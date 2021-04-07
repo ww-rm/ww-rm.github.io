@@ -157,34 +157,38 @@ window.onload = e => {
     div_mirage.getElementsByTagName("button")[0].addEventListener(
         "click",
         e => {
-            const canvas_cover = document.createElement("canvas");
-            const canvas_secret = document.createElement("canvas");
-            const img_cover = div_cover.getElementsByTagName("img")[0];
-            const img_secret = div_secret.getElementsByTagName("img")[0];
-            canvas_cover.height = img_cover.naturalHeight;
-            canvas_cover.width = img_cover.naturalWidth;
-            canvas_secret.height = img_secret.naturalHeight;
-            canvas_secret.width = img_secret.naturalWidth;
+            try {
+                const canvas_cover = document.createElement("canvas");
+                const canvas_secret = document.createElement("canvas");
+                const img_cover = div_cover.getElementsByTagName("img")[0];
+                const img_secret = div_secret.getElementsByTagName("img")[0];
+                canvas_cover.height = img_cover.naturalHeight;
+                canvas_cover.width = img_cover.naturalWidth;
+                canvas_secret.height = img_secret.naturalHeight;
+                canvas_secret.width = img_secret.naturalWidth;
 
-            let ctx = canvas_cover.getContext("2d");
-            ctx.drawImage(img_cover, 0, 0);
-            const mat_cover = cv.matFromImageData(
-                ctx.getImageData(0, 0, canvas_cover.width, canvas_cover.height)
-            );
+                let ctx = canvas_cover.getContext("2d");
+                ctx.drawImage(img_cover, 0, 0);
+                const mat_cover = cv.matFromImageData(
+                    ctx.getImageData(0, 0, canvas_cover.width, canvas_cover.height)
+                );
 
-            ctx = canvas_secret.getContext("2d");
-            ctx.drawImage(img_secret, 0, 0);
-            const mat_secret = cv.matFromImageData(
-                ctx.getImageData(0, 0, canvas_secret.width, canvas_secret.height)
-            );
+                ctx = canvas_secret.getContext("2d");
+                ctx.drawImage(img_secret, 0, 0);
+                const mat_secret = cv.matFromImageData(
+                    ctx.getImageData(0, 0, canvas_secret.width, canvas_secret.height)
+                );
 
-            const mat_mirage = makeimg(mat_cover, mat_secret);
-            const canvas_mirage = document.getElementById("mirage").getElementsByTagName("canvas")[0];
-            cv.imshow(canvas_mirage, mat_mirage);
+                const mat_mirage = makeimg(mat_cover, mat_secret);
+                const canvas_mirage = document.getElementById("mirage").getElementsByTagName("canvas")[0];
+                cv.imshow(canvas_mirage, mat_mirage);
 
-            mat_cover.delete();
-            mat_secret.delete();
-            mat_mirage.delete();
+                mat_cover.delete();
+                mat_secret.delete();
+                mat_mirage.delete();
+            } catch (err) {
+                document.write(err.toString());
+            }
         }
     )
 };
