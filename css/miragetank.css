@@ -1,12 +1,10 @@
-div * {
+/* div * {
     max-height: inherit;
     max-width: inherit;
-}
+} */
 
-.img_select {
+/* .img_select {
     position: relative;
-    border: 3px;
-    border-color: brown;
     max-height: 100px;
-    max-width: 100px, 100px;
-}
+    max-width: 100px;
+} */

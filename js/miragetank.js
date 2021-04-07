@@ -107,6 +107,7 @@ function mergeimg() {
     cv.cvtColor(secret, secret, cv.COLOR_RGBA2GRAY);
 
 }
+
 window.onload = e => {
     // bind event handles
     const div_cover = document.getElementById("cover");
