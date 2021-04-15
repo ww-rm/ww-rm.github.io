@@ -18,12 +18,25 @@ input {
     border-width: 1px;
 }
 
+button {
+    outline: none;
+    cursor: pointer;
+}
+
+button:focus,
+button:active {
+    outline: 1px black dotted;
+}
+
+
 a {
     text-decoration: none;
+    outline: none;
 }
 
 a:hover,
-a:active {
+a:active,
+a:focus {
     text-decoration: underline;
 }
 
@@ -42,8 +55,7 @@ a:visited {
 
     position: relative;
     min-height: 100%;
-    max-width: 800px;
-    min-width: 600px;
+    width: 1200px;
     margin: 0 auto;
 }
 
@@ -55,7 +67,7 @@ header {
 }
 
 main {
-    min-height: 500px;
+    min-height: 600px;
     margin: 10px 0;
 
     display: flex;
@@ -177,7 +189,17 @@ aside.content-list {
 }
 
 .nav-menu-item {
-    color: peru;
+    color: inherit;
+}
+
+ul.nav-menu a {
+    text-decoration: none;
+}
+
+ul.nav-menu a:hover,
+ul.nav-menu a:focus {
+    color: white;
+    background-color: darkgray;
 }
 
 aside.content-list {
@@ -192,7 +214,6 @@ aside.content-list {
 }
 
 .search button {
-    cursor: pointer;
     border-width: 0;
     background: #fff0 url(../img/search-btn.svg) 0 0 no-repeat;
 }
