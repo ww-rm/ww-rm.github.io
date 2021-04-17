@@ -15,6 +15,7 @@ ol {
 }
 
 input {
+    outline: none;
     border-width: 1px;
 }
 
@@ -35,7 +36,7 @@ a {
 }
 
 a:hover,
-a:active{
+a:active {
     text-decoration: underline;
 }
 
@@ -118,7 +119,7 @@ footer {
     justify-content: space-around;
 }
 
-ul.nav-menu {
+ul.site-nav-menu {
     flex: auto;
 
     display: flex;
@@ -126,13 +127,13 @@ ul.nav-menu {
     align-items: stretch;
 }
 
-ul.nav-menu li {
+ul.site-nav-menu li {
     flex: auto;
 
     display: flex;
 }
 
-ul.nav-menu a {
+ul.site-nav-menu a {
     flex: auto;
 
     display: flex;
@@ -152,6 +153,9 @@ aside.content-list {
     max-height: 600px;
     width: 200px;
     margin-right: 5px;
+
+    display: flex;
+    flex-flow: column;
 }
 
 .search {
@@ -173,15 +177,26 @@ aside.content-list {
     padding: 2px;
 }
 
-.search-result {
+.content-nav {
+    flex: auto;
     margin: 10px 0;
     padding: 5px 5px;
 }
 
+ul.content-nav-menu {
+    max-height: 75%;
+    overflow: hidden auto;
+}
+
+ul.content-nav-menu a {
+    display: block;
+    padding: 10px 0;
+}
+
+/* 内容 */
 .content {
     flex: auto;
     margin-left: 5px;
-    box-shadow: 2px 2px 5px #888888;
 }
 
 
@@ -192,17 +207,21 @@ aside.content-list {
     box-shadow: 2px 2px 5px #888888;
 }
 
-.nav-menu-item {
+.site-nav-menu-item {
     color: inherit;
 }
 
-ul.nav-menu a {
+ul.site-nav-menu a {
     text-decoration: none;
 }
 
-ul.nav-menu a:hover {
+ul.site-nav-menu a:hover {
     color: white;
-    background-color: darkgray;
+    background-color: #00bfff;
+}
+
+ul.content-nav-menu a:hover {
+    background-color: cornsilk;
 }
 
 aside.content-list {
@@ -219,4 +238,8 @@ aside.content-list {
 .search button {
     border-width: 0;
     background: #fff0 url(../img/search-btn.svg) 0 0 no-repeat;
+}
+
+.content {
+    box-shadow: 2px 2px 5px #888888;
 }

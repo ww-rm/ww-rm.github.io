@@ -29,7 +29,7 @@
     <link rel="canonical" href="https://ww-rm.github.io/">
     <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lib/normalize.css" type="text/css">
     <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lib/animate.css" type="text/css">
-    <link rel="stylesheet" href="./static/css/index.css" type="text/css">
+    <link rel="stylesheet" href="./static/css/layout.css" type="text/css">
     <title>ww-rm's Page</title>
 </head>
 
@@ -59,26 +59,26 @@
                 </button>
             </div>
             <nav class="site-nav">
-                <ul id="nav-menu" class="nav-menu">
+                <ul id="site-nav-menu" class="site-nav-menu">
                     <!-- TODO: 用 js 动态填充内容-->
                     <li>
                         <a href="https://ww-rm.github.io/">
-                            <span class="nav-menu-item">首页</span>
+                            <span class="site-nav-menu-item">首页</span>
                         </a>
                     </li>
                     <li>
                         <a href="https://ww-rm.github.io/">
-                            <span class="nav-menu-item">关于</span>
+                            <span class="site-nav-menu-item">关于</span>
                         </a>
                     </li>
                     <li>
                         <a href="https://ww-rm.github.io/">
-                            <span class="nav-menu-item">日志</span>
+                            <span class="site-nav-menu-item">日志</span>
                         </a>
                     </li>
                     <li>
                         <a href="https://ww-rm.github.io/tool/miragetank.html">
-                            <span class="nav-menu-item">工具</span>
+                            <span class="site-nav-menu-item">工具</span>
                         </a>
                     </li>
                 </ul>
@@ -90,13 +90,35 @@
                     <input type="search" name="keywords" placeholder="查找关键词...">
                     <button></button>
                 </div>
-                <div id="search-result" class="search-result">
-                    <ul>
-                        <li><a href="#">One</a></li>
-                        <li><a href="#">Two</a></li>
-                        <li><a href="#">...</a></li>
+                <nav class="content-nav">
+                    <ul id="content-nav-menu" class="content-nav-menu">
+                        <li>
+                            <a href="#">
+                                <span class="content-nav-menu-item">One</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="content-nav-menu-item">Two</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="content-nav-menu-item">Three</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="content-nav-menu-item">Four</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <span class="content-nav-menu-item">...</span>
+                            </a>
+                        </li>
                     </ul>
-                </div>
+                </nav>
             </aside>
             <!-- TODO: 正文样式 -->
             <div id="content" class="content">
@@ -114,7 +136,7 @@
     <template id="temp-nav-item">
         <li>
             <a href="">
-                <span class="nav-menu-item">链接</span>
+                <span class="site-nav-menu-item">链接</span>
             </a>
         </li>
     </template>
