@@ -71,9 +71,11 @@ main {
     margin: 10px 0;
 
     display: flex;
+    align-items: stretch;
 }
 
 footer {
+    margin: 10px 0;
     height: 100px;
 }
 
@@ -146,6 +148,9 @@ ul.nav-menu a {
 
 /* 内容列表 */
 aside.content-list {
+    position: sticky;
+    top: 0;
+    max-height: 600px;
     width: 200px;
     margin-right: 5px;
 }
@@ -196,8 +201,7 @@ ul.nav-menu a {
     text-decoration: none;
 }
 
-ul.nav-menu a:hover,
-ul.nav-menu a:focus {
+ul.nav-menu a:hover {
     color: white;
     background-color: darkgray;
 }
