@@ -35,8 +35,7 @@ a {
 }
 
 a:hover,
-a:active,
-a:focus {
+a:active{
     text-decoration: underline;
 }
 

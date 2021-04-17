@@ -1,0 +1,23 @@
+h1 {
+    font-family: courier;
+    font-size: 40px;
+  }
+  
+  #buttonContainer {
+    padding: 15% 35% 25% 35%
+  }
+  
+  #generate {
+    font-size: 15px;
+    height: 3em;
+    width: max-content;
+    font-family: monaco;
+  }
+  
+  pre {
+    border-style: solid;
+    height: 100%;
+    overflow: auto;
+    overflow-wrap: break-word;
+  }
+  

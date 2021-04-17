@@ -27,9 +27,9 @@
     <!-- <link rel="mask-icon" href="https://github.githubassets.com/favicons/favicon.svg" color="#222"> -->
     <!-- <link rel="alternate" href="https://shenqiy.cn/atom.xml" title="ww-rm's page" type="application/atom+xml"> -->
     <link rel="canonical" href="https://ww-rm.github.io/">
-    <link rel="stylesheet" href="./css/lib/normalize.css" type="text/css">
-    <link rel="stylesheet" href="./css/lib/animate.css" type="text/css">
-    <link rel="stylesheet" href="./css/index.css" type="text/css">
+    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lib/normalize.css" type="text/css">
+    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lib/animate.css" type="text/css">
+    <link rel="stylesheet" href="./static/css/index.css" type="text/css">
     <title>ww-rm's Page</title>
 </head>
 
@@ -60,6 +60,7 @@
             </div>
             <nav class="site-nav">
                 <ul id="nav-menu" class="nav-menu">
+                    <!-- TODO: 用 js 动态填充内容-->
                     <li>
                         <a href="https://ww-rm.github.io/">
                             <span class="nav-menu-item">首页</span>
@@ -76,7 +77,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="https://ww-rm.github.io/miragetank.html">
+                        <a href="https://ww-rm.github.io/tool/miragetank.html">
                             <span class="nav-menu-item">工具</span>
                         </a>
                     </li>
@@ -109,6 +110,14 @@
         <footer id="footer" class="footer">
         </footer>
     </div>
+
+    <template id="temp-nav-item">
+        <li>
+            <a href="">
+                <span class="nav-menu-item">链接</span>
+            </a>
+        </li>
+    </template>
 </body>
 
 </html>
