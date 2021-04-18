@@ -1,0 +1,42 @@
+
+/* 样式 */
+
+
+.header {
+    box-shadow: 2px 2px 5px #888888;
+}
+
+.site-nav-menu-item {
+    color: inherit;
+}
+
+ul.site-nav-menu a {
+    text-decoration: none;
+}
+
+ul.site-nav-menu a:hover {
+    color: white;
+    background-color: #00bfff;
+}
+
+ul.content-nav-menu a:hover {
+    background-color: cornsilk;
+}
+
+aside.content-list {
+    box-shadow: 2px 2px 5px #888888;
+}
+
+.search input {
+    border-color: grey;
+    border-width: 1px;
+}
+
+.search button {
+    border-width: 0;
+    background: #fff0 url(../img/search-btn.svg) 0 0 no-repeat;
+}
+
+.content {
+    box-shadow: 2px 2px 5px #888888;
+}

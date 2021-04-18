@@ -1,0 +1,42 @@
+/* 元素默认样式 */
+
+body {
+    overflow: auto;
+}
+
+ul,
+ol {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+input {
+    outline: none;
+    border-width: 1px;
+}
+
+button {
+    outline: none;
+    cursor: pointer;
+}
+
+button:focus,
+button:active {
+    outline: 1px black dotted;
+}
+
+a {
+    text-decoration: none;
+    outline: none;
+}
+
+a:hover,
+a:active {
+    text-decoration: underline;
+}
+
+a:link,
+a:visited {
+    color: inherit;
+}
