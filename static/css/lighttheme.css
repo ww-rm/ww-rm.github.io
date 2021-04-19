@@ -1,9 +1,19 @@
 
 /* 样式 */
 
+body {
+    color: #555;
+    background: #eee;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.507);
+}
 
 .header {
     box-shadow: 2px 2px 5px #888888;
+    background-color: rgba(0, 0, 0, 0.288);
+    color: rgb(0, 0, 0);
 }
 
 .site-nav-menu-item {

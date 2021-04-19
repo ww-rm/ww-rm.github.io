@@ -2,7 +2,12 @@
     /* border: brown 1px solid; */
 }
 
+/* TODO: 调整字体 */
 /* 基本布局 */
+
+body {
+    font-family: "Consolas", "Microsoft YaHei", sans-serif;
+}
 
 .container {
     position: relative;
@@ -47,8 +52,11 @@ footer {
 
 .site-title {
     flex: auto;
-    padding: 5px;
+    padding: 0 5px;
     text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 30px;
 }
 
 .site-subtitle {
@@ -56,6 +64,7 @@ footer {
     margin: 0;
     padding: 5px;
     text-align: center;
+    letter-spacing: 1px;
 }
 
 .toggle-btn {
@@ -103,7 +112,7 @@ ul.site-nav-menu a {
 aside.content-list {
     flex: 1 0 auto;
     position: sticky;
-    top: 0;
+    top: 10px;
     max-height: 600px;
     min-width: 10vw;
     width: 200px;
@@ -135,7 +144,7 @@ aside.content-list {
 .content-nav {
     flex: auto;
     margin: 10px 0;
-    padding: 5px 5px;
+    padding: 2px;
     overflow: hidden auto;
 }
 
@@ -145,7 +154,7 @@ ul.content-nav-menu {
 
 ul.content-nav-menu a {
     display: block;
-    padding: 10px 0;
+    padding: 10px 5px;
 }
 
 .content-nav-menu-item {
@@ -175,4 +184,5 @@ p.content-text {
     text-justify: auto;
     text-align: justify;
     text-indent: 2em;
+    line-height: 25px;
 }
