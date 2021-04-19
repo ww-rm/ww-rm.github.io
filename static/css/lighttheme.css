@@ -16,6 +16,10 @@ body {
     color: rgb(0, 0, 0);
 }
 
+.site-title {
+    /* color: blue; */
+}
+
 .site-nav-menu-item {
     color: inherit;
 }
@@ -44,7 +48,7 @@ aside.content-list {
 
 .search button {
     border-width: 0;
-    background: #fff0 url(../img/search-btn.svg) 0 0 no-repeat;
+    background: #0000 url(../img/search-btn.svg) center/contain no-repeat;
 }
 
 .content {

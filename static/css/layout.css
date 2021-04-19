@@ -2,12 +2,33 @@
     /* border: brown 1px solid; */
 }
 
-/* TODO: 调整字体 */
+/* helper */
+
+.full-size {
+    box-sizing: border-box;
+    display: block;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+.flex-vc {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+}
+
+.toggle-btn {
+    position: absolute;
+    display: none;
+}
+
 /* 基本布局 */
 
 body {
     font-family: "Consolas", "Microsoft YaHei", sans-serif;
 }
+
 
 .container {
     position: relative;
@@ -20,153 +41,121 @@ body {
 header {
     height: 120px;
     min-height: 10vh;
-    margin: 10px 0;
+    margin: 10px auto;
 
     display: flex;
 }
 
 main {
-    min-height: 600px;
-    margin: 10px 0;
+    min-height: 100vh;
+    margin: 10px auto;
 
     display: flex;
 }
 
 footer {
+    min-height: 5vh;
     height: 100px;
-    margin: 10px 0;
+    margin: 10px auto;
 }
 
 /* 网站标题 */
 .site-brand {
-    width: 200px;
-    min-width: 15%;
-}
-
-.site-meta {
-    height: 90%;
-
-    display: flex;
-    flex-flow: column;
+    flex: 1;
+    width: 0;
 }
 
 .site-title {
-    flex: auto;
-    padding: 0 5px;
     text-align: center;
     font-weight: bold;
     font-size: 20px;
-    line-height: 30px;
 }
 
 .site-subtitle {
-    flex: auto;
-    margin: 0;
-    padding: 5px;
     text-align: center;
-    letter-spacing: 1px;
-}
-
-.toggle-btn {
-    position: absolute;
-    display: none;
+    font-style: italic;
 }
 
 /* 导航栏 */
 .site-nav {
-    flex: auto;
-
-    display: flex;
-    flex-flow: column;
-    justify-content: space-around;
+    flex: 4;
+    width: 0;
 }
 
 ul.site-nav-menu {
-    flex: auto;
-
     display: flex;
     justify-content: space-around;
-    align-items: stretch;
 }
 
 ul.site-nav-menu li {
     flex: auto;
-
-    display: flex;
+    width: 0;
 }
 
 ul.site-nav-menu a {
-    flex: auto;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
+    padding: 15px;
 }
-
-
 
 /* 主要内容 */
 
 
 /* 内容列表 */
 aside.content-list {
-    flex: 1 0 auto;
+    flex: 1;
+    width: 0;
     position: sticky;
-    top: 10px;
-    max-height: 600px;
-    min-width: 10vw;
-    width: 200px;
+    top: 2vh;
+    max-height: 95vh;
     margin-right: 5px;
 
     display: flex;
     flex-flow: column;
 }
 
+/* 搜索框 */
 .search {
     padding: 5px 1px;
 
     display: flex;
+    justify-content: space-around;
 }
 
 .search input {
     flex: auto;
-    width: 70%;
-    margin: 2px;
-    padding: 2px;
+    width: 0;
+    margin: 0 5px;
+    padding: 5px;
+    border-radius: 10px;
 }
 
 .search button {
-    flex: auto;
-    margin: 2px;
-    padding: 2px;
+    display: block;
+    height: 100%;
+    margin: 0 5px;
+    padding: 0 15px;
 }
 
+/* 内容导航列表 */
 .content-nav {
     flex: auto;
-    margin: 10px 0;
-    padding: 2px;
+    padding: 5px 2px;
     overflow: hidden auto;
 }
 
-ul.content-nav-menu {
-    max-height: 100%;
-}
-
-ul.content-nav-menu a {
-    display: block;
-    padding: 10px 5px;
-}
-
 .content-nav-menu-item {
+    height: 40px;
+    line-height: 40px;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: inline-block;
     max-width: 100%;
+    padding: 5px 5px;
 }
 
 /* 内容 */
 .content {
-    flex: auto;
+    flex: 3.5;
+    width: 0;
     margin-left: 5px;
     padding: 20px;
 }
@@ -177,6 +166,8 @@ ul.content-nav-menu a {
 
 .content-time {
     text-align: center;
+    font-weight: lighter;
+    font-size: smaller;
 }
 
 p.content-text {
@@ -185,4 +176,5 @@ p.content-text {
     text-align: justify;
     text-indent: 2em;
     line-height: 25px;
+    hyphens: auto;
 }
