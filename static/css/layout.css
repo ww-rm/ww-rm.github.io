@@ -1,4 +1,5 @@
 * {
+    /* DEBUG */
     /* border: brown 1px solid; */
 }
 
@@ -42,6 +43,7 @@ header {
     height: 120px;
     min-height: 10vh;
     margin: 10px auto;
+    border-radius: 2px;
 
     display: flex;
 }
@@ -55,7 +57,7 @@ main {
 
 footer {
     min-height: 5vh;
-    height: 100px;
+    height: 50px;
     margin: 10px auto;
 }
 
@@ -66,14 +68,24 @@ footer {
 }
 
 .site-title {
+    flex: auto;
     text-align: center;
     font-weight: bold;
     font-size: 20px;
 }
 
+.site-title a {
+    position: relative;
+    top: 20px;
+    text-decoration: none;
+}
+
 .site-subtitle {
+    flex: auto;
     text-align: center;
     font-style: italic;
+    font-size: x-small;
+    letter-spacing: 1px;
 }
 
 /* 导航栏 */
@@ -85,6 +97,7 @@ footer {
 ul.site-nav-menu {
     display: flex;
     justify-content: space-around;
+    text-align: center;
 }
 
 ul.site-nav-menu li {
@@ -93,7 +106,6 @@ ul.site-nav-menu li {
 }
 
 ul.site-nav-menu a {
-    text-align: center;
     padding: 15px;
 }
 
@@ -101,13 +113,14 @@ ul.site-nav-menu a {
 
 
 /* 内容列表 */
-aside.content-list {
+.content-list {
     flex: 1;
     width: 0;
     position: sticky;
     top: 2vh;
     max-height: 95vh;
     margin-right: 5px;
+    border-radius: 2px;
 
     display: flex;
     flex-flow: column;
@@ -115,18 +128,19 @@ aside.content-list {
 
 /* 搜索框 */
 .search {
-    padding: 5px 1px;
+    padding: 10px 2px;
 
     display: flex;
+    height: 50px;
     justify-content: space-around;
 }
 
 .search input {
     flex: auto;
-    width: 0;
     margin: 0 5px;
     padding: 5px;
     border-radius: 10px;
+    font-size: small;
 }
 
 .search button {
@@ -139,8 +153,13 @@ aside.content-list {
 /* 内容导航列表 */
 .content-nav {
     flex: auto;
+    height: 0;
     padding: 5px 2px;
+}
+
+ul.content-nav-menu {
     overflow: hidden auto;
+    max-height: 95%;
 }
 
 .content-nav-menu-item {
@@ -158,10 +177,12 @@ aside.content-list {
     width: 0;
     margin-left: 5px;
     padding: 20px;
+    border-radius: 2px;
 }
 
 .content-title {
     text-align: center;
+    font-size: x-large;
 }
 
 .content-time {
