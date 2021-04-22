@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="theme-color" content="#FF00007F">
     <meta name="keywords" content="ww-rm html">
-    <meta name="description" content="平平无奇的Site，默默无闻的Coder">
+    <meta name="description" content="平平无奇的 Site，默默无闻的 Coder">
     <meta name="author" content="ww-rm">
     <meta name="generator" content="vscode">
     <!-- Open Graph Data -->
@@ -27,16 +27,16 @@
     <!-- <link rel="mask-icon" href="https://github.githubassets.com/favicons/favicon.svg" color="#222"> -->
     <!-- <link rel="alternate" href="https://shenqiy.cn/atom.xml" title="ww-rm's page" type="application/atom+xml"> -->
     <link rel="canonical" href="https://ww-rm.github.io/">
-    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lib/normalize.css" type="text/css">
-    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lib/animate.css" type="text/css">
-    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/base.css" type="text/css">
-    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/layout.css" type="text/css">
-    <link rel="stylesheet" href="https://ww-rm.github.io/static/css/lighttheme.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/lib/normalize.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/lib/animate.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/base.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/layout.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/lighttheme.css" type="text/css">
+    <title>ww-rm's Page</title>
     <!-- 测试时使用相对链接 -->
     <!-- <link rel="stylesheet" href="./static/css/base.css" type="text/css">
     <link rel="stylesheet" href="./static/css/layout.css" type="text/css">
     <link rel="stylesheet" href="./static/css/lighttheme.css" type="text/css"> -->
-    <title>ww-rm's Page</title>
 </head>
 
 <body lang="zh-Hans" itemscope="" itemtype="http://schema.org/WebPage">
@@ -44,37 +44,35 @@
         <header id="header" class="header">
             <div class="site-brand flex-vc">
                 <div class="site-title">
+                    <!-- 用 JS 动态填充-->
                     <a href="https://ww-rm.github.io/" rel="first">
                         ww-rm's Page
                     </a>
                 </div>
                 <div class="site-subtitle">
-                    <p>
-                        平平无奇的 Site<br>
-                        默默无闻的 Coder
-                    </p>
+                    <p>平平无奇的 Site<br>默默无闻的 Coder</p>
                 </div>
             </div>
             <nav class="site-nav">
                 <ul id="site-nav-menu" class="site-nav-menu full-size">
                     <!-- TODO: 用 js 动态填充内容-->
                     <li>
-                        <a href="https://ww-rm.github.io/" title="首页" class="full-size flex-vc">
+                        <a href="/" title="首页" class="full-size flex-vc">
                             <div class="site-nav-menu-item">首页首页首页首页首页首页首页首页首页首页</div>
                         </a>
                     </li>
                     <li>
-                        <a href="https://ww-rm.github.io/" class="full-size flex-vc">
+                        <a href="/about/" class="full-size flex-vc">
                             <div class="site-nav-menu-item">关于</div>
                         </a>
                     </li>
                     <li>
-                        <a href="https://ww-rm.github.io/" class="full-size flex-vc">
+                        <a href="/blog/" class="full-size flex-vc">
                             <div class="site-nav-menu-item">日志</div>
                         </a>
                     </li>
                     <li>
-                        <a href="https://ww-rm.github.io/tool/miragetank.html" class="full-size flex-vc">
+                        <a href="/tool/miragetank.html" class="full-size flex-vc">
                             <div class="site-nav-menu-item">工具</div>
                         </a>
                     </li>
@@ -353,18 +351,21 @@
 
     <template id="temp-site-nav-item">
         <li>
-            <a href="">
-                <span class="site-nav-menu-item">链接</span>
+            <a href="#" title="" class="full-size flex-vc">
+                <div class="site-nav-menu-item">链接</div>
             </a>
         </li>
     </template>
     <template id="temp-content-nav-item">
         <li>
-            <a href="#">
-                <span class="content-nav-menu-item">链接</span>
+            <a href="#" title= "" class="full-size">
+                <div class="content-nav-menu-item">链接</div>
             </a>
         </li>
     </template>
+    <script src="/static/js/base.js"></script>
+    <!-- 测试时使用相对路径 -->
+    <script src="./static/js/base.js"></script>
 </body>
 
 </html>

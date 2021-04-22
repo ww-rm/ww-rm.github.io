@@ -1,26 +1,26 @@
 [{
         "name": "Home",
-        "abspath": "https://ww-rm.github.io/",
+        "relpath": "/",
         "text": "首页"
     },
     {
         "name": "About",
-        "abspath": "https://ww-rm.github.io/about/",
+        "relpath": "/about/",
         "text": "关于"
     },
     {
         "name": "Blog",
-        "abspath": "https://ww-rm.github.io/blog/",
+        "relpath": "/blog/",
         "text": "日志"
     },
     {
         "name": "Tool",
-        "abspath": "https://ww-rm.github.io/tool/",
+        "relpath": "/tool/",
         "text": "工具"
     },
     {
         "name": "Game",
-        "abspath": "https://ww-rm.github.io/game/",
+        "relpath": "/game/",
         "text": "游戏"
     }
 ]
