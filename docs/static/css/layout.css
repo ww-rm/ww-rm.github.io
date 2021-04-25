@@ -62,7 +62,7 @@ footer {
 }
 
 /* 网站标题 */
-.site-brand {
+.site-meta {
     flex: 1;
     width: 0;
 }
@@ -84,7 +84,7 @@ footer {
     flex: auto;
     text-align: center;
     font-style: italic;
-    font-size: x-small;
+    font-size: 10px;
     letter-spacing: 1px;
 }
 
@@ -140,7 +140,7 @@ ul.site-nav-menu a {
     margin: 0 5px;
     padding: 5px;
     border-radius: 10px;
-    font-size: small;
+    font-size: 10px;
 }
 
 .search button {
@@ -182,13 +182,13 @@ ul.content-nav-menu {
 
 .content-title {
     text-align: center;
-    font-size: x-large;
+    font-size: 30px;
 }
 
 .content-time {
     text-align: center;
     font-weight: lighter;
-    font-size: smaller;
+    font-size: 12px;
 }
 
 p.content-text {
