@@ -140,7 +140,7 @@ ul.site-nav-menu a {
     margin: 0 5px;
     padding: 5px;
     border-radius: 10px;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .search button {
@@ -157,10 +157,12 @@ ul.site-nav-menu a {
     padding: 5px 2px;
 }
 
+
+
 ul.content-nav-menu {
     overflow: hidden auto;
     max-height: 95%;
-}
+}   
 
 .content-nav-menu-item {
     height: 40px;

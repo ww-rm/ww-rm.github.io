@@ -1,31 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hans">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../static/js/lib/opencv_3_4_14.js"></script>
-    <link href="../static/css/miragetank.css" rel="stylesheet" type="text/css">
-    <script src="../static/js/miragetank.js"></script>
-    <title>Mirage Tank</title>
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="theme-color" content="#222">
+    <meta name="keywords" content="ww-rm, html">
+    <meta name="description" content="平平无奇的 Site，默默无闻的 Coder">
+    <meta name="author" content="ww-rm">
+    <meta name="generator" content="vscode">
+    <link rel="apple-touch-icon" href="https://github.githubassets.com/favicons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://github.githubassets.com/favicons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://github.githubassets.com/favicons/favicon.svg">
+    <link rel="canonical" href="https://ww-rm.github.io/">
+    <link rel="stylesheet" href="/static/css/lib/normalize.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/lib/animate.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/base.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/layout.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/lighttheme.css" type="text/css">
+    <script src="/static/js/render.js"></script>
+    <title>ww-rm's Page</title>
 </head>
 
-<body>
-    <div id="cover" class="img_select">
-        <img alt="未选择图片">
-        <input type="file" accept="image/*" style="display:none">
-        <button>选择cover文件...</button>
+<body lang="zh-Hans" itemscope="" itemtype="http://schema.org/WebPage">
+    <div class="container">
+        <header id="header" class="header">
+            <div class="site-meta flex-vc">
+                <div class="site-title">
+                    <a href="https://ww-rm.github.io/" rel="first">
+                        <!-- ww-rm's Page -->
+                    </a>
+                </div>
+                <div class="site-subtitle">
+                    <p>
+                        <!-- 平平无奇的 Site<br>默默无闻的 Coder -->
+                    </p>
+                </div>
+            </div>
+            <nav class="site-nav">
+                <ul id="site-nav-menu" class="site-nav-menu full-size">
+                    <!-- 用 js 动态填充内容-->
+                </ul>
+            </nav>
+        </header>
+        <main id="main" class="main">
+            <aside id="content-list" class="content-list">
+                <div id="search" class="search">
+                    <input type="search" name="keywords" placeholder="查找关键词...">
+                    <button></button>
+                </div>
+                <nav class="content-nav">
+                    <ul id="content-nav-menu" class="content-nav-menu">
+                        <!-- 用 js 动态填充内容-->
+                    </ul>
+                </nav>
+            </aside>
+            <article id="content" class="content">
+                <h1 class="content-title">
+                    幻影坦克 JS 实现
+                </h1>
+                <p class="content-time">
+                    2021年4月26日
+                </p>
+                <p class="content-text">
+                    <div id="cover" class="img_select">
+                        <img alt="未选择图片">
+                        <input type="file" accept="image/*" style="display:none">
+                        <button>选择cover文件...</button>
+                    </div>
+                    <div id="secret" class="img_select">
+                        <img alt="未选择图片">
+                        <input type="file" accept="image/*" style="display:none">
+                        <button>选择secret文件...</button>
+                    </div>
+                    <div id="mirage" class="img_select">
+                        <canvas>牙白! 换一个浏览器再试试吧 x_x</canvas>
+                        <button>开始合成</button>
+                    </div>
+                </p>
+            </article>
+        </main>
+        <footer id="footer" class="footer">
+            <!-- TODO: js footer -->
+        </footer>
     </div>
-    <div id="secret" class="img_select">
-        <img alt="未选择图片">
-        <input type="file" accept="image/*" style="display:none">
-        <button>选择secret文件...</button>
-    </div>
-    <div id="mirage" class="img_select">
-        <canvas>牙白! 换一个浏览器再试试吧 x_x</canvas>
-        <button>开始合成</button>
-    </div>
+
+    <template id="temp-site-nav-item">
+        <li>
+            <a href="#" title="" class="full-size flex-vc">
+                <div class="site-nav-menu-item">链接</div>
+            </a>
+        </li>
+    </template>
+    <template id="temp-content-nav-item">
+        <li>
+            <a href="#" title="" class="full-size">
+                <div class="content-nav-menu-item">链接</div>
+            </a>
+        </li>
+    </template>
+    <script src="/static/js/main.js"></script>
 </body>
 
 </html>

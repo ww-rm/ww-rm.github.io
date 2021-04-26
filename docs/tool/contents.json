@@ -1,7 +1,7 @@
 [
     {
         "name": "Mirage Tank",
-        "description": "幻影坦克(Python)",
+        "description": "幻影坦克(JS)",
         "relpath": "./miragetank.html"
     }
 ]

@@ -1,1 +1,7 @@
-[]
+[
+    {
+        "name": "首页说明",
+        "description": "首页说明",
+        "relpath": "./index.html"
+    }
+]
