@@ -200,17 +200,6 @@
     </script>
 
     <script>
-        function mergeimg() {
-            // TODO: 
-            const div_cover = document.getElementById("cover");
-            const div_secret = document.getElementById("secret");
-
-            const cover = cv.imread(div_cover.getElementsByTagName("img")[0]);
-            const secret = cv.imread(div_secret.getElementsByTagName("img")[0]);
-            cv.cvtColor(cover, cover, cv.COLOR_RGBA2GRAY);
-            cv.cvtColor(secret, secret, cv.COLOR_RGBA2GRAY);
-        }
-
         function previewImg(file, imgEle) {
             let freader = new FileReader();
             freader.onload = e => {
