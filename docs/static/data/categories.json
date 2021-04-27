@@ -1,12 +1,8 @@
-[{
+[
+    {
         "name": "Home",
         "relpath": "/",
         "text": "首页"
-    },
-    {
-        "name": "About",
-        "relpath": "/about/",
-        "text": "关于"
     },
     {
         "name": "Blog",

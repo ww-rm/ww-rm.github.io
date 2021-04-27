@@ -3,5 +3,10 @@
         "name": "首页说明",
         "description": "首页说明",
         "relpath": "./index.html"
+    },
+    {
+        "name": "关于",
+        "description": "关于",
+        "relpath": "./about.html"
     }
 ]
