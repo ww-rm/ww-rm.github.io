@@ -54,6 +54,7 @@ header {
 
 main {
     margin: 10px auto;
+    min-height: 600px;
 
     display: flex;
 }
