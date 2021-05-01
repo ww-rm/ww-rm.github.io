@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="/static/css/layout.css" type="text/css">
     <link rel="stylesheet" href="/static/css/lighttheme.css" type="text/css">
     <script src="/static/js/render.js"></script>
+    {% block head_css_js %}{% endblock %}
     <title>ww-rm's Page</title>
 </head>
 
@@ -60,20 +61,19 @@
                 </nav>
             </aside>
             <article id="content" class="content">
-                <!-- 正文内容 -->
                 <h1 class="content-title">
-                    <!-- TODO: 标题 -->
+                    {% block content_title %}{% endblock %}
                 </h1>
                 <p class="content-time">
-                    <!-- TODO: 时间 -->
+                    {% block content_time %}{% endblock %}
                 </p>
                 <p class="content-text">
-                    <!-- TODO: 内容-->
+                    {% block content_text %}{% endblock %}
                 </p>
             </article>
         </main>
         <footer id="footer" class="footer">
-            <!-- TODO: js footer -->
+            <!-- 页脚 -->
         </footer>
     </div>
 
@@ -92,6 +92,7 @@
         </li>
     </template>
     <script src="/static/js/main.js"></script>
+    {% block body_css_js %}{% endblock %}
 </body>
 
 </html>

@@ -1,0 +1,8 @@
+[
+    "index.html",
+    "about.html",
+    "404.html",
+    "tool/*.html",
+    "game/*.html",
+    "blog/*.html"
+]
