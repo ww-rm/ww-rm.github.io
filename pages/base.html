@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="/static/css/layout.css" type="text/css">
     <link rel="stylesheet" href="/static/css/lighttheme.css" type="text/css">
     <script src="/static/js/render.js"></script>
-    {% block head_css_js %}{% endblock %}
+    {% block head_css_js -%}{%- endblock %}
     <title>ww-rm's Page</title>
 </head>
 
@@ -62,13 +62,13 @@
             </aside>
             <article id="content" class="content">
                 <h1 class="content-title">
-                    {% block content_title %}{% endblock %}
+                    {% block content_title -%}{%- endblock %}
                 </h1>
                 <p class="content-time">
-                    {% block content_time %}{% endblock %}
+                    {% block content_time -%}{%- endblock %}
                 </p>
                 <p class="content-text">
-                    {% block content_text %}{% endblock %}
+                    {% block content_text -%}{%- endblock %}
                 </p>
             </article>
         </main>
@@ -92,7 +92,7 @@
         </li>
     </template>
     <script src="/static/js/main.js"></script>
-    {% block body_css_js %}{% endblock %}
+    {% block body_css_js -%}{%- endblock %}
 </body>
 
 </html>
