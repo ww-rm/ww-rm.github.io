@@ -4,5 +4,6 @@
     "404.html",
     "tool/*.html",
     "game/*.html",
-    "blog/*.html"
+    "blog/*.html",
+    "dailypixiv/*.html"
 ]

@@ -1,5 +1,4 @@
-[
-    {
+[{
         "name": "Home",
         "relpath": "/",
         "text": "首页"
@@ -18,5 +17,10 @@
         "name": "Game",
         "relpath": "/game/",
         "text": "游戏"
+    },
+    {
+        "name": "DailyPixiv",
+        "relpath": "/dailypixiv/",
+        "text": "每日Pixiv"
     }
 ]
