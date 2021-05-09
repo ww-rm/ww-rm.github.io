@@ -1,0 +1,1 @@
+from pyxiv import PyxivBrowser
