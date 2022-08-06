@@ -121,3 +121,14 @@ tag_generator:
   enable_index_page: false
 
 excerpt_length: 150
+
+symbols_count_time:
+  # shown in post meta
+  symbols: true
+  time: true
+  # shown in footer
+  total_symbols: true
+  total_time: true
+
+  awl: 4 # average word length
+  wpm: 275 # word per minute
