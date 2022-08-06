@@ -1,4 +1,4 @@
 ---
-title: 标签汇总
+title: 标签
 type: tags
 ---
