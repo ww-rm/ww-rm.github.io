@@ -2,6 +2,12 @@
   {%- set date_diff = date(post.date) != date(post.updated) %}
   {%- set time_diff = time(post.date) != time(post.updated) %}
 
+  {%- if is_index and post.sticky > 0 %}
+    <span class="post-sticky-flag" title="{{ __('post.sticky') }}">
+      <i class="fa fa-thumbtack"></i>
+    </span>
+  {%- endif %}
+
   {%- if theme.post_meta.created_at %}
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
