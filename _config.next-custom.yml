@@ -382,17 +382,17 @@ back2top:
   # Back to top in sidebar.
   sidebar: false
   # Scroll percent label in b2t button.
-  scrollpercent: false
+  scrollpercent: true
 
 # Reading progress bar
 reading_progress:
-  enable: false
+  enable: true
   # Available values: left | right
   start_at: left
   # Available values: top | bottom
   position: top
   reversed: false
-  color: "#37c6c0"
+  color: "#222"
   height: 3px
 
 # Bookmark Support
@@ -858,11 +858,11 @@ pace:
   enable: true
   # All available colors:
   # black | blue | green | orange | pink | purple | red | silver | white | yellow
-  color: blue
+  color: black
   # All available themes:
   # big-counter | bounce | barber-shop | center-atom | center-circle | center-radar | center-simple
   # corner-indicator | fill-left | flat-top | flash | loading-bar | mac-osx | material | minimal
-  theme: minimal
+  theme: center-atom
 
 # Canvas ribbon
 # For more information: https://github.com/hustcc/ribbon.js
