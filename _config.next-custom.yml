@@ -209,11 +209,11 @@ footer:
   # Icon between year and copyright info.
   icon:
     # Icon name in Font Awesome. See: https://fontawesome.com/icons
-    name: fa fa-heart
+    name: fa-solid fa-user-secret
     # If you want to animate the icon, set it to true.
     animated: false
     # Change the color of icon, using Hex Code.
-    color: "#f999999"
+    color: "#999999"
 
   # If not defined, `author` from Hexo `_config.yml` will be used.
   copyright:
