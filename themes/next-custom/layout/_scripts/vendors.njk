@@ -2,6 +2,10 @@
   <script size="{{ theme.canvas_ribbon.size }}" alpha="{{ theme.canvas_ribbon.alpha }}" zIndex="{{ theme.canvas_ribbon.zIndex }}" src="{{ theme.vendors.canvas_ribbon.url }}"></script>
 {%- endif %}
 
+{%- if theme.canvas_nest.enable %}
+  <script color="{{ theme.canvas_nest.color }}" opacity="{{ theme.canvas_nest.opacity }}" zIndex="{{ theme.canvas_nest.zIndex }}" count="{{ theme.canvas_nest.count }}" pointColor="{{ theme.canvas_nest.pointColor }}" src="{{ theme.vendors.canvas_nest.url }}"></script>
+{%- endif %}
+
 {%- for name in js_vendors() %}
   {{ next_vendors(name) }}
 {%- endfor %}

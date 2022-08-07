@@ -167,6 +167,11 @@ canvas_ribbon:
   version: 1.0.2
   file: dist/ribbon.min.js
   integrity: sha256-UkSSapoJqxvq+8bSCIrAhXO+aOMBRmkK6vxjTstemLs=
+canvas_nest:
+  name: canvas-nest.js
+  version: 2.0.4
+  file: dist/canvas-nest.js
+  integrity: sha512-P+NGabN/TJDOnCVOFJO+E06TBm4i+M8dTT91lWg/8UpwLrzicEXIypmABPpA47D0x6r+yxFHjYIZKWhc1h7xlQ==
 creative_commons:
   name: '@creativecommons/vocabulary'
   version: 2020.11.3
