@@ -314,7 +314,7 @@ post_navigation: left
 tagcloud:
   min: 12 # Minimum font size in px
   max: 30 # Maximum font size in px
-  amount: 200 # Total amount of tags
+  amount: 1000 # Total amount of tags
   orderby: name # Order of tags
   order: 1 # Sort order
 
@@ -841,7 +841,7 @@ mermaid:
 # Use Animate.css to animate everything.
 # For more information: https://animate.style
 motion:
-  enable: true
+  enable: false
   async: false
   transition:
     # All available transition variants: https://theme-next.js.org/animate/
