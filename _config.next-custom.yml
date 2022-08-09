@@ -918,3 +918,6 @@ background_image:
   url: "/images/background.jpg"
   opacity: 1
   zindex: -2
+
+# (0, 1]
+content_transparency: 0.8

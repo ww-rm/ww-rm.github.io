@@ -21,6 +21,7 @@ $blue         = #0684bd;
 $blue-deep    = #262a30;
 $orange       = #fc6423;
 
+$body-transparency = (hexo-config('content_transparency') or 1);
 
 // Transition
 // --------------------------------------------------
@@ -50,10 +51,14 @@ $blockquote-color-dark        = $grey;
 $border-color                 = $grey-light;
 
 // Background color for <body>
-$body-bg-color                = white;
-$body-bg-color-dark           = #282828;
-$content-bg-color             = white;
-$content-bg-color-dark        = $black-dim;
+// $body-bg-color                = white;
+// $body-bg-color-dark           = #282828;
+// $content-bg-color             = white;
+// $content-bg-color-dark        = $black-dim;
+$body-bg-color                = rgba(255, 255, 255, $body-transparency);
+$body-bg-color-dark           = rgba(40, 40, 40, $body-transparency);
+$content-bg-color             = rgba(255, 255, 255, $body-transparency);
+$content-bg-color-dark        = rgba(51, 51, 51, $body-transparency);
 
 // Selection
 $selection-bg                 = $blue-deep;
