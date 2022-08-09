@@ -14,7 +14,7 @@
 <body itemscope itemtype="http://schema.org/WebPage"{% if theme.motion.enable %} class="use-motion"{% endif %}>
   <div class="headband"></div>
   {%- if theme.background_image.enable %}
-  <div class="background-image"></div>
+  <div class="background-image" style="background-image: url({{ url_for(theme.background_image.url) }}); "></div>
   {%- endif %}
   <main class="main">
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
