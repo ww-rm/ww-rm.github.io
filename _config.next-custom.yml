@@ -877,10 +877,10 @@ canvas_ribbon:
 # For more information: https://github.com/hustcc/canvas-nest.js
 canvas_nest:
   enable: true
-  color: "150, 150, 150"
-  pointColor: "100, 100, 100"
+  color: "192, 192, 192"
+  pointColor: "255, 255, 255"
   opacity: 1.0
-  count: 99
+  count: 150
   zIndex: -1
 
 
@@ -911,3 +911,10 @@ vendors:
 css: css
 js: js
 images: images
+
+###### ================ User Custom Settings ===================== ######
+background_image:
+  enable: true
+  url: "/images/background.jpg"
+  opacity: 1
+  zindex: -2

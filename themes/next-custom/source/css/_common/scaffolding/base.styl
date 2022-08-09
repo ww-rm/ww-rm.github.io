@@ -7,6 +7,21 @@ html, body {
   height: auto;
 }
 
+.background-image {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  opacity: hexo-config('background_image.opacity');
+  z-index: hexo-config('background_image.zindex');
+  background-image: url(hexo-config('background_image.url'));
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: top;
+}
+
+
 body {
   background: var(--body-bg-color);
   box-sizing: border-box;
