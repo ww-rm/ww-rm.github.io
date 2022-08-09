@@ -917,7 +917,7 @@ background_image:
   enable: true
   url: "/images/background.jpg"
   opacity: 1
-  zindex: -2
+  zindex: -100
 
 # (0, 1]
 content_transparency: 0.8
