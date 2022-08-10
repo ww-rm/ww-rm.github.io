@@ -155,7 +155,7 @@ site_state: true
 # Key is the link label showing to end users.
 # Value before `||` delimiter is the target permalink, value after `||` delimiter is the name of Font Awesome icon.
 social:
-  GitHub: https://github.com/ww-rm || fab fa-github
+  GitHub: https://github.com/ww-rm/ || fab fa-github
   E-Mail: mailto:ww-rm@qq.com || fa fa-envelope
   #Weibo: https://weibo.com/yourname || fab fa-weibo
   #Google: https://plus.google.com/yourname || fab fa-google
@@ -407,7 +407,7 @@ bookmark:
 # `Follow me on GitHub` banner in the top-right corner.
 github_banner:
   enable: false
-  permalink: https://github.com/ww-rm
+  permalink: https://github.com/ww-rm/
   title: Follow me on GitHub
 
 
