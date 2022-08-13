@@ -128,5 +128,5 @@ symbols_count_time:
   total_symbols: true
   total_time: true
 
-  awl: 4 # average word length
+  awl: 2 # average word length
   wpm: 275 # word per minute
