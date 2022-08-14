@@ -41,9 +41,6 @@ external_link:
 filename_case: 0
 render_drafts: false
 post_asset_folder: false
-marked:
-  prependRoot: true
-  postAsset: true
 
 relative_link: false
 future: true
@@ -130,3 +127,8 @@ symbols_count_time:
 
   awl: 2 # average word length
   wpm: 275 # word per minute
+
+marked:
+  smartypants: false
+  prependRoot: true
+  postAsset: true
