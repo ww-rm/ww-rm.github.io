@@ -3,8 +3,6 @@ title: 打造一个舒适的 Python 编程环境
 tags:
   - "python"
   - "VS Code"
-  - "新手教程"
-  - "编程"
 categories:
   - "网安本科速通"
   - "新手入门"

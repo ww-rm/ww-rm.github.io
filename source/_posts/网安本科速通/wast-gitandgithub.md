@@ -3,7 +3,6 @@ title: Git 与 Github 入门
 tags:
   - "git"
   - "github"
-  - "编程"
 categories:
   - "网安本科速通"
   - "必备技能"

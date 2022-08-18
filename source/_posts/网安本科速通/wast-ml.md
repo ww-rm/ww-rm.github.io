@@ -2,7 +2,6 @@
 title: 经典问题之文本分类
 tags:
   - "机器学习"
-  - "python"
   - "scikit-learn"
   - "文本分类"
 categories:

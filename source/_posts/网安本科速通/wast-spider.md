@@ -2,9 +2,7 @@
 title: 基于 Requests 的爬虫入门
 tags:
   - "爬虫"
-  - "python"
   - "requests"
-  - "编程"
 categories:
   - "网安本科速通"
   - "必备技能"

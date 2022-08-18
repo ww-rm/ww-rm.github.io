@@ -3,7 +3,6 @@ title: 基于 PyTorch 的手写数字分类
 tags:
   - "深度学习"
   - "pytorch"
-  - "python"
   - "手写数字分类"
 categories:
   - "网安本科速通"
