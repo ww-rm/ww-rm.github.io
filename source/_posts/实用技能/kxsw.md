@@ -1,5 +1,5 @@
 ---
-title: 解决学习道路上的 "最后 1 KB"
+title: '解决学习道路上的 "最后 1 KB"'
 tags:
   - "科学上网"
 categories:
