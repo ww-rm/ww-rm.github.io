@@ -366,10 +366,10 @@ codeblock:
   # Code Highlight theme
   # All available themes: https://theme-next.js.org/highlight/
   theme:
-    light: atom-one-dark
+    light: atom-one-light
     dark: atom-one-dark
   prism:
-    light: prism-vsc-dark-plus
+    light: prism-one-light
     dark: prism-vsc-dark-plus
   # Add copy button on codeblock
   copy_button:
