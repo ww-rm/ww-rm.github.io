@@ -262,7 +262,7 @@ test_dataloader = DataLoader(test_dataset, shuffle=True, batch_size=batch_size)
 
 导入了自己的手写数字数据集并使用 `DataLoader` 来进行加载, 可以设置是否打乱与批次大小等加载参数.
 
-### 实例化模型与训练需要的对象
+### 实例化模型训练需要的对象
 
 ```python
 model = MyNetwork().to(DEVICE)
