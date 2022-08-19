@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="这是网安本科速通系列的最后一篇了, 主题还是 pytorch, 但是问题换成了 NLP, 并且还是以经典的文本分类作为示例, 数据集使用与前面经典问题之文本分类相同的一份小数据集, 方便进行比较. 阅读本篇前需要先看前两篇, 经典问题之文本分类与基于 PyTorch 的手写数字分类. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="再遇文本分类">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/19/wast-nlp/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="这是网安本科速通系列的最后一篇了, 主题还是 pytorch, 但是问题换成了 NLP, 并且还是以经典的文本分类作为示例, 数据集使用与前面经典问题之文本分类相同的一份小数据集, 方便进行比较. 阅读本篇前需要先看前两篇, 经典问题之文本分类与基于 PyTorch 的手写数字分类. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-08-19T06:29:33.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="pytorch">
+<meta property="article:tag" content="文本分类">
+<meta property="article:tag" content="nlp">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/19/wast-nlp/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/19/wast-nlp/","path":"/posts/2022/08/19/wast-nlp/","title":"再遇文本分类"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>再遇文本分类 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87%E4%B8%8E%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">环境准备与项目结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">2.</span> <span class="nav-text">快速上手</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E5%BA%93"><span class="nav-number">2.1.</span> <span class="nav-text">导入库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.2.</span> <span class="nav-text">构建数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84"><span class="nav-number">2.3.</span> <span class="nav-text">定义神经网络结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%8C%87%E6%A0%87%E8%AF%84%E4%BB%B7%E5%87%BD%E6%95%B0"><span class="nav-number">2.4.</span> <span class="nav-text">定义指标评价函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E4%B8%8E%E8%AF%84%E4%BC%B0%E5%87%BD%E6%95%B0"><span class="nav-number">2.5.</span> <span class="nav-text">训练与评估函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%A1%E5%AF%B9%E5%87%BD%E6%95%B0-collate-fn"><span class="nav-number">2.6.</span> <span class="nav-text">校对函数 (collate_fn)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-number">2.7.</span> <span class="nav-text">定义训练超参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.8.</span> <span class="nav-text">加载数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E9%9C%80%E8%A6%81%E7%9A%84%E5%AF%B9%E8%B1%A1"><span class="nav-number">2.9.</span> <span class="nav-text">实例化模型训练需要的对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.10.</span> <span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E6%9C%80%E7%BB%88%E7%9A%84%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">2.11.</span> <span class="nav-text">输出最终的测试结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%BA%90"><span class="nav-number">3.</span> <span class="nav-text">相关资源</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/19/wast-nlp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="再遇文本分类 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          再遇文本分类
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-19 14:29:33" itemprop="dateCreated datePublished" datetime="2022-08-19T14:29:33+08:00">2022-08-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">必备技能</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>这是<a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">网安本科速通</a>系列的最后一篇了, 主题还是 <code>pytorch</code>, 但是问题换成了 <code>NLP</code>, 并且还是以经典的文本分类作为示例, 数据集使用与前面<a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>相同的一份小数据集, 方便进行比较.</p>
+<p>阅读本篇前需要先看前两篇, <a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>与<a href="/posts/2022/08/17/wast-dl/">基于 PyTorch 的手写数字分类</a>. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.</p>
+<span id="more"></span>
+
+<h2 id="环境准备与项目结构"><a href="#环境准备与项目结构" class="headerlink" title="环境准备与项目结构"></a>环境准备与项目结构</h2><p>环境使用 <code>pytorch</code> 环境.</p>
+<p>项目结构与文本分类项目结构一致, 并且使用相同的数据集.</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入库"><a href="#导入库" class="headerlink" title="导入库"></a>导入库</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report, f1_score, precision_score, recall_score</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_sequence</span><br><span class="line"></span><br><span class="line">DEVICE = <span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>前两个项目的结合, 都是些常规库.</p>
+<h3 id="构建数据集"><a href="#构建数据集" class="headerlink" title="构建数据集"></a>构建数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Vocabulary</span>:</span><br><span class="line">    PAD = <span class="string">&quot;&lt;PAD&gt;&quot;</span></span><br><span class="line">    UNK = <span class="string">&quot;&lt;UNK&gt;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.token2id = &#123;self.PAD: <span class="number">0</span>, self.UNK: <span class="number">1</span>&#125;</span><br><span class="line">        self.id2token = [self.PAD, self.UNK]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.token2id)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_token</span>(<span class="params">self, token</span>):</span><br><span class="line">        <span class="keyword">if</span> token <span class="keyword">not</span> <span class="keyword">in</span> self.token2id:</span><br><span class="line">            self.token2id[token] = <span class="built_in">len</span>(self.token2id)</span><br><span class="line">            self.id2token.append(token)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">encode</span>(<span class="params">self, text</span>):</span><br><span class="line">        <span class="keyword">return</span> [self.token2id.get(x, self.token2id[self.UNK]) <span class="keyword">for</span> x <span class="keyword">in</span> text]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">decode</span>(<span class="params">self, ids</span>):</span><br><span class="line">        <span class="keyword">return</span> [self.id2token[x] <span class="keyword">for</span> x <span class="keyword">in</span> ids]</span><br></pre></td></tr></table></figure>
+
+<p>先写一个词表类, 这个词表可以按需求添加生词, 并且将分词后的文本进行词与序号之间的编解码操作, 核心目的是提供文本向量化的能力.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_raw_data</span>(<span class="params">path</span>):</span><br><span class="line">    raw_data = load_files(path, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">    data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">    data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">    index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">    label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (data_x, data_y), (index2label, label2index)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">preprocess</span>(<span class="params">data_x, data_y</span>):</span><br><span class="line">    data_x = [jieba.lcut(s) <span class="keyword">for</span> s <span class="keyword">in</span> data_x]</span><br><span class="line">    train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">        data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">        shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    vocab = Vocabulary()</span><br><span class="line">    <span class="keyword">for</span> text <span class="keyword">in</span> train_x:</span><br><span class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> text:</span><br><span class="line">            vocab.add_token(word)</span><br><span class="line"></span><br><span class="line">    train_x = [vocab.encode(x) <span class="keyword">for</span> x <span class="keyword">in</span> train_x]</span><br><span class="line">    test_x = [vocab.encode(x) <span class="keyword">for</span> x <span class="keyword">in</span> test_x]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (train_x, test_x, train_y, test_y), vocab</span><br></pre></td></tr></table></figure>
+
+<p>然后封装一下之前文本分类项目里的数据集加载操作, 手动使用 <code>jieba.lcut</code> 进行分词并构建词表, 最后返回划分好的训练集与测试集.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        self.inputs = x</span><br><span class="line">        self.targets = y</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.inputs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, item</span>):</span><br><span class="line">        input_ = torch.tensor(self.inputs[item]).long().to(DEVICE)</span><br><span class="line">        target = torch.tensor([self.targets[item]]).long().to(DEVICE)</span><br><span class="line">        <span class="keyword">return</span> (input_, target)</span><br></pre></td></tr></table></figure>
+
+<p>自定义数据集类, 与数字分类项目里的定义方式类似, 但是输入参数换成直接获取前面预处理好的数据集.</p>
+<h3 id="定义神经网络结构"><a href="#定义神经网络结构" class="headerlink" title="定义神经网络结构"></a>定义神经网络结构</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyNetwork</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, output_size=<span class="number">7</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        _embedding_size = <span class="number">128</span></span><br><span class="line">        _hidden_size = <span class="number">128</span></span><br><span class="line">        _filter_sizes = (<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">        self.embedding = nn.Embedding(vocab_size, _embedding_size)</span><br><span class="line">        self.dropout = nn.Dropout()</span><br><span class="line">        self.convs = nn.ModuleList([nn.Conv1d(_embedding_size, _hidden_size, k) <span class="keyword">for</span> k <span class="keyword">in</span> _filter_sizes])</span><br><span class="line">        self.fc = nn.Linear(_hidden_size * <span class="built_in">len</span>(_filter_sizes), output_size)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_convpool</span>(<span class="params">self, x</span>):</span><br><span class="line">        outputs = []</span><br><span class="line">        <span class="keyword">for</span> conv <span class="keyword">in</span> self.convs:</span><br><span class="line">            output = torch.relu(conv(x))</span><br><span class="line">            output = torch.max_pool1d(output, output.size(<span class="number">2</span>)).squeeze()</span><br><span class="line">            outputs.append(output)</span><br><span class="line">        <span class="keyword">return</span> torch.cat(outputs, -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        outputs = self.embedding(inputs)</span><br><span class="line">        outputs = self.dropout(outputs)</span><br><span class="line">        outputs = outputs.transpose(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">        outputs = self._convpool(outputs)</span><br><span class="line">        outputs = self.fc(outputs)</span><br><span class="line">        outputs = torch.log_softmax(outputs, -<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+
+<p>继续使用与数字分类中相同的卷积结构, 也就是 <code>TextCNN</code>, 卷积核选择经典的三个值. 各个步骤的维度变化在注释里有标注.</p>
+<h3 id="定义指标评价函数"><a href="#定义指标评价函数" class="headerlink" title="定义指标评价函数"></a>定义指标评价函数</h3><p>见<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87%E5%87%BD%E6%95%B0">定义评价指标函数</a>.</p>
+<h3 id="训练与评估函数"><a href="#训练与评估函数" class="headerlink" title="训练与评估函数"></a>训练与评估函数</h3><p>见<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0">定义训练函数</a>与<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BC%B0%E5%87%BD%E6%95%B0">定义评估函数</a></p>
+<h3 id="校对函数-collate-fn"><a href="#校对函数-collate-fn" class="headerlink" title="校对函数 (collate_fn)"></a>校对函数 (collate_fn)</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">data: <span class="built_in">list</span></span>):</span><br><span class="line">    inputs, targets = <span class="built_in">map</span>(<span class="built_in">list</span>, <span class="built_in">zip</span>(*data))</span><br><span class="line">    inputs = pad_sequence(inputs, batch_first=<span class="literal">True</span>)</span><br><span class="line">    targets = torch.stack(targets)</span><br><span class="line">    <span class="keyword">return</span> inputs, targets</span><br></pre></td></tr></table></figure>
+
+<p>这个东西可能第一次见, 并且用了一些很奇怪的操作, 比如那个 <code>map</code>, 但是首先要明白这个函数用于干什么.</p>
+<p>回忆我们在数字分类项目里使用 <code>DataLoader</code> 时, 它可以给我们提供一个 loader 来迭代我们自定义的 <code>Dataset</code>. <code>Dataset</code> 每次取出来的东西是一个二元组, 里面包含样本与标签两部分, 而 <code>Dataloader</code> 又能够按 <code>batch_size</code> 的大小批量获取这些二元组, 形成一个 <code>list</code>. 这个长度为 <code>batch_size</code>, 内容为二元组的 <code>list</code> 就是 <code>collate_fn</code> 的输入参数.</p>
+<p>再看 <code>map</code> 那一行操作, 涉及了几个 <code>python</code> 函数用法, 这里直接说结论, 它将 <code>data</code> 里的样本与标签拆分成了两个单独的 <code>list</code>.</p>
+<p>然后再说 <code>pad_sequence</code> 操作, 对于神经网络来说, 所有的计算过程都是矩阵计算, 但是对于文本任务, 每个样本句子长度几乎都不是相同的, 因此需要进行对齐操作, 对短句进行填充. 需要注意的是, 默认参数里的填充值是 <code>0</code>, 这与我们前面词表里的定义是一致的, 如果不一致则需要手动填一下.</p>
+<p>最后是参数的返回值, 直接对应了我们从 loader 里迭代数据时获取的变量形式, 此处就是和之前一样, 分别返回样本列表与标签列表.</p>
+<h3 id="定义训练超参数"><a href="#定义训练超参数" class="headerlink" title="定义训练超参数"></a>定义训练超参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">seed = <span class="number">1</span></span><br><span class="line">learning_rate = <span class="number">1e-3</span></span><br><span class="line">batch_size = <span class="number">16</span></span><br><span class="line">epochs = <span class="number">25</span></span><br><span class="line"></span><br><span class="line">torch.manual_seed(seed)</span><br><span class="line">torch.cuda.manual_seed(seed)</span><br></pre></td></tr></table></figure>
+
+<p>与前面的项目类似, 但是 <code>batch_size</code> 设的稍小一些, 因为对于文本处理, 按批次训练时, 进行了填充操作, 越大的 <code>batch_size</code> 能够得到越快的训练速度, 但是在一个 <code>batch</code> 内会引入更多不必要的 <code>0</code> 填充值, 可以酌情尝试调整.</p>
+<h3 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(data_x, data_y), (index2label, label2index) = load_raw_data(<span class="string">&quot;./data/&quot;</span>)</span><br><span class="line">(train_x, test_x, train_y, test_y), vocab = preprocess(data_x, data_y)</span><br><span class="line"></span><br><span class="line">train_dataset = MyDataset(train_x, train_y)</span><br><span class="line">test_dataset = MyDataset(test_x, test_y)</span><br><span class="line">train_dataloader = DataLoader(train_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size, collate_fn=collate_fn)</span><br><span class="line">test_dataloader = DataLoader(test_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size, collate_fn=collate_fn)</span><br></pre></td></tr></table></figure>
+
+<p>最大的不同就是添加了 <code>collate_fn</code> 参数, 其余的都是之前涉及过的操作.</p>
+<h3 id="实例化模型训练需要的对象"><a href="#实例化模型训练需要的对象" class="headerlink" title="实例化模型训练需要的对象"></a>实例化模型训练需要的对象</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model = MyNetwork(<span class="built_in">len</span>(vocab)).to(DEVICE)</span><br><span class="line">loss_fn = nn.CrossEntropyLoss().to(DEVICE)</span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
+
+<p>与之前的定义也是几乎一致的, 唯一的不同就是 <code>MyNetwork</code> 多了一个 <code>vocab_size</code> 的参数需要传进去, 其他参数都用的默认值.</p>
+<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><p>代码见<a href="/posts/2022/08/18/wast-dl/#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B">训练模型</a>, 这里只贴一下后 5 轮的训练结果.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">===============================</span><br><span class="line">Epoch 21</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0071 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1102 Acc: 0.9667 F1: 0.9669(0.9669/0.9667)</span><br><span class="line">===============================</span><br><span class="line">Epoch 22</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0055 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1099 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br><span class="line">Epoch 23</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0056 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1062 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br><span class="line">Epoch 24</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0048 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1019 Acc: 0.9667 F1: 0.9669(0.9669/0.9667)</span><br><span class="line">===============================</span><br><span class="line">Epoch 25</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0042 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1051 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在训练集上已经完全拟合了, 并且测试集上 F1 得分也高达 0.9645.</p>
+<h3 id="输出最终的测试结果"><a href="#输出最终的测试结果" class="headerlink" title="输出最终的测试结果"></a>输出最终的测试结果</h3><p>代码见<a href="/posts/2022/08/18/wast-dl/#%E8%BE%93%E5%87%BA%E6%9C%80%E7%BB%88%E7%9A%84%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C">输出最终的测试结果</a>, 这里只贴一下输出结果.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9524    1.0000    0.9756        60</span><br><span class="line">           1     0.9667    0.9667    0.9667        60</span><br><span class="line">           2     1.0000    1.0000    1.0000        60</span><br><span class="line">           3     0.9649    0.9167    0.9402        60</span><br><span class="line">           4     0.9833    0.9833    0.9833        60</span><br><span class="line">           5     0.9333    0.9180    0.9256        61</span><br><span class="line">           6     0.9508    0.9667    0.9587        60</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9644       421</span><br><span class="line">   macro avg     0.9645    0.9645    0.9643       421</span><br><span class="line">weighted avg     0.9644    0.9644    0.9642       421</span><br></pre></td></tr></table></figure>
+
+<p>可以和之前使用朴素贝叶斯的文本分类做个比较, 可以看到还是有明显提升的, <code>2</code> 号类别甚至已经完全正确了. 当然这个对比不是很科学, 毕竟这是一个很小的数据集, 而且两者都还有大量的可调整空间. 朴素贝叶斯里有很多超参数, 而且样本的特征提取也有待进一步升级; <code>TextCNN</code> 网络里也有很多超参数可调, 比如词向量的长度等等.</p>
+<p>不过神经网络的强处正是在于能够自动提取深层次特征, 避免了人工构造特征的麻烦, 也就是非常擅长 &quot;找规律&quot;, 只要数据集充足, 选择合适的网络结构, 然后经过一番超参数调整之后, 效果都不会很差. <del>就是玄学炼丹.</del></p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>各个模块的使用方法可以去看 <code>pytorch</code> 的<span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">官方网站<i class="fa fa-external-link-alt"></i></span>, 项目中使用的数据集在前面的文章里也有, 这里再贴一下, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/pytorch/" rel="tag"><i class="fa fa-tag"></i> pytorch</a>
+              <a href="/tags/%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB/" rel="tag"><i class="fa fa-tag"></i> 文本分类</a>
+              <a href="/tags/nlp/" rel="tag"><i class="fa fa-tag"></i> nlp</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/18/wast-dl/" rel="prev" title="基于 PyTorch 的手写数字分类">
+                  <i class="fa fa-chevron-left"></i> 基于 PyTorch 的手写数字分类
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/19/wast-afterword/" rel="next" title=""网安本科速通" 系列后记">
+                  "网安本科速通" 系列后记 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

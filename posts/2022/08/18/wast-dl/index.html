@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本篇算是对 pytorch 这一 python 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 pytorch 来搭建一个自定义的网络结构, 并加以训练.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 PyTorch 的手写数字分类">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/18/wast-dl/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="本篇算是对 pytorch 这一 python 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 pytorch 来搭建一个自定义的网络结构, 并加以训练.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/18/vrAZse.png">
+<meta property="article:published_time" content="2022-08-18T12:29:33.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="pytorch">
+<meta property="article:tag" content="手写数字分类">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/18/vrAZse.png">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/18/wast-dl/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/18/wast-dl/","path":"/posts/2022/08/18/wast-dl/","title":"基于 PyTorch 的手写数字分类"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于 PyTorch 的手写数字分类 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">项目结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E4%B8%8D%E5%BF%AB%E9%80%9F%E7%9A%84%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">3.</span> <span class="nav-text">并不快速的快速上手</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%85%A5%E6%89%80%E9%9C%80%E8%A6%81%E7%9A%84%E6%89%80%E6%9C%89%E5%BA%93"><span class="nav-number">3.1.</span> <span class="nav-text">导入所需要的所有库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.2.</span> <span class="nav-text">构建自己的数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">3.3.</span> <span class="nav-text">搭建一个简单的神经网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87%E5%87%BD%E6%95%B0"><span class="nav-number">3.4.</span> <span class="nav-text">定义评价指标函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0"><span class="nav-number">3.5.</span> <span class="nav-text">定义训练函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BC%B0%E5%87%BD%E6%95%B0"><span class="nav-number">3.6.</span> <span class="nav-text">定义评估函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-number">3.7.</span> <span class="nav-text">定义训练超参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">3.8.</span> <span class="nav-text">加载数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%8C%96%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E9%9C%80%E8%A6%81%E7%9A%84%E5%AF%B9%E8%B1%A1"><span class="nav-number">3.9.</span> <span class="nav-text">实例化模型训练需要的对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.10.</span> <span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E6%9C%80%E7%BB%88%E7%9A%84%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">3.11.</span> <span class="nav-text">输出最终的测试结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%BA%90"><span class="nav-number">5.</span> <span class="nav-text">相关资源</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/18/wast-dl/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于 PyTorch 的手写数字分类 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于 PyTorch 的手写数字分类
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-18 20:29:33" itemprop="dateCreated datePublished" datetime="2022-08-18T20:29:33+08:00">2022-08-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">必备技能</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本篇算是对 <code>pytorch</code> 这一 <code>python</code> 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 <code>pytorch</code> 来搭建一个自定义的网络结构, 并加以训练.</p>
+<span id="more"></span>
+
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>所需的第三方库.</p>
+<p><code>scikit-learn</code>: 并没有用到里面的算法, 但是小调一下里面现成的指标评价函数, 减少不必要的重复劳动.</p>
+<p><code>pytorch</code>: 本篇要使用的核心库, 安装方式需要在<span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">官网<i class="fa fa-external-link-alt"></i></span>查询, 且按需安装 <code>cuda</code> 工具.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">example/</span><br><span class="line">    digit_data/</span><br><span class="line">        train/</span><br><span class="line">            0/</span><br><span class="line">                1.jpg</span><br><span class="line">                2.jpg</span><br><span class="line">                ...</span><br><span class="line">            ...</span><br><span class="line">            9/</span><br><span class="line">                ...</span><br><span class="line">                XXX.jpg</span><br><span class="line">        test/</span><br><span class="line">            ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://s1.ax1x.com/2022/08/18/vrAZse.png" alt="vrAZse.png"></p>
+<h2 id="并不快速的快速上手"><a href="#并不快速的快速上手" class="headerlink" title="并不快速的快速上手"></a>并不快速的快速上手</h2><h3 id="导入所需要的所有库"><a href="#导入所需要的所有库" class="headerlink" title="导入所需要的所有库"></a>导入所需要的所有库</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report, f1_score, precision_score, recall_score</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">from</span> torchvision.io <span class="keyword">import</span> read_image</span><br><span class="line"><span class="keyword">from</span> torchvision.io.image <span class="keyword">import</span> ImageReadMode</span><br><span class="line"></span><br><span class="line">DEVICE = <span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>除了导入必需的库之外, 还设置了一个全局变量 <code>DEVICE</code>, 后续代码会使用它, 将计算放在 <code>DEVICE</code> 指定的硬件上进行计算, 推荐尽量用 gpu, 速度快很多, 当然对于这个小小的示例程序, cpu 也是能算的.</p>
+<h3 id="构建自己的数据集"><a href="#构建自己的数据集" class="headerlink" title="构建自己的数据集"></a>构建自己的数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path</span>):</span><br><span class="line">        data = load_files(path, load_content=<span class="literal">False</span>, shuffle=<span class="literal">False</span>)</span><br><span class="line">        self.inputs = data[<span class="string">&quot;filenames&quot;</span>]</span><br><span class="line">        self.targets = data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.targets)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, item</span>):</span><br><span class="line">        input_ = read_image(self.inputs[item], ImageReadMode.GRAY).<span class="built_in">float</span>().to(DEVICE)</span><br><span class="line">        target = torch.tensor([self.targets[item]]).long().to(DEVICE)</span><br><span class="line">        <span class="keyword">return</span> (input_, target)</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>pytorch</code>, 通过继承类 <code>Dataset</code>, 并且重写 <code>__init__</code>, <code>__len__</code> 和 <code>__getitem__</code> 来构建自定义数据集.</p>
+<p><code>__init__</code>: 通常在构造函数里定义如何获取原始数据集.</p>
+<p><code>__len__</code>: 定义数据集的大小计算方式.</p>
+<p><code>__getitem__</code>: 定义如何通过索引来获取一个样本.</p>
+<p>这里我们使用之前用过的 <code>load_files</code> 来加载数据集的路径, 并使用 <code>pytorch</code> 提供的图像读取函数 <code>read_image</code> 读取样本.</p>
+<h3 id="搭建一个简单的神经网络"><a href="#搭建一个简单的神经网络" class="headerlink" title="搭建一个简单的神经网络"></a>搭建一个简单的神经网络</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyNetwork</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, intput_size=<span class="number">28</span>, input_channels=<span class="number">1</span>, output_size=<span class="number">10</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        self.convpooling = nn.Sequential(</span><br><span class="line">            nn.Conv2d(input_channels, <span class="number">16</span>, <span class="number">5</span>),           <span class="comment"># 28 - 4 = 24</span></span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>),                            <span class="comment"># 24 // 2 = 14</span></span><br><span class="line">            nn.Conv2d(<span class="number">16</span>, <span class="number">64</span>, <span class="number">3</span>),                       <span class="comment"># 14 - 2 = 12</span></span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(<span class="number">2</span>),                            <span class="comment"># 12 // 2 = 6</span></span><br><span class="line">        )</span><br><span class="line">        _size = ((intput_size - <span class="number">4</span>) // <span class="number">2</span> - <span class="number">2</span>) // <span class="number">2</span></span><br><span class="line">        self.fc = nn.Sequential(</span><br><span class="line">            nn.Flatten(),</span><br><span class="line">            nn.Dropout(),</span><br><span class="line">            nn.Linear(<span class="number">64</span>*_size*_size, output_size)      <span class="comment"># 64*6*6 -&gt; 10</span></span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        outputs = self.convpooling(inputs)</span><br><span class="line">        outputs = self.fc(outputs)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+
+<p>通过继承 <code>Module</code> 类并重写其中的 <code>__init__</code> 和 <code>forward</code> 来自定义网络结构与前向传播方式.</p>
+<p><code>__init__</code>: 在构造函数里给出自定义网络的所有层次结构. 使用 <code>Module</code> 的子类进行定义, 会自动将需要学习的参数注册到整个网络结构上.</p>
+<p><code>forward</code>: 定义输入数据如何进行前向传播, 也就是如何使用在构造函数里定义的各个网络层.</p>
+<p>这里对于手写数字分类问题, 我们写了一个简单的两层 CNN 网络, 并加上一个全连接层.</p>
+<p>网络的输入是 <code>input_size*input_size</code> 大小, 通道数为 <code>input_channels</code> 的图片, 而输出则是 <code>output_size</code> 的一个分类向量, 每个位置代表不同类别的得分.</p>
+<p>代码注释里给出了每一层样本大小的变化情况, 每一层之间需要相互对齐才能正确计算.</p>
+<h3 id="定义评价指标函数"><a href="#定义评价指标函数" class="headerlink" title="定义评价指标函数"></a>定义评价指标函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">eval_metrics</span>(<span class="params">y_true, y_pred</span>):</span><br><span class="line">    acc = accuracy_score(y_true, y_pred)</span><br><span class="line">    p = precision_score(y_true, y_pred, average=<span class="string">&quot;macro&quot;</span>, zero_division=<span class="number">0</span>)</span><br><span class="line">    r = recall_score(y_true, y_pred, average=<span class="string">&quot;macro&quot;</span>, zero_division=<span class="number">0</span>)</span><br><span class="line">    f1 = f1_score(y_true, y_pred, average=<span class="string">&quot;macro&quot;</span>, zero_division=<span class="number">0</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>, zero_division=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (acc, p, r, f1, report)</span><br></pre></td></tr></table></figure>
+
+<p>这里调用了 <code>scikit-learn</code> 的一些常用指标计算函数, 包括准确率, 精度, 召回率, F1 得分, 以及一份汇总结果.</p>
+<p>输入数据就是真实标签与预测标签.</p>
+<h3 id="定义训练函数"><a href="#定义训练函数" class="headerlink" title="定义训练函数"></a>定义训练函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">model, train_data_loader, criterion, optimizer</span>):</span><br><span class="line">    model.train()</span><br><span class="line">    loss_list = []</span><br><span class="line">    pred_list = []</span><br><span class="line">    true_list = []</span><br><span class="line">    <span class="keyword">for</span> inputs, targets <span class="keyword">in</span> train_data_loader:</span><br><span class="line">        targets = targets.flatten()</span><br><span class="line">        outputs = model(inputs)</span><br><span class="line">        loss = criterion(outputs, targets)</span><br><span class="line"></span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line"></span><br><span class="line">        loss_list.append(loss.item())</span><br><span class="line">        pred_list.append(outputs.argmax(dim=-<span class="number">1</span>).cpu().numpy())</span><br><span class="line">        true_list.append(targets.cpu().numpy())</span><br><span class="line"></span><br><span class="line">    y_pred = np.concatenate(pred_list)</span><br><span class="line">    y_true = np.concatenate(true_list)</span><br><span class="line"></span><br><span class="line">    loss = np.mean(loss_list)</span><br><span class="line">    result = eval_metrics(y_true, y_pred)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (loss, *result)</span><br></pre></td></tr></table></figure>
+
+<p>训练函数有四个参数.</p>
+<p><code>model</code>: 模型, 也就是前面我们自己定义的神经网络实例.</p>
+<p><code>train_data_loader</code>: 训练数据集加载器. 是一个 <code>DataLoader</code> 实例, 可以进行迭代从里面按批次大小获得训练数据.</p>
+<p><code>criterion</code>: 损失函数, 用来计算每次输出与真实标签之间的损失值, 并进行反向传播计算梯度.</p>
+<div class="note info"><p>需要注意的是, 对 <code>targets</code> 使用了一次 <code>flatten</code> 操作.<br>因为使用 <code>DataLoader</code> 对数据集进行加载时, 每次是按照 <code>batch_size</code> 来批量获取的, 因此会自动将单个样本进行拼接变成一个 batch. 所以 <code>targets</code> 是 <code>(batch_size, 1)</code> 的形状.<br>但是我们要使用的损失函数是 <code>CrossEntropy</code> 交叉熵损失函数, 它的输入要求真实标签是一个一维的向量 <code>(batch_size, )</code>, 因此使用 <code>flatten</code> 对 <code>targets</code> 进行展平操作.</p>
+</div>
+
+<p><code>optimizer</code>: 优化器, 在使用之前已经将 <code>model</code> 中需要训练的参数注册进去, 每次调用 <code>step</code> 方法可以对 <code>model</code> 注册的参数通过梯度进行更新.</p>
+<p>训练的流程共有以下几步.</p>
+<ol>
+<li>将 <code>model</code> 转为 <code>train</code> 模式.</li>
+<li>迭代数据集加载器, 按批次获取每一次要学习的样本.</li>
+<li>将样本喂进 <code>model</code> 进行前向传播, 并计算损失.</li>
+<li>清空优化器中上一次梯度值.</li>
+<li>从损失处开始反向传播, 计算本次参数需进行学习的梯度.</li>
+<li>调用优化器的 <code>step</code>, 根据梯度值完成对网络参数的更新.</li>
+</ol>
+<p>后面还有一些额外的统计操作, 用来记录本次训练过程时的平均损失和准确度等情况.</p>
+<h3 id="定义评估函数"><a href="#定义评估函数" class="headerlink" title="定义评估函数"></a>定义评估函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">evaluate</span>(<span class="params">model, eval_data_loader, criterion</span>):</span><br><span class="line">    model.<span class="built_in">eval</span>()</span><br><span class="line">    loss_list = []</span><br><span class="line">    pred_list = []</span><br><span class="line">    true_list = []</span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="keyword">for</span> inputs, targets <span class="keyword">in</span> eval_data_loader:</span><br><span class="line">            targets = targets.flatten()</span><br><span class="line">            outputs = model(inputs)</span><br><span class="line">            loss = criterion(outputs, targets)</span><br><span class="line"></span><br><span class="line">            loss_list.append(loss.item())</span><br><span class="line">            pred_list.append(torch.argmax(outputs, dim=-<span class="number">1</span>).cpu().numpy())</span><br><span class="line">            true_list.append(targets.cpu().numpy())</span><br><span class="line"></span><br><span class="line">    y_pred = np.concatenate(pred_list)</span><br><span class="line">    y_true = np.concatenate(true_list)</span><br><span class="line"></span><br><span class="line">    loss = np.mean(loss_list)</span><br><span class="line">    result = eval_metrics(y_true, y_pred)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (loss, *result)</span><br></pre></td></tr></table></figure>
+
+<p>评估函数的过程与训练函数类似, 不同之处在于前者的参数里没有优化器, 因为评估函数用于模型在测试集上进行测试, 不需要反向传播与参数更新的操作.</p>
+<p>评估函数的关键是 <code>torch.no_grad</code> 操作, 在此上下文内对 <code>model</code> 的操作不会计算任何梯度值, 只会进行单纯的前向求值计算操作.</p>
+<h3 id="定义训练超参数"><a href="#定义训练超参数" class="headerlink" title="定义训练超参数"></a>定义训练超参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">seed = <span class="number">1</span></span><br><span class="line">learning_rate = <span class="number">1e-3</span></span><br><span class="line">batch_size = <span class="number">500</span></span><br><span class="line">epochs = <span class="number">5</span></span><br><span class="line"></span><br><span class="line">torch.manual_seed(seed)</span><br><span class="line">torch.cuda.manual_seed(seed)</span><br></pre></td></tr></table></figure>
+
+<p>这里我们设置了学习率和训练轮数, 由于只是示例因此轮数只有 5 来展示效果.</p>
+<p>将随机数种子列入了超参数并且固定了 <code>torch</code> 随机数模块的种子, 目的是为了稳定复现结果.</p>
+<h3 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">train_dataset = MyDataset(<span class="string">&quot;./digit_data/train/&quot;</span>)</span><br><span class="line">test_dataset = MyDataset(<span class="string">&quot;./digit_data/test/&quot;</span>)</span><br><span class="line">train_dataloader = DataLoader(train_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size)</span><br><span class="line">test_dataloader = DataLoader(test_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size)</span><br></pre></td></tr></table></figure>
+
+<p>导入了自己的手写数字数据集并使用 <code>DataLoader</code> 来进行加载, 可以设置是否打乱与批次大小等加载参数.</p>
+<h3 id="实例化模型训练需要的对象"><a href="#实例化模型训练需要的对象" class="headerlink" title="实例化模型训练需要的对象"></a>实例化模型训练需要的对象</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model = MyNetwork().to(DEVICE)</span><br><span class="line">loss_fn = nn.CrossEntropyLoss().to(DEVICE)</span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
+
+<p>模型使用了默认参数, 数据集图片大小为 <code>28*28</code>, 且加上了 <code>to(DEVICE)</code>. 在前面构建数据集部分也使用了 <code>to(DEVICE)</code> 操作, 其目的是为了保证所有要参与计算的 <code>Tensor</code> 都在同一个硬件设备上进行计算.</p>
+<p>然后是实例化损失函数与优化器. 在优化器的参数中需要填入 <code>model</code> 所有需要更新的网络参数, 并填入学习率.</p>
+<p>优化器选择了 <code>Adam</code>, 一个几乎万用的优化器.</p>
+<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;===============================&quot;</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Epoch <span class="subst">&#123;i+<span class="number">1</span>&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;-------------------------------&quot;</span>)</span><br><span class="line">    *train_metrics, _ = train(model, train_dataloader, loss_fn, optimizer)</span><br><span class="line">    *evaluate_metrics, _ = evaluate(model, test_dataloader, loss_fn)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Train Loss: &#123;:.4f&#125; Acc: &#123;:.4f&#125; F1: &#123;:.4f&#125;(&#123;:.4f&#125;/&#123;:.4f&#125;)&quot;</span>.<span class="built_in">format</span>(*train_metrics))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Eval  Loss: &#123;:.4f&#125; Acc: &#123;:.4f&#125; F1: &#123;:.4f&#125;(&#123;:.4f&#125;/&#123;:.4f&#125;)&quot;</span>.<span class="built_in">format</span>(*evaluate_metrics))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;===============================&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>得到如下训练过程输出.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">===============================</span><br><span class="line">Epoch 1</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 11.0961 Acc: 0.4295 F1: 0.4297(0.4272/0.4281)</span><br><span class="line">Eval  Loss: 0.7999 Acc: 0.8052 F1: 0.8232(0.8059/0.8014)</span><br><span class="line">===============================</span><br><span class="line">Epoch 2</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.8910 Acc: 0.8009 F1: 0.8002(0.8000/0.7999)</span><br><span class="line">Eval  Loss: 0.3495 Acc: 0.9106 F1: 0.9111(0.9103/0.9103)</span><br><span class="line">===============================</span><br><span class="line">Epoch 3</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.4862 Acc: 0.8683 F1: 0.8675(0.8675/0.8674)</span><br><span class="line">Eval  Loss: 0.2554 Acc: 0.9324 F1: 0.9324(0.9322/0.9320)</span><br><span class="line">===============================</span><br><span class="line">Epoch 4</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.3536 Acc: 0.9016 F1: 0.9013(0.9008/0.9010)</span><br><span class="line">Eval  Loss: 0.2114 Acc: 0.9396 F1: 0.9393(0.9397/0.9393)</span><br><span class="line">===============================</span><br><span class="line">Epoch 5</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.2802 Acc: 0.9173 F1: 0.9170(0.9170/0.9169)</span><br><span class="line">Eval  Loss: 0.1861 Acc: 0.9470 F1: 0.9474(0.9471/0.9469)</span><br><span class="line">===============================</span><br></pre></td></tr></table></figure>
+
+<p>训练时每训练一轮同时也在测试集上评估一次, 可以看到两个损失值都是成功下降, 且正确率逐步上升. 有时间的话可以多训练几轮, 看看损失值的变化情况.</p>
+<h3 id="输出最终的测试结果"><a href="#输出最终的测试结果" class="headerlink" title="输出最终的测试结果"></a>输出最终的测试结果</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*_, report = evaluate(model, test_dataloader, loss_fn)</span><br><span class="line"><span class="built_in">print</span>(report)</span><br></pre></td></tr></table></figure>
+
+<p>输出.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9344    0.9913    0.9620       460</span><br><span class="line">           1     0.9653    0.9737    0.9695       571</span><br><span class="line">           2     0.9176    0.9660    0.9412       530</span><br><span class="line">           3     0.9346    0.9720    0.9529       500</span><br><span class="line">           4     0.9459    0.9440    0.9449       500</span><br><span class="line">           5     0.9566    0.9671    0.9618       456</span><br><span class="line">           6     0.9644    0.9372    0.9506       462</span><br><span class="line">           7     0.9467    0.9023    0.9240       512</span><br><span class="line">           8     0.9585    0.8978    0.9271       489</span><br><span class="line">           9     0.9503    0.9192    0.9345       520</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9470      5000</span><br><span class="line">   macro avg     0.9474    0.9471    0.9469      5000</span><br><span class="line">weighted avg     0.9474    0.9470    0.9468      5000</span><br></pre></td></tr></table></figure>
+
+<p>其实就是再次调用了一下 <code>evaluate</code> 函数, 但是输出了 report 结果.</p>
+<p>可以看到正确率尚可, 达到了 0.94 多, 多训练几轮说不定会更高. 贴一下训练了 22 轮的结果.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9620    0.9913    0.9764       460</span><br><span class="line">           1     0.9758    0.9895    0.9826       571</span><br><span class="line">           2     0.9701    0.9792    0.9746       530</span><br><span class="line">           3     0.9839    0.9760    0.9799       500</span><br><span class="line">           4     0.9739    0.9720    0.9730       500</span><br><span class="line">           5     0.9759    0.9759    0.9759       456</span><br><span class="line">           6     0.9868    0.9697    0.9782       462</span><br><span class="line">           7     0.9631    0.9688    0.9659       512</span><br><span class="line">           8     0.9710    0.9571    0.9640       489</span><br><span class="line">           9     0.9706    0.9519    0.9612       520</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9732      5000</span><br><span class="line">   macro avg     0.9733    0.9731    0.9732      5000</span><br><span class="line">weighted avg     0.9733    0.9732    0.9732      5000</span><br></pre></td></tr></table></figure>
+
+<p><del>提高了足足 <strong>3 个百分点</strong>! 足以让我们发一篇 CVPR 了!</del> 看得出没有太明显的提升, 一是数据集较小, 二是网络结构比较简单, 不过也足以见到神经网络的强大了.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>万变不离其宗, 虽然本篇是一个只是一个非常精简的手写数字分类, 但是麻雀虽小五脏俱全, 再大型再复杂的网络结构, 它的基本流程都离不开那几个步骤, 唯一没提到了可能就是面对长时间训练情况下, 怎么 &quot;断点续训&quot; 记录存档点, 这个靠自己摸索了. <del>都是网安的了, 自学什么的早就会了吧.</del></p>
+<p>实际中, 很少真的自己手搓网络了, 就算是学习论文里的模型, 也都是尽可能的直接拉开源代码下来跑. 那么学习本篇的主要目的是知道使用 <code>pytorch</code> 的最基本的几个步骤, 在看开源代码时, 能够快速找到各个部件都在哪, 理解作者的项目组织方式, 并且必要时可以对源代码做出一定的调整.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>pytorch</code> 的官方网站: <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">https://pytorch.org/<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这个官方网站挺好的, 不仅文档详细, 同时也提供了很多示例教学, 很适合入门或者详细了解各种接口.</p>
+<p>另附上项目中使用的数据集下载地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVFBrSzA5cGZuaGE=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/pytorch/" rel="tag"><i class="fa fa-tag"></i> pytorch</a>
+              <a href="/tags/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E5%88%86%E7%B1%BB/" rel="tag"><i class="fa fa-tag"></i> 手写数字分类</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/17/wast-ml/" rel="prev" title="经典问题之文本分类">
+                  <i class="fa fa-chevron-left"></i> 经典问题之文本分类
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/19/wast-nlp/" rel="next" title="再遇文本分类">
+                  再遇文本分类 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

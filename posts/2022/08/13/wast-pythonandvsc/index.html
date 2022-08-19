@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="网安专业几乎 99% 的作业都可以用 python 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 c 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 python 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用. 因此本篇主要基于个人经验介">
+<meta property="og:type" content="article">
+<meta property="og:title" content="打造一个舒适的 Python 编程环境">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="网安专业几乎 99% 的作业都可以用 python 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 c 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 python 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用. 因此本篇主要基于个人经验介">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtamNQ.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtaN4J.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtd9VU.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtdqeK.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNUegI.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNami4.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNdYn0.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNwSvn.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNDSvd.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vN0OpQ.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNDsPO.png">
+<meta property="article:published_time" content="2022-08-13T05:53:17.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="VS Code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/13/vtamNQ.png">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/","path":"/posts/2022/08/13/wast-pythonandvsc/","title":"打造一个舒适的 Python 编程环境"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>打造一个舒适的 Python 编程环境 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-Python"><span class="nav-number">2.</span> <span class="nav-text">安装 Python</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Python-%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">3.</span> <span class="nav-text">Python 虚拟环境</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%E7%AE%80%E4%BB%8B"><span class="nav-number">3.1.</span> <span class="nav-text">虚拟环境简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%E7%AE%A1%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">虚拟环境管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E7%8E%AF%E5%A2%83%E4%B8%AD%E5%AE%89%E8%A3%85%E7%AC%AC%E4%B8%89%E6%96%B9%E5%8C%85"><span class="nav-number">3.2.1.</span> <span class="nav-text">在环境中安装第三方包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B9%B6%E4%BD%BF%E7%94%A8%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">3.2.2.</span> <span class="nav-text">创建并使用虚拟环境</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E7%9A%84%E7%AC%AC%E4%B8%89%E6%96%B9%E5%8C%85"><span class="nav-number">3.3.</span> <span class="nav-text">常用的第三方包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-VS-Code-%E4%B8%AD%E4%BD%BF%E7%94%A8-Python"><span class="nav-number">4.</span> <span class="nav-text">在 VS Code 中使用 Python</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AF%9D"><span class="nav-number">5.</span> <span class="nav-text">后话</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="打造一个舒适的 Python 编程环境 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          打造一个舒适的 Python 编程环境
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-13 13:53:17" itemprop="dateCreated datePublished" datetime="2022-08-13T13:53:17+08:00">2022-08-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/" itemprop="url" rel="index"><span itemprop="name">新手入门</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
+<p>因此本篇主要基于个人经验介绍一下比较舒适的 <code>python</code> 编程环境设置, 让大家能够把精力放在<del>抄</del>写代码上, 而不是被环境弄的头疼.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>从本篇开始, 基本上算是完全的个人经验分享. 由于我自己是网安专业而非信安, 因此可能分享的内容对网安同学适用性更好, 不过信安同学可以酌情参考. 如果还没分专业, 也可以参考一下将来可能需要点一些啥技能来速通网安各个课程作业.</p>
+<p>如果对 <code>VS Code</code> 没有了解, 可以看前一篇<a href="/posts/2022/08/11/wast-vscandvs/">给新生的编程工具推荐与基本使用方法</a>, 这里面讲了 <code>VS Code</code> 的基本使用方法. 而本篇将会基于 <code>VS Code</code>, 打造一个相对舒适的 <code>python</code> 编程环境.</p>
+<h2 id="安装-Python"><a href="#安装-Python" class="headerlink" title="安装 Python"></a>安装 Python</h2><p>第一步肯定是安装 <code>python</code>, 官网就是 <span class="exturl" data-url="aHR0cHM6Ly93d3cucHl0aG9uLm9yZy8=">https://www.python.org/<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>可以选择下最新版, 不过不是那么的推荐, 而是适当旧一点, 比如现在最新的版本是 <code>3.10.6</code>, 那么可以下 <code>3.8.10</code> (<code>3.8.x</code> 发布的最后一个有安装包的版本). 这样子兼容度大一点. (曾经遇见过要装的某个包还没发布适配新版本 <code>python</code> 的版本, 害得我又重装降级了 <code>python</code>).</p>
+<p>这里直接提供 <a target="_blank" rel="noopener" href="https://www.python.org/downloads/release/python-3810/"><code>Python 3.8.10</code></a> 的官方下载页面, 点进去之后选 &quot;Windows installer (64-bit)&quot; 这个版本就好了.</p>
+<p>下载好之后双击进入安装界面. 下面两项都勾上, 并且选择 &quot;Customize installation&quot;.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtamNQ.png" alt="vtamNQ.png"></p>
+<p>这一面也是直接全勾.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtaN4J.png" alt="vtaN4J.png"></p>
+<p>再次 Next 之后, 这个界面里, 勾选 &quot;Install for all users&quot;, 并且可以在下方调整 <code>python</code> 的安装路径. 推荐装到 D 盘或者其他方便找到的地方, 比如 <code>D:\Program Files\Python38</code>.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtd9VU.png" alt="vtd9VU.png"></p>
+<p>重启一下电脑, 快捷键 <code>Win + R</code>, 输入 <code>cmd</code> 打开命令提示符, 敲一下 <code>python --version</code>, 如下图所示则安装成功.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtdqeK.png" alt="vtdqeK.png"></p>
+<h2 id="Python-虚拟环境"><a href="#Python-虚拟环境" class="headerlink" title="Python 虚拟环境"></a>Python 虚拟环境</h2><h3 id="虚拟环境简介"><a href="#虚拟环境简介" class="headerlink" title="虚拟环境简介"></a>虚拟环境简介</h3><p>关于虚拟环境的详细介绍很多, 必应一搜就有很多<span class="exturl" data-url="aHR0cHM6Ly9jbi5iaW5nLmNvbS9zZWFyY2g/cT1weXRob24lRTclOUElODQlRTglOTklOUElRTYlOEIlOUYlRTclOEUlQUYlRTUlQTIlODMlRTYlOTglQUYlRTQlQkIlODAlRTQlQjklODg=">结果<i class="fa fa-external-link-alt"></i></span>, 有时间可以慢慢理解.</p>
+<p>当你写代码时, 不可能完全都靠自己从零开始, 这样子很低效<del>并且很蠢</del>, 所以对于 <code>python</code> 而言, 写代码之前确定并安装合适的第三方包就是基本操作.</p>
+<p>然而, 第三方包在发布的时候, 可能会存在许多不同的版本, 不同项目之间所需要的包版本也不尽相同, 会造成巨大的兼容问题 (比如万恶的 <code>tensorflow 1.x</code> 和 <code>tensorflow 2.x</code>). 这种时候就需要使用虚拟环境.</p>
+<p>虚拟环境可以简单认为是 &quot;<code>python</code> 和对应的包的副本&quot;, 最基本的要素是环境内的 <code>python</code> 版本和包的版本. 每一个环境之间的 <code>python</code> 和包版本都是相互独立的. 这样子在运行项目时, 我们可以选择特定的某一个环境, 从而使用某个特定的 <code>python</code> 版本与包版本.</p>
+<h3 id="虚拟环境管理"><a href="#虚拟环境管理" class="headerlink" title="虚拟环境管理"></a>虚拟环境管理</h3><p>网上很多推荐使用 <span class="exturl" data-url="aHR0cHM6Ly93d3cuYW5hY29uZGEuY29tLw==">Anaconda<i class="fa fa-external-link-alt"></i></span> 来进行包和环境的管理, 我觉得可以但没必要, 一是臃肿二是让新手有点摸不着头脑. 不过等熟练之后用倒是个不错的选择.</p>
+<p>这里只介绍一下 <code>python</code> 自带的 <code>venv</code> 模块使用以及第三方包 <code>virtualenvwrapper-win</code> 的使用.</p>
+<h4 id="在环境中安装第三方包"><a href="#在环境中安装第三方包" class="headerlink" title="在环境中安装第三方包"></a>在环境中安装第三方包</h4><p>一般来说, 安装完 <code>python</code> 之后, 就会有一个 &quot;本地环境&quot;, 而将除本地环境之外的其他环境通常 &quot;虚拟环境&quot;.</p>
+<p>在运行 <code>python</code> 程序时, 是按照所指定的 <code>python</code> 解释器来决定使用的环境的.</p>
+<p>我们在命令行里可以直接使用 <code>python</code> 指令, 实际上是因为我们在安装时勾选了 &quot;Add Python 3.8 to PATH&quot;, 在环境变量 <code>PATH</code> 中添加了本地环境中 <code>python</code> 解释器的路径, 所以在使用 <code>python</code> 指令时, 实际上就是使用了本地环境.</p>
+<p>通常主要使用内置的 <code>pip</code> 模块进行第三方包的管理, 并且有以下几个常用命令.</p>
+<ul>
+<li><p><code>&lt;解释器&gt; -m pip list &lt;包名&gt;</code>: 列出当前环境所有安装的包.</p>
+</li>
+<li><p><code>&lt;解释器&gt; -m pip install &lt;包名&gt;</code>: 安装包.</p>
+</li>
+<li><p><code>&lt;解释器&gt; -m pip install &lt;包名&gt;</code>: 卸载包.</p>
+</li>
+</ul>
+<p><code>&lt;解释器&gt;</code> 就是你要进行包管理的环境的解释器 <code>python.exe</code> 路径, 对于本地环境来说就是直接使用的 <code>python</code> 命令.</p>
+<p><code>-m pip</code> 表示调用了指定解释器中的 <code>pip</code> 模块进行包的管理.</p>
+<p><code>&lt;包名&gt;</code> 则是你需要的包的 &quot;安装名称&quot;, 一般来说它和 <code>import</code> 语句的名字是一致的, 但是也有可能不一样, 推荐去官方的包发布网站 <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy8=">https://pypi.org/<i class="fa fa-external-link-alt"></i></span> 上进行搜索.</p>
+<p>除此之外, <code>pip</code> 也支持使用 <code>whl</code> 文件或者源码安装, 具体的可以自行进一步学习.</p>
+<h4 id="创建并使用虚拟环境"><a href="#创建并使用虚拟环境" class="headerlink" title="创建并使用虚拟环境"></a>创建并使用虚拟环境</h4><p>最简单的创建方法是使用自带的 <code>venv</code> 模块, 命令如下.</p>
+<p><code>python -m venv &lt;路径&gt;</code></p>
+<p>比如使用 <code>python -m venv env</code> 则会在当前目录下生成一个 <code>env</code> 文件夹, 这里面就包含了名为 <code>env</code> 的虚拟环境的解释器以及第三方库.</p>
+<p>另外比较重要的文件是 <code>activate</code> 与 <code>deactivate</code>, 用于激活和退出虚拟环境.</p>
+<p>具体的使用在后面的部分<a href="#%E5%9C%A8-vs-code-%E4%B8%AD%E4%BD%BF%E7%94%A8-python">在 VS Code 中使用 Python</a> 中再进行说明.</p>
+<p>另一种方案是使用第三方库 <code>virtualenvwrapper-win</code> 来辅助我们管理虚拟环境.</p>
+<p>使用 <code>python -m pip install virtualenvwrapper-win</code> 进行安装. 安装完后, 即可以在命令行中使用以下几个常用命令对机器上的虚拟环境进行集中管理.</p>
+<ul>
+<li><code>mkvirtualenv &lt;虚拟环境名称&gt;</code>: 创建虚拟环境.</li>
+<li><code>workon &lt;虚拟环境名称&gt;</code>: 激活对应的虚拟环境.</li>
+<li><code>rmvirtualenv &lt;虚拟环境名称&gt;</code>: 删除虚拟环境.</li>
+</ul>
+<p>前面的 <code>venv</code> 模块常常用于某个项目内的临时环境, 而 <code>virtualenvwrapper-win</code> 这个第三方工具主要用于你希望自己的电脑上常驻某些不同类别的环境, 并对它们方便的进行集中管理.</p>
+<p>默认该模块创建的环境都将位于 <code>%USERPROFILE%\envs</code> 文件夹下,可以通过环境变量 <code>WORKON_HOME</code> 来自定义你希望的存储位置.</p>
+<h3 id="常用的第三方包"><a href="#常用的第三方包" class="headerlink" title="常用的第三方包"></a>常用的第三方包</h3><p>对于速通网安, 有一些常用的第三方库总结, 在这里把我自己常用的包情况列举一下.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># 用于格式化和检测代码规范的工具</span><br><span class="line">autopep8</span><br><span class="line">pylint</span><br><span class="line"></span><br><span class="line"># 与爬虫有关的库</span><br><span class="line">lxml</span><br><span class="line">beautifulsoup4</span><br><span class="line">requests</span><br><span class="line"></span><br><span class="line"># 与数据处理有关的库</span><br><span class="line">numpy</span><br><span class="line">pandas</span><br><span class="line">matplotlib</span><br><span class="line"></span><br><span class="line"># 机器学习以及深度学习相关的库</span><br><span class="line">opencv-python</span><br><span class="line">scikit-learn</span><br><span class="line"># torch</span><br><span class="line"># torchaudio</span><br><span class="line"># torchvision</span><br><span class="line"></span><br><span class="line"># 在 VS Code 内使用 jupyter notebook 有关的库</span><br><span class="line">ipykernel</span><br><span class="line">jupyter</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>torch</code> 的安装需要前往官网 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">https://pytorch.org/<i class="fa fa-external-link-alt"></i></span> 按说明进行安装.</p>
+<h2 id="在-VS-Code-中使用-Python"><a href="#在-VS-Code-中使用-Python" class="headerlink" title="在 VS Code 中使用 Python"></a>在 VS Code 中使用 Python</h2><p>这一节将会实践一下前面所有的内容, 在 <code>VS Code</code> 中使用 <code>python</code> 完成一次向量乘法计算.</p>
+<p>打开之前曾经创建的 <code>example</code> 文件夹, 并且新建一个终端.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vNUegI.png" alt="vNUegI.png"></p>
+<p>我们使用以下命令为这个项目建立一个单独的虚拟环境, 取名为 <code>env</code>.</p>
+<p><code>python -m venv env</code></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vNami4.png" alt="vNami4.png"></p>
+<p>命令执行完成后, 左边的资源管理器面板上多出来一个 <code>env</code> 文件夹, 这就是我们刚刚创建好的虚拟环境. 我们使用 <code>.\env\Scripts\activate</code> 在终端中激活这个虚拟环境, 激活完成后可以看到终端的提示信息前面多了一个 <code>(env)</code> 标记, 表示当前终端处于 <code>env</code> 的虚拟环境之下.</p>
+<p>如果出现不能执行的情况, 可以参考<span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vZGF4aW9uZzEzMTQvcC8xNjI2NTU0OS5odG1s">这篇博客<i class="fa fa-external-link-alt"></i></span>解决权限问题. 或者在 <code>VS Code</code> 的设置里把默认的终端类型调成 <code>cmd</code> 而不是 <code>powershell</code>, 我推荐改成 <code>cmd</code> 一劳永逸. <del><code>powershell</code> 屁事多</del>.</p>
+<p>解决完问题之后就如下图所示了.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vNdYn0.png" alt="vNdYn0.png"></p>
+<p>此时在终端里直接执行 <code>python</code> 有关的命令, 都会映射到虚拟环境里的命令.</p>
+<p>然后我们继续, 使用 <code>pip</code> 向虚拟环境里添加一个第三方库 <code>numpy</code>.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vNwSvn.png" alt="vNwSvn.png"></p>
+<p>顺利安装完成之后, 可以看到左边的 <code>env</code> 文件夹里 <code>site-packages</code> 下多出来一个 <code>numpy</code> 的文件夹, 这就是我们刚刚安装好的第三方库了. 同时终端里给了我们一个 <code>WARNING</code>, 提示我们可以对 <code>pip</code> 模块进行升级. 虽然影响不是很大, 不过推荐复制它提供的指令升一下级, 这样 <code>pip</code> 在查找和安装包时能够使用最新的功能, 减小安装失败的风险<del>主要是有彩色进度条</del>.</p>
+<p>然后清空之前 <code>main.py</code> 里面的代码, 并且敲入以下新的内容.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vNDSvd.png" alt="vNDSvd.png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    vector1 = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">    vector2 = np.array([<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(np.dot(vector1, vector2))</span><br><span class="line">    <span class="built_in">print</span>(np.multiply(vector1, vector2))</span><br></pre></td></tr></table></figure>
+
+<p>会发现 <code>import</code> 语句的 <code>numpy</code> 有黄色波浪线, 同时下面的 &quot;问题&quot; 面板有写出来原因, 意思是没有 <code>numpy</code> 这个库.</p>
+<p>这是因为虽然我们刚刚在终端里是已经成功激活了虚拟环境, 但是对于 <code>VS Code</code> 来说, 它并不关心终端里是什么情况, 而是对于这个项目来说, 它需要使用什么环境来处理项目内容, 所以我们还需要在下方的状态栏里切换 <code>VS Code</code> 对于当前项目使用的 <code>python</code> 环境.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vN0OpQ.png" alt="vN0OpQ.png"></p>
+<p>点击下方状态栏的环境选择, 并且切换到刚刚创建的 <code>env</code> 环境, 此时下方的环境已经换成了 <code>&#39;env&#39;:venv</code>, 并且刚刚的黄色波浪线与问题也消失了.</p>
+<p>此时我们可以选择在激活了虚拟环境的终端里运行这份代码, 或者使用快捷键 <code>Ctrl + F5</code> 让 <code>VS Code</code> 帮我们运行. 这里展示一下在终端里直接运行的结果, 可以看到成功输出, 一个是向量内积结果, 一个是向量按位乘法结果.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vNDsPO.png" alt="vNDsPO.png"></p>
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>到这里就结束了, 说实话只讲了 <code>VS Code</code> 中使用 <code>python</code> 的最基本技巧, 这些操作之后写代码的时候多操作几次应该就烂熟于心了.</p>
+<p>但是对于进校没多久的萌新们来说, 估计看的还是很晕的, 因为有很多新名词, 特别是 &quot;环境变量&quot; 这种, 可能是完全第一次听说, 而且也容易出问题. 所以还是建议多动手尝试尝试, 并且善用搜索引擎, 多翻几篇博客, 总会能够找到适合你问题的解决方案.</p>
+<p>就这样了, 下回单独写写怎么合理的科学上网, 为使用 <code>Github</code> <del>抄代码</del>打下坚实基础.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+              <a href="/tags/VS-Code/" rel="tag"><i class="fa fa-tag"></i> VS Code</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/11/wast-vscandvs/" rel="prev" title="给新生的编程工具推荐与基本使用方法">
+                  <i class="fa fa-chevron-left"></i> 给新生的编程工具推荐与基本使用方法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/14/kxsw/" rel="next" title="解决学习道路上的 "最后 1 KB"">
+                  解决学习道路上的 "最后 1 KB" <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

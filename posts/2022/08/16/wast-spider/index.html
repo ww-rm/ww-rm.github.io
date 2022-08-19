@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本篇是基于 python 语言及其第三方库 requests 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Requests 的爬虫入门">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/16/wast-spider/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="本篇是基于 python 语言及其第三方库 requests 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0cQQx.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0hSFU.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0hhc9.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v04mBq.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0oHrd.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0TFZn.png">
+<meta property="article:published_time" content="2022-08-16T14:03:17.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="requests">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/16/v0cQQx.png">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/16/wast-spider/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/16/wast-spider/","path":"/posts/2022/08/16/wast-spider/","title":"基于 Requests 的爬虫入门"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于 Requests 的爬虫入门 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E4%B8%8E%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">工具与环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%88%AC%E8%99%AB%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">爬虫基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B"><span class="nav-number">3.</span> <span class="nav-text">快速上手</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E7%BD%91%E7%AB%99"><span class="nav-number">3.1.</span> <span class="nav-text">分析网站</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%B7%E6%B1%82%E7%BD%91%E9%A1%B5"><span class="nav-number">3.2.</span> <span class="nav-text">请求网页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E7%BD%91%E9%A1%B5%E7%BB%93%E6%9E%84%E4%B8%8E%E5%86%85%E5%AE%B9"><span class="nav-number">3.3.</span> <span class="nav-text">分析网页结构与内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%BD%91%E9%A1%B5%E5%86%85%E5%AE%B9%E6%8F%90%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="nav-number">3.4.</span> <span class="nav-text">从网页内容提取数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E4%B8%8B%E6%9D%A5%E5%B9%B2%E4%BB%80%E4%B9%88"><span class="nav-number">3.5.</span> <span class="nav-text">接下来干什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">相关资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/16/wast-spider/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于 Requests 的爬虫入门 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于 Requests 的爬虫入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-16 22:03:17" itemprop="dateCreated datePublished" datetime="2022-08-16T22:03:17+08:00">2022-08-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">必备技能</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
+<span id="more"></span>
+
+<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
+<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
+<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
+<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
+<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0cQQx.png" alt="v0cQQx.png"></p>
+<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
+<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
+<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0hSFU.png" alt="v0hSFU.png"></p>
+<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
+<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0hhc9.png" alt="v0hhc9.png"></p>
+<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v04mBq.png" alt="v04mBq.png"></p>
+<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
+<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
+<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
+<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
+<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
+<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
+<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
+<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
+<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
+<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0oHrd.png" alt="v0oHrd.png"></p>
+<p>定位完成后, 我们分析数据附近的结构.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0TFZn.png" alt="v0TFZn.png"></p>
+<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
+<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
+<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
+<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
+<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
+<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
+<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
+<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
+<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
+<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
+<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
+<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
+<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
+<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
+<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
+<p>一些库的官方文档地址.</p>
+<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
+<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/requests/" rel="tag"><i class="fa fa-tag"></i> requests</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/15/wast-gitandgithub/" rel="prev" title="Git 与 Github 入门">
+                  <i class="fa fa-chevron-left"></i> Git 与 Github 入门
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/17/wast-ml/" rel="next" title="经典问题之文本分类">
+                  经典问题之文本分类 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="git 你可能用不到但是 github 肯定用得到, 因为面对一大堆代码任务, 谁都想去抄借鉴一下他人优秀的代码. 因此本篇将向萌新们介绍一下版本管理工具 git 与全世界最大的代码托管平台 github 的基本使用方法.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git 与 Github 入门">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="git 你可能用不到但是 github 肯定用得到, 因为面对一大堆代码任务, 谁都想去抄借鉴一下他人优秀的代码. 因此本篇将向萌新们介绍一下版本管理工具 git 与全世界最大的代码托管平台 github 的基本使用方法.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaPitJ.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaPtnf.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaPTjx.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaVnBt.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaVI8e.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/15/vaLItP.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/15/vwila8.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/15/vwi2s1.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0E9gg.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0naB4.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0uFrF.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0KiWt.png">
+<meta property="article:published_time" content="2022-08-15T09:22:32.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="git">
+<meta property="article:tag" content="github">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/14/vaPitJ.png">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/","path":"/posts/2022/08/15/wast-gitandgithub/","title":"Git 与 Github 入门"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Git 与 Github 入门 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Github"><span class="nav-number">1.</span> <span class="nav-text">Github</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Git"><span class="nav-number">2.</span> <span class="nav-text">Git</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-Git"><span class="nav-number">2.1.</span> <span class="nav-text">安装 Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Git"><span class="nav-number">2.2.</span> <span class="nav-text">使用 Git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%80%E4%B8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">简单的实践一下</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Git-%E7%AE%A1%E7%90%86-Github-%E4%B8%8A%E7%9A%84%E9%A1%B9%E7%9B%AE"><span class="nav-number">3.</span> <span class="nav-text">使用 Git 管理 Github 上的项目</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Git-%E5%88%86%E6%94%AF%E7%AE%80%E4%BB%8B"><span class="nav-number">3.1.</span> <span class="nav-text">Git 分支简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-Github-%E4%B8%8A%E5%8F%91%E5%B8%83%E7%AC%AC%E4%B8%80%E4%B8%AA%E9%A1%B9%E7%9B%AE"><span class="nav-number">3.2.</span> <span class="nav-text">在 Github 上发布第一个项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E6%9C%AC%E5%9C%B0%E7%AE%A1%E7%90%86%E8%BF%9C%E7%A8%8B%E9%A1%B9%E7%9B%AE"><span class="nav-number">3.3.</span> <span class="nav-text">在本地管理远程项目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-VS-Code-%E4%B8%AD%E4%BD%BF%E7%94%A8-Git"><span class="nav-number">4.</span> <span class="nav-text">在 VS Code 中使用 Git</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">5.</span> <span class="nav-text">后记</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Git 与 Github 入门 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Git 与 Github 入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-15 17:22:32" itemprop="dateCreated datePublished" datetime="2022-08-15T17:22:32+08:00">2022-08-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">必备技能</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
+<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
+<span id="more"></span>
+
+<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
+<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
+<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
+<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
+<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
+<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
+<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
+<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
+<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPtnf.png" alt="vaPtnf.png"></p>
+<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPTjx.png" alt="vaPTjx.png"></p>
+<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
+<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
+<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
+<p><code>git init</code>: 初始化一个本地仓库.</p>
+<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
+<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
+<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
+<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
+<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
+<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
+<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
+<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
+<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
+
+<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vaVnBt.png" alt="vaVnBt.png"></p>
+<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
+<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vaVI8e.png" alt="vaVI8e.png"></p>
+<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
+<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
+<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
+<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
+<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
+<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
+<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
+<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
+<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
+<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
+<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/15/vaLItP.png" alt="vaLItP.png"></p>
+<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
+<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://s1.ax1x.com/2022/08/15/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://s1.ax1x.com/2022/08/15/vwi2s1.png" alt="vwi2s1.png"></p>
+</div>
+
+<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0E9gg.png" alt="v0E9gg.png"></p>
+<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
+<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
+<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
+<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
+<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
+<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
+<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
+<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
+<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
+<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
+<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
+<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
+<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0naB4.png" alt="v0naB4.png"></p>
+<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
+<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
+<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0uFrF.png" alt="v0uFrF.png"></p>
+<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
+<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/16/v0KiWt.png" alt="v0KiWt.png"></p>
+<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
+<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
+<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/git/" rel="tag"><i class="fa fa-tag"></i> git</a>
+              <a href="/tags/github/" rel="tag"><i class="fa fa-tag"></i> github</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/14/kxsw/" rel="prev" title="解决学习道路上的 "最后 1 KB"">
+                  <i class="fa fa-chevron-left"></i> 解决学习道路上的 "最后 1 KB"
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/16/wast-spider/" rel="next" title="基于 Requests 的爬虫入门">
+                  基于 Requests 的爬虫入门 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Github 时断时连? git clone 老是失败? 谷歌学术无法使用? ...... 没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻. 本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="解决学习道路上的 &quot;最后 1 KB&quot;">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/14/kxsw/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="Github 时断时连? git clone 老是失败? 谷歌学术无法使用? ...... 没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻. 本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vUBwJU.jpg">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vUyCmd.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vUc2TA.png">
+<meta property="article:published_time" content="2022-08-14T06:03:33.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="科学上网">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/14/vUBwJU.jpg">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/14/kxsw/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/14/kxsw/","path":"/posts/2022/08/14/kxsw/","title":"解决学习道路上的 \"最后 1 KB\""}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>解决学习道路上的 "最后 1 KB" | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E4%B8%8B%E8%BD%BD"><span class="nav-number">1.</span> <span class="nav-text">工具下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">工具使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">使用代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%8A%82%E7%82%B9%E4%B8%8E%E8%AE%A2%E9%98%85"><span class="nav-number">2.2.</span> <span class="nav-text">使用节点与订阅</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/14/kxsw/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="解决学习道路上的 "最后 1 KB" | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          解决学习道路上的 "最后 1 KB"
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-14 14:03:33" itemprop="dateCreated datePublished" datetime="2022-08-14T14:03:33+08:00">2022-08-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%9E%E7%94%A8%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">实用技能</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
+<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
+<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
+<span id="more"></span>
+
+<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
+<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>在这里只简单科普一下基本概念.</p>
+<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
+<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
+<p>不使用工具前:</p>
+<p><code>用户 --|--&gt; 目标网站</code></p>
+<p>使用工具后:</p>
+<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
+<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
+<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
+<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
+<ul>
+<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
+<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
+<li>不改变系统代理: 保持原有系统代理设置不变.</li>
+</ul>
+<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
+<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
+<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vUyCmd.png" alt="vUyCmd.png"></p>
+<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
+<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
+<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
+<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
+<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
+<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
+<p>比如有有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
+<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
+<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
+<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vUc2TA.png" alt="vUc2TA.png"></p>
+<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/" rel="tag"><i class="fa fa-tag"></i> 科学上网</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/13/wast-pythonandvsc/" rel="prev" title="打造一个舒适的 Python 编程环境">
+                  <i class="fa fa-chevron-left"></i> 打造一个舒适的 Python 编程环境
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/15/wast-gitandgithub/" rel="next" title="Git 与 Github 入门">
+                  Git 与 Github 入门 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

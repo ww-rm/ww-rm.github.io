@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz. 主要讲解一下 Visual Studio Code 和 Visual Studio 的基本使用.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="给新生的编程工具推荐与基本使用方法">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz. 主要讲解一下 Visual Studio Code 和 Visual Studio 的基本使用.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/11/vGcccj.jpg">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/11/vGgPvd.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/11/vGgNPU.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/11/vGRJ9U.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJ85wR.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJGk6g.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJGj3T.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJJhI1.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJYkZj.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJY3w9.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJYBeH.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJYyFI.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJY4mQ.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJtKht.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJtyB4.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJtouD.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJ5QCq.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJI6S0.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJIfw4.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJIqOO.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJOeqP.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJXf00.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJXztO.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJjO2Q.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJviPU.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJvKIK.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJv6Ln.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJv4WF.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJxqXj.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/12/vJzQjH.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtQxRU.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtlezD.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtlnQe.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtlJW8.png">
+<meta property="article:published_time" content="2022-08-11T13:55:28.000Z">
+<meta property="article:modified_time" content="2022-08-19T07:07:08.788Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="VS Code">
+<meta property="article:tag" content="Visual Studio Code">
+<meta property="article:tag" content="Visual Studio">
+<meta property="article:tag" content="VS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/11/vGcccj.jpg">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/","path":"/posts/2022/08/11/wast-vscandvs/","title":"给新生的编程工具推荐与基本使用方法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>给新生的编程工具推荐与基本使用方法 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Visual-Studio-Code"><span class="nav-number">2.</span> <span class="nav-text">Visual Studio Code</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8"><span class="nav-number">2.2.</span> <span class="nav-text">基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="nav-number">2.2.1.</span> <span class="nav-text">插件安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E4%BB%BD%E4%BB%A3%E7%A0%81"><span class="nav-number">2.2.2.</span> <span class="nav-text">第一份代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">运行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B0%83%E8%AF%95"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">调试</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Visual-Studio"><span class="nav-number">3.</span> <span class="nav-text">Visual Studio</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-1"><span class="nav-number">3.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8-1"><span class="nav-number">3.2.</span> <span class="nav-text">基本使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A4%E8%AF%86%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86%E5%99%A8"><span class="nav-number">3.2.1.</span> <span class="nav-text">认识解决方案资源管理器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">3.2.2.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E4%B8%8E%E8%B0%83%E8%AF%95"><span class="nav-number">3.2.3.</span> <span class="nav-text">运行与调试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AF%9D"><span class="nav-number">4.</span> <span class="nav-text">后话</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">A python coder.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="A python coder.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="给新生的编程工具推荐与基本使用方法 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          给新生的编程工具推荐与基本使用方法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-08-11 21:55:28" itemprop="dateCreated datePublished" datetime="2022-08-11T21:55:28+08:00">2022-08-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/" itemprop="url" rel="index"><span itemprop="name">新手入门</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
+<p>主要讲解一下 <code>Visual Studio Code</code> 和 <code>Visual Studio</code> 的基本使用.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>作为一个合格的网络空间安全专业本科生, 平常课程作业中最常使用的编程语言应该就是 <code>c</code> 和 <code>python</code>. (信息安全专业也可以参考)</p>
+<p><code>c</code> 应该会伴随你四年的本科生涯, 并且将会是大部分人接触的第一门语言, 大一也会有一门课叫 &quot;C语言程序设计&quot;, 这个课包括理论课与实验课两个课头, 相信大家还是会学有所获的.</p>
+<p>而 <code>python</code>, 就我这一届来看, 并没有开设和 <code>python</code> 相关的语言课程, 但是, 从速通网安的角度来说, <code>python</code> 是非常推荐学一下的, 毕竟有很多现成的库, 网上的相关资源也非常丰富, 同时很适合做各种课程大作业. <del>人生苦短, 我学python</del>.</p>
+<p>所以就我四年的本科使用经验来说, <code>Visual Studio Code</code> 和 <code>Visual Studio</code> 用来写上述两种语言的体验还是非常舒适的, 所以在此进行推荐和软件的使用方法入门.</p>
+<h2 id="Visual-Studio-Code"><a href="#Visual-Studio-Code" class="headerlink" title="Visual Studio Code"></a>Visual Studio Code</h2><p>首先是 <code>VS Code</code>. 从本质上来说, <code>VS Code</code> 是一个多功能的文本编辑器, 不管你是否需要写代码, 我都建议你在电脑上装一个, 可以极大的提高你的文本处理效率. <del>珍爱生命, 远离记事本</del>.</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9jb2RlLnZpc3VhbHN0dWRpby5jb20v">https://code.visualstudio.com/<i class="fa fa-external-link-alt"></i></span>. 进去之后的界面现在长这样.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/11/vGcccj.jpg" alt="vGcccj.jpg"></p>
+<p>可以直接点 Download 下载然后快速安装, 不过我不是那么的推荐, 因为直接点下载的是 User 版本, 可能会有奇怪的权限问题. 推荐下能够获取系统权限的版本比较好, 并且可以安装在系统目录.</p>
+<p>所以按下图直接点到其他版本的选择页面, 选 64 bit System 版本下载.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/11/vGgPvd.png" alt="vGgPvd.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/11/vGgNPU.png" alt="vGgNPU.png"></p>
+<p>下载完之后点击安装, 接下来提一下几个比较有用的安装选项, 可以极大的提高你的使用体验.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/11/vGRJ9U.png" alt="vGRJ9U.png"></p>
+<p>这个界面上的选项建议全勾上, 第 2 个和第 3 个选项可以在你的右键菜单里添加 &quot;通过 Code 打开&quot; 的选项, 这样子你可以很方便的直接使用右键点击文件或者文件夹或者文件夹的空白处, 然后把他们在 <code>VS Code</code> 中打开进行操作.</p>
+<p>第 5 个选项平常不会怎么用到, 但是保持默认选项勾上就可以了, 它可以让你在命令行中用 <code>Code</code> 进行操作</p>
+<p>一路下一步, 然后就安装完成, 之后可以选择重启一下电脑让一些配置立即生效, 不过不重启也没关系, 没啥影响.</p>
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><p>首先说说平常写代码时候, 一般来说都是至少以一个文件夹作为最小单位来操作 (除非真的是非常临时的一份小脚本, 否则都推荐弄个文件夹舒服, 里面不仅放代码同时也放代码要引用和生成的其他文件).</p>
+<p>这个文件夹就是你的项目文件夹, 一个 Project, 之后会在这个基础上开展你后续的 Coding 工作.</p>
+<p>所以基本上你要写点啥课程大作业代码的时候, 第一步就是找个地方新建一个文件夹, 然后用 Code 打开. 这里用一个叫 &quot;example&quot; 的文件夹作为示例, 讲解一下 <code>VS Code</code> 的基本使用方法.</p>
+<h4 id="插件安装"><a href="#插件安装" class="headerlink" title="插件安装"></a>插件安装</h4><p>不管你是用通过右键打开的项目文件夹还是从 &quot;文件&quot; 菜单栏打开的, 之后的界面都应该和下面的图长得差不多, 一片空白.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJ85wR.png" alt="vJ85wR.png"></p>
+<p>然后我们选到左边的长得像方块的图标, 也就是扩展, 开始按照工作需求自定义我们的 <code>VS Code</code>.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJGk6g.png" alt="vJGk6g.png"></p>
+<p>可以看到这里已经有一个扩展了, 这也是我们下载 <code>VS Code</code> 几乎必装的一个扩展, 中文汉化扩展, 如果没有预装, 则直接搜索对应的扩展名字装上就可以了. <del>英语大佬请无视中文扩展</del>.</p>
+<p>装完会提示重新启动 <code>VS Code</code> 加载, 之后的界面就会像我图里那样全中文了.</p>
+<p>然后是编程语言扩展, 这也是最基本的东西, 需要用 <code>VS Code</code> 写什么语言的代码就装什么语言的扩展, 一般直接装 Microsoft 官方的或者 Star 最多的就行.</p>
+<p>由于 <code>VS Code</code> 之后基本上用来写 <code>python</code>, 因此这里把 <code>python</code> 扩展先装上, 日后有需求可以自行举一反三.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJGj3T.png" alt="vJGj3T.png"></p>
+<p>安装完成之后可能会弹出来一些 Get Start 页面, 不用管, 不过有时间的话可以稍微翻一翻, 也是一些新手教程.</p>
+<h4 id="第一份代码"><a href="#第一份代码" class="headerlink" title="第一份代码"></a>第一份代码</h4><p><img data-src="https://s1.ax1x.com/2022/08/12/vJJhI1.png" alt="vJJhI1.png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sub</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a - b</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">mul</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a * b</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">div</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a / b</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    num1 = add(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    num2 = mul(num1, <span class="number">7</span>)</span><br><span class="line">    num3 = sub(num2, num1)</span><br><span class="line">    num4 = div(num3, num1)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Result: <span class="subst">&#123;num4&#125;</span>&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>新建一份文件, 然后随便敲一点东西之后, 得到了现在的 <code>main.py</code> 文件. 下面说说对这份文件最简单的运行和调试.</p>
+<h5 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h5><p>有很多方法可以运行, 这里只说两种最简单的, 一是靠鼠标或者快捷键, 二是在命令行里敲命令.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJYkZj.png" alt="vJYkZj.png"></p>
+<p>图内可以看到菜单栏有个运行选项, 点开就是两个, 一个叫 &quot;启动调试&quot; (<code>F5</code>), 另一个是 &quot;以非调试模式运行&quot; (<code>Ctrl + F5</code>).</p>
+<p>前者是调试, 后者是单纯的运行, 对于我们来说, 只需要点击后者, 或者直接快捷键 <code>Ctrl + F5</code>, 就可以看到运行效果了.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJY3w9.png" alt="vJY3w9.png"></p>
+<p>自动弹出了一个终端, 并且成功的打印出了我们的结果. 到这里第一种方法就结束了, 更多细致的功能日后再慢慢探索吧.</p>
+<p>然后是第二种方式, 自己在命令行里敲命令, 那么首先需要知道怎么把终端调用出来.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJYBeH.png" alt="vJYBeH.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJYyFI.png" alt="vJYyFI.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJY4mQ.png" alt="vJY4mQ.png"></p>
+<p>如上图新建一个终端, 然后敲入指令 <code>python main.py</code>, 同样输出了我们的运行结果. 可以看到, 新建的终端会自动打开到我们的项目文件夹目录, 所以可以直接访问到里面的内容, 而我们的所有命令, 也都是基于项目文件夹作为根目录来运行的. (这一点很重要, 如果命令行的工作目录和项目文件夹不一致, 可以自己手动 <code>cd</code> 切换一下, 可以免去写代码时带来的一些路径问题)</p>
+<h5 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h5><p>这里简单的调试一下这份文件, 打一下断点, 查看一下运行中变量.</p>
+<p>所谓断点, 就是你在调试的时候需要让程序停在哪个点, 从而在某个点可以查看程序的运行情况, 快速定位问题来源.</p>
+<p>打上断点的方式也很简单, 比如在第 15 行停下, 那么只需要在行号左边点一下就可以了, 这样子当程序运行到第 15 行的时候, 会停下, 且第 15 行<strong>不会执行</strong>, 是即将要执行的语句.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJtKht.png" alt="vJtKht.png"></p>
+<p>然后, 从运行菜单里选择 &quot;进行调试&quot; 或者快捷键 <code>F5</code>, 会弹出提示让你选择要使用的调试配置 (因为我们没有给这个项目设定自己的调试配置, 所以需要选择一种系统提供的默认调试配置), 这里直接选第一个就行了.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJtyB4.png" alt="vJtyB4.png"></p>
+<p>不出意外的话, 程序会稳稳的停在第 15 行, 并且左边跳转到了调试面板, 显示了各种调试信息.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJtouD.png" alt="vJtouD.png"></p>
+<ul>
+<li>变量: 显示了各种局部或者全局的变量值.</li>
+<li>监视: 可以手动输入一些变量或者表达式来进行单独观察.</li>
+<li>调用堆栈: 显示了函数之间的嵌套调用关系.</li>
+<li>断点: 显示当前所有的断点信息, 有三种固有断点, 和程序的报错有关.</li>
+</ul>
+<p>这里可以看到, 左边变量里, 显示了一个局部变量 <code>num1</code> 等于 5, 这和我们的预期是一致的, 并且第 15 行尚未执行, 所以还没有 <code>num2</code> 这个变量.</p>
+<p>然后是调试过程中可以使用的基本操作, 可以看到上方多出来一个条, 有各种调试按钮.</p>
+<div class="note info"><p>程序执行过程中, 可能会遇到函数调用, 如果我们需要进入这个函数进行调试, 查看这个函数的内部情况, 则需要使用 &quot;单步调试&quot;, 即一步一步执行, 进入函数内部.</p>
+<p>而当你在当前函数内部查看完情况之后, 可能函数还剩很多没执行完, 这个之后需要使用 &quot;单步跳出&quot;, 直接快进到把当前函数执行完成.</p>
+<p>有的时候你完全不想进入某个函数, 想直接执行一整行, 这种时候可以使用 &quot;单步跳过&quot;.</p>
+<p>最后, 如果你这一片代码已经调试完成, 需要直接快进到下一个断点, 使用 &quot;继续&quot; 则会将程序继续执行, 直到再次遇见断点则停下, 或者直接执行到程序结束.</p>
+</div>
+
+<p>这些调试按钮配合左侧面板的调试信息, 可以很清晰的知道程序的执行步骤以及每一步的变化情况, 是解决代码 bug 的利器, 闲暇时间可以多尝试几次, 熟悉调试过程和操作.</p>
+<h2 id="Visual-Studio"><a href="#Visual-Studio" class="headerlink" title="Visual Studio"></a>Visual Studio</h2><p>第二个推荐的编程工具是 <code>VS</code>, 相比于 <code>VS Code</code>, <code>VS</code> 更加臃肿但是功能更加强大, 如果用习惯了, 在 Windows 平台上写 <code>c</code> 语言之类的课程作业,  将会是无比舒适.</p>
+<h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><p><code>VS</code> 的安装分成两步, 首先是安装它专属的 Installer, 然后再决定安装具体的 <code>VS</code> 内容.</p>
+<p>官方网站是 <span class="exturl" data-url="aHR0cHM6Ly92aXN1YWxzdHVkaW8ubWljcm9zb2Z0LmNvbS8=">https://visualstudio.microsoft.com/<i class="fa fa-external-link-alt"></i></span>, 目前是 2022 的最新版本, 下的时候选择 Community 版本下载, 这个版本是<strong>面向个人免费使用</strong>的, 只需要注册微软的账户就可以授权给个人了.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJ5QCq.png" alt="vJ5QCq.png"></p>
+<p>这个东西下完之后是 VS 的 Installer, 直接无脑装好然后运行, 会进入如下的选择界面. (找不到就去开始菜单里翻, 它是不会有桌面快捷方式的)</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJI6S0.png" alt="vJI6S0.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJIfw4.png" alt="vJIfw4.png"></p>
+<p>默认会直接进到第二张图, 如果不是的话按第一张图自己选安装.</p>
+<p>对于我们日常写写作业来说, 我们只需要能够写 <code>c</code> 语言就够了, 所以只需勾选下面其中的一个就完全足够使用了, 那就是 &quot;使用 C++ 的桌面开发&quot;. 虽然写的是 <code>c++</code>, 但是其实写 <code>c</code> 也是用这个写的, 只要你创建源文件的时候, 后缀名自己改成 <code>.c</code> 而不是 <code>.cpp</code>, 这样子编译的时候就会换成 <code>c</code> 的编译方式.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJIqOO.png" alt="vJIqOO.png"></p>
+<p>这一坨子东西装下来还是要一点空间和时间的, 推荐电脑有空闲时间的时候慢慢挂机安装, 安装完之后重启一下电脑, 让一些系统项生效.</p>
+<h3 id="基本使用-1"><a href="#基本使用-1" class="headerlink" title="基本使用"></a>基本使用</h3><p>打开装好的 <code>VS</code>, 我们开始用 <code>c</code> 写一个 Hello World 程序<del>程序员绕不过去的新手代码</del>.</p>
+<p>首先会跳出来这个界面, 我们直接选择创建新项目.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJOeqP.png" alt="vJOeqP.png"></p>
+<p>然后是选择项目模板, 模板类型有很多, 但是我们选择最简单的 &quot;空项目&quot;, 这样子可以后续自己手动创建文件, 了解一下具体的项目结构.</p>
+<p>然后是设置名称. 这里有两个内容可以自定义, 一个是项目名称, 一个是解决方案名称.</p>
+<p>在 <code>VS</code> 里面创建项目时, 顶层结构不是 &quot;项目&quot; 而是 &quot;解决方案&quot;, 这是与 <code>VS Code</code> 不同的一点. 一个 &quot;解决方案&quot; 是一个更大的容器, 里面可以包含很多的 &quot;项目&quot;, 然后每一个 &quot;项目&quot; 是一个个单独的内容, 用不同的文件夹分门别类的区分开来.</p>
+<p>这样子的好处就是, 适应性范围更广, 能够很方便的做多个项目之间的互相调用, 比如你可以一个项目用来写测试, 另一个项目是你实际上要写的代码库.</p>
+<p>这里我们把 &quot;解决方案&quot; 的名称设为 &quot;example&quot;, 把项目名称设置为 &quot;c_project&quot;. 这样子实际的物理结构就会是一个 <code>example</code> 的总文件夹下面还有一个 <code>c_project</code> 的项目文件夹.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJXf00.png" alt="vJXf00.png"></p>
+<p>创建好之后大概长下图所示, 解决方案资源管理器位置可以自己调, 我调左边去了, 视图菜单里也可以手动显示出来.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJXztO.png" alt="vJXztO.png"></p>
+<h4 id="认识解决方案资源管理器"><a href="#认识解决方案资源管理器" class="headerlink" title="认识解决方案资源管理器"></a>认识解决方案资源管理器</h4><p><code>VS</code> 里面的解决方案资源管理器是一个集合了非常多功能的管理器, 需要熟悉一下它提供给我们的基本功能.</p>
+<p>管理器的顶层是解决方案, 也就是刚刚我们命名的 <code>example</code> 文件夹, 然后列出来了里面包含的所有项目, 目前只有一个项目, 就是一起创建的 <code>c_project</code>.</p>
+<p>目前看到的这个视图是 &quot;解决方案视图&quot;, 是解决方案内的<strong>逻辑结构</strong>而不是在磁盘上的<strong>物理结构</strong>.</p>
+<p>那么我们首先尝试创建一份 <code>main.c</code>, 并写几句代码.</p>
+<p>右键 &quot;源文件&quot;, 选择 &quot;添加&quot;, 然后选择 &quot;新建项&quot;, 选择源文件, 同时把文件名设为 <code>main.c</code>. 然后键入经典的 Hello world 程序代码.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJjO2Q.png" alt="vJjO2Q.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJviPU.png" alt="vJviPU.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJvKIK.png" alt="vJvKIK.png"></p>
+<p>可以看到左侧已经成功的在源文件项下面多出来了一份 <code>main.c</code>. 但是刚刚说了目前的界面是解决方案的 &quot;逻辑结构&quot;, 所以我们需要切换一下视图, 看看刚刚创建的文件究竟在哪.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJv6Ln.png" alt="vJv6Ln.png"></p>
+<p>管理器的上方有一个切换视图按钮, 点击之后可以选择是 &quot;解决方案&quot; 还是 &quot;文件夹视图&quot;, 我们直接换到文件夹视图.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJv4WF.png" alt="vJv4WF.png"></p>
+<p>这个时候就非常清晰了, 顶层文件夹 <code>example</code>, 次级项目文件夹 <code>c_project</code>, 然后在项目文件夹内有一份 <code>main.c</code>.</p>
+<p>切回解决方案视图, 现在再看 &quot;源文件&quot; 这一项, 它其实只是人为设置的一个分类结构, 在 <code>VS</code> 里叫 &quot;筛选器&quot;, 可以在不影响物理结构文件实际路径的同时给开发人员一个合适的文件分类方法, 可以右键新建里添加新的自定义筛选器.</p>
+<h4 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h4><p>既然是写 <code>c</code> 语言, 运行前必不可少的步骤就是编译, 那么首先我们要知道, <code>VS</code> 是如何知道哪些文件是需要被纳入编译范围的.</p>
+<p>一个最简单的设置方法就是将文件或者文件夹设置是否包含在项目中. 解决方案视图只会显示在项目中的内容. 即使文件实际上在项目文件夹内, 如果不在项目中, 那它也不会纳入 <code>VS</code> 项目的各种判断逻辑中, 比如不会参与编译.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJxqXj.png" alt="vJxqXj.png"></p>
+<p>这种方式可以很轻松的把文件排除项目. 那么对于添加到项目里, 比如需要添加现有的文件与源代码, 我们需要首先把对应的文件在物理上移到我们的项目文件夹内合适的地方, 然后使用管理器切换到 &quot;所有文件&quot; 视图.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/12/vJzQjH.png" alt="vJzQjH.png"></p>
+<p>如果刚刚把 <code>main.c</code> 排除了, 那么就会像图上那样有个红色符号, 表示这个文件没有纳入项目逻辑考虑范围. 我们可以用右键把它重新包含到项目内, 这样子红色符号就消失了, 解决方案视图里也能重新看到这个文件了.</p>
+<p>当确定了那些文件被包含到项目中后, 就可以开始编译了.</p>
+<p>有两种方式会进行编译, 一种是直接运行或者调试程序, 如果项目没有被编译, 则会先进行编译, 再运行程序. 另一种就是只编译不运行, 分步骤进行.</p>
+<p>我这里还是推荐分步骤进行, 先编译看看是否存在什么警告或者错误, 再进行运行或者调试.</p>
+<p>编译的时候有一些基本选项可以调整.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtQxRU.png" alt="vtQxRU.png"></p>
+<p><code>x86</code> 和 <code>x64</code> 好理解, 指的是编译出来的二进制文件是 32 位程序还是 64 位程序, 一般来说调成 <code>x64</code> 会让程序能更充分利用现在的 64 位处理器性能.</p>
+<p>而 <code>Release</code> 与 <code>Debug</code>, 翻译一般叫 &quot;发布&quot; 与 &quot;调试&quot;. 调试版本是适合于调试代码的版本, <code>VS</code> 在编译时会加入很多调试信息进入最终的二进制文件, 能够在调试时充分的获得程序运行的每一步信息. 而 &quot;发布&quot; 则是适合最终运行的优化版本, <code>VS</code> 会在编译时尽可能的减少代码冗余, 对代码结构进行优化, 提高最终程序的运行效率.</p>
+<p>所以写代码的时候用 <code>Debug</code> 版本, 而交程序的时候用 <code>Release</code> 版本. (这两个版本的运行效率差异非常大, 如果你觉得代码太慢, 不妨试一下 <code>Release</code> 来尝试提高效率. <del>说不定有奇效</del>)</p>
+<p>然后进入编译的正题. 选择菜单栏里的 &quot;生成&quot;, 在这里可以对解决方案和每个项目进行生成操作. 此处 &quot;生成&quot; 不一定指编译, 而是去生成每个项目的目标文件, 对于 <code>c</code> 语言来说就是编译链接操作. </p>
+<p>选择生成整个解决方案, 则 <code>VS</code> 会按照项目间的依赖关系依次生成方案内所有的项目. 选择生成某一个项目, 那就是生成单独的一个项目. 每次可以选择 &quot;重新生成&quot; 或者 &quot;生成&quot;, 前者会先进行一步 &quot;清理&quot; 操作, 把上一次生成时产生的所有文件先清除再进行生成.</p>
+<p>一般来说, 直接使用快捷键 <code>Ctrl + B</code> 即可, 会生成当前正在操作的项目.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtlezD.png" alt="vtlezD.png"></p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtlnQe.png" alt="vtlnQe.png"></p>
+<p>运行一下生成, 可以看到下方的输出里显示生成成功, 并且也输出了生成的二进制文件的路径.</p>
+<h4 id="运行与调试"><a href="#运行与调试" class="headerlink" title="运行与调试"></a>运行与调试</h4><p>这里就简单说说, 不赘述了, 因为同为微软家的产品, 基本概念和快捷键都是一样的, 具体的操作和前面 <code>VS Code</code> 中说的大同小异, 几乎是一致的. 这里就放一下成功运行截图了.</p>
+<p>按下快捷键 <code>Ctrl + F5</code>, <code>VS</code> 就会自动弹出来一个运行黑框了, &quot;Hello world!&quot;</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/13/vtlJW8.png" alt="vtlJW8.png"></p>
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>这一篇就打算写这么多了, 第一次写这种新手教程额, 尽可能的按照一个没有接触过编程但是来到了网安学院的大一新生视角来写, 希望能够有所帮助, 快速入门吧. <del>上啊, 卷死他们!</del></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/VS-Code/" rel="tag"><i class="fa fa-tag"></i> VS Code</a>
+              <a href="/tags/Visual-Studio-Code/" rel="tag"><i class="fa fa-tag"></i> Visual Studio Code</a>
+              <a href="/tags/Visual-Studio/" rel="tag"><i class="fa fa-tag"></i> Visual Studio</a>
+              <a href="/tags/VS/" rel="tag"><i class="fa fa-tag"></i> VS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2021/05/21/%E5%BA%8F%E8%A8%80/" rel="prev" title="序">
+                  <i class="fa fa-chevron-left"></i> 序
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2022/08/13/wast-pythonandvsc/" rel="next" title="打造一个舒适的 Python 编程环境">
+                  打造一个舒适的 Python 编程环境 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">43k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:17</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
