@@ -135,10 +135,10 @@ class MyNetwork(nn.Module):
 ```python
 def eval_metrics(y_true, y_pred):
     acc = accuracy_score(y_true, y_pred)
-    p = precision_score(y_true, y_pred, average="macro")
-    r = recall_score(y_true, y_pred, average="macro")
-    f1 = f1_score(y_true, y_pred, average="macro")
-    report = classification_report(y_true, y_pred, digits=4)
+    p = precision_score(y_true, y_pred, average="macro", zero_division=0)
+    r = recall_score(y_true, y_pred, average="macro", zero_division=0)
+    f1 = f1_score(y_true, y_pred, average="macro", zero_division=0)
+    report = classification_report(y_true, y_pred, digits=4, zero_division=0)
 
     return (acc, p, r, f1, report)
 ```
