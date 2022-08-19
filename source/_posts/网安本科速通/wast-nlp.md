@@ -136,17 +136,17 @@ class MyNetwork(nn.Module):
     def _convpool(self, x):
         outputs = []
         for conv in self.convs:
-            output = torch.relu(conv(x))
-            output = torch.max_pool1d(output, output.size(2)).squeeze()
+            output = torch.relu(conv(x))                                # (128, L) -> (128, L-k+1)
+            output = torch.max_pool1d(output, output.size(2)).squeeze() # (128, L-k+1) -> (128,)
             outputs.append(output)
-        return torch.cat(outputs, -1)
+        return torch.cat(outputs, -1)                                   # (128,) -> (384,)
 
     def forward(self, inputs):
-        outputs = self.embedding(inputs)
-        outputs = self.dropout(outputs)
-        outputs = outputs.transpose(1, 2)
-        outputs = self._convpool(outputs)
-        outputs = self.fc(outputs)
+        outputs = self.embedding(inputs)                                # (L,) -> (L, 128)
+        outputs = self.dropout(outputs)                                 # 
+        outputs = outputs.transpose(1, 2)                               # (L, 128) -> (128, L)
+        outputs = self._convpool(outputs)                               # (128, L) -> (384,)
+        outputs = self.fc(outputs)                                      # (384,) -> (7,)
         outputs = torch.log_softmax(outputs, -1)
         return outputs
 ```
