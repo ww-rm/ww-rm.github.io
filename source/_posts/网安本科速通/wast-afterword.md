@@ -18,4 +18,4 @@ date: 2022-08-19 15:43:07
 
 就这样了, 网安本科速通, 完成!
 
-![zzz.gif](https://s2.loli.net/2022/08/19/S9zh6xVB7UeMnND.gif)
+![zzz.gif](/images/zzz.gif)
