@@ -97,7 +97,7 @@ date: 2022-08-13 13:53:17
 
 另外比较重要的文件是 `activate` 与 `deactivate`, 用于激活和退出虚拟环境.
 
-具体的使用在后面的部分[在 VS Code 中使用 Python](#在-vs-code-中使用-python) 中再进行说明.
+具体的使用在后面的部分[在 VS Code 中使用 Python](#在-VS-Code-中使用-Python) 中再进行说明.
 
 另一种方案是使用第三方库 `virtualenvwrapper-win` 来辅助我们管理虚拟环境.
 
