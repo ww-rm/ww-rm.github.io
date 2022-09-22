@@ -458,7 +458,7 @@
 <p><code>python -m venv &lt;路径&gt;</code></p>
 <p>比如使用 <code>python -m venv env</code> 则会在当前目录下生成一个 <code>env</code> 文件夹, 这里面就包含了名为 <code>env</code> 的虚拟环境的解释器以及第三方库.</p>
 <p>另外比较重要的文件是 <code>activate</code> 与 <code>deactivate</code>, 用于激活和退出虚拟环境.</p>
-<p>具体的使用在后面的部分<a href="#%E5%9C%A8-vs-code-%E4%B8%AD%E4%BD%BF%E7%94%A8-python">在 VS Code 中使用 Python</a> 中再进行说明.</p>
+<p>具体的使用在后面的部分<a href="#%E5%9C%A8-VS-Code-%E4%B8%AD%E4%BD%BF%E7%94%A8-Python">在 VS Code 中使用 Python</a> 中再进行说明.</p>
 <p>另一种方案是使用第三方库 <code>virtualenvwrapper-win</code> 来辅助我们管理虚拟环境.</p>
 <p>使用 <code>python -m pip install virtualenvwrapper-win</code> 进行安装. 安装完后, 即可以在命令行中使用以下几个常用命令对机器上的虚拟环境进行集中管理.</p>
 <ul>
