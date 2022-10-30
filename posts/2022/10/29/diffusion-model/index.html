@@ -20,30 +20,32 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="终于写完了最后一篇! (撒花~), 点我查看全系列内容. 虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容. 我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试. 这个系列也算是对本科四年一些知识点">
+    <meta name="description" content="本文是对知乎的一篇文章扩散模型 Diffusion Models - 原理篇的摘要性总结.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="&quot;网安本科速通&quot; 系列后记">
-<meta property="og:url" content="http://ww-rm.github.io/posts/2022/08/19/wast-afterword/index.html">
+<meta property="og:title" content="扩散模型阅读笔记">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/10/29/diffusion-model/index.html">
 <meta property="og:site_name" content="暗香画楼">
-<meta property="og:description" content="终于写完了最后一篇! (撒花~), 点我查看全系列内容. 虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容. 我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试. 这个系列也算是对本科四年一些知识点">
+<meta property="og:description" content="本文是对知乎的一篇文章扩散模型 Diffusion Models - 原理篇的摘要性总结.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://ww-rm.github.io/images/posts/zzz.gif">
-<meta property="article:published_time" content="2022-08-19T07:43:07.000Z">
+<meta property="og:image" content="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg">
+<meta property="article:published_time" content="2022-10-29T14:45:56.000Z">
 <meta property="article:modified_time" content="2022-10-30T08:04:53.571Z">
 <meta property="article:author" content="ww-rm">
-<meta property="article:tag" content="杂谈">
+<meta property="article:tag" content="图像生成">
+<meta property="article:tag" content="扩散模型">
+<meta property="article:tag" content="Diffusion Model">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://ww-rm.github.io/images/posts/zzz.gif">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg">
 
 
-<link rel="canonical" href="http://ww-rm.github.io/posts/2022/08/19/wast-afterword/">
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/10/29/diffusion-model/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/08/19/wast-afterword/","path":"/posts/2022/08/19/wast-afterword/","title":"\"网安本科速通\" 系列后记"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/10/29/diffusion-model/","path":"/posts/2022/10/29/diffusion-model/","title":"扩散模型阅读笔记"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>"网安本科速通" 系列后记 | 暗香画楼</title>
+<title>扩散模型阅读笔记 | 暗香画楼</title>
   
 
 
@@ -133,7 +135,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -146,6 +148,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E5%90%91%E6%89%A9%E6%95%A3"><span class="nav-number">2.</span> <span class="nav-text">前向扩散</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%86%E5%90%91%E6%89%A9%E6%95%A3"><span class="nav-number">3.</span> <span class="nav-text">逆向扩散</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97"><span class="nav-number">4.</span> <span class="nav-text">损失计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E7%BC%96%E7%A8%8B%E6%97%B6%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.</span> <span class="nav-text">一些编程时的步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8F%82%E6%95%B0"><span class="nav-number">5.1.</span> <span class="nav-text">基本参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%A1%E7%AE%97%E7%9A%84%E5%80%BC"><span class="nav-number">5.2.</span> <span class="nav-text">预计算的值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">5.3.</span> <span class="nav-text">设计一个神经网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95"><span class="nav-number">5.4.</span> <span class="nav-text">损失计算方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.5.</span> <span class="nav-text">训练步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E7%90%86%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.6.</span> <span class="nav-text">推理步骤</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -219,7 +222,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/08/19/wast-afterword/">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/10/29/diffusion-model/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
@@ -232,12 +235,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content=""网安本科速通" 系列后记 | 暗香画楼">
+      <meta itemprop="name" content="扩散模型阅读笔记 | 暗香画楼">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          "网安本科速通" 系列后记
+          扩散模型阅读笔记
         </h1>
 
         <div class="post-meta-container">
@@ -248,7 +251,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-08-19 15:43:07" itemprop="dateCreated datePublished" datetime="2022-08-19T15:43:07+08:00">2022-08-19</time>
+      <time title="创建时间：2022-10-29 22:45:56" itemprop="dateCreated datePublished" datetime="2022-10-29T22:45:56+08:00">2022-10-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -256,11 +259,7 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/" itemprop="url" rel="index"><span itemprop="name">网安本科速通</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%90%8E%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">后记</span></a>
+          <a href="/categories/AI%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">AI相关</span></a>
         </span>
     </span>
 
@@ -278,14 +277,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>241</span>
+      <span>2.2k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
+      <span>4 分钟</span>
     </span>
 </div>
 
@@ -296,12 +295,56 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="/images/posts/zzz.gif" alt="zzz.gif"></p>
+        <p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
+<span id="more"></span>
+
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p><img data-src="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg" alt="x5xJiR.jpg"></p>
+<p>前向过程为一张图片 $x_0$ 在经过 $T$ 轮高斯噪声叠加后会变成一张近似纯高斯噪声图 $x_T$, 而网络则是学习反向过程中的参数, 能够通过 $x_T$ 一步步还原出 $x_0$.</p>
+<h2 id="前向扩散"><a href="#前向扩散" class="headerlink" title="前向扩散"></a>前向扩散</h2><p>设共进行 $T$ 轮扩散, 有 $\beta_1 &lt; \beta_2 &lt; \dots &lt; \beta_T (0 &lt; \beta_i &lt; 1)$ 的方差参数.</p>
+<p>设 $q(x_t|x_{t-1})$ 服从高斯分布, 且:</p>
+<p>$$<br>x_t(z;x_{t-1},t)=\sqrt{1-\beta_t}x_{t-1}+\sqrt{\beta_t}z \sim N(\sqrt{1-\beta_t}x_{t-1}, \beta_t)<br>$$</p>
+<p>设 $\alpha_t=1-\beta_t,\bar{\alpha}<em>t=\prod</em>{i=1}^t\alpha_t$, 则有</p>
+<p>$$<br>x_t(\epsilon_t;x_0,t)=\sqrt{\bar{\alpha}_t}x_0+\sqrt{1-\bar{\alpha}_t}\epsilon_t \sim N(\sqrt{\bar{\alpha}_t}x_0, 1-\bar{\alpha}_t)<br>$$</p>
+<p>则给定 $x_0,t$, 以及高斯随机量 $\epsilon_t$, 可以直接得到对应的 $x_t$.</p>
+<h2 id="逆向扩散"><a href="#逆向扩散" class="headerlink" title="逆向扩散"></a>逆向扩散</h2><p>假设 $p(x_{t-1}|x_t;\theta)$ 也服从高斯分布, 则有:</p>
+<p>$$<br>x_{t-1}(z;x_t,t) = \mu_t(x_t, t;\theta)+\sigma_t(x_t, t;\theta)z \sim N(\mu_t(x_t, t;\theta), \sigma^2_t(x_t, t;\theta))<br>$$</p>
+<p>$p(x_{t-1}|x_t;\theta)$ 无法用公式表示, 但是 $q(x_{t-1}|x_t,x_0)$ 可以, 有:</p>
+<p>$$<br>\mu_t = \frac{1}{\sqrt{\alpha_t}}(x_t-\frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_t)<br>$$</p>
+<p>$$<br>\sigma_t = \sqrt{\frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t}<br>$$</p>
+<p>$$<br>x_{t-1}(z;x_t,\epsilon_t,t) = \mu_t+\sigma_tz \sim N(\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_t), \frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t)<br>$$</p>
+<p>(该公式不含 $x_0$, 但是需要有 $x_0$ 的前提下得到, 由前向的公式替换掉了, $\epsilon_t$ 与前向中的 $\epsilon_t$ 是同一个值)</p>
+<p>其中, $\sigma_t$ 可近似认为等于 $\sqrt{\beta_t}$.</p>
+<h2 id="损失计算"><a href="#损失计算" class="headerlink" title="损失计算"></a>损失计算</h2><p>目标是能够让 $q$ 和 $p$ 尽可能的接近, 用 $q$ 去近似 $p$.</p>
+<p>损失需要算 $q(x_{t-1}|x_t,x_0)$ 和 $p(x_{t-1}|x_t;\theta)$ 之间的 KL 散度(分布相似程度), 一通计算之后得到:</p>
+<p>$$<br>Loss = E((\mu_t(x_t, \epsilon_t, t)-\mu_t(x_t,t;\theta))^2)<br>$$</p>
+<p>优化后:</p>
+<p>$$<br>Loss = E((\epsilon_t-\epsilon_t(x_t,t;\theta))^2)<br>$$</p>
+<p>可以看出来实际推理中, 只有均值中的 $\epsilon_t$ 是未知的, 因此需要一个网络去猜测 $\epsilon_t$, 使得 $q(x_{t-1}|x_t,x_0)$ 可以近似替代 $p(x_{t-1}|x_t;\theta)$, 来还原 $t-1$ 步的数据.</p>
+<p>优化后是去拟合加入的噪声数据, 也就是一个网络输入了 $t$ 时刻的加噪图, 能估计出添加的噪声变量 $\epsilon_t=\epsilon_t(x_t,t;\theta)$, 进而使用 $q(x_{t-1}|x_t,x_0)$ 得到 $x_{t-1}$.</p>
+<h2 id="一些编程时的步骤"><a href="#一些编程时的步骤" class="headerlink" title="一些编程时的步骤"></a>一些编程时的步骤</h2><h3 id="基本参数"><a href="#基本参数" class="headerlink" title="基本参数"></a>基本参数</h3><ul>
+<li><p>$T$</p>
+<p>扩散步数, 至少 $100$ 以上.</p>
+</li>
+<li><p>$\beta_1 &lt; \beta_2 &lt; \dots &lt; \beta_T (0 &lt; \beta_i &lt; 1)$</p>
+<p>每一轮扩散的方差, 在满足大小关系的情况下, 尽可能的小, 通常在 $10^{-3}$ 的数量级左右. (应该步骤越多, 方差越精细?)</p>
+</li>
+</ul>
+<h3 id="预计算的值"><a href="#预计算的值" class="headerlink" title="预计算的值"></a>预计算的值</h3><ul>
+<li>$\alpha_t=1-\beta_t$</li>
+<li>$\bar{\alpha}_t=\prod_{i=1}^t\alpha_t$</li>
+</ul>
+<h3 id="设计一个神经网络"><a href="#设计一个神经网络" class="headerlink" title="设计一个神经网络"></a>设计一个神经网络</h3><p>输入:</p>
+<ul>
+<li>$x_t$: 训练集样本经过 $t$ 轮正向扩散后的结果.</li>
+<li>$t$: 扩散步数</li>
+</ul>
+<p>输出:</p>
+<ul>
+<li>$\epsilon_t(\theta)$: 噪声估计值</li>
+</ul>
+<h3 id="损失计算方法"><a href="#损失计算方法" class="headerlink" title="损失计算方法"></a>损失计算方法</h3><p>产生一个随机噪声 $\epsilon_t$, 通过网络得到估计值 $\epsilon_t(\theta)$, 计算两者之间的均方差 (MSE损失).</p>
+<h3 id="训练步骤"><a href="#训练步骤" class="headerlink" title="训练步骤"></a>训练步骤</h3><p>给定训练集 $X$, 去拟合每个样本 $x$ 在每个步骤 $t$ 时刻的噪声估计.</p>
+<h3 id="推理步骤"><a href="#推理步骤" class="headerlink" title="推理步骤"></a>推理步骤</h3><p>给定一个真实样本 $x_t$, 指定其 $t$ 值, 根据网络得到噪声估计 $\epsilon_t(\theta)$, 计算出 $\mu_t$ 和 $\sigma_t$, 采样一个随机标准高斯噪声 $z$, 计算 $x_{t-1} = \mu_t+\sigma_tz$</p>
 
     </div>
 
@@ -311,21 +354,20 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%9D%82%E8%B0%88/" rel="tag"><i class="fa fa-tag"></i> 杂谈</a>
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" rel="tag"><i class="fa fa-tag"></i> 图像生成</a>
+              <a href="/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 扩散模型</a>
+              <a href="/tags/Diffusion-Model/" rel="tag"><i class="fa fa-tag"></i> Diffusion Model</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/posts/2022/08/19/wast-nlp/" rel="prev" title="再遇文本分类">
-                  <i class="fa fa-chevron-left"></i> 再遇文本分类
+                <a href="/posts/2022/08/19/wast-afterword/" rel="prev" title=""网安本科速通" 系列后记">
+                  <i class="fa fa-chevron-left"></i> "网安本科速通" 系列后记
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/2022/10/29/diffusion-model/" rel="next" title="扩散模型阅读笔记">
-                  扩散模型阅读笔记 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
@@ -415,7 +457,7 @@
 
   
 
-  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
 <script src="/js/third-party/math/mathjax.js"></script>
 
 
