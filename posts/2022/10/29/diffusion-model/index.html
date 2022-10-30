@@ -29,7 +29,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg">
 <meta property="article:published_time" content="2022-10-29T14:45:56.000Z">
-<meta property="article:modified_time" content="2022-10-30T08:04:53.571Z">
+<meta property="article:modified_time" content="2022-10-30T08:09:06.064Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="图像生成">
 <meta property="article:tag" content="扩散模型">
@@ -303,7 +303,7 @@
 <h2 id="前向扩散"><a href="#前向扩散" class="headerlink" title="前向扩散"></a>前向扩散</h2><p>设共进行 $T$ 轮扩散, 有 $\beta_1 &lt; \beta_2 &lt; \dots &lt; \beta_T (0 &lt; \beta_i &lt; 1)$ 的方差参数.</p>
 <p>设 $q(x_t|x_{t-1})$ 服从高斯分布, 且:</p>
 <p>$$<br>x_t(z;x_{t-1},t)=\sqrt{1-\beta_t}x_{t-1}+\sqrt{\beta_t}z \sim N(\sqrt{1-\beta_t}x_{t-1}, \beta_t)<br>$$</p>
-<p>设 $\alpha_t=1-\beta_t,\bar{\alpha}<em>t=\prod</em>{i=1}^t\alpha_t$, 则有</p>
+<p>设 $\alpha_t=1-\beta_t,\bar{\alpha}_t=\prod_{i=1}^t\alpha_t$, 则有</p>
 <p>$$<br>x_t(\epsilon_t;x_0,t)=\sqrt{\bar{\alpha}_t}x_0+\sqrt{1-\bar{\alpha}_t}\epsilon_t \sim N(\sqrt{\bar{\alpha}_t}x_0, 1-\bar{\alpha}_t)<br>$$</p>
 <p>则给定 $x_0,t$, 以及高斯随机量 $\epsilon_t$, 可以直接得到对应的 $x_t$.</p>
 <h2 id="逆向扩散"><a href="#逆向扩散" class="headerlink" title="逆向扩散"></a>逆向扩散</h2><p>假设 $p(x_{t-1}|x_t;\theta)$ 也服从高斯分布, 则有:</p>
