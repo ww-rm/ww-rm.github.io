@@ -7,6 +7,7 @@ tags:
 categories:
   - "AI相关"
 date: 2022-10-29 22:45:56
+mathjax: true
 ---
 
 本文是对知乎的一篇文章[扩散模型 Diffusion Models - 原理篇](https://zhuanlan.zhihu.com/p/548112711)的摘要性总结.
@@ -56,7 +57,7 @@ $$
 $$
 
 $$
-x_{t-1}(z;x_t,\epsilon_t,t) = \mu_t+\sigma_tz \sim N(\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_t), \frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t)
+x_{t-1}(z;x_t,\epsilon_t,t) = \mu_t+\sigma_tz \sim N(\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{\beta_t}{\sqrt{1-\bar{\alpha}\_t}}\epsilon_t), \frac{1-\bar{\alpha}\_{t-1}}{1-\bar{\alpha}_t}\beta_t)
 $$
 
 (该公式不含 $x_0$, 但是需要有 $x_0$ 的前提下得到, 由前向的公式替换掉了, $\epsilon_t$ 与前向中的 $\epsilon_t$ 是同一个值)
@@ -85,13 +86,18 @@ $$
 
 ### 基本参数
 
-- $T$: 扩散步数, 至少 $100$ 以上.
-- $\beta_1 < \beta_2 < \dots < \beta_T (0 < \beta_i < 1)$: 每一轮扩散的方差, 在满足大小关系的情况下, 尽可能的小, 通常在 $10^{-3}$ 的数量级左右. (应该步骤越多, 方差越精细?)
+- $T$
+
+  扩散步数, 至少 $100$ 以上.
+
+- $\beta_1 < \beta_2 < \dots < \beta_T (0 < \beta_i < 1)$
+  
+  每一轮扩散的方差, 在满足大小关系的情况下, 尽可能的小, 通常在 $10^{-3}$ 的数量级左右. (应该步骤越多, 方差越精细?)
 
 ### 预计算的值
 
 - $\alpha_t=1-\beta_t$
-- $\bar{\alpha}_t=\prod_{i=1}^t\alpha_t$
+- $\bar{\alpha}\_t=\prod_{i=1}^t\alpha_t$
 
 ### 设计一个神经网络
 
