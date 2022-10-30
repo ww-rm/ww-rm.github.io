@@ -30,7 +30,7 @@ $$
 x_t(z;x_{t-1},t)=\sqrt{1-\beta_t}x_{t-1}+\sqrt{\beta_t}z \sim N(\sqrt{1-\beta_t}x_{t-1}, \beta_t)
 $$
 
-设 $\alpha_t=1-\beta_t,\bar{\alpha}_t=\prod_{i=1}^t\alpha_t$, 则有
+设 $\alpha_t=1-\beta_t,\bar{\alpha}\_t=\prod_{i=1}^t\alpha_t$, 则有
 
 $$
 x_t(\epsilon_t;x_0,t)=\sqrt{\bar{\alpha}_t}x_0+\sqrt{1-\bar{\alpha}_t}\epsilon_t \sim N(\sqrt{\bar{\alpha}_t}x_0, 1-\bar{\alpha}_t)
