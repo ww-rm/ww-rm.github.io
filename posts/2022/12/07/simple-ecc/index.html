@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ECC 算法原理简介与实现">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2022/12/07/simple-ecc/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2022/12/06/zcG6gI.png">
+<meta property="og:image" content="https://s1.ax1x.com/2022/12/07/zcYiWj.png">
+<meta property="article:published_time" content="2022-12-07T03:04:56.000Z">
+<meta property="article:modified_time" content="2022-12-07T03:12:07.251Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="公钥算法">
+<meta property="article:tag" content="椭圆曲线密码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2022/12/06/zcG6gI.png">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2022/12/07/simple-ecc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2022/12/07/simple-ecc/","path":"/posts/2022/12/07/simple-ecc/","title":"ECC 算法原理简介与实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ECC 算法原理简介与实现 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E8%AE%BA%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">理论介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A0%E5%9F%9F%E4%B8%8A%E7%9A%84%E7%A6%BB%E6%95%A3%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF"><span class="nav-number">1.1.</span> <span class="nav-text">素域上的离散椭圆曲线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E4%B8%8A%E7%9A%84%E8%BF%90%E7%AE%97"><span class="nav-number">1.2.</span> <span class="nav-text">椭圆曲线上的运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E8%BF%90%E7%AE%97%E5%85%AC%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">椭圆曲线运算公式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%A6%82%E5%BF%B5"><span class="nav-number">1.4.</span> <span class="nav-text">其他概念</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">椭圆曲线代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B2%E7%BA%BF%E4%B8%8E%E7%82%B9%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">曲线与点的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%85%E5%8A%A9%E8%BF%90%E7%AE%97"><span class="nav-number">2.2.</span> <span class="nav-text">辅助运算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E5%8A%A0%E4%B8%8E%E6%95%B0%E4%B9%98"><span class="nav-number">2.3.</span> <span class="nav-text">点加与数乘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84%E6%89%80%E6%9C%89%E7%82%B9%E5%8F%8A%E5%85%B6%E9%98%B6"><span class="nav-number">2.4.</span> <span class="nav-text">计算椭圆曲线的所有点及其阶</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E8%BF%9B%E8%A1%8C%E6%95%B0%E6%8D%AE%E5%8A%A0%E5%AF%86"><span class="nav-number">3.</span> <span class="nav-text">使用椭圆曲线进行数据加密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ECDLP"><span class="nav-number">3.1.</span> <span class="nav-text">ECDLP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AC%E7%A7%81%E9%92%A5%E7%9A%84%E9%80%89%E5%8F%96"><span class="nav-number">3.2.</span> <span class="nav-text">公私钥的选取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E5%8A%A0%E8%A7%A3%E5%AF%86%E6%96%B9%E6%A1%88"><span class="nav-number">3.3.</span> <span class="nav-text">一个简单的加解密方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">加解密算法的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%85%E5%90%AB%E6%96%87%E4%BB%B6%E4%B8%8E%E4%B8%BB%E7%A8%8B%E5%BA%8F"><span class="nav-number">5.</span> <span class="nav-text">包含文件与主程序</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2022/12/07/simple-ecc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ECC 算法原理简介与实现 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ECC 算法原理简介与实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-07 11:04:56" itemprop="dateCreated datePublished" datetime="2022-12-07T11:04:56+08:00">2022-12-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AF%86%E7%A0%81%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">密码相关</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.</p>
+<span id="more"></span>
+
+<h2 id="理论介绍"><a href="#理论介绍" class="headerlink" title="理论介绍"></a>理论介绍</h2><h3 id="素域上的离散椭圆曲线"><a href="#素域上的离散椭圆曲线" class="headerlink" title="素域上的离散椭圆曲线"></a>素域上的离散椭圆曲线</h3><p>形如 $y^2 = x^3 + ax + b \bmod p$ 的曲线叫椭圆曲线, 其中需满足 $p$ 是大于 $3$ 的素数, 且 $4a^3 + 27b^2 \ne 0 \bmod p$.</p>
+<p>先不看 $\bmod$ 记号, 那么这就是一条普通的连续曲线, 可以按照普通的方程求解, 给定一个 $x$, 就可以求出来对应的 $y$. 容易看出来, 这条曲线是关于 $x$ 轴对称的, 因此它的图像大概长下面这种样子.</p>
+<p><img data-src="https://s1.ax1x.com/2022/12/06/zcG6gI.png" alt="zcG6gI.png"></p>
+<p>可以有几种不同的形式, 但是基本上差不多.</p>
+<p>那么加了 $\bmod$ 记号之后有什么不同呢? 刚刚是根据实数域画出来的连续曲线, 那么加上 $\bmod$ 之后, 曲线还是这条曲线, 但是坐标取值范围变成了整数范围, 且取值在 $[0, p-1]$ 之间.</p>
+<p>也就是从这条曲线上挑出了一些离散的整数解, 不仅能够满足这个曲线方程, 同时 $x$ 和 $y$ 的取值范围在 $[0, p-1]$, 也就是对 $p$ 取模, 所有的数据运算都在模 $p$ 下进行, 因此将这种曲线记为 $y^2 = x^3 + ax + b \bmod p$.</p>
+<p>所以, ECC 中使用的椭圆曲线并不是一条真正连续的曲线, 而是由很多离散的点组成的.</p>
+<h3 id="椭圆曲线上的运算"><a href="#椭圆曲线上的运算" class="headerlink" title="椭圆曲线上的运算"></a>椭圆曲线上的运算</h3><p>既然要使用椭圆曲线进行计算, 那么先得定义在椭圆曲线上的运算.</p>
+<p>我们都学过向量的运算, 其中最基本的两种运算是加法和数乘.</p>
+<p>如果设 $\vec{a}$, $\vec{b}$ 是两个向量, 那么我们可以计算 $\vec{a}+\vec{b}$ 的值, 这称为<strong>向量加法</strong>.</p>
+<p>我还可以计算 $\vec{a}$ 与自己的相加运算, 计算 $k$ 个 $\vec{a}$ 连续相加, 并简记为 $k\vec{a}$, 这称为<strong>向量数乘</strong>.</p>
+<p>可以看出, 第二种情况虽然有个&quot;乘&quot;字, 但是仍然属于加法运算的一种, 至此, 向量关于加法的运算已经基本上齐全了, 但是还缺少一些特殊情况定义.</p>
+<p>首先是 $0$ 的定义, 此处指的是抽象的 $0$, 不是数字 $0$, 也就是对于向量运算来说, 需要有一个 $0$ 值的概念, 它在加法运算中不会影响运算本身, 通常就将其定义为全零向量 $\vec{0}$, 也可称其为<strong>单位元</strong>.</p>
+<p>而在定义完单位元之后, 可以定义向量取负, 依靠于 $\vec{0}$ 来进行的, 如果有 $-\vec{a}$, 则 $\vec{a} + (-\vec{a}) = \vec{0}$, 这样就通过单位元定义了加法的逆运算减法的规则, 因为减去一个原向量等于加上原向量的相反向量, 而相反向量满足上述关于单位元的等式, 因而可以求出相反向量的具体取值. 在这里, 相反向量称之为原向量的<strong>逆元</strong>.</p>
+<p>至此, 我们成功在向量中定义了这些基本概念:</p>
+<ul>
+<li>加法 ($\vec{a} + \vec{b}$)</li>
+<li>数乘 ($k\vec{a}$)</li>
+<li>单位元 ($\vec{0}$)</li>
+<li>逆元 ($-\vec{a}$)</li>
+</ul>
+<p>那么, 把上述中的&quot;向量&quot;全部换成别的东西, 我们就可以定义出一套新的数据运算, 而对于椭圆曲线, 我们将&quot;向量&quot;换成所有满足椭圆曲线方程的点, 定义了椭圆曲线上的点运算规则.</p>
+<p>下面用一张图来直观解释椭圆曲线上点是如何进行&quot;相加&quot;的.</p>
+<p><img data-src="https://s1.ax1x.com/2022/12/07/zcYiWj.png" alt="zcYiWj.png"></p>
+<p>设 $P$, $Q$ 为椭圆曲线上的两点, 则 $P+Q$ 就是 $P$, $Q$ 连线与曲线的交点关于 $x$ 轴的对称点.</p>
+<p>当 $P$, $Q$ 重合时, 取切线与曲线的交点的对称点作为加法结果, 也就是 $2P$.</p>
+<p>当 $P$, $Q$ 关于 $x$ 轴对称时, 定义相加结果为无穷远点, 视作加法的单位元点, 记为 $O$, 同时易得此时 $P$, $Q$ 互为对方的逆元.</p>
+<h3 id="椭圆曲线运算公式"><a href="#椭圆曲线运算公式" class="headerlink" title="椭圆曲线运算公式"></a>椭圆曲线运算公式</h3><p>运算公式按照普通的解析几何去求解即可, 在此直接给出公式, 分为两点不重合和重合的情况.</p>
+<p>设曲线方程是 $y^2 = x^3 + ax + b$, $R(x_3, y_3)=P(x_1, y_1) + Q(x_2, y_2)$, 则:</p>
+<p>$$<br>\left\{<br>  \begin{align*}<br>    x_3 &amp;= \lambda^2 - x_1 - x_2 \\<br>    y_3 &amp;= \lambda(x_1 - x_3) - y_1<br>  \end{align*}<br>\right.<br>$$</p>
+<p>其中, 当 $P(x_1, y_1) \ne Q(x_2, y_2)$, 即两点不重合时,</p>
+<p>$$<br>\lambda = \frac{y_2 - y_1}{x_2 - x_1}<br>$$</p>
+<p>当 $P(x_1, y_1) = Q(x_2, y_2)$, 即两点重合时,</p>
+<p>$$<br>\lambda = \frac{3x_1^2+a}{2y_1}<br>$$</p>
+<h3 id="其他概念"><a href="#其他概念" class="headerlink" title="其他概念"></a>其他概念</h3><p>一些代码实现时需要知道的概念, 在此简单记录.</p>
+<ul>
+<li>循环群: 循环群是一些点的集合, 群内存在一个特殊点 $G$, 在这个群内的任何一个点, 都可以由 $G, 2G, ..., nG$ 表示, 对 $G$ 的 $n$ 次加法运算能够遍历群中的每个点, 群的大小是 $n$.</li>
+<li>生成元: 循环群中的 $G$ 称为这个循环群的生成元.</li>
+<li>阶: 指循环群或者生成元的阶, 就是生成元所在循环群的大小 $n$.</li>
+<li>模逆运算: 指求解方程 $ax \equiv 1 \bmod p$, 即 $x$ 在模 $p$ 运算下的&quot;倒数&quot;.</li>
+</ul>
+<h2 id="椭圆曲线代码实现"><a href="#椭圆曲线代码实现" class="headerlink" title="椭圆曲线代码实现"></a>椭圆曲线代码实现</h2><h3 id="曲线与点的定义"><a href="#曲线与点的定义" class="headerlink" title="曲线与点的定义"></a>曲线与点的定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int64_t</span> x;</span><br><span class="line">    <span class="type">int64_t</span> y;</span><br><span class="line">&#125; EccPoint;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int64_t</span> a;</span><br><span class="line">    <span class="type">int64_t</span> b;</span><br><span class="line">    <span class="type">int64_t</span> p;</span><br><span class="line">&#125; EC; <span class="comment">// y^2 = x^3 + ax + b (mod p)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    EccPoint pt;</span><br><span class="line">    <span class="type">int64_t</span> n;</span><br><span class="line">&#125; GenPoint;</span><br></pre></td></tr></table></figure>
+
+<h3 id="辅助运算"><a href="#辅助运算" class="headerlink" title="辅助运算"></a>辅助运算</h3><p>模 $p$ 运算和模逆运算.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int64_t</span> <span class="title function_">modp</span><span class="params">(<span class="type">int64_t</span> x, <span class="type">int64_t</span> p)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">while</span> (x &lt; <span class="number">0</span>) x += p;</span><br><span class="line">    x %= p;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int64_t</span> <span class="title function_">inverse</span><span class="params">(<span class="type">int64_t</span> x, <span class="type">int64_t</span> p)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int64_t</span> q = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int64_t</span> r = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">int64_t</span> r1 = p;</span><br><span class="line">    <span class="type">int64_t</span> r2 = x;</span><br><span class="line"></span><br><span class="line">    <span class="type">int64_t</span> t1 = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int64_t</span> t2 = <span class="number">1</span>;</span><br><span class="line">    <span class="type">int64_t</span> t = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (r2 &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        q = r1 / r2, r = r1 % r2;</span><br><span class="line">        r1 = r2, r2 = r;</span><br><span class="line"></span><br><span class="line">        t = t1 - q * t2;</span><br><span class="line">        t1 = t2, t2 = t;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    t1 = modp(t1, p);</span><br><span class="line">    <span class="keyword">return</span> t1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="点加与数乘"><a href="#点加与数乘" class="headerlink" title="点加与数乘"></a>点加与数乘</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">addpt</span><span class="params">(</span></span><br><span class="line"><span class="params">    <span class="type">const</span> EC* ec,</span></span><br><span class="line"><span class="params">    <span class="type">const</span> EccPoint* pt1, <span class="type">const</span> EccPoint* pt2,</span></span><br><span class="line"><span class="params">    EccPoint* new_pt</span></span><br><span class="line"><span class="params">)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (pt1-&gt;x == <span class="number">-1</span> &amp;&amp; pt1-&gt;y == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        new_pt-&gt;x = pt2-&gt;x;</span><br><span class="line">        new_pt-&gt;y = pt2-&gt;y;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (pt2-&gt;x == <span class="number">-1</span> &amp;&amp; pt2-&gt;y == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        new_pt-&gt;x = pt1-&gt;x;</span><br><span class="line">        new_pt-&gt;y = pt1-&gt;y;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int64_t</span> lambda = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int64_t</span> new_x = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int64_t</span> new_y = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (pt1-&gt;x == pt2-&gt;x)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Unit</span></span><br><span class="line">            <span class="keyword">if</span> (pt1-&gt;y + pt2-&gt;y == ec-&gt;p)</span><br><span class="line">            &#123;</span><br><span class="line">                new_pt-&gt;x = <span class="number">-1</span>;</span><br><span class="line">                new_pt-&gt;y = <span class="number">-1</span>;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Same</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (pt1-&gt;y == pt2-&gt;y)</span><br><span class="line">            &#123;</span><br><span class="line">                lambda = (<span class="number">3</span> * pt1-&gt;x * pt1-&gt;x + ec-&gt;a) * inverse(<span class="number">2</span> * pt1-&gt;y, ec-&gt;p);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Different</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int64_t</span> delta_x = <span class="number">0</span>;</span><br><span class="line">            <span class="type">int64_t</span> delta_y = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">            delta_x = modp((pt2-&gt;x - pt1-&gt;x), ec-&gt;p);</span><br><span class="line">            delta_y = modp((pt2-&gt;y - pt1-&gt;y), ec-&gt;p);</span><br><span class="line">            lambda = delta_y * inverse(delta_x, ec-&gt;p);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        lambda %= ec-&gt;p;</span><br><span class="line"></span><br><span class="line">        new_x = modp((lambda * lambda - pt1-&gt;x - pt2-&gt;x), ec-&gt;p);</span><br><span class="line">        new_y = modp((lambda * (pt1-&gt;x - new_x) - pt1-&gt;y), ec-&gt;p);</span><br><span class="line"></span><br><span class="line">        new_pt-&gt;x = new_x;</span><br><span class="line">        new_pt-&gt;y = new_y;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">mulpt</span><span class="params">(</span></span><br><span class="line"><span class="params">    <span class="type">const</span> EC* ec,</span></span><br><span class="line"><span class="params">    <span class="type">uint64_t</span> k, <span class="type">const</span> EccPoint* pt,</span></span><br><span class="line"><span class="params">    EccPoint* new_pt</span></span><br><span class="line"><span class="params">)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (k == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        new_pt-&gt;x = <span class="number">-1</span>;</span><br><span class="line">        new_pt-&gt;y = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> i = <span class="number">64</span>;</span><br><span class="line">    <span class="comment">// find first 1 bit</span></span><br><span class="line">    <span class="keyword">while</span> (!(k &amp; <span class="number">0x8000000000000000</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        k &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">        i--;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    new_pt-&gt;x = pt.x;</span><br><span class="line">    new_pt-&gt;y = pt.y;</span><br><span class="line">    i--;</span><br><span class="line">    k &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (i &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        addpt(ec, new_pt, new_pt, new_pt);</span><br><span class="line">        <span class="keyword">if</span> (k &amp; <span class="number">0x8000000000000000</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            addpt(ec, new_pt, pt, new_pt);</span><br><span class="line">        &#125;</span><br><span class="line">        k &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">        i--;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="计算椭圆曲线的所有点及其阶"><a href="#计算椭圆曲线的所有点及其阶" class="headerlink" title="计算椭圆曲线的所有点及其阶"></a>计算椭圆曲线的所有点及其阶</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">uint8_t</span> <span class="title function_">isprime</span><span class="params">(<span class="type">int64_t</span> x)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int64_t</span> i = <span class="number">2</span>; i &lt; (<span class="type">int64_t</span>)sqrtl((<span class="type">long</span> <span class="type">double</span>)x); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (x % i == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int64_t</span> <span class="title function_">compute_ptrank</span><span class="params">(<span class="type">const</span> EC* ec, <span class="type">const</span> EccPoint* pt)</span></span><br><span class="line">&#123;</span><br><span class="line">    EccPoint tmp = &#123; pt-&gt;x, pt-&gt;y &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="type">int64_t</span> rank = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        addpt(ec, &amp;tmp, pt, &amp;tmp);</span><br><span class="line">        <span class="keyword">if</span> (tmp.x == pt-&gt;x &amp;&amp; tmp.y == pt-&gt;y)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        rank++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> rank;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">print_points</span><span class="params">(EC* ec)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;EC: &#123; a = %lld, b = %lld, p = %lld &#125;\n&quot;</span>, ec-&gt;a, ec-&gt;b, ec-&gt;p);</span><br><span class="line">    <span class="keyword">if</span> (modp(<span class="number">4</span> * ec-&gt;a * ec-&gt;a * ec-&gt;a + <span class="number">27</span> * ec-&gt;b * ec-&gt;b, ec-&gt;p) == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Params Invalid!\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int64_t</span> pt_count = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int64_t</span> y_sqr = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int64_t</span> y = <span class="number">0</span>;</span><br><span class="line">        <span class="type">uint8_t</span> find = <span class="number">0</span>;</span><br><span class="line">        EccPoint pt_tmp = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">        <span class="type">int64_t</span> pt_rank = <span class="number">0</span>;</span><br><span class="line">        <span class="type">char</span> prime_rank = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int64_t</span> x = <span class="number">0</span>; x &lt; ec-&gt;p; x++)</span><br><span class="line">        &#123;</span><br><span class="line">            y_sqr = modp((x * x * x + ec-&gt;a * x + ec-&gt;b), ec-&gt;p);</span><br><span class="line">            find = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">while</span> (y_sqr &lt; (ec-&gt;p - <span class="number">1</span>) * (ec-&gt;p - <span class="number">1</span>))</span><br><span class="line">            &#123;</span><br><span class="line">                y = (<span class="type">int64_t</span>)sqrtl((<span class="type">long</span> <span class="type">double</span>)y_sqr);</span><br><span class="line">                <span class="keyword">if</span> (y * y == y_sqr)</span><br><span class="line">                &#123;</span><br><span class="line">                    find = <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                y_sqr += ec-&gt;p;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (find)</span><br><span class="line">            &#123;</span><br><span class="line">                pt_tmp.x = x;</span><br><span class="line">                pt_tmp.y = y;</span><br><span class="line">                pt_rank = compute_ptrank(ec, &amp;pt_tmp);</span><br><span class="line">                prime_rank = (isprime(pt_rank) ? <span class="string">&#x27;P&#x27;</span> : <span class="string">&#x27;C&#x27;</span>);</span><br><span class="line">                pt_count++;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;(%5lld, %5lld)[%5lld][%c], &quot;</span>, pt_tmp.x, pt_tmp.y, pt_rank, prime_rank);</span><br><span class="line">                <span class="keyword">if</span> (pt_count % <span class="number">4</span> == <span class="number">0</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (y != <span class="number">0</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    pt_tmp.y = ec-&gt;p - y;</span><br><span class="line">                    pt_count++;</span><br><span class="line">                    <span class="built_in">printf</span>(<span class="string">&quot;(%5lld, %5lld)[%5lld][%c], &quot;</span>, pt_tmp.x, pt_tmp.y, pt_rank, prime_rank);</span><br><span class="line">                    <span class="keyword">if</span> (pt_count % <span class="number">4</span> == <span class="number">0</span>)</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;(%5d, %5d)[%5d][%c]\n&quot;</span>, <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">1</span>, <span class="string">&#x27;C&#x27;</span>);</span><br><span class="line">        pt_count++;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;EccPoints Count: %lld\n&quot;</span>, pt_count);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用椭圆曲线进行数据加密"><a href="#使用椭圆曲线进行数据加密" class="headerlink" title="使用椭圆曲线进行数据加密"></a>使用椭圆曲线进行数据加密</h2><p>前面只是实现了关于椭圆曲线的运算, 现在需要使用这个运算来构建一个密码算法, 这其中使用到的问题称为椭圆曲线上的离散对数问题.</p>
+<h3 id="ECDLP"><a href="#ECDLP" class="headerlink" title="ECDLP"></a>ECDLP</h3><p>设曲线为 $y^2 = x^3 + ax + b \bmod p$, $p$ 为大于 $3$ 的素数, 且 $4a^3 + 27b^2 \ne 0 \bmod p$.</p>
+<p>曲线上的一个循环群记为 $&lt;G, n&gt;$, $G$ 是群的生成元, $n$ 是群的阶, 且 $n$ 为素数.</p>
+<p>设 $P$, $Q$ 是群上的两点, 且 $Q = tP$, $t$ 为正整数且 $t \in [1, n-1]$.</p>
+<p>则已知 $t$, $P$, 要计算 $Q$ 是简单的, 但是反过来, 已知 $P$, $Q$, 要计算 $t$ 是困难的, 这就是椭圆曲线上的离散对数问题.</p>
+<h3 id="公私钥的选取"><a href="#公私钥的选取" class="headerlink" title="公私钥的选取"></a>公私钥的选取</h3><p>根据前面 ECDLP 的定义, 定义用户的私钥为 $d$, 公钥为 $Q$, 且 $Q = dG$, $G$ 是循环群 $&lt;G, n&gt;$ 的生成元. 其余所有和椭圆曲线有关的参数均是公开已知, 只有 $d$ 的值是秘密保留的, 当 $p$ 足够大时, 求解 $d$ 是困难的.</p>
+<h3 id="一个简单的加解密方案"><a href="#一个简单的加解密方案" class="headerlink" title="一个简单的加解密方案"></a>一个简单的加解密方案</h3><p>设 $d$ 为用户私钥, $Q$ 为用户公钥, 明文数据为 $M$, 且 $0 \leq M \leq n-1$.</p>
+<p>加密:</p>
+<ol>
+<li>选择一个随机数 $k$, 且 $k \in \{1, 2, ..., n-1\}$.</li>
+<li>计算点 $X_1(x_1, y_1) = kQ$, 如果 $x_1 = 0$, 则转步骤 1.</li>
+<li>计算点 $X_2(x_2, y_2) = kG$.</li>
+<li>计算密文 $C \equiv Mx_1 \bmod n$.</li>
+<li>以 $(X_2, C)$ 作为 $M$ 的最终密文.</li>
+</ol>
+<p>解密:</p>
+<ol>
+<li>计算 $X_1(x_1, y_1) = dX_2 = d(kG) = k(dG) = kQ$.</li>
+<li>计算明文 $M \equiv Cx_1^{-1} \bmod n$.</li>
+</ol>
+<h2 id="加解密算法的实现"><a href="#加解密算法的实现" class="headerlink" title="加解密算法的实现"></a>加解密算法的实现</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">encrypt_blk</span><span class="params">(</span></span><br><span class="line"><span class="params">    <span class="type">const</span> ECDLP* ecdlp,</span></span><br><span class="line"><span class="params">    <span class="type">const</span> EccPoint* pubkey,</span></span><br><span class="line"><span class="params">    <span class="type">int64_t</span> plain,</span></span><br><span class="line"><span class="params">    EccPoint* cipher_pt, <span class="type">int64_t</span>* cipher</span></span><br><span class="line"><span class="params">)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int64_t</span> rndk = <span class="number">0</span>;</span><br><span class="line">    EccPoint x1 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    <span class="keyword">do</span></span><br><span class="line">    &#123;</span><br><span class="line">        rndk = rand() % (ecdlp-&gt;genpt.n - <span class="number">1</span>) + <span class="number">1</span>;</span><br><span class="line">        mulpt(&amp;ecdlp-&gt;ec, rndk, pubkey, &amp;x1);</span><br><span class="line">    &#125; <span class="keyword">while</span> (x1.x == <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    mulpt(&amp;ecdlp-&gt;ec, rndk, &amp;ecdlp-&gt;genpt.pt, cipher_pt);</span><br><span class="line">    *cipher = (plain * x1.x) % ecdlp-&gt;genpt.n;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">decrypt_blk</span><span class="params">(</span></span><br><span class="line"><span class="params">    <span class="type">const</span> ECDLP* ecdlp,</span></span><br><span class="line"><span class="params">    <span class="type">int64_t</span> prikey,</span></span><br><span class="line"><span class="params">    <span class="type">const</span> EccPoint* cipher_pt, <span class="type">int64_t</span> cipher,</span></span><br><span class="line"><span class="params">    <span class="type">int64_t</span>* plain</span></span><br><span class="line"><span class="params">)</span></span><br><span class="line">&#123;</span><br><span class="line">    EccPoint x1 = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    mulpt(&amp;ecdlp-&gt;ec, prikey, cipher_pt, &amp;x1);</span><br><span class="line">    *plain = (cipher * inverse(x1.x, ecdlp-&gt;genpt.n)) % ecdlp-&gt;genpt.n;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="包含文件与主程序"><a href="#包含文件与主程序" class="headerlink" title="包含文件与主程序"></a>包含文件与主程序</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;math.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;time.h&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    srand((<span class="type">uint32_t</span>)time(<span class="literal">NULL</span>));</span><br><span class="line">    ECDLP ecdlp = &#123; &#123; <span class="number">2</span>, <span class="number">11</span>, <span class="number">49177</span> &#125;, &#123;&#123;<span class="number">1</span>, <span class="number">14445</span>&#125;, <span class="number">49031</span>&#125; &#125;;</span><br><span class="line">    <span class="comment">// print_points(&amp;ecdlp.ec);</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Curve Params: &#123; a = %lld, b = %lld, p = %lld &#125;\n&quot;</span>, ecdlp.ec.a, ecdlp.ec.b, ecdlp.ec.p);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;GenPoint: &#123; pt: (%lld, %lld), n: %lld &#125;\n&quot;</span>, ecdlp.genpt.pt.x, ecdlp.genpt.pt.y, ecdlp.genpt.n);</span><br><span class="line"></span><br><span class="line">    <span class="type">int64_t</span> prikey = <span class="number">149</span>;</span><br><span class="line">    EccPoint pubkey = &#123; <span class="number">0</span> &#125;;</span><br><span class="line">    mulpt(&amp;ecdlp.ec, prikey, &amp;ecdlp.genpt.pt, &amp;pubkey);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Prikey: %lld Pubkey: (%lld, %lld)\n&quot;</span>, prikey, pubkey.x, pubkey.y);</span><br><span class="line"></span><br><span class="line">    <span class="type">int64_t</span> plain = <span class="number">23456</span>;</span><br><span class="line">    <span class="type">int64_t</span> cipher = <span class="number">-1</span>;</span><br><span class="line">    EccPoint cipher_pt = &#123; <span class="number">0</span> &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Plain: %lld\n&quot;</span>, plain);</span><br><span class="line"></span><br><span class="line">    encrypt_blk(&amp;ecdlp, &amp;pubkey, plain, &amp;cipher_pt, &amp;cipher);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Cipher: (%lld, %lld), %lld\n&quot;</span>, cipher_pt.x, cipher_pt.y, cipher);</span><br><span class="line"></span><br><span class="line">    decrypt_blk(&amp;ecdlp, prikey, &amp;cipher_pt, cipher, &amp;plain);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Plain: %lld\n&quot;</span>, plain);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%85%AC%E9%92%A5%E7%AE%97%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 公钥算法</a>
+              <a href="/tags/%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%AF%86%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 椭圆曲线密码</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2022/10/29/diffusion-model/" rel="prev" title="扩散模型阅读笔记">
+                  <i class="fa fa-chevron-left"></i> 扩散模型阅读笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">54k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">1:37</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
