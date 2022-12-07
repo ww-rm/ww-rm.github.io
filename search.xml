@@ -184,7 +184,7 @@
 <li>循环群: 循环群是一些点的集合, 群内存在一个特殊点 $G$, 在这个群内的任何一个点, 都可以由 $G, 2G, ..., nG$ 表示, 对 $G$ 的 $n$ 次加法运算能够遍历群中的每个点, 群的大小是 $n$.</li>
 <li>生成元: 循环群中的 $G$ 称为这个循环群的生成元.</li>
 <li>阶: 指循环群或者生成元的阶, 就是生成元所在循环群的大小 $n$.</li>
-<li>模逆运算: 指求解方程 $ax \equiv 1 \bmod p$, 即 $x$ 在模 $p$ 运算下的&quot;倒数&quot;.</li>
+<li>模逆运算: 指求解方程 $ax \equiv 1 \bmod p$, 即 $a$ 在模 $p$ 运算下的&quot;倒数&quot;.</li>
 </ul>
 <h2 id="椭圆曲线代码实现"><a href="#椭圆曲线代码实现" class="headerlink" title="椭圆曲线代码实现"></a>椭圆曲线代码实现</h2><h3 id="曲线与点的定义"><a href="#曲线与点的定义" class="headerlink" title="曲线与点的定义"></a>曲线与点的定义</h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int64_t</span> x;</span><br><span class="line">    <span class="type">int64_t</span> y;</span><br><span class="line">&#125; EccPoint;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">int64_t</span> a;</span><br><span class="line">    <span class="type">int64_t</span> b;</span><br><span class="line">    <span class="type">int64_t</span> p;</span><br><span class="line">&#125; EC; <span class="comment">// y^2 = x^3 + ax + b (mod p)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    EccPoint pt;</span><br><span class="line">    <span class="type">int64_t</span> n;</span><br><span class="line">&#125; GenPoint;</span><br></pre></td></tr></table></figure>
 

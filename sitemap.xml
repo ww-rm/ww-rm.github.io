@@ -2,7 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://ww-rm.github.io/tags/index.html</loc>
+    <loc>http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/</loc>
+    
+    <lastmod>2022-12-07</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ww-rm.github.io/about/index.html</loc>
     
     <lastmod>2022-12-07</lastmod>
     
@@ -12,6 +21,15 @@
   
   <url>
     <loc>http://ww-rm.github.io/categories/index.html</loc>
+    
+    <lastmod>2022-12-07</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ww-rm.github.io/tags/index.html</loc>
     
     <lastmod>2022-12-07</lastmod>
     
@@ -119,25 +137,7 @@
   </url>
   
   <url>
-    <loc>http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/</loc>
-    
-    <lastmod>2022-12-07</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://ww-rm.github.io/404.html</loc>
-    
-    <lastmod>2022-12-07</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://ww-rm.github.io/about/index.html</loc>
     
     <lastmod>2022-12-07</lastmod>
     
