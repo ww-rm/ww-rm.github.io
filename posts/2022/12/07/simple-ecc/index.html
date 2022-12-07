@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://s1.ax1x.com/2022/12/06/zcG6gI.png">
 <meta property="og:image" content="https://s1.ax1x.com/2022/12/07/zcYiWj.png">
 <meta property="article:published_time" content="2022-12-07T03:04:56.000Z">
-<meta property="article:modified_time" content="2022-12-07T03:12:07.251Z">
+<meta property="article:modified_time" content="2022-12-07T06:01:48.020Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="公钥算法">
 <meta property="article:tag" content="椭圆曲线密码">
@@ -284,7 +284,7 @@
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>15 分钟</span>
+      <span>16 分钟</span>
     </span>
 </div>
 
@@ -353,7 +353,7 @@
 <p>曲线上的一个循环群记为 $&lt;G, n&gt;$, $G$ 是群的生成元, $n$ 是群的阶, 且 $n$ 为素数.</p>
 <p>设 $P$, $Q$ 是群上的两点, 且 $Q = tP$, $t$ 为正整数且 $t \in [1, n-1]$.</p>
 <p>则已知 $t$, $P$, 要计算 $Q$ 是简单的, 但是反过来, 已知 $P$, $Q$, 要计算 $t$ 是困难的, 这就是椭圆曲线上的离散对数问题.</p>
-<h3 id="公私钥的选取"><a href="#公私钥的选取" class="headerlink" title="公私钥的选取"></a>公私钥的选取</h3><p>根据前面 ECDLP 的定义, 定义用户的私钥为 $d$, 公钥为 $Q$, 且 $Q = dG$, $G$ 是循环群 $&lt;G, n&gt;$ 的生成元. 其余所有和椭圆曲线有关的参数均是公开已知, 只有 $d$ 的值是秘密保留的, 当 $p$ 足够大时, 求解 $d$ 是困难的.</p>
+<h3 id="公私钥的选取"><a href="#公私钥的选取" class="headerlink" title="公私钥的选取"></a>公私钥的选取</h3><p>根据前面 ECDLP 的定义, 定义用户的私钥为 $d$, 可以为集合 $\{1, 2, ..., n-1\}$ 中的一个随机数, 公钥为 $Q$, 且 $Q = dG$, $G$ 是循环群 $&lt;G, n&gt;$ 的生成元. 其余所有和椭圆曲线有关的参数均是公开已知, 只有 $d$ 的值是秘密保留的, 当 $p$ 足够大时, 求解 $d$ 是困难的.</p>
 <h3 id="一个简单的加解密方案"><a href="#一个简单的加解密方案" class="headerlink" title="一个简单的加解密方案"></a>一个简单的加解密方案</h3><p>设 $d$ 为用户私钥, $Q$ 为用户公钥, 明文数据为 $M$, 且 $0 \leq M \leq n-1$.</p>
 <p>加密:</p>
 <ol>
