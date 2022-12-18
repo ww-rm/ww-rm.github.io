@@ -387,6 +387,11 @@ void print_points(EC* ec)
 ## 加解密算法的实现
 
 ```c
+typedef struct {
+    EC ec;
+    GenPoint genpt;
+} ECDLP;
+
 void encrypt_blk(
     const ECDLP* ecdlp,
     const EccPoint* pubkey,
