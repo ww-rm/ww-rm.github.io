@@ -103,6 +103,7 @@ menu:
   #schedule: /schedule/ || fa fa-calendar
   #sitemap: /sitemap.xml || fa fa-sitemap
   #commonweal: /404/ || fa fa-heartbeat
+  festival: /festival/ || fa fa-gift
   pixiv: /pixivdaily/ || fa fa-p
 
 # Enable / Disable menu icons / item badges.
