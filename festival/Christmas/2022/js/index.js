@@ -458,7 +458,7 @@ function drawStars() {
 
 
 let myLabels = [
-    "To Z.",
+    "To Z",
     "Merry Christmas",
     "Safe & Happy",
     "2022.12.25",
