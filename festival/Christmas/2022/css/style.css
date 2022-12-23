@@ -38,15 +38,15 @@ body {
 }
 
 @font-face {
-    font-family: "myfont";
-    src: url("/fonts/segoesc.ttf") format("truetype");
+    font-family: "Segoe Script";
+    src: url("/fonts/segoesc.ttf");
 }
 
 #header {
     /* position: absolute; */
     text-align: center;
     color: #C89568;
-    font-family: "myfont", Georgia, "Times New Roman", Times, serif;
+    font-family: "Segoe Script", Georgia, "Times New Roman", Times, serif;
     /* font-style: italic; */
     font-size: 35px;
     min-width: 400px;
