@@ -493,4 +493,4 @@ setTimeout(function () {
     mainTl.add(starTl, 0);
     gsap.globalTimeline.timeScale(1.5); //  圣诞树开始绘画时小光点动画的绘画速率，越大越快
     drawStars();
-}, 3000)
+}, 1500)
