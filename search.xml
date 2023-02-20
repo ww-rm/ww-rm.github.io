@@ -23,6 +23,60 @@
       </tags>
   </entry>
   <entry>
+    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
+    <url>//posts/2022/08/14/kxsw/</url>
+    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
+<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
+<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
+<span id="more"></span>
+
+<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
+<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>在这里只简单科普一下基本概念.</p>
+<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
+<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
+<p>不使用工具前:</p>
+<p><code>用户 --|--&gt; 目标网站</code></p>
+<p>使用工具后:</p>
+<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
+<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
+<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
+<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
+<ul>
+<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
+<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
+<li>不改变系统代理: 保持原有系统代理设置不变.</li>
+</ul>
+<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
+<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
+<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vUyCmd.png" alt="vUyCmd.png"></p>
+<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
+<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
+<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
+<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
+<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
+<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
+<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
+<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
+<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
+<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
+<p><img data-src="https://s1.ax1x.com/2022/08/14/vUc2TA.png" alt="vUc2TA.png"></p>
+<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
+]]></content>
+      <categories>
+        <category>实用技能</category>
+      </categories>
+      <tags>
+        <tag>科学上网</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>扩散模型阅读笔记</title>
     <url>//posts/2022/10/29/diffusion-model/</url>
     <content><![CDATA[<p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
@@ -86,57 +140,60 @@
       </tags>
   </entry>
   <entry>
-    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
-    <url>//posts/2022/08/14/kxsw/</url>
-    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
-<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
-<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
 <span id="more"></span>
 
-<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
-<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
-<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>在这里只简单科普一下基本概念.</p>
-<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
-<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
-<p>不使用工具前:</p>
-<p><code>用户 --|--&gt; 目标网站</code></p>
-<p>使用工具后:</p>
-<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
-<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
-<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
-<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
 <ul>
-<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
-<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
-<li>不改变系统代理: 保持原有系统代理设置不变.</li>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
 </ul>
-<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
-<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
-<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vUyCmd.png" alt="vUyCmd.png"></p>
-<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
-<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
-<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
-<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
-<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
-<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
-<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
-<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
-<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
-<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vUc2TA.png" alt="vUc2TA.png"></p>
-<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 首先需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$</p>
+<p>输出: $Y_{n \times q}~(q \leq p)$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.var(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>实用技能</category>
+        <category>数据分析</category>
       </categories>
       <tags>
-        <tag>科学上网</tag>
+        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
