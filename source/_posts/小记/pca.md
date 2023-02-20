@@ -162,9 +162,9 @@ $$
 
 ### 算法流程
 
-输入: $X_{n \times p}$, $q$
+输入: $X_{n \times p}$, $q~(q \leq p)$
 
-输出: $Y_{n \times q}~(q \leq p)$
+输出: $Y_{n \times q}$
 
 1. 对 $X$ 进行均值方差归一化.
 2. 求解 $X_{Cov} = \frac{1}{n}X^TX$.
