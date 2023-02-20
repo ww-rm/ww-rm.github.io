@@ -11,6 +11,51 @@
   </url>
   
   <url>
+    <loc>http://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/</loc>
+    
+    <lastmod>2023-02-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ww-rm.github.io/posts/2022/08/17/wast-ml/</loc>
+    
+    <lastmod>2023-02-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ww-rm.github.io/posts/2022/08/19/wast-nlp/</loc>
+    
+    <lastmod>2023-02-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/</loc>
+    
+    <lastmod>2023-02-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://ww-rm.github.io/posts/2022/08/16/wast-spider/</loc>
+    
+    <lastmod>2023-02-20</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/</loc>
     
     <lastmod>2023-02-20</lastmod>
@@ -102,51 +147,6 @@
   
   <url>
     <loc>http://ww-rm.github.io/posts/2022/08/18/wast-dl/</loc>
-    
-    <lastmod>2023-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/</loc>
-    
-    <lastmod>2023-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://ww-rm.github.io/posts/2022/08/17/wast-ml/</loc>
-    
-    <lastmod>2023-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://ww-rm.github.io/posts/2022/08/19/wast-nlp/</loc>
-    
-    <lastmod>2023-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/</loc>
-    
-    <lastmod>2023-02-20</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://ww-rm.github.io/posts/2022/08/16/wast-spider/</loc>
     
     <lastmod>2023-02-20</lastmod>
     
