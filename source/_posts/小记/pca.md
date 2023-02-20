@@ -162,7 +162,7 @@ $$
 
 ### 算法流程
 
-输入: $X_{n \times p}$
+输入: $X_{n \times p}$, $q$
 
 输出: $Y_{n \times q}~(q \leq p)$
 
