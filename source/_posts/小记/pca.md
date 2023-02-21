@@ -188,7 +188,7 @@ def pca(X: np.ndarray, n_compnents: int) -> np.ndarray:
     q = n_compnents
 
     # normalization
-    X = (X - np.mean(X, axis=0, keepdims=True)) / np.var(X, axis=0, keepdims=True)
+    X = (X - np.mean(X, axis=0, keepdims=True)) / np.std(X, axis=0, keepdims=True)
 
     # covariance of x
     X_cov = (1 / n) * X.T @ X
