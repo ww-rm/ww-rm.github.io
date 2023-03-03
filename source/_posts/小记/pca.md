@@ -207,3 +207,7 @@ def pca(X: np.ndarray, n_compnents: int) -> np.ndarray:
     Y = (W @ X.T).T
     return Y
 ```
+
+## 参考
+
+1. [A tutorial on principal components analysis](https://ourarchive.otago.ac.nz/bitstream/handle/10523/7534/OUCS-2002-12.pdf)
