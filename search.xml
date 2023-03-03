@@ -188,6 +188,10 @@
 <li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
 </ol>
 <h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
 ]]></content>
       <categories>
         <category>数据分析</category>
@@ -934,6 +938,20 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
       </tags>
   </entry>
 </search>
