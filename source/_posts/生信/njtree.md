@@ -241,20 +241,25 @@ def neighbor_joining(_otu: List[str], _dist: Dict[Tuple[int, int], float]):
         current_otus.add(n3)
 
     # join rest two otus
-    nodes[-2]["parent"] = len(nodes) - 1
-    nodes[-1]["children"] = nodes[-1]["children"] + (len(nodes) - 2, )
+    n2 = current_otus.pop()
+    n1 = current_otus.pop()
+    nodes[n1]["parent"] = n2
+    nodes[n2]["children"] = nodes[n2]["children"] + (n1, )
 
     return nodes, distances
 
 
 def draw_njtree(nodes: List[Dict[str, Any]], distances: Dict[Tuple[int, int], float]):
-    stack = [(0, 0, len(nodes) - 1, nodes[-1])]
+    stack = []
+    for i, node in enumerate(nodes):
+        if not node["parent"]:
+            stack.append((0, 0, i, node))
     while stack:
         level, count, idx, top = stack.pop()
         if level > 0:
             start = "├─" if count > 0 else "└─"
             print(
-                "│  "*(level - 1),
+                "│   "*(level - 1),
                 start,
                 "─",
                 top["name"],
@@ -286,16 +291,16 @@ if __name__ == "__main__":
 输出内容:
 
 ```plain
-#9
-├──#8(7.875)
-│  ├──e(2.000)
-│  └──d(3.000)
-├──#7(3.750)
-│  ├──#6(3.500)
-│  │  ├──b(4.000)
-│  │  └──a(1.000)
-│  └──c(2.000)
-└──f(5.000)
+#8
+├──#9(7.875)
+│   ├──#7(3.750)
+│   │   ├──#6(3.500)
+│   │   │   ├──b(4.000)
+│   │   │   └──a(1.000)
+│   │   └──c(2.000)
+│   └──f(5.000)
+├──e(2.000)
+└──d(3.000)
 ```
 
 ## 参考
