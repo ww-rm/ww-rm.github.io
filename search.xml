@@ -291,10 +291,10 @@
       </tags>
   </entry>
   <entry>
-    <title>NJ 树算法简介</title>
+    <title>NJ 树算法原理与实现</title>
     <url>//posts/2023/03/08/njtree/</url>
     <content><![CDATA[<p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
-<p>本文简要介绍 NJ 树算法的基本流程与计算方法.</p>
+<p>本文简要介绍 NJ 树算法的基本流程与计算方法, 并在文末提供对应的 <code>python</code> 实现.</p>
 <span id="more"></span>
 
 <h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="邻居"><a href="#邻居" class="headerlink" title="邻居"></a>邻居</h3><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVbSaR.png" alt="ppVbSaR.png"></p>
