@@ -241,8 +241,8 @@ def neighbor_joining(_otu: List[str], _dist: Dict[Tuple[int, int], float]):
         current_otus.add(n3)
 
     # join rest two otus
-    n2 = current_otus.pop()
     n1 = current_otus.pop()
+    n2 = current_otus.pop()
     nodes[n1]["parent"] = n2
     nodes[n2]["children"] = nodes[n2]["children"] + (n1, )
 
@@ -291,16 +291,16 @@ if __name__ == "__main__":
 输出内容:
 
 ```plain
-#8
-├──#9(7.875)
-│   ├──#7(3.750)
-│   │   ├──#6(3.500)
-│   │   │   ├──b(4.000)
-│   │   │   └──a(1.000)
-│   │   └──c(2.000)
-│   └──f(5.000)
-├──e(2.000)
-└──d(3.000)
+#9
+├──#8(7.875)
+│   ├──e(2.000)
+│   └──d(3.000)
+├──#7(3.750)
+│   ├──#6(3.500)
+│   │   ├──b(4.000)
+│   │   └──a(1.000)
+│   └──c(2.000)
+└──f(5.000)
 ```
 
 ## 参考
