@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树. 本文简要介绍 NJ 树算法的基本流程与计算方法.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NJ 树算法简介">
+<meta property="og:url" content="http://ww-rm.github.io/posts/2023/03/08/njtree/index.html">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树. 本文简要介绍 NJ 树算法的基本流程与计算方法.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2023/03/06/ppVbSaR.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/03/06/ppVqOHJ.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/03/06/ppVX9mD.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/03/06/ppVqOHJ.png">
+<meta property="article:published_time" content="2023-03-08T13:54:27.000Z">
+<meta property="article:modified_time" content="2023-03-08T15:29:48.753Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="聚类算法">
+<meta property="article:tag" content="生信">
+<meta property="article:tag" content="NJ 树">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2023/03/06/ppVbSaR.png">
+
+
+<link rel="canonical" href="http://ww-rm.github.io/posts/2023/03/08/njtree/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2023/03/08/njtree/","path":"/posts/2023/03/08/njtree/","title":"NJ 树算法简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>NJ 树算法简介 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">基本定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%BB%E5%B1%85"><span class="nav-number">1.1.</span> <span class="nav-text">邻居</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E5%8C%96%E6%A0%91%E6%9E%84%E5%BB%BA%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">进化树构建流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">算法流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%80%BB%E6%9E%9D%E9%95%BF"><span class="nav-number">2.1.</span> <span class="nav-text">计算总枝长</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E6%96%B0%E5%A2%9E%E6%9E%9D%E9%95%BF%E5%90%8E%E7%9A%84%E6%80%BB%E6%9E%9D%E9%95%BF"><span class="nav-number">2.2.</span> <span class="nav-text">计算新增枝长后的总枝长</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E6%96%B0%E5%9B%BE"><span class="nav-number">2.3.</span> <span class="nav-text">构造新图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.4.</span> <span class="nav-text">循环步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AC%E5%BC%8F%E5%8C%96%E7%AE%80"><span class="nav-number">3.</span> <span class="nav-text">公式化简</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4"><span class="nav-number">4.1.</span> <span class="nav-text">步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">4.2.</span> <span class="nav-text">代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">15</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ww-rm.github.io/posts/2023/03/08/njtree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="NJ 树算法简介 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NJ 树算法简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-08 21:54:27" itemprop="dateCreated datePublished" datetime="2023-03-08T21:54:27+08:00">2023-03-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">数据分析</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
+<p>本文简要介绍 NJ 树算法的基本流程与计算方法.</p>
+<span id="more"></span>
+
+<h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="邻居"><a href="#邻居" class="headerlink" title="邻居"></a>邻居</h3><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVbSaR.png" alt="ppVbSaR.png"></p>
+<p>首先是关于&quot;邻居&quot;的定义, 在 NJ 树中, 一对&quot;邻居&quot;指的是在一个无根分叉树中仅仅通过一个内部结点连接起来一对分类单元 (OTU).</p>
+<p>例如在上图中, $1$ 和 $2$ 可以视为一对邻居, 它们通过内部结点 $A$ 进行连结.</p>
+<p>进一步, 可以对分类单元进行组合, 形成新的更大的分类单元与邻居对, 例如, $&lt;1, 2&gt;$ 和 $3$ 可以作为一对邻居, 它们通过内部结点 $B$ 进行连结, $&lt;5, 6&gt;$ 和 $&lt;7, 8&gt;$ 可以作为一对邻居, 它们通过内部结点 $D$ 进行连结.</p>
+<h3 id="进化树构建流程"><a href="#进化树构建流程" class="headerlink" title="进化树构建流程"></a>进化树构建流程</h3><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
+<p>假设初始时没有任何分类单元聚集在一起, 算法起始于一个星状树, 如上图左侧所示. 算法的一步变换则是将左图变成了右图.</p>
+<p>在这些分类单元中, 分类单元之间有着不同的距离远近, 右侧的图将 $1$ 和 $2$ 聚合在了一起, 并形成了一个新结点 $Y$, 将 $1$, $2$ 视作一个整体, 则相比于左图, $&lt;1, 2&gt;$ 作为新分类单元整体替换了左图里的分类单元 $1$ 和 $2$, 整个星状树减少了 1 个分类单元, 增加了 1 条内部分支, 每次选择要聚合的邻居时, 都是使得聚合后的新树总枝长最短. 如此循环, 则可以一步一步减少星状树的分类单元, 直至分类单元只剩下 3 个, 内部分支增加至 $N - 3$ 个.</p>
+<p><img data-src="https://s1.ax1x.com/2023/03/06/ppVX9mD.png" alt="ppVX9mD.png"></p>
+<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
+<h3 id="计算总枝长"><a href="#计算总枝长" class="headerlink" title="计算总枝长"></a>计算总枝长</h3><p>还是以这张图为例, 设初始时共有 $N$ 个分类单元, 设 $D_{ij}$ 指分类单元 $i$ 和 $j$ 之间的距离, $L_{ab}$ 指结点 $a$ 和 $b$ 之间的枝长. 整个树的总枝长为:</p>
+<p>$$<br>S_O = \sum_{i=1}^{N}L_{iX}=\frac{1}{N-1}\sum_{i&lt;j}^{N}D_{ij}<br>$$</p>
+<p>也就是每个结点到 $X$ 的枝长总和, 等价于分类单元两两之间距离求和后除以 $N-1$, 因为每个枝相当于数了 $N-1$ 次.</p>
+<details class="note info"><summary><p>为什么是 $N-1$ ?</p>
+</summary>
+<p>$1$ 到 $X$ 的距离通过 $D_{ij}$ 数了 $N-1$ 次; $2$ 到 $X$ 的距离通过 $D_{12}$ 数了 $1$ 次, 通过 $D_{2j}$ 数了 $N-2$ 次, 以此类推.</p>
+
+</details>
+
+<h3 id="计算新增枝长后的总枝长"><a href="#计算新增枝长后的总枝长" class="headerlink" title="计算新增枝长后的总枝长"></a>计算新增枝长后的总枝长</h3><p>另一方面, 右侧图中 $X$ 和 $Y$ 结点之间的枝长计算方法为:</p>
+<p>$$<br>\begin{aligned}<br>  L_{XY} &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}{(D_{1k}+D_{2k})} - {(N-2)(L_{1X}+L_{2X})} - {2\sum_{i=3}^{N}{L_{iY}}} \right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}{(D_{1k}+D_{2k})} - {(N-2)D_{12}} - {\frac{2}{N-3}\sum_{3 \leq i&lt;j}^{N}D_{ij}} \right]<br>\end{aligned}<br>$$</p>
+<p>第一项 $\sum_{k=3}^{N}{(D_{1k}+D_{2k})}$ 代表从结点 $1,2$ 到其余所有结点的距离, 包括 $L_{XY}$. 公式的后两项是为了减去多算的那部分距离, $(L_{1X}+L_{2X})$ 是 $1,2$ 到 $X$ 的距离, $\sum_{i=3}^{N}{L_{iY}}$ 是其余点到 $Y$ 的距离.</p>
+<details class="note info"><summary><p>前面的那些系数怎么来的 ?</p>
+</summary>
+<p>在第一项中, $\sum_{k=3}^{N}{(D_{1k}+D_{2k})}$ 将 $1,2$ 到 $X$ 的边各数了 $N-2$ 次, $X$ 到 $Y$ 的边数了 $2(N-2)$ 次, $Y$ 到其余结点各数了 $2$ 次, 因此减去对应的次数后再除以 $2(N-2)$ 就是 $L_{XY}$ 的距离.</p>
+
+</details>
+
+<p>得到 $L_{XY}$ 之后, 可以计算右侧新图的总枝长:</p>
+<p>$$<br>\begin{aligned}<br>  S_{12} &amp;= L_{XY} + (L_{1X} + L_{2X}) + \sum_{i=3}^{N}L_{iY} \\<br>  ~ &amp;= \frac{1}{2(N-2)}\sum_{k=3}^{N}(D_{1k} + D_{2k}) + \frac{1}{2}D_{12} + \frac{1}{N-2}\sum_{3 \leq i&lt;j}^{N}D_{ij}<br>\end{aligned}<br>$$</p>
+<h3 id="构造新图"><a href="#构造新图" class="headerlink" title="构造新图"></a>构造新图</h3><p>通常来说, 并不会知道右图中 $1,2$ 究竟选择哪一对分类单元作为邻居, 因此需要计算所有的 $S_{ij}$, 并选择最小的那一对作为这一轮的选择.</p>
+<p>假设 $1,2$ 就是这一轮选择出来的邻居, 则它们两个和 $X$ 会形成新的分类单元 $&lt;1,2&gt;$, 然后计算新分类单元与其余分类单元的距离:</p>
+<p>$$<br>D_{&lt;1,2&gt;j} = \frac{1}{2}(D_{1j} + D_{2j}) \quad (3 \leq j \leq N)<br>$$</p>
+<p>得到新距离之后, 还需要计算新分类单元 $&lt;1,2&gt;$ 内部的距离 $L_{1X}, L_{2X}$.</p>
+<p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  L_{2X} &amp;= \frac{1}{2}(D_{12} + D_{2Z} - D_{1Z})<br>\end{aligned}<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\begin{aligned}<br>  D_{1Z} &amp;= \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} \\<br>  D_{2Z} &amp;= \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}<br>\end{aligned}<br>$$</p>
+<p>在这一组公式里面, $Z$ 代表除去 $1,2$ 的所有结点形成的&quot;假想结点&quot;, 即 $1$ 通过 $Z$ 这个整体与 $2$ 相连. 则 $1,2$ 与 $Z$ 的距离分别为各自到 $Z$ 中其余结点距离的平均值.</p>
+<h3 id="循环步骤"><a href="#循环步骤" class="headerlink" title="循环步骤"></a>循环步骤</h3><p>每选择一对合适的邻居, 则图上的分类单元就会减少 1 个, 直到图上的分类单元数量变成 3, 算法结束.</p>
+<h2 id="公式化简"><a href="#公式化简" class="headerlink" title="公式化简"></a>公式化简</h2><p>在实际计算之前, 需要对原始公式进行一些化简变形.</p>
+<p>首先是对每一轮都需要计算的新图总枝长公式进行变形, 以前文的 $S_{12}$ 为例:</p>
+<p>$$<br>\begin{aligned}<br>  S_{12} &amp;= \frac{1}{2(N-2)}\sum_{k=3}^{N}(D_{1k} + D_{2k}) + \frac{1}{2}D_{12} + \frac{1}{N-2}\sum_{3 \leq i&lt;j}^{N}D_{ij} \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}D_{1k} + \sum_{k=3}^{N}D_{2k} + (N-2)D_{12} + \sum_{3 \leq i&lt;j}^{N}D_{ij} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \left(D_{12} + \sum_{k=3}^{N}D_{1k}\right) - \left(D_{21} + \sum_{k=3}^{N}D_{2k}\right) + \left(D_{12} + \sum_{k=3}^{N}D_{1k} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right) + \left(D_{21} + \sum_{k=3}^{N}D_{2k} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k} + 2\sum_{i&lt;j}^{N}D_{ij}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] + \frac{1}{(N-2)}\sum_{i&lt;j}^{N}D_{ij} \\<br>  ~ &amp;= C_1\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] + C_2<br>\end{aligned}<br>$$</p>
+<p>经过化简之后, 可以看到, 只有方括号里的内容与要计算的邻居对 $1,2$ 有关, 其他量都可以看作这一轮的常量.</p>
+<p>因为最终 $S_{ij}$ 是用于比较最小值, 所以只需要保证 $S_{ij}$ 的相对大小不变, 又 $C_1, C_2$ 均大于 $0$, 于是可以在实际计算中忽略掉常数项, 从而简化计算, 从而有:</p>
+<p>$$<br>S_{ij} = (N-2)D_{ij} - M_i - M_j<br>$$</p>
+<p>其中:</p>
+<p>$$<br>M_i = \sum_{k \ne i}^{N}D_{ik}<br>$$</p>
+<p>仍以前文的图为例, 在选择出最合适的邻居 $1,2$ 后, 会合并成新的分类单元 $&lt;1,2&gt;$, 需要在新图里计算 $&lt;1,2&gt;$ 和其余点的距离值, 以及内部距离 $L_{1X}, L_{2X}$.</p>
+<p>新距离值就是 $D_{&lt;i,j&gt;k} = \frac{1}{2}(D_{ik} + D_{jk})$, 这里对 $L_{1X}, L_{2X}$ 进行变形化简.</p>
+<p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  ~ &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} - \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}\right) \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{i=3}^{N}D_{1i} - \sum_{i=3}^{N}D_{2i}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \left(D_{12} + \sum_{i=3}^{N}D_{1i}\right) - \left(D_{21} + \sum_{i=3}^{N}D_{2i}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] \\<br>  ~ &amp;= \frac{1}{2}D_{12} + \frac{1}{2(N-2)}\left(\sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right) \\<br>  L_{2X} &amp;= D_{12} - L_{1X}<br>\end{aligned}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\begin{aligned}<br>  L_{iX} &amp;= \frac{1}{2}\left(D_{ij} + \frac{1}{(N-2)}(M_i - M_j)\right) \\<br>  L_{jX} &amp;= D_{ij} - L_{iX}<br>\end{aligned}<br>$$</p>
+<p>变形成这样有个好处, 就是能够复用前面算 $S_{ij}$ 时计算的 $M_i$ 结果.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><ol>
+<li>依次计算当前轮次的 $M_i$ 值, 得到 $M$ 向量 $(M_1, M_2, \ldots, M_N)$.</li>
+<li>计算所有的 $S_{ij} ~ (1 \leq i &lt; j \leq N)$, 选择使 $S_{ij}$ 最小的 $i,j$ 作为这一轮的邻居.</li>
+<li>计算新分类单元 $&lt;i,j&gt;$ 对其余点的新距离 $D_{&lt;i,j&gt;k} ~ (1 \leq k \leq N, k \ne i, j)$.</li>
+<li>计算内部距离 $L_{iX}$ 和 $L_{jX}$.</li>
+<li>更新当前分类单元数 $N = N-1$, 如果 $N &gt; 3$, 则转步骤 1 继续, 否则结束计算.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">neighbor_joining</span>(<span class="params">_otu: <span class="type">List</span>[<span class="built_in">str</span>], _dist: <span class="type">Dict</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>], <span class="built_in">float</span>]</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        _otu: names of otus</span></span><br><span class="line"><span class="string">        _dist: distances dict for otus, (i, j) -&gt; dist, i less than j</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># init</span></span><br><span class="line">    nodes = [&#123;<span class="string">&quot;name&quot;</span>: e, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>&#125; <span class="keyword">for</span> e <span class="keyword">in</span> _otu]</span><br><span class="line">    distances = &#123;(i, j): <span class="built_in">float</span>(_dist[(i + <span class="number">1</span>, j + <span class="number">1</span>)]) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(nodes)) <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i + <span class="number">1</span>, <span class="built_in">len</span>(nodes))&#125;</span><br><span class="line"></span><br><span class="line">    current_otus = <span class="built_in">set</span>(<span class="built_in">range</span>(<span class="built_in">len</span>(nodes)))</span><br><span class="line">    <span class="keyword">while</span> <span class="built_in">len</span>(current_otus) &gt; <span class="number">2</span>:</span><br><span class="line">        <span class="comment"># calc M</span></span><br><span class="line">        distance_to_others = &#123;</span><br><span class="line">            otu: <span class="built_in">sum</span>(distances[(<span class="built_in">min</span>(otu, other), <span class="built_in">max</span>(otu, other))] <span class="keyword">for</span> other <span class="keyword">in</span> current_otus <span class="keyword">if</span> other != otu)</span><br><span class="line">            <span class="keyword">for</span> otu <span class="keyword">in</span> current_otus</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment"># choose min (i, j)</span></span><br><span class="line">        n1, n2 = <span class="built_in">min</span>(</span><br><span class="line">            ((i, j) <span class="keyword">for</span> i <span class="keyword">in</span> current_otus <span class="keyword">for</span> j <span class="keyword">in</span> current_otus <span class="keyword">if</span> i &lt; j),</span><br><span class="line">            key=<span class="keyword">lambda</span> x: (<span class="built_in">len</span>(current_otus) - <span class="number">2</span>) * distances[x] - distance_to_others[x[<span class="number">0</span>]] - distance_to_others[x[<span class="number">1</span>]]</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">        <span class="comment"># make new otu</span></span><br><span class="line">        n3 = <span class="built_in">len</span>(nodes)</span><br><span class="line">        otu_merge = &#123;<span class="string">&quot;name&quot;</span>: <span class="string">f&quot;#<span class="subst">&#123;n3&#125;</span>&quot;</span>, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>, <span class="string">&quot;children&quot;</span>: (n1, n2)&#125;</span><br><span class="line">        nodes[n1][<span class="string">&quot;parent&quot;</span>] = n3</span><br><span class="line">        nodes[n2][<span class="string">&quot;parent&quot;</span>] = n3</span><br><span class="line"></span><br><span class="line">        <span class="comment"># remove n1 &amp; n2</span></span><br><span class="line">        current_otus.remove(n1)</span><br><span class="line">        current_otus.remove(n2)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># update distances</span></span><br><span class="line">        <span class="keyword">for</span> k <span class="keyword">in</span> current_otus:</span><br><span class="line">            _k1 = (<span class="built_in">min</span>(n1, k), <span class="built_in">max</span>(n1, k))</span><br><span class="line">            _k2 = (<span class="built_in">min</span>(n2, k), <span class="built_in">max</span>(n2, k))</span><br><span class="line">            distances[(k, n3)] = (distances[_k1] + distances[_k2]) / <span class="number">2</span></span><br><span class="line">            distances.pop(_k1)</span><br><span class="line">            distances.pop(_k2)</span><br><span class="line"></span><br><span class="line">        distances[(n1, n3)] = (distances[(n1, n2)] + (distance_to_others[n1] - distance_to_others[n2]) / <span class="built_in">len</span>(current_otus)) / <span class="number">2</span></span><br><span class="line">        distances[(n2, n3)] = distances[(n1, n2)] - distances[(n1, n3)]</span><br><span class="line">        distances.pop((n1, n2))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># add n3</span></span><br><span class="line">        nodes.append(otu_merge)</span><br><span class="line">        current_otus.add(n3)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># join rest two otus</span></span><br><span class="line">    nodes[-<span class="number">2</span>][<span class="string">&quot;parent&quot;</span>] = <span class="built_in">len</span>(nodes) - <span class="number">1</span></span><br><span class="line">    nodes[-<span class="number">1</span>][<span class="string">&quot;children&quot;</span>] = nodes[-<span class="number">1</span>][<span class="string">&quot;children&quot;</span>] + (<span class="built_in">len</span>(nodes) - <span class="number">2</span>, )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> nodes, distances</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw_njtree</span>(<span class="params">nodes: <span class="type">List</span>[<span class="type">Dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>]], distances: <span class="type">Dict</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>], <span class="built_in">float</span>]</span>):</span><br><span class="line">    stack = [(<span class="number">0</span>, <span class="number">0</span>, <span class="built_in">len</span>(nodes) - <span class="number">1</span>, nodes[-<span class="number">1</span>])]</span><br><span class="line">    <span class="keyword">while</span> stack:</span><br><span class="line">        level, count, idx, top = stack.pop()</span><br><span class="line">        <span class="keyword">if</span> level &gt; <span class="number">0</span>:</span><br><span class="line">            start = <span class="string">&quot;├─&quot;</span> <span class="keyword">if</span> count &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="string">&quot;└─&quot;</span></span><br><span class="line">            <span class="built_in">print</span>(</span><br><span class="line">                <span class="string">&quot;│  &quot;</span>*(level - <span class="number">1</span>),</span><br><span class="line">                start,</span><br><span class="line">                <span class="string">&quot;─&quot;</span>,</span><br><span class="line">                top[<span class="string">&quot;name&quot;</span>],</span><br><span class="line">                <span class="string">f&quot;(<span class="subst">&#123;distances[(<span class="built_in">min</span>(idx, top[<span class="string">&#x27;parent&#x27;</span>]), <span class="built_in">max</span>(idx, top[<span class="string">&#x27;parent&#x27;</span>]))]:<span class="number">.3</span>f&#125;</span>)&quot;</span>,</span><br><span class="line">                sep=<span class="string">&quot;&quot;</span></span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(top[<span class="string">&quot;name&quot;</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i, child <span class="keyword">in</span> <span class="built_in">enumerate</span>(top.get(<span class="string">&quot;children&quot;</span>, [])):</span><br><span class="line">            stack.append((level + <span class="number">1</span>, i, child, nodes[child]))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    r = neighbor_joining(</span><br><span class="line">        [<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>, <span class="string">&quot;f&quot;</span>],</span><br><span class="line">        &#123;</span><br><span class="line">            (<span class="number">1</span>, <span class="number">2</span>): <span class="number">5</span>, (<span class="number">1</span>, <span class="number">3</span>): <span class="number">4</span>, (<span class="number">1</span>, <span class="number">4</span>): <span class="number">7</span>, (<span class="number">1</span>, <span class="number">5</span>): <span class="number">6</span>, (<span class="number">1</span>, <span class="number">6</span>): <span class="number">8</span>,</span><br><span class="line">            (<span class="number">2</span>, <span class="number">3</span>): <span class="number">7</span>, (<span class="number">2</span>, <span class="number">4</span>): <span class="number">10</span>, (<span class="number">2</span>, <span class="number">5</span>): <span class="number">9</span>, (<span class="number">2</span>, <span class="number">6</span>): <span class="number">11</span>,</span><br><span class="line">            (<span class="number">3</span>, <span class="number">4</span>): <span class="number">7</span>, (<span class="number">3</span>, <span class="number">5</span>): <span class="number">6</span>, (<span class="number">3</span>, <span class="number">6</span>): <span class="number">8</span>,</span><br><span class="line">            (<span class="number">4</span>, <span class="number">5</span>): <span class="number">5</span>, (<span class="number">4</span>, <span class="number">6</span>): <span class="number">9</span>,</span><br><span class="line">            (<span class="number">5</span>, <span class="number">6</span>): <span class="number">8</span>,</span><br><span class="line">        &#125;</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    draw_njtree(r[<span class="number">0</span>], r[<span class="number">1</span>])</span><br></pre></td></tr></table></figure>
+
+<p>输出内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#9</span><br><span class="line">├──#8(7.875)</span><br><span class="line">│  ├──e(2.000)</span><br><span class="line">│  └──d(3.000)</span><br><span class="line">├──#7(3.750)</span><br><span class="line">│  ├──#6(3.500)</span><br><span class="line">│  │  ├──b(4.000)</span><br><span class="line">│  │  └──a(1.000)</span><br><span class="line">│  └──c(2.000)</span><br><span class="line">└──f(5.000)</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9hY2FkZW1pYy5vdXAuY29tL21iZS9hcnRpY2xlLzQvNC80MDYvMTAyOTY2NA==">The Neighbor-joining Method: A New Method for Reconstructing Phylogenetic Trees<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%81%9A%E7%B1%BB%E7%AE%97%E6%B3%95/" rel="tag"><i class="fa fa-tag"></i> 聚类算法</a>
+              <a href="/tags/%E7%94%9F%E4%BF%A1/" rel="tag"><i class="fa fa-tag"></i> 生信</a>
+              <a href="/tags/NJ-%E6%A0%91/" rel="tag"><i class="fa fa-tag"></i> NJ 树</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2023/02/27/win10activation/" rel="prev" title="Windows 10 激活工具">
+                  <i class="fa fa-chevron-left"></i> Windows 10 激活工具
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">67k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:01</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdn.jsdelivr.net/npm/canvas-nest.js@2.0.4/dist/canvas-nest.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/hexo-generator-searchdb@1.4.0/dist/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
