@@ -257,10 +257,9 @@ def draw_njtree(nodes: List[Dict[str, Any]], distances: Dict[Tuple[int, int], fl
     while stack:
         level, count, idx, top = stack.pop()
         if level > 0:
-            start = "├──" if count > 0 else "└──"
             print(
                 "│   "*(level - 1),
-                start,
+                "├──" if count > 0 else "└──",
                 top["name"],
                 f"({distances[(min(idx, top['parent']), max(idx, top['parent']))]:.3f})",
                 sep=""
