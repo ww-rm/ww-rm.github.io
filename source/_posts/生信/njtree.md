@@ -189,7 +189,11 @@ $$
 ```python
 from typing import *
 
-def neighbor_joining(_otu: List[str], _dist: Dict[Tuple[int, int], float]):
+import numpy as np
+from rich import progress
+
+
+def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
     """
     Args:
         _otu: names of otus
@@ -198,58 +202,69 @@ def neighbor_joining(_otu: List[str], _dist: Dict[Tuple[int, int], float]):
 
     # init
     nodes = [{"name": e, "parent": None} for e in _otu]
-    distances = {(i, j): float(_dist[(i + 1, j + 1)]) for i in range(len(nodes)) for j in range(i + 1, len(nodes))}
+    n = len(nodes)
+    node_distances: np.ndarray = np.array(_dist, dtype=np.float_)
+    node_distances = np.concatenate([node_distances, np.zeros((n - 2, n))], axis=0)
+    node_distances = np.concatenate([node_distances, np.zeros((2 * n - 2, n - 2))], axis=1)
 
-    current_otus = set(range(len(nodes)))
-    while len(current_otus) > 2:
+    current_otus = list(range(n))
+    for _ in progress.track(range(n - 2)):
+        n = len(current_otus)
+        otu_distances = node_distances[current_otus, ...][..., current_otus]
+
         # calc M
-        distance_to_others = {
-            otu: sum(distances[(min(otu, other), max(otu, other))] for other in current_otus if other != otu)
-            for otu in current_otus
-        }
+        distance_to_others: np.ndarray = np.sum(otu_distances, axis=0)
+
+        # calc S
+        graph_branch_length = (n - 2) * otu_distances - distance_to_others.reshape(-1, 1) - distance_to_others.reshape(1, -1)
 
         # choose min (i, j)
-        n1, n2 = min(
-            ((i, j) for i in current_otus for j in current_otus if i < j),
-            key=lambda x: (len(current_otus) - 2) * distances[x] - distance_to_others[x[0]] - distance_to_others[x[1]]
-        )
+        otu1, otu2 = 0, 1
+        min_length = graph_branch_length[otu1, otu2]
+        for i in range(n):
+            for j in range(i + 1, n):
+                length = graph_branch_length[i, j]
+                if length < min_length:
+                    otu1, otu2 = i, j
+                    min_length = length
 
         # make new otu
+        n1, n2 = current_otus[otu1], current_otus[otu2]
         n3 = len(nodes)
-        otu_merge = {"name": f"#{n3}", "parent": None, "children": (n1, n2)}
+        new_node = {"name": f"#{n3}", "parent": None, "children": (n1, n2)}
         nodes[n1]["parent"] = n3
         nodes[n2]["parent"] = n3
+
+        # update distances
+        node_distances[n3, ...] = (node_distances[n1, ...] + node_distances[n2, ...]) / 2
+        node_distances[..., n3] = (node_distances[..., n1] + node_distances[..., n2]) / 2
+        node_distances[n3, n3] = 0
+
+        node_distances[n1, n3] = node_distances[n3, n1] = \
+            (node_distances[n1, n2] + (distance_to_others[otu1] - distance_to_others[otu2]) / (n - 2)) / 2
+        node_distances[n2, n3] = node_distances[n3, n2] = \
+            node_distances[n1, n2] - node_distances[n1, n3]
 
         # remove n1 & n2
         current_otus.remove(n1)
         current_otus.remove(n2)
 
-        # update distances
-        for k in current_otus:
-            _k1 = (min(n1, k), max(n1, k))
-            _k2 = (min(n2, k), max(n2, k))
-            distances[(k, n3)] = (distances[_k1] + distances[_k2]) / 2
-            distances.pop(_k1)
-            distances.pop(_k2)
-
-        distances[(n1, n3)] = (distances[(n1, n2)] + (distance_to_others[n1] - distance_to_others[n2]) / len(current_otus)) / 2
-        distances[(n2, n3)] = distances[(n1, n2)] - distances[(n1, n3)]
-        distances.pop((n1, n2))
-
         # add n3
-        nodes.append(otu_merge)
-        current_otus.add(n3)
+        nodes.append(new_node)
+        current_otus.append(n3)
 
-    # join rest two otus
-    n1 = current_otus.pop()
+    # join rest two otus, otu2 is the last node
     n2 = current_otus.pop()
+    n1 = current_otus.pop()
     nodes[n1]["parent"] = n2
     nodes[n2]["children"] = nodes[n2]["children"] + (n1, )
 
-    return nodes, distances
+    return nodes, node_distances
 
 
-def draw_njtree(nodes: List[Dict[str, Any]], distances: Dict[Tuple[int, int], float]):
+def draw_njtree(nodes: List[Dict[str, Any]], distances: np.ndarray):
+    lines = []
+
     stack = []
     for i, node in enumerate(nodes):
         if not node["parent"]:
@@ -265,43 +280,45 @@ def draw_njtree(nodes: List[Dict[str, Any]], distances: Dict[Tuple[int, int], fl
                     level_branchs.append("    " * (_level - pre_level - 1) + "│   ")
                     pre_level = _level
             level_branchs.append("    " * (level - pre_level - 1) + ("├──" if count > 0 else "└──"))
-            edge_length = f"({distances[(min(idx, top['parent']), max(idx, top['parent']))]:.3f})"
-            print(*level_branchs, top["name"], edge_length, sep="")
+            edge_length = f"({distances[idx, top['parent']]:.6f})"
+            lines.append("".join((*level_branchs, top["name"], edge_length)))
         else:
-            print(top["name"])
+            lines.append(top["name"])
 
         for i, child in enumerate(top.get("children", [])):
             stack.append((level + 1, i, child, nodes[child]))
+
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
     r = neighbor_joining(
         ["a", "b", "c", "d", "e", "f"],
-        {
-            (1, 2): 5, (1, 3): 4, (1, 4): 7, (1, 5): 6, (1, 6): 8,
-            (2, 3): 7, (2, 4): 10, (2, 5): 9, (2, 6): 11,
-            (3, 4): 7, (3, 5): 6, (3, 6): 8,
-            (4, 5): 5, (4, 6): 9,
-            (5, 6): 8,
-        }
+        [[0, 5, 4, 7, 6, 8],
+         [5, 0, 7, 10, 9, 11],
+         [4, 7, 0, 7, 6, 8],
+         [7, 10, 7, 0, 5, 9],
+         [6, 9, 6, 5, 0, 8],
+         [8, 11, 8, 9, 8, 0]]
     )
 
-    draw_njtree(r[0], r[1])
+    tree = draw_njtree(r[0], r[1])
+    print(tree)
 ```
 
 输出内容:
 
 ```plain
 #9
-├──#8(7.875)
-│   ├──e(2.000)
-│   └──d(3.000)
-├──#7(3.750)
-│   ├──#6(3.500)
-│   │   ├──b(4.000)
-│   │   └──a(1.000)
-│   └──c(2.000)
-└──f(5.000)
+├──#8(7.875000)
+│   ├──e(2.000000)
+│   └──d(3.000000)
+├──#7(3.750000)
+│   ├──#6(3.500000)
+│   │   ├──b(4.000000)
+│   │   └──a(1.000000)
+│   └──c(2.000000)
+└──f(5.000000)
 ```
 
 ## 参考
