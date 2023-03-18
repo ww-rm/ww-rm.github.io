@@ -345,9 +345,6 @@
 <p>$$<br>M_i = \sum_{k \ne i}^{N}D_{ik}<br>$$</p>
 <p>仍以前文的图为例, 在选择出最合适的邻居 $1,2$ 后, 会合并成新的分类单元 $&lt;1,2&gt;$, 需要在新图里计算 $&lt;1,2&gt;$ 和其余点的距离值, 以及内部距离 $L_{1X}, L_{2X}$.</p>
 <p>新距离值就是 $D_{&lt;i,j&gt;k} = \frac{1}{2}(D_{ik} + D_{jk})$, 这里对 $L_{1X}, L_{2X}$ 进行变形化简.</p>
-<blockquote>
-<p>在后文代码实现中, 计算 $X$ 与其他点的距离时, 需要按照 $D_{Xk} = \frac{1}{2}(D_{ik} + D_{jk} - D_{ij})$ 来计算, 要额外减去内部结点的距离.</p>
-</blockquote>
 <p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  ~ &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} - \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}\right) \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{i=3}^{N}D_{1i} - \sum_{i=3}^{N}D_{2i}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \left(D_{12} + \sum_{i=3}^{N}D_{1i}\right) - \left(D_{21} + \sum_{i=3}^{N}D_{2i}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] \\<br>  ~ &amp;= \frac{1}{2}D_{12} + \frac{1}{2(N-2)}\left(\sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right) \\<br>  L_{2X} &amp;= D_{12} - L_{1X}<br>\end{aligned}<br>$$</p>
 <p>因此有:</p>
 <p>$$<br>\begin{aligned}<br>  L_{iX} &amp;= \frac{1}{2}\left(D_{ij} + \frac{1}{(N-2)}(M_i - M_j)\right) \\<br>  L_{jX} &amp;= D_{ij} - L_{iX}<br>\end{aligned}<br>$$</p>
