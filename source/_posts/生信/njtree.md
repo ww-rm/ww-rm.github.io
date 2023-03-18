@@ -205,47 +205,53 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
     # init
     nodes = [{"name": e, "parent": None} for e in _otu]
     n = len(nodes)
-    node_distances: np.ndarray = np.array(_dist, dtype=np.float_)
-    node_distances = np.concatenate([node_distances, np.zeros((n - 2, n))], axis=0)
-    node_distances = np.concatenate([node_distances, np.zeros((2 * n - 2, n - 2))], axis=1)
+
+    # otu_distances: used to record otu distances
+    otu_distances: np.ndarray = np.array(_dist, dtype=np.float_)
+    otu_distances = np.concatenate([otu_distances, np.zeros((n - 2, n))], axis=0)
+    otu_distances = np.concatenate([otu_distances, np.zeros((2 * n - 2, n - 2))], axis=1)
+
+    # node_distances: used to record node distances (branch lengths)
+    node_distances = np.array(otu_distances)
 
     current_otus = list(range(n))
     for _ in progress.track(range(n - 2)):
         n = len(current_otus)
-        otu_distances = node_distances[current_otus, ...][..., current_otus]
+        otu_dists = otu_distances[current_otus, ...][..., current_otus]
 
         # calc M
-        distance_to_others: np.ndarray = np.sum(otu_distances, axis=0)
+        otu_dists_to_others: np.ndarray = np.sum(otu_dists, axis=0)
 
         # calc S
-        graph_branch_length = (n - 2) * otu_distances - distance_to_others.reshape(-1, 1) - distance_to_others.reshape(1, -1)
+        graph_branch_length = (n - 2) * otu_dists - otu_dists_to_others.reshape(-1, 1) - otu_dists_to_others.reshape(1, -1)
 
         # choose min (i, j)
-        otu1, otu2 = 0, 1
-        min_length = graph_branch_length[otu1, otu2]
-        for i in range(n):
-            for j in range(i + 1, n):
-                length = graph_branch_length[i, j]
-                if length < min_length:
-                    otu1, otu2 = i, j
-                    min_length = length
+        otu1, otu2 = min(((i, j) for i in range(n) for j in range(i + 1, n)), key=lambda x: graph_branch_length[x])
 
-        # make new otu
-        n1, n2 = current_otus[otu1], current_otus[otu2]
-        n3 = len(nodes)
+        # make new otu and node
+        n1, n2, n3 = current_otus[otu1], current_otus[otu2], len(nodes)
         new_node = {"name": f"#{n3}", "parent": None, "children": (n1, n2)}
         nodes[n1]["parent"] = n3
         nodes[n2]["parent"] = n3
 
-        # update distances
-        # IMPORTANT: the distances from n3 to others need to substract the inner distance n1 to n2
+        # update otu distances
+        otu_distances[n3, ...] = (otu_distances[n1, ...] + otu_distances[n2, ...]) / 2
+        otu_distances[..., n3] = (otu_distances[..., n1] + otu_distances[..., n2]) / 2
+        otu_distances[n3, [n1, n2, n3]] = 0
+        otu_distances[[n1, n2, n3], n3] = 0
+
+        # update node distances
+        node_dists = node_distances[current_otus, ...][..., current_otus]
+        node_dists_to_others: np.ndarray = np.sum(node_dists, axis=0)
+
+        # IMPORTANT: the node distances from n3 to others need to substract the inner node distance n1 to n2
         node_distances[n3, ...] = (node_distances[n1, ...] + node_distances[n2, ...] - node_distances[n1, n2]) / 2
         node_distances[..., n3] = (node_distances[..., n1] + node_distances[..., n2] - node_distances[n1, n2]) / 2
         node_distances[n3, n3:] = 0
         node_distances[n3:, n3] = 0
 
         node_distances[n1, n3] = node_distances[n3, n1] = \
-            (node_distances[n1, n2] + (distance_to_others[otu1] - distance_to_others[otu2]) / (n - 2)) / 2
+            (node_distances[n1, n2] + (node_dists_to_others[otu1] - node_dists_to_others[otu2]) / (n - 2)) / 2
         node_distances[n2, n3] = node_distances[n3, n2] = \
             node_distances[n1, n2] - node_distances[n1, n3]
 
