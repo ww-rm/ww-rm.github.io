@@ -151,6 +151,8 @@ $$
 
 新距离值就是 $D_{<i,j>k} = \frac{1}{2}(D_{ik} + D_{jk})$, 这里对 $L_{1X}, L_{2X}$ 进行变形化简.
 
+> 在后文代码实现中, 计算 $X$ 与其他点的距离时, 需要按照 $D_{Xk} = \frac{1}{2}(D_{ik} + D_{jk} - D_{ij})$ 来计算, 要额外减去内部结点的距离.
+
 $$
 \begin{aligned}
   L_{1X} &= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\\\
@@ -236,9 +238,11 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
         nodes[n2]["parent"] = n3
 
         # update distances
-        node_distances[n3, ...] = (node_distances[n1, ...] + node_distances[n2, ...]) / 2
-        node_distances[..., n3] = (node_distances[..., n1] + node_distances[..., n2]) / 2
-        node_distances[n3, n3] = 0
+        # IMPORTANT: the distances from n3 to others need to substract the inner distance n1 to n2
+        node_distances[n3, ...] = (node_distances[n1, ...] + node_distances[n2, ...] - node_distances[n1, n2]) / 2
+        node_distances[..., n3] = (node_distances[..., n1] + node_distances[..., n2] - node_distances[n1, n2]) / 2
+        node_distances[n3, n3:] = 0
+        node_distances[n3:, n3] = 0
 
         node_distances[n1, n3] = node_distances[n3, n1] = \
             (node_distances[n1, n2] + (distance_to_others[otu1] - distance_to_others[otu2]) / (n - 2)) / 2
@@ -310,11 +314,11 @@ if __name__ == "__main__":
 
 ```plain
 #9
-├──#8(7.875000)
+├──#8(1.000000)
 │   ├──e(2.000000)
 │   └──d(3.000000)
-├──#7(3.750000)
-│   ├──#6(3.500000)
+├──#7(1.000000)
+│   ├──#6(1.000000)
 │   │   ├──b(4.000000)
 │   │   └──a(1.000000)
 │   └──c(2.000000)
