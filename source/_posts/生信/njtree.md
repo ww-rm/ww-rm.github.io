@@ -197,7 +197,7 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
     """
     Args:
         _otu: names of otus
-        _dist: distances dict for otus, (i, j) -> dist, i less than j
+        _dist: distances matrix for otus
     """
 
     # init
