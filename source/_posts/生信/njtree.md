@@ -262,7 +262,7 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
     n1 = current_otus.pop()
 
     nr = len(nodes)
-    root_node = {"name": f"#{n3}", "parent": None, "children": (n1, n2, n3)}
+    root_node = {"name": f"#{nr}", "parent": None, "children": (n1, n2, n3)}
     nodes[n1]["parent"] = nr
     nodes[n2]["parent"] = nr
     nodes[n3]["parent"] = nr
