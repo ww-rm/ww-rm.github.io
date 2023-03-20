@@ -197,7 +197,7 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
     """
     Args:
         _otu: names of otus
-        _dist: distances matrix for otus
+        _dist: distances dict for otus, (i, j) -> dist, i less than j
     """
 
     # init
@@ -209,19 +209,19 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
     otu_distances = np.concatenate([otu_distances, np.zeros((n - 2, n))], axis=0)
     otu_distances = np.concatenate([otu_distances, np.zeros((2 * n - 2, n - 2))], axis=1)
 
-    # node_distances: used to record node distances (branch lengths)
-    node_distances = np.array(otu_distances)
+    # branch_lengths: used to record branch lengths
+    branch_lengths = np.zeros_like(otu_distances)
 
     current_otus = list(range(n))
-    for _ in progress.track(range(n - 2)):
+    for _ in progress.track(range(n - 3)):
         n = len(current_otus)
         otu_dists = otu_distances[current_otus, ...][..., current_otus]
 
         # calc M
-        otu_dists_to_others: np.ndarray = np.sum(otu_dists, axis=0)
+        otu_dists_to_others: np.ndarray = np.sum(otu_dists, axis=0) / (n - 2)
 
         # calc S
-        graph_branch_length = (n - 2) * otu_dists - otu_dists_to_others.reshape(-1, 1) - otu_dists_to_others.reshape(1, -1)
+        graph_branch_length = otu_dists - otu_dists_to_others.reshape(-1, 1) - otu_dists_to_others.reshape(1, -1)
 
         # choose min (i, j)
         otu1, otu2 = min(((i, j) for i in range(n) for j in range(i + 1, n)), key=lambda x: graph_branch_length[x])
@@ -238,20 +238,15 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
         otu_distances[n3, [n1, n2, n3]] = 0
         otu_distances[[n1, n2, n3], n3] = 0
 
-        # update node distances
-        node_dists = node_distances[current_otus, ...][..., current_otus]
-        node_dists_to_others: np.ndarray = np.sum(node_dists, axis=0)
-
-        # IMPORTANT: the node distances from n3 to others need to substract the inner node distance n1 to n2
-        node_distances[n3, ...] = (node_distances[n1, ...] + node_distances[n2, ...] - node_distances[n1, n2]) / 2
-        node_distances[..., n3] = (node_distances[..., n1] + node_distances[..., n2] - node_distances[n1, n2]) / 2
-        node_distances[n3, n3:] = 0
-        node_distances[n3:, n3] = 0
-
-        node_distances[n1, n3] = node_distances[n3, n1] = \
-            (node_distances[n1, n2] + (node_dists_to_others[otu1] - node_dists_to_others[otu2]) / (n - 2)) / 2
-        node_distances[n2, n3] = node_distances[n3, n2] = \
-            node_distances[n1, n2] - node_distances[n1, n3]
+        # update branch lengths
+        branch_lengths[n1, n3] = branch_lengths[n3, n1] = (
+            otu_distances[n1, n2] + otu_dists_to_others[otu1] - otu_dists_to_others[otu2]
+            - otu_distances[nodes[n1].get("children", (n1, n1))]
+        ) / 2
+        branch_lengths[n2, n3] = branch_lengths[n3, n2] = (
+            otu_distances[n2, n1] + otu_dists_to_others[otu2] - otu_dists_to_others[otu1]
+            - otu_distances[nodes[n2].get("children", (n2, n2))]
+        ) / 2
 
         # remove n1 & n2
         current_otus.remove(n1)
@@ -261,16 +256,36 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
         nodes.append(new_node)
         current_otus.append(n3)
 
-    # join rest two otus, otu2 is the last node
+    # join rest three otus
+    n3 = current_otus.pop()
     n2 = current_otus.pop()
     n1 = current_otus.pop()
-    nodes[n1]["parent"] = n2
-    nodes[n2]["children"] = nodes[n2]["children"] + (n1, )
 
-    return nodes, node_distances
+    nr = len(nodes)
+    root_node = {"name": f"#{n3}", "parent": None, "children": (n1, n2, n3)}
+    nodes[n1]["parent"] = nr
+    nodes[n2]["parent"] = nr
+    nodes[n3]["parent"] = nr
+
+    branch_lengths[n1, nr] = branch_lengths[nr, n1] = (
+        otu_distances[n1, n2] + otu_distances[n1, n3] - otu_distances[n2, n3]
+        - otu_distances[nodes[n1].get("children", (n1, n1))]
+    ) / 2
+    branch_lengths[n2, nr] = branch_lengths[nr, n2] = (
+        otu_distances[n2, n1] + otu_distances[n2, n3] - otu_distances[n1, n3]
+        - otu_distances[nodes[n2].get("children", (n2, n2))]
+    ) / 2
+    branch_lengths[n3, nr] = branch_lengths[nr, n3] = (
+        otu_distances[n3, n1] + otu_distances[n3, n2] - otu_distances[n1, n2]
+        - otu_distances[nodes[n3].get("children", (n3, n3))]
+    ) / 2
+
+    nodes.append(root_node)
+
+    return nodes, branch_lengths
 
 
-def draw_njtree(nodes: List[Dict[str, Any]], distances: np.ndarray):
+def draw_njtree(nodes: List[Dict[str, Any]], branch_lengths: np.ndarray):
     lines = []
 
     stack = []
@@ -288,7 +303,7 @@ def draw_njtree(nodes: List[Dict[str, Any]], distances: np.ndarray):
                     level_branchs.append("    " * (_level - pre_level - 1) + "│   ")
                     pre_level = _level
             level_branchs.append("    " * (level - pre_level - 1) + ("├──" if count > 0 else "└──"))
-            edge_length = f"({distances[idx, top['parent']]:.6f})"
+            edge_length = f"({branch_lengths[idx, top['parent']]:.6f})"
             lines.append("".join((*level_branchs, top["name"], edge_length)))
         else:
             lines.append(top["name"])
