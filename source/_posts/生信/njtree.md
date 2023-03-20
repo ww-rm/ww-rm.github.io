@@ -128,8 +128,8 @@ $$
   ~ &= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}D_{1k} + \sum_{k=3}^{N}D_{2k} + (N-2)D_{12} + \sum_{3 \leq i<j}^{N}D_{ij} + \sum_{3 \leq i<j}^{N}D_{ij}\right] \\\\
   ~ &= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \left(D_{12} + \sum_{k=3}^{N}D_{1k}\right) - \left(D_{21} + \sum_{k=3}^{N}D_{2k}\right) + \left(D_{12} + \sum_{k=3}^{N}D_{1k} + \sum_{3 \leq i<j}^{N}D_{ij}\right) + \left(D_{21} + \sum_{k=3}^{N}D_{2k} + \sum_{3 \leq i<j}^{N}D_{ij}\right)\right] \\\\
   ~ &= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k} + 2\sum_{i<j}^{N}D_{ij}\right] \\\\
-  ~ &= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] + \frac{1}{(N-2)}\sum_{i<j}^{N}D_{ij} \\\\
-  ~ &= C_1\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] + C_2
+  ~ &= \frac{1}{2}\left[D_{12} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right] + \frac{1}{(N-2)}\sum_{i<j}^{N}D_{ij} \\\\
+  ~ &= C_1\left[D_{12} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right] + C_2
 \end{aligned}
 $$
 
@@ -138,13 +138,13 @@ $$
 因为最终 $S_{ij}$ 是用于比较最小值, 所以只需要保证 $S_{ij}$ 的相对大小不变, 又 $C_1, C_2$ 均大于 $0$, 于是可以在实际计算中忽略掉常数项, 从而简化计算, 从而有:
 
 $$
-S_{ij} = (N-2)D_{ij} - M_i - M_j
+S_{ij} = D_{ij} - D_{iZ} - D_{jZ}
 $$
 
 其中:
 
 $$
-M_i = \sum_{k \ne i}^{N}D_{ik}
+D_{iZ} = \frac{1}{(N-2)}\sum_{k \ne i}^{N}D_{ik}
 $$
 
 仍以前文的图为例, 在选择出最合适的邻居 $1,2$ 后, 会合并成新的分类单元 $<1,2>$, 需要在新图里计算 $<1,2>$ 和其余点的距离值, 以及内部距离 $L_{1X}, L_{2X}$.
@@ -158,8 +158,8 @@ $$
   ~ &= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{i=3}^{N}D_{1i} - \sum_{i=3}^{N}D_{2i}\right] \\\\
   ~ &= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \left(D_{12} + \sum_{i=3}^{N}D_{1i}\right) - \left(D_{21} + \sum_{i=3}^{N}D_{2i}\right)\right] \\\\
   ~ &= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] \\\\
-  ~ &= \frac{1}{2}D_{12} + \frac{1}{2(N-2)}\left(\sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right) \\\\
-  L_{2X} &= D_{12} - L_{1X}
+  ~ &= \frac{1}{2}\left(D_{12} + \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right) \\\\
+  L_{2X} &= \frac{1}{2}\left(D_{12} + \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} \right)
 \end{aligned}
 $$
 
@@ -167,12 +167,12 @@ $$
 
 $$
 \begin{aligned}
-  L_{iX} &= \frac{1}{2}\left(D_{ij} + \frac{1}{(N-2)}(M_i - M_j)\right) \\\\
-  L_{jX} &= D_{ij} - L_{iX}
+  L_{iX} &= \frac{1}{2}\left(D_{ij} + D_{iZ} - D_{jZ}\right) \\\\
+  L_{jX} &= \frac{1}{2}\left(D_{ij} + D_{jZ} - D_{iZ}\right)
 \end{aligned}
 $$
 
-变形成这样有个好处, 就是能够复用前面算 $S_{ij}$ 时计算的 $M_i$ 结果.
+变形成这样有个好处, 就是能够复用前面算 $S_{ij}$ 时计算的 $D_{iZ}$ 结果.
 
 ## 代码实现
 
@@ -217,7 +217,7 @@ def neighbor_joining(_otu: List[str], _dist: List[List[float]]):
         n = len(current_otus)
         otu_dists = otu_distances[current_otus, ...][..., current_otus]
 
-        # calc M
+        # calc D to Z
         otu_dists_to_others: np.ndarray = np.sum(otu_dists, axis=0) / (n - 2)
 
         # calc S
