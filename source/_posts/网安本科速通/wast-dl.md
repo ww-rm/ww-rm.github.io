@@ -107,7 +107,7 @@ class MyNetwork(nn.Module):
         )
         _size = ((intput_size - 4) // 2 - 2) // 2
         self.fc = nn.Sequential(
-            nn.Flatten(),
+            nn.Flatten(1),
             nn.Dropout(),
             nn.Linear(64*_size*_size, output_size)      # 64*6*6 -> 10
         )
