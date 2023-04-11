@@ -51,7 +51,7 @@ date: 2023-04-11 09:53:19
 
 当遇到无法通过 `Mesh` 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:
 
-![ppLZ3eU.png](https://s1.ax1x.com/2023/04/11/ppLZ3eU.png)
+![ppLHg1I.png](https://s1.ax1x.com/2023/04/11/ppLHg1I.png)
 
 ```python
 import shutil
@@ -201,7 +201,7 @@ def choose_image(image_path):
 PNG_DIR = Path("./Texture2D")
 OBJ_DIR = Path("./Mesh")
 
-EXPORT_DIR = Path("./test")
+EXPORT_DIR = Path("./paintings")
 
 if __name__ == "__main__":
     count = 0
@@ -244,43 +244,43 @@ if __name__ == "__main__":
 放一些还原前和还原后的图作对比~夹带私货~.
 
 {% note danger guanghui_h.png %}
-![ppLeqED.png](https://s1.ax1x.com/2023/04/11/ppLeqED.png)
-![ppLmurV.png](https://s1.ax1x.com/2023/04/11/ppLmurV.png)
+![ppLI7y8.png](https://s1.ax1x.com/2023/04/11/ppLI7y8.png)
+![ppLIDRx.png](https://s1.ax1x.com/2023/04/11/ppLIDRx.png)
 🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹
 <div style="text-align:center;">🌹{% curtain %}为光辉老婆献上 99 朵玫瑰!{% endcurtain %}🌹</div>
 {% endnote %}
 
 {% note info guanghui.png %}
-![ppLeIjx.png](https://s1.ax1x.com/2023/04/11/ppLeIjx.png)
-![ppLmECj.png](https://s1.ax1x.com/2023/04/11/ppLmECj.png)
+![ppLITQf.png](https://s1.ax1x.com/2023/04/11/ppLITQf.png)
+![ppLIBJ1.png](https://s1.ax1x.com/2023/04/11/ppLIBJ1.png)
 {% endnote %}
 
 {% note info guanghui_2.png %}
-![ppLe7DK.png](https://s1.ax1x.com/2023/04/11/ppLe7DK.png)
-![ppLmFUg.png](https://s1.ax1x.com/2023/04/11/ppLmFUg.png)
+![ppLIoSP.png](https://s1.ax1x.com/2023/04/11/ppLIoSP.png)
+![ppLI0iR.png](https://s1.ax1x.com/2023/04/11/ppLI0iR.png)
 {% endnote %}
 
 {% note info guanghui_3.png %}
-![ppLeTu6.png](https://s1.ax1x.com/2023/04/11/ppLeTu6.png)
-![ppLmk5Q.png](https://s1.ax1x.com/2023/04/11/ppLmk5Q.png)
+![ppLI5Wt.png](https://s1.ax1x.com/2023/04/11/ppLI5Wt.png)
+![ppLIdo9.png](https://s1.ax1x.com/2023/04/11/ppLIdo9.png)
 {% endnote %}
 
 {% note info guanghui_4.png %}
-![ppLe5g1.png](https://s1.ax1x.com/2023/04/11/ppLe5g1.png)
-![ppLmCb8.png](https://s1.ax1x.com/2023/04/11/ppLmCb8.png)
+![ppLIhFA.png](https://s1.ax1x.com/2023/04/11/ppLIhFA.png)
+![ppLIadJ.png](https://s1.ax1x.com/2023/04/11/ppLIadJ.png)
 {% endnote %}
 
 {% note info guanghui_5.png %}
-![ppLeHHO.png](https://s1.ax1x.com/2023/04/11/ppLeHHO.png)
-![ppLmevq.png](https://s1.ax1x.com/2023/04/11/ppLmevq.png)
+![ppLIHOS.png](https://s1.ax1x.com/2023/04/11/ppLIHOS.png)
+![ppLIrz6.png](https://s1.ax1x.com/2023/04/11/ppLIrz6.png)
 {% endnote %}
 
 {% note info guanghui_idol.png %}
-![ppLeO4H.png](https://s1.ax1x.com/2023/04/11/ppLeO4H.png)
-![ppLyIk8.png](https://s1.ax1x.com/2023/04/11/ppLyIk8.png)
+![ppLHstH.png](https://s1.ax1x.com/2023/04/11/ppLHstH.png)
+![ppLI6sO.png](https://s1.ax1x.com/2023/04/11/ppLI6sO.png)
 {% endnote %}
 
 {% note info guanghui_idol_n.png %}
-![ppLeLUe.png](https://s1.ax1x.com/2023/04/11/ppLeLUe.png)
-![ppLy4Tf.png](https://s1.ax1x.com/2023/04/11/ppLy4Tf.png)
+![ppLIqeg.png](https://s1.ax1x.com/2023/04/11/ppLIqeg.png)
+![ppLIyQK.png](https://s1.ax1x.com/2023/04/11/ppLIyQK.png)
 {% endnote %}
