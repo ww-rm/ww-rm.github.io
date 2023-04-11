@@ -20,12 +20,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程. 本文介绍碧蓝航线立绘拆包和还原基本思路, 文末附有完整的批量还原 python 脚本.">
+    <meta name="description" content="因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程. 本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 python 脚本.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="碧蓝航线立绘拆包与批量还原">
+<meta property="og:title" content="碧蓝航线立绘提取与批量还原">
 <meta property="og:url" content="http://ww-rm.github.io/posts/2023/04/11/blhx-painting/index.html">
 <meta property="og:site_name" content="暗香画楼">
-<meta property="og:description" content="因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程. 本文介绍碧蓝航线立绘拆包和还原基本思路, 文末附有完整的批量还原 python 脚本.">
+<meta property="og:description" content="因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程. 本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 python 脚本.">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s1.ax1x.com/2023/04/11/ppLZ3eU.png">
 <meta property="og:image" content="https://s1.ax1x.com/2023/04/11/ppLeqED.png">
@@ -45,7 +45,7 @@
 <meta property="og:image" content="https://s1.ax1x.com/2023/04/11/ppLeLUe.png">
 <meta property="og:image" content="https://s1.ax1x.com/2023/04/11/ppLy4Tf.png">
 <meta property="article:published_time" content="2023-04-11T01:53:19.000Z">
-<meta property="article:modified_time" content="2023-04-11T03:21:56.259Z">
+<meta property="article:modified_time" content="2023-04-11T03:52:21.418Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="工具">
 <meta property="article:tag" content="碧蓝航线">
@@ -58,10 +58,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2023/04/11/blhx-painting/","path":"/posts/2023/04/11/blhx-painting/","title":"碧蓝航线立绘拆包与批量还原"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://ww-rm.github.io/posts/2023/04/11/blhx-painting/","path":"/posts/2023/04/11/blhx-painting/","title":"碧蓝航线立绘提取与批量还原"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>碧蓝航线立绘拆包与批量还原 | 暗香画楼</title>
+<title>碧蓝航线立绘提取与批量还原 | 暗香画楼</title>
   
 
 
@@ -164,7 +164,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%8B%86%E5%8C%85"><span class="nav-number">1.</span> <span class="nav-text">资源拆包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E5%8E%9F%E6%80%9D%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">还原思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">基本流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">3.2.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E5%8E%9F%E6%95%88%E6%9E%9C"><span class="nav-number">5.</span> <span class="nav-text">还原效果</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%8F%90%E5%8F%96"><span class="nav-number">1.</span> <span class="nav-text">资源提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">文件格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E5%8E%9F%E6%80%9D%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">还原思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">基本流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">3.2.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%98%E5%8E%9F%E6%95%88%E6%9E%9C"><span class="nav-number">5.</span> <span class="nav-text">还原效果</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -251,12 +251,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="碧蓝航线立绘拆包与批量还原 | 暗香画楼">
+      <meta itemprop="name" content="碧蓝航线立绘提取与批量还原 | 暗香画楼">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          碧蓝航线立绘拆包与批量还原
+          碧蓝航线立绘提取与批量还原
         </h1>
 
         <div class="post-meta-container">
@@ -312,10 +312,10 @@
     
     <div class="post-body" itemprop="articleBody">
         <p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
-<p>本文介绍碧蓝航线立绘拆包和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
+<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
 <span id="more"></span>
 
-<h2 id="资源拆包"><a href="#资源拆包" class="headerlink" title="资源拆包"></a>资源拆包</h2><p>拆包的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
+<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
 <h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
 <p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
 <ul>
