@@ -53,3 +53,14 @@ hexo.extend.tag.register('subsubtabs', postTabs, true);
 const postVideo = require('./video');
 
 hexo.extend.tag.register('video', postVideo);
+
+// Define by ww-rm
+const blackCurtain = require('./black-curtain')(hexo);
+
+hexo.extend.tag.register('blackcurtain', blackCurtain, true);
+hexo.extend.tag.register('curtain', blackCurtain, true);
+
+const blurText = require('./blur-text')(hexo);
+
+hexo.extend.tag.register('blurtext', blurText, true);
+hexo.extend.tag.register('blur', blurText, true);
