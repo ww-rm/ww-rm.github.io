@@ -650,7 +650,7 @@
     <title>再遇文本分类</title>
     <url>//posts/2022/08/19/wast-nlp/</url>
     <content><![CDATA[<p>这是<a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">网安本科速通</a>系列的最后一篇了, 主题还是 <code>pytorch</code>, 但是问题换成了 <code>NLP</code>, 并且还是以经典的文本分类作为示例, 数据集使用与前面<a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>相同的一份小数据集, 方便进行比较.</p>
-<p>阅读本篇前需要先看前两篇, <a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>与<a href="/posts/2022/08/17/wast-dl/">基于 PyTorch 的手写数字分类</a>. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.</p>
+<p>阅读本篇前需要先看前两篇, <a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>与<a href="/posts/2022/08/18/wast-dl/">基于 PyTorch 的手写数字分类</a>. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.</p>
 <span id="more"></span>
 
 <h2 id="环境准备与项目结构"><a href="#环境准备与项目结构" class="headerlink" title="环境准备与项目结构"></a>环境准备与项目结构</h2><p>环境使用 <code>pytorch</code> 环境.</p>
