@@ -1,5 +1,5 @@
 ---
-title: 碧蓝航线立绘拆包与批量还原
+title: 碧蓝航线立绘提取与批量还原
 tags:
   - "工具"
   - "碧蓝航线"
@@ -11,13 +11,13 @@ date: 2023-04-11 09:53:19
 
 因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.
 
-本文介绍碧蓝航线立绘拆包和还原基本思路, 文末附有完整的批量还原 `python` 脚本.
+本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 `python` 脚本.
 
 <!-- more -->
 
-## 资源拆包
+## 资源提取
 
-拆包的方法网上很多, 不再赘述, 用 [AssetStudio](https://github.com/Perfare/AssetStudio/releases) 导出安装包和热更新里的 `painting` 内容, 得到 里面的 `Mesh` 和 `Texture2D` 资源即可进行下一步还原.
+提取的方法网上很多, 不再赘述, 用 [AssetStudio](https://github.com/Perfare/AssetStudio/releases) 导出安装包和热更新里的 `painting` 内容, 得到 里面的 `Mesh` 和 `Texture2D` 资源即可进行下一步还原.
 
 ## 文件格式
 
