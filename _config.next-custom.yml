@@ -30,7 +30,6 @@ custom_file_path:
   #mixin: source/_data/mixins.styl
   #style: source/_data/styles.styl
 
-
 # ---------------------------------------------------------------
 # Scheme Settings
 # ---------------------------------------------------------------
@@ -43,7 +42,6 @@ scheme: Gemini
 
 # Dark Mode
 darkmode: false
-
 
 # ---------------------------------------------------------------
 # Site Information Settings
@@ -85,7 +83,6 @@ open_graph:
     #fb_admins: <fb:admin_id>
     #fb_app_id: <fb:app_id>
 
-
 # ---------------------------------------------------------------
 # Menu Settings
 # ---------------------------------------------------------------
@@ -110,7 +107,6 @@ menu:
 menu_settings:
   icons: true
   badges: false
-
 
 # ---------------------------------------------------------------
 # Sidebar Settings
@@ -195,7 +191,6 @@ toc:
   # Maximum heading depth of generated toc.
   max_depth: 6
 
-
 # ---------------------------------------------------------------
 # Footer Settings
 # See: https://theme-next.js.org/docs/theme-settings/footer
@@ -233,7 +228,6 @@ footer:
     gongan_num:
     # The icon for gongan beian. See: http://www.beian.gov.cn/portal/download
     gongan_icon_url:
-
 
 # ---------------------------------------------------------------
 # Post Settings
@@ -305,7 +299,6 @@ post_edit:
 # Available values: left | right | false
 post_navigation: left
 
-
 # ---------------------------------------------------------------
 # Custom Page Settings
 # See: https://theme-next.js.org/docs/theme-settings/custom-pages
@@ -331,7 +324,6 @@ calendar:
   showDeleted: false
   singleEvents: true
   maxResults: 250
-
 
 # ---------------------------------------------------------------
 # Misc Theme Settings
@@ -411,7 +403,6 @@ github_banner:
   permalink: https://github.com/ww-rm/
   title: Follow me on GitHub
 
-
 # ---------------------------------------------------------------
 # Font Settings
 # ---------------------------------------------------------------
@@ -463,7 +454,6 @@ font:
     external: true
     family:
 
-
 # ---------------------------------------------------------------
 # SEO Settings
 # See: https://theme-next.js.org/docs/theme-settings/seo
@@ -493,7 +483,6 @@ yandex_site_verification:
 # Baidu Webmaster tools verification.
 # See: https://ziyuan.baidu.com/site
 baidu_site_verification:
-
 
 # ---------------------------------------------------------------
 # Third Party Plugins & Services Settings
@@ -561,7 +550,6 @@ quicklink:
   timeout: 3000
   # Default (true) will attempt to use the fetch() API if supported (rather than link[rel=prefetch]).
   priority: true
-
 
 # ---------------------------------------------------------------
 # Comments Settings
@@ -648,7 +636,6 @@ utterances:
 # For more information: https://posativ.org/isso/
 isso: # <data_isso>
 
-
 # ---------------------------------------------------------------
 # Post Widgets & Content Sharing Services
 # See: https://theme-next.js.org/docs/third-party-services/post-widgets
@@ -658,13 +645,12 @@ isso: # <data_isso>
 # To get your ID visit https://widgetpack.com
 rating:
   enable: false
-  id:     # <app_id>
-  color:  "#fc6423"
+  id: # <app_id>
+  color: "#fc6423"
 
 # AddThis Share. See: https://www.addthis.com
 # Go to https://www.addthis.com/dashboard to customize your tools.
 add_this_id:
-
 
 # ---------------------------------------------------------------
 # Statistics and Analytics
@@ -728,7 +714,6 @@ busuanzi_count:
   post_views: true
   post_views_icon: far fa-eye
 
-
 # ---------------------------------------------------------------
 # Search Services
 # See: https://theme-next.js.org/docs/third-party-services/search-services
@@ -754,7 +739,6 @@ local_search:
   unescape: false
   # Preload the search data when the page loads.
   preload: false
-
 
 # ---------------------------------------------------------------
 # Chat Services
@@ -789,7 +773,6 @@ tidio:
 gitter:
   enable: false
   room:
-
 
 # ---------------------------------------------------------------
 # Tags Settings
@@ -834,7 +817,6 @@ mermaid:
     light: default
     dark: dark
 
-
 # ---------------------------------------------------------------
 # Animation Settings
 # ---------------------------------------------------------------
@@ -873,7 +855,6 @@ canvas_ribbon:
   alpha: 0.6 # The transparency of the ribbon
   zIndex: -1 # The display level of the ribbon
 
-
 # Canvas nest
 # For more information: https://github.com/hustcc/canvas-nest.js
 canvas_nest:
@@ -883,7 +864,6 @@ canvas_nest:
   opacity: 1.0
   count: 150
   zIndex: -1
-
 
 # ---------------------------------------------------------------
 # CDN Settings
