@@ -20,32 +20,32 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="本文是对知乎的一篇文章扩散模型 Diffusion Models - 原理篇的摘要性总结.">
+    <meta name="description" content="本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 The Illustrated Transformer, 本文内符号也沿用此文. 主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="扩散模型阅读笔记">
-<meta property="og:url" content="https://ww-rm.github.io/posts/2022/10/29/diffusion-model/">
+<meta property="og:title" content="Transformer 的训练与推理">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2023/08/29/transformer/">
 <meta property="og:site_name" content="暗香画楼">
-<meta property="og:description" content="本文是对知乎的一篇文章扩散模型 Diffusion Models - 原理篇的摘要性总结.">
+<meta property="og:description" content="本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 The Illustrated Transformer, 本文内符号也沿用此文. 主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg">
-<meta property="article:published_time" content="2022-10-29T14:45:56.000Z">
+<meta property="og:image" content="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png">
+<meta property="og:image" content="https://jalammar.github.io/images/t/transformer_decoding_2.gif">
+<meta property="article:published_time" content="2023-08-29T06:48:13.000Z">
 <meta property="article:modified_time" content="2023-08-29T07:45:28.169Z">
 <meta property="article:author" content="ww-rm">
-<meta property="article:tag" content="图像生成">
-<meta property="article:tag" content="扩散模型">
-<meta property="article:tag" content="Diffusion Model">
+<meta property="article:tag" content="Transformer">
+<meta property="article:tag" content="NLP">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg">
+<meta name="twitter:image" content="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png">
 
 
-<link rel="canonical" href="https://ww-rm.github.io/posts/2022/10/29/diffusion-model/">
+<link rel="canonical" href="https://ww-rm.github.io/posts/2023/08/29/transformer/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2022/10/29/diffusion-model/","path":"/posts/2022/10/29/diffusion-model/","title":"扩散模型阅读笔记"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/08/29/transformer/","path":"/posts/2023/08/29/transformer/","title":"Transformer 的训练与推理"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>扩散模型阅读笔记 | 暗香画楼</title>
+<title>Transformer 的训练与推理 | 暗香画楼</title>
   
 
 
@@ -148,7 +148,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E5%90%91%E6%89%A9%E6%95%A3"><span class="nav-number">2.</span> <span class="nav-text">前向扩散</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%86%E5%90%91%E6%89%A9%E6%95%A3"><span class="nav-number">3.</span> <span class="nav-text">逆向扩散</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97"><span class="nav-number">4.</span> <span class="nav-text">损失计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E7%BC%96%E7%A8%8B%E6%97%B6%E7%9A%84%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.</span> <span class="nav-text">一些编程时的步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%8F%82%E6%95%B0"><span class="nav-number">5.1.</span> <span class="nav-text">基本参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%AE%A1%E7%AE%97%E7%9A%84%E5%80%BC"><span class="nav-number">5.2.</span> <span class="nav-text">预计算的值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">5.3.</span> <span class="nav-text">设计一个神经网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95"><span class="nav-number">5.4.</span> <span class="nav-text">损失计算方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.5.</span> <span class="nav-text">训练步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A8%E7%90%86%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.6.</span> <span class="nav-text">推理步骤</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%8A%A8%E5%9B%9E%E9%A1%BE"><span class="nav-number">1.</span> <span class="nav-text">数据流动回顾</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">训练过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">预测过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -222,7 +222,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2022/10/29/diffusion-model/">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/08/29/transformer/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
@@ -235,12 +235,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="扩散模型阅读笔记 | 暗香画楼">
+      <meta itemprop="name" content="Transformer 的训练与推理 | 暗香画楼">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          扩散模型阅读笔记
+          Transformer 的训练与推理
         </h1>
 
         <div class="post-meta-container">
@@ -251,7 +251,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-10-29 22:45:56" itemprop="dateCreated datePublished" datetime="2022-10-29T22:45:56+08:00">2022-10-29</time>
+      <time title="创建时间：2023-08-29 14:48:13" itemprop="dateCreated datePublished" datetime="2023-08-29T14:48:13+08:00">2023-08-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -277,14 +277,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.2k</span>
+      <span>1.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
+      <span>3 分钟</span>
     </span>
 </div>
 
@@ -295,56 +295,29 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
+        <p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
+<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
 <span id="more"></span>
 
-<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p><img data-src="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg" alt="x5xJiR.jpg"></p>
-<p>前向过程为一张图片 $x_0$ 在经过 $T$ 轮高斯噪声叠加后会变成一张近似纯高斯噪声图 $x_T$, 而网络则是学习反向过程中的参数, 能够通过 $x_T$ 一步步还原出 $x_0$.</p>
-<h2 id="前向扩散"><a href="#前向扩散" class="headerlink" title="前向扩散"></a>前向扩散</h2><p>设共进行 $T$ 轮扩散, 有 $\beta_1 &lt; \beta_2 &lt; \dots &lt; \beta_T (0 &lt; \beta_i &lt; 1)$ 的方差参数.</p>
-<p>设 $q(x_t|x_{t-1})$ 服从高斯分布, 且:</p>
-<p>$$<br>x_t(z;x_{t-1},t)=\sqrt{1-\beta_t}x_{t-1}+\sqrt{\beta_t}z \sim N(\sqrt{1-\beta_t}x_{t-1}, \beta_t)<br>$$</p>
-<p>设 $\alpha_t=1-\beta_t,\bar{\alpha}_t=\prod_{i=1}^t\alpha_t$, 则有:</p>
-<p>$$<br>x_t(\epsilon_t;x_0,t)=\sqrt{\bar{\alpha}_t}x_0+\sqrt{1-\bar{\alpha}_t}\epsilon_t \sim N(\sqrt{\bar{\alpha}_t}x_0, 1-\bar{\alpha}_t)<br>$$</p>
-<p>则给定 $x_0,t$, 以及高斯随机量 $\epsilon_t$, 可以直接得到对应的 $x_t$.</p>
-<h2 id="逆向扩散"><a href="#逆向扩散" class="headerlink" title="逆向扩散"></a>逆向扩散</h2><p>假设 $p(x_{t-1}|x_t;\theta)$ 也服从高斯分布, 则有:</p>
-<p>$$<br>x_{t-1}(z;x_t,t) = \mu_t(x_t, t;\theta)+\sigma_t(x_t, t;\theta)z \sim N(\mu_t(x_t, t;\theta), \sigma^2_t(x_t, t;\theta))<br>$$</p>
-<p>$p(x_{t-1}|x_t;\theta)$ 无法用公式表示, 但是 $q(x_{t-1}|x_t,x_0)$ 可以, 有:</p>
-<p>$$<br>\mu_t = \frac{1}{\sqrt{\alpha_t}}(x_t-\frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_t)<br>$$</p>
-<p>$$<br>\sigma_t = \sqrt{\frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t}<br>$$</p>
-<p>$$<br>x_{t-1}(z;x_t,\epsilon_t,t) = \mu_t+\sigma_tz \sim N(\frac{1}{\sqrt{\alpha_t}}(x_t-\frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_t), \frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t)<br>$$</p>
-<p>(该公式不含 $x_0$, 但是需要有 $x_0$ 的前提下得到, 由前向的公式替换掉了, $\epsilon_t$ 与前向中的 $\epsilon_t$ 是同一个值)</p>
-<p>其中, $\sigma_t$ 可近似认为等于 $\sqrt{\beta_t}$.</p>
-<h2 id="损失计算"><a href="#损失计算" class="headerlink" title="损失计算"></a>损失计算</h2><p>目标是能够让 $q$ 和 $p$ 尽可能的接近, 用 $q$ 去近似 $p$.</p>
-<p>损失需要算 $q(x_{t-1}|x_t,x_0)$ 和 $p(x_{t-1}|x_t;\theta)$ 之间的 KL 散度(分布相似程度), 一通计算之后得到:</p>
-<p>$$<br>Loss = E((\mu_t(x_t, \epsilon_t, t)-\mu_t(x_t,t;\theta))^2)<br>$$</p>
-<p>优化后:</p>
-<p>$$<br>Loss = E((\epsilon_t-\epsilon_t(x_t,t;\theta))^2)<br>$$</p>
-<p>可以看出来实际推理中, 只有均值中的 $\epsilon_t$ 是未知的, 因此需要一个网络去猜测 $\epsilon_t$, 使得 $q(x_{t-1}|x_t,x_0)$ 可以近似替代 $p(x_{t-1}|x_t;\theta)$, 来还原 $t-1$ 步的数据.</p>
-<p>优化后是去拟合加入的噪声数据, 也就是一个网络输入了 $t$ 时刻的加噪图, 能估计出添加的噪声变量 $\epsilon_t=\epsilon_t(x_t,t;\theta)$, 进而使用 $q(x_{t-1}|x_t,x_0)$ 得到 $x_{t-1}$.</p>
-<h2 id="一些编程时的步骤"><a href="#一些编程时的步骤" class="headerlink" title="一些编程时的步骤"></a>一些编程时的步骤</h2><h3 id="基本参数"><a href="#基本参数" class="headerlink" title="基本参数"></a>基本参数</h3><ul>
-<li><p>$T$</p>
-<p>扩散步数, 至少 $100$ 以上.</p>
-</li>
-<li><p>$\beta_1 &lt; \beta_2 &lt; \dots &lt; \beta_T (0 &lt; \beta_i &lt; 1)$</p>
-<p>每一轮扩散的方差, 在满足大小关系的情况下, 尽可能的小, 通常在 $10^{-3}$ 的数量级左右. (应该步骤越多, 方差越精细?)</p>
-</li>
-</ul>
-<h3 id="预计算的值"><a href="#预计算的值" class="headerlink" title="预计算的值"></a>预计算的值</h3><ul>
-<li>$\alpha_t=1-\beta_t$</li>
-<li>$\bar{\alpha}_t=\prod_{i=1}^t\alpha_t$</li>
-</ul>
-<h3 id="设计一个神经网络"><a href="#设计一个神经网络" class="headerlink" title="设计一个神经网络"></a>设计一个神经网络</h3><p>输入:</p>
-<ul>
-<li>$x_t$: 训练集样本经过 $t$ 轮正向扩散后的结果.</li>
-<li>$t$: 扩散步数</li>
-</ul>
-<p>输出:</p>
-<ul>
-<li>$\epsilon_t(\theta)$: 噪声估计值</li>
-</ul>
-<h3 id="损失计算方法"><a href="#损失计算方法" class="headerlink" title="损失计算方法"></a>损失计算方法</h3><p>产生一个随机噪声 $\epsilon_t$, 通过网络得到估计值 $\epsilon_t(\theta)$, 计算两者之间的均方差 (MSE损失).</p>
-<h3 id="训练步骤"><a href="#训练步骤" class="headerlink" title="训练步骤"></a>训练步骤</h3><p>给定训练集 $X$, 去拟合每个样本 $x$ 在每个步骤 $t$ 时刻的噪声估计.</p>
-<h3 id="推理步骤"><a href="#推理步骤" class="headerlink" title="推理步骤"></a>推理步骤</h3><p>给定一个真实样本 $x_t$, 指定其 $t$ 值, 根据网络得到噪声估计 $\epsilon_t(\theta)$, 计算出 $\mu_t$ 和 $\sigma_t$, 采样一个随机标准高斯噪声 $z$, 计算 $x_{t-1} = \mu_t+\sigma_tz$</p>
+<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
+<p>这张图是一个简略的 Transformer 整体框架图.</p>
+<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
+<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
+<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
+<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
+<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
+<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
+<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
+<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
+<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
+<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
+<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
+<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
+<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
+<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
 
     </div>
 
@@ -354,23 +327,19 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" rel="tag"><i class="fa fa-tag"></i> 图像生成</a>
-              <a href="/tags/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 扩散模型</a>
-              <a href="/tags/Diffusion-Model/" rel="tag"><i class="fa fa-tag"></i> Diffusion Model</a>
+              <a href="/tags/Transformer/" rel="tag"><i class="fa fa-tag"></i> Transformer</a>
+              <a href="/tags/NLP/" rel="tag"><i class="fa fa-tag"></i> NLP</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/posts/2022/08/19/wast-afterword/" rel="prev" title=""网安本科速通" 系列后记">
-                  <i class="fa fa-chevron-left"></i> "网安本科速通" 系列后记
+                <a href="/posts/2023/05/17/idm-cracked/" rel="prev" title="IDM 破解版">
+                  <i class="fa fa-chevron-left"></i> IDM 破解版
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/2022/12/07/simple-ecc/" rel="next" title="ECC 算法原理简介与实现">
-                  ECC 算法原理简介与实现 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
