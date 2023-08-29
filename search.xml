@@ -121,6 +121,114 @@
       </tags>
   </entry>
   <entry>
+    <title>基于 Spine 的碧蓝航线桌宠</title>
+    <url>//posts/2023/08/30/desktopsprite/</url>
+    <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
+<span id="more"></span>
+
+<h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">https://github.com/ww-rm/DesktopSprite<i class="fa fa-external-link-alt"></i></span></p>
+<p>这是一个适用于 <code>Windows</code> 系统下的桌面精灵, 目前已在 <code>Win10</code>, <code>Win11</code> 下基本测试通过.</p>
+<ul>
+<li>轻量的性能监视器: 可以显示电脑占用和网速监视浮窗</li>
+</ul>
+<p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
+<ul>
+<li>可自定义桌宠: 支持基于 <code>spine v3.6.53</code> 导出的碧蓝航线全角色小人动画</li>
+</ul>
+<p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
+<h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 下载 <code>Latest</code> 版本的 <code>zip</code> 压缩包, 解压后双击运行里面的 <code>DesktopSprite.msi</code> 安装文件进行安装, 可以自定义安装位置.</p>
+<p>安装完成后, 开始菜单和桌面都会出现程序启动图标. 双击运行, 通知栏会有程序图标, 首次运行桌面默认会显示自带的碧蓝小人角色, 且有一个性能浮窗.</p>
+<h3 id="更换角色"><a href="#更换角色" class="headerlink" title="更换角色"></a>更换角色</h3><p>右键通知区域程序图标, 可以进入设置界面, 设置对应的 <code>atlas</code> 和 <code>skel/json</code> 文件, 然后应用/确定设置即可完成更换.</p>
+<p>需要注意 <code>*.atlas</code>, <code>*.png</code>, <code>*.skel/*.json</code> 三份文件需要互相匹配, 且 <code>*.atlas</code> 和 <code>*.png</code> 文件名必须相同 (选择 <code>atlas</code> 的时候会自动填入 <code>png</code> 文件).</p>
+<p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
+<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/config.png" alt="config.png"></p>
+<h5 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h5><ul>
+<li>开机启动: 程序是否开机启动</li>
+<li>整点报时: 一个小功能, 可以在整点时间弹出通知提醒</li>
+<li>提示声音: 整点报时是否有声音</li>
+<li>气泡图标路径: 整点报时气泡通知使用的图标</li>
+</ul>
+<h5 id="显示设置"><a href="#显示设置" class="headerlink" title="显示设置"></a>显示设置</h5><p>这部分的设置是针对性能浮窗的.</p>
+<ul>
+<li>显示浮窗: 是在桌面显示浮窗还是隐藏到通知区域图标使用鼠标悬停显示</li>
+<li>显示占用: 是否在浮窗上显示处理器和内存占用百分比</li>
+<li>显示网速: 是否在浮窗上显示上传和下载速度</li>
+<li>深色主题: 设置浮窗主题颜色</li>
+<li>透明度: 设置浮窗透明度百分比, 0 为完全透明, 100 为完全不透明</li>
+</ul>
+<h5 id="精灵设置"><a href="#精灵设置" class="headerlink" title="精灵设置"></a>精灵设置</h5><p>这部分的设置是针对桌宠的</p>
+<ul>
+<li>atlas, png, skel 路径: 选择要使用的 SD 小人模型, 三个文件要互相匹配</li>
+<li>显示精灵: 是否在桌面上显示桌宠, 不显示的情况下不会有桌宠的资源占用</li>
+<li>鼠标穿透: 是否让桌宠鼠标穿透, 穿透情况下桌宠无视鼠标和键盘输入</li>
+<li>最大帧率: 设置桌宠的渲染帧率, 对电脑性能有较高影响</li>
+<li>透明度: 设置桌宠透明度, 配合鼠标穿透可以设置挂件效果</li>
+<li>缩放: 设置桌宠的大小</li>
+</ul>
+<h5 id="Spine-设置"><a href="#Spine-设置" class="headerlink" title="Spine 设置"></a>Spine 设置</h5><p>该部分设置桌宠动画小人不同事件和动画的映射关系, 可选内容由加载的 spine 模型决定.</p>
+<ul>
+<li>待机: 无操作的普通情况</li>
+<li>拖动: 鼠标拖动桌宠时触发</li>
+<li>任务中: 没想好</li>
+<li>睡觉: 电脑无输入闲置一段时间后触发</li>
+<li>闲置: 电脑低负载时随机触发</li>
+<li>触摸: 单击桌宠触发</li>
+<li>摸头: 鼠标中键下滚</li>
+<li>任务完成: 任务结束后, 和任务中是连着的</li>
+<li>跳舞: 鼠标中键上滚</li>
+<li>过载: 电脑高负载时随机触发</li>
+</ul>
+<h5 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h5><ul>
+<li>打开数据文件夹: 打开程序数据文件所在的文件夹</li>
+</ul>
+<h4 id="快捷操作"><a href="#快捷操作" class="headerlink" title="快捷操作"></a>快捷操作</h4><ul>
+<li>右键菜单: 有两个, 一个是浮窗/通知区域图标的, 另一个是桌宠的, 大部分选项都是设置面板里有的, 是快捷操作</li>
+<li>精灵复位: 用来预防一些未知的特殊情况, 如一些不可知的显示器分辨率问题导致的精灵错位消失, 点击之后精灵会回到原点, 屏幕的正下方</li>
+<li>双击桌宠: 让角色转向</li>
+</ul>
+<h4 id="通知区域图标"><a href="#通知区域图标" class="headerlink" title="通知区域图标"></a>通知区域图标</h4><ul>
+<li>右键单击: 显示右键菜单</li>
+<li>左键双击: 显示桌宠</li>
+</ul>
+<h2 id="一些开发细节"><a href="#一些开发细节" class="headerlink" title="一些开发细节"></a>一些开发细节</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ul>
+<li><code>Win10+</code></li>
+<li><code>Visual Studio 2022</code></li>
+<li><code>C++14</code></li>
+<li><a href="https://github.com/EsotericSoftware/spine-runtimes/tree/3.6"><code>spine-runtime</code></a></li>
+<li><a href="https://github.com/open-source-parsers/jsoncpp"><code>jsoncpp</code></a></li>
+</ul>
+<p>其中 <code>spine-runtime</code> 和 <code>jsoncpp</code> 均是以源码方式引入并编译的, 内部有一些相应的适配性修改.</p>
+<p><code>spine-runtime</code> 版本固定了是 <code>v3.6.53</code>, 所以几乎只支持碧蓝航线导出的小人资源.</p>
+<h3 id="动画渲染"><a href="#动画渲染" class="headerlink" title="动画渲染"></a>动画渲染</h3><p>桌宠使用 2D 图形库绘制, 具体实现原理参考 <span class="exturl" data-url="aHR0cDovL3poLmVzb3Rlcmljc29mdHdhcmUuY29tL3NwaW5lLWM=">spine-c 运行时文档<i class="fa fa-external-link-alt"></i></span>, 标准实现需要使用纹理映射等计算机图形学操作<del>但是我不会</del>, 所以纹理映射是通过 2D 库的纹理笔刷来实现的.</p>
+<p>创建纹理笔刷之后, 在绘制顶点三角形时, 需要自己手动计算纹理到模型的仿射矩阵, 然后设置笔刷的变换矩阵, 就能完成纹理映射. 关键函数是这个 <code>GetAffineMatrix</code>:</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">GetAffineMatrix</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> x1, <span class="type">float</span> y1, <span class="type">float</span> x2, <span class="type">float</span> y2, <span class="type">float</span> x3, <span class="type">float</span> y3, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> u1, <span class="type">float</span> v1, <span class="type">float</span> u2, <span class="type">float</span> v2, <span class="type">float</span> u3, <span class="type">float</span> v3, </span></span></span><br><span class="line"><span class="params"><span class="function">    Matrix* m</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>能够计算两个平面三角形 <code>UV</code> 到 <code>XY</code> 的仿射矩阵. 与渲染有关的详细实现见 <a href="https://github.com/ww-rm/DesktopSprite/blob/main/DesktopSprite/src/ds/spinechar.cpp"><code>spinechar.cpp</code></a>.</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="关于配置文件"><a href="#关于配置文件" class="headerlink" title="关于配置文件"></a>关于配置文件</h3><p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>点击 &quot;打开数据文件夹&quot; 后, 可以看到数据文件夹里有一份 <code>config.json</code>, 里面以 <code>json</code> 格式存储了所有的设置面板可见的配置信息.</p>
+<h3 id="使用上的问题"><a href="#使用上的问题" class="headerlink" title="使用上的问题"></a>使用上的问题</h3><ul>
+<li>不建议帧率调太高, 会使电脑耗电显著增加, 或者风扇抽风</li>
+<li>如果不慎出了一些和配置有关的问题, 比如设置了错误的内容导致程序崩了/打不开, 直接打开数据文件夹, 关闭程序并删除 <code>config.json</code> 后重启程序, 即可让程序使用默认配置运行</li>
+</ul>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>如果无法下载则可以试一下下面的链接:</p>
+<ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXRTYUJ6WlRXQ3l2Y3JnYkdoX21ncmc/cHdkPWJsaHg=">单角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXFwWm5KUkI0UGFDOUViM3RrWmRBQ3c/cHdkPWJsaHg=">全角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+</ul>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>桌宠</tag>
+        <tag>碧蓝航线</tag>
+        <tag>Spine</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
     <url>//posts/2022/08/14/kxsw/</url>
     <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
@@ -1142,8 +1250,8 @@
         <category>资源分享</category>
       </categories>
       <tags>
-        <tag>工具</tag>
         <tag>碧蓝航线</tag>
+        <tag>工具</tag>
         <tag>立绘还原</tag>
       </tags>
   </entry>
