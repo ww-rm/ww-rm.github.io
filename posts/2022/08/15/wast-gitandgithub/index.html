@@ -27,25 +27,25 @@
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="git 你可能用不到但是 github 肯定用得到, 因为面对一大堆代码任务, 谁都想去抄借鉴一下他人优秀的代码. 因此本篇将向萌新们介绍一下版本管理工具 git 与全世界最大的代码托管平台 github 的基本使用方法.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaPitJ.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaPtnf.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaPTjx.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaVnBt.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/14/vaVI8e.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/15/vaLItP.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/15/vwila8.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/15/vwi2s1.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0E9gg.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0naB4.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0uFrF.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0KiWt.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png">
 <meta property="article:published_time" content="2022-08-15T09:22:32.000Z">
-<meta property="article:modified_time" content="2023-08-30T05:21:12.622Z">
+<meta property="article:modified_time" content="2023-08-30T05:50:12.902Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="git">
 <meta property="article:tag" content="github">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/14/vaPitJ.png">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png">
 
 
 <link rel="canonical" href="https://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/">
@@ -322,11 +322,11 @@
 <p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
 <p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
 <h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
 <p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPtnf.png" alt="vaPtnf.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
 <p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPTjx.png" alt="vaPTjx.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
 <p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
 <p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
 <h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
@@ -344,10 +344,10 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
 
 <p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaVnBt.png" alt="vaVnBt.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
 <p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
 <p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaVI8e.png" alt="vaVI8e.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
 <p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
 <h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
 <p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
@@ -359,14 +359,14 @@
 <p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
 <h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
 <p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/15/vaLItP.png" alt="vaLItP.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
 <p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
 <p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
-<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://s1.ax1x.com/2022/08/15/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://s1.ax1x.com/2022/08/15/vwi2s1.png" alt="vwi2s1.png"></p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
 </div>
 
 <p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0E9gg.png" alt="v0E9gg.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
 <p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
 <p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
 <p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
@@ -381,14 +381,14 @@
 <p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
 <h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
 <p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0naB4.png" alt="v0naB4.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
 <p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
 <p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
 <p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0uFrF.png" alt="v0uFrF.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
 <p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
 <p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0KiWt.png" alt="v0KiWt.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
 <p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
 <p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
 <h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>

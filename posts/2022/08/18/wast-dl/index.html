@@ -27,15 +27,15 @@
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="本篇算是对 pytorch 这一 python 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 pytorch 来搭建一个自定义的网络结构, 并加以训练.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/18/vrAZse.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-dl/vrAZse.png">
 <meta property="article:published_time" content="2022-08-18T12:29:33.000Z">
-<meta property="article:modified_time" content="2023-08-30T05:21:12.622Z">
+<meta property="article:modified_time" content="2023-08-30T05:50:12.898Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="深度学习">
 <meta property="article:tag" content="pytorch">
 <meta property="article:tag" content="手写数字分类">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/18/vrAZse.png">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/wast-dl/vrAZse.png">
 
 
 <link rel="canonical" href="https://ww-rm.github.io/posts/2022/08/18/wast-dl/">
@@ -307,7 +307,7 @@
 <p><code>pytorch</code>: 本篇要使用的核心库, 安装方式需要在<span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">官网<i class="fa fa-external-link-alt"></i></span>查询, 且按需安装 <code>cuda</code> 工具.</p>
 <h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">example/</span><br><span class="line">    digit_data/</span><br><span class="line">        train/</span><br><span class="line">            0/</span><br><span class="line">                1.jpg</span><br><span class="line">                2.jpg</span><br><span class="line">                ...</span><br><span class="line">            ...</span><br><span class="line">            9/</span><br><span class="line">                ...</span><br><span class="line">                XXX.jpg</span><br><span class="line">        test/</span><br><span class="line">            ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://s1.ax1x.com/2022/08/18/vrAZse.png" alt="vrAZse.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-dl/vrAZse.png" alt="vrAZse.png"></p>
 <h2 id="并不快速的快速上手"><a href="#并不快速的快速上手" class="headerlink" title="并不快速的快速上手"></a>并不快速的快速上手</h2><h3 id="导入所需要的所有库"><a href="#导入所需要的所有库" class="headerlink" title="导入所需要的所有库"></a>导入所需要的所有库</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report, f1_score, precision_score, recall_score</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">from</span> torchvision.io <span class="keyword">import</span> read_image</span><br><span class="line"><span class="keyword">from</span> torchvision.io.image <span class="keyword">import</span> ImageReadMode</span><br><span class="line"></span><br><span class="line">DEVICE = <span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>除了导入必需的库之外, 还设置了一个全局变量 <code>DEVICE</code>, 后续代码会使用它, 将计算放在 <code>DEVICE</code> 指定的硬件上进行计算, 推荐尽量用 gpu, 速度快很多, 当然对于这个小小的示例程序, cpu 也是能算的.</p>

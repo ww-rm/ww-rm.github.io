@@ -223,7 +223,7 @@
 <p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
 <p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
 <p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
 <h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
 <p>在这里只简单科普一下基本概念.</p>
 <p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
@@ -243,7 +243,7 @@
 <p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
 <p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
 <p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vUyCmd.png" alt="vUyCmd.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
 <p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
 <h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
 <p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
@@ -255,7 +255,7 @@
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
 <p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
 <p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vUc2TA.png" alt="vUc2TA.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
 <p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
 ]]></content>
       <categories>
@@ -272,15 +272,15 @@
 <p>本文简要介绍 NJ 树算法的基本流程与计算方法, 并在文末提供对应的 <code>python</code> 实现.</p>
 <span id="more"></span>
 
-<h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="邻居"><a href="#邻居" class="headerlink" title="邻居"></a>邻居</h3><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVbSaR.png" alt="ppVbSaR.png"></p>
+<h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="邻居"><a href="#邻居" class="headerlink" title="邻居"></a>邻居</h3><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVbSaR.png" alt="ppVbSaR.png"></p>
 <p>首先是关于&quot;邻居&quot;的定义, 在 NJ 树中, 一对&quot;邻居&quot;指的是在一个无根分叉树中仅仅通过一个内部结点连接起来一对分类单元 (OTU).</p>
 <p>例如在上图中, $1$ 和 $2$ 可以视为一对邻居, 它们通过内部结点 $A$ 进行连结.</p>
 <p>进一步, 可以对分类单元进行组合, 形成新的更大的分类单元与邻居对, 例如, $&lt;1, 2&gt;$ 和 $3$ 可以作为一对邻居, 它们通过内部结点 $B$ 进行连结, $&lt;5, 6&gt;$ 和 $&lt;7, 8&gt;$ 可以作为一对邻居, 它们通过内部结点 $D$ 进行连结.</p>
-<h3 id="进化树构建流程"><a href="#进化树构建流程" class="headerlink" title="进化树构建流程"></a>进化树构建流程</h3><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
+<h3 id="进化树构建流程"><a href="#进化树构建流程" class="headerlink" title="进化树构建流程"></a>进化树构建流程</h3><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
 <p>假设初始时没有任何分类单元聚集在一起, 算法起始于一个星状树, 如上图左侧所示. 算法的一步变换则是将左图变成了右图.</p>
 <p>在这些分类单元中, 分类单元之间有着不同的距离远近, 右侧的图将 $1$ 和 $2$ 聚合在了一起, 并形成了一个新结点 $Y$, 将 $1$, $2$ 视作一个整体, 则相比于左图, $&lt;1, 2&gt;$ 作为新分类单元整体替换了左图里的分类单元 $1$ 和 $2$, 整个星状树减少了 1 个分类单元, 增加了 1 条内部分支, 每次选择要聚合的邻居时, 都是使得聚合后的新树总枝长最短. 如此循环, 则可以一步一步减少星状树的分类单元, 直至分类单元只剩下 3 个, 内部分支增加至 $N - 3$ 个.</p>
-<p><img data-src="https://s1.ax1x.com/2023/03/06/ppVX9mD.png" alt="ppVX9mD.png"></p>
-<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><p><img data-src="https://s1.ax1x.com/2023/03/06/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVX9mD.png" alt="ppVX9mD.png"></p>
+<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
 <h3 id="计算总枝长"><a href="#计算总枝长" class="headerlink" title="计算总枝长"></a>计算总枝长</h3><p>还是以这张图为例, 设初始时共有 $N$ 个分类单元, 设 $D_{ij}$ 指分类单元 $i$ 和 $j$ 之间的距离, $L_{ab}$ 指结点 $a$ 和 $b$ 之间的枝长. 整个树的总枝长为:</p>
 <p>$$<br>S_O = \sum_{i=1}^{N}L_{iX}=\frac{1}{N-1}\sum_{i&lt;j}^{N}D_{ij}<br>$$</p>
 <p>也就是每个结点到 $X$ 的枝长总和, 等价于分类单元两两之间距离求和后除以 $N-1$, 因为每个枝相当于数了 $N-1$ 次.</p>
@@ -418,7 +418,7 @@
 
 <h2 id="理论介绍"><a href="#理论介绍" class="headerlink" title="理论介绍"></a>理论介绍</h2><h3 id="素域上的离散椭圆曲线"><a href="#素域上的离散椭圆曲线" class="headerlink" title="素域上的离散椭圆曲线"></a>素域上的离散椭圆曲线</h3><p>形如 $y^2 = x^3 + ax + b \bmod p$ 的曲线叫椭圆曲线, 其中需满足 $p$ 是大于 $3$ 的素数, 且 $4a^3 + 27b^2 \ne 0 \bmod p$.</p>
 <p>先不看 $\bmod$ 记号, 那么这就是一条普通的连续曲线, 可以按照普通的方程求解, 给定一个 $x$, 就可以求出来对应的 $y$. 容易看出来, 这条曲线是关于 $x$ 轴对称的, 因此它的图像大概长下面这种样子.</p>
-<p><img data-src="https://s1.ax1x.com/2022/12/06/zcG6gI.png" alt="zcG6gI.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/simple-ecc/zcG6gI.png" alt="zcG6gI.png"></p>
 <p>可以有几种不同的形式, 但是基本上差不多.</p>
 <p>那么加了 $\bmod$ 记号之后有什么不同呢? 刚刚是根据实数域画出来的连续曲线, 那么加上 $\bmod$ 之后, 曲线还是这条曲线, 但是坐标取值范围变成了整数范围, 且取值在 $[0, p-1]$ 之间.</p>
 <p>也就是从这条曲线上挑出了一些离散的整数解, 不仅能够满足这个曲线方程, 同时 $x$ 和 $y$ 的取值范围在 $[0, p-1]$, 也就是对 $p$ 取模, 所有的数据运算都在模 $p$ 下进行, 因此将这种曲线记为 $y^2 = x^3 + ax + b \bmod p$.</p>
@@ -439,7 +439,7 @@
 </ul>
 <p>那么, 把上述中的&quot;向量&quot;全部换成别的东西, 我们就可以定义出一套新的数据运算, 而对于椭圆曲线, 我们将&quot;向量&quot;换成所有满足椭圆曲线方程的点, 定义了椭圆曲线上的点运算规则.</p>
 <p>接下来就是对于点加法具体过程的定义, 用一张图来直观解释椭圆曲线上点是如何进行&quot;相加&quot;的.</p>
-<p><img data-src="https://s1.ax1x.com/2022/12/07/zcYiWj.png" alt="zcYiWj.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/simple-ecc/zcYiWj.png" alt="zcYiWj.png"></p>
 <p>设 $P$, $Q$ 为椭圆曲线上的两点, 则 $P+Q$ 就是 $P$, $Q$ 连线与曲线的交点关于 $x$ 轴的对称点.</p>
 <p>当 $P$, $Q$ 重合时, 取切线与曲线的交点的对称点作为加法结果, 也就是 $2P$.</p>
 <p>当 $P$, $Q$ 关于 $x$ 轴对称时, 定义相加结果为无穷远点, 视作加法的单位元点, 记为 $O$, 同时易得此时 $P$, $Q$ 互为对方的逆元.</p>
@@ -508,7 +508,7 @@
 <p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
 <p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
 <p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="/images/posts/zzz.gif" alt="zzz.gif"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
 ]]></content>
       <categories>
         <category>网安本科速通</category>
@@ -529,7 +529,7 @@
 <p><code>pytorch</code>: 本篇要使用的核心库, 安装方式需要在<span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">官网<i class="fa fa-external-link-alt"></i></span>查询, 且按需安装 <code>cuda</code> 工具.</p>
 <h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    digit_data/</span><br><span class="line">        train/</span><br><span class="line">            0/</span><br><span class="line">                1.jpg</span><br><span class="line">                2.jpg</span><br><span class="line">                ...</span><br><span class="line">            ...</span><br><span class="line">            9/</span><br><span class="line">                ...</span><br><span class="line">                XXX.jpg</span><br><span class="line">        test/</span><br><span class="line">            ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://s1.ax1x.com/2022/08/18/vrAZse.png" alt="vrAZse.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-dl/vrAZse.png" alt="vrAZse.png"></p>
 <h2 id="并不快速的快速上手"><a href="#并不快速的快速上手" class="headerlink" title="并不快速的快速上手"></a>并不快速的快速上手</h2><h3 id="导入所需要的所有库"><a href="#导入所需要的所有库" class="headerlink" title="导入所需要的所有库"></a>导入所需要的所有库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report, f1_score, precision_score, recall_score</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">from</span> torchvision.io <span class="keyword">import</span> read_image</span><br><span class="line"><span class="keyword">from</span> torchvision.io.image <span class="keyword">import</span> ImageReadMode</span><br><span class="line"></span><br><span class="line">DEVICE = <span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>除了导入必需的库之外, 还设置了一个全局变量 <code>DEVICE</code>, 后续代码会使用它, 将计算放在 <code>DEVICE</code> 指定的硬件上进行计算, 推荐尽量用 gpu, 速度快很多, 当然对于这个小小的示例程序, cpu 也是能算的.</p>
@@ -636,11 +636,11 @@
 <p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
 <p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
 <h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
 <p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPtnf.png" alt="vaPtnf.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
 <p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaPTjx.png" alt="vaPTjx.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
 <p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
 <p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
 <h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
@@ -658,10 +658,10 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
 
 <p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaVnBt.png" alt="vaVnBt.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
 <p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
 <p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/14/vaVI8e.png" alt="vaVI8e.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
 <p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
 <h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
 <p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
@@ -673,14 +673,14 @@
 <p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
 <h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
 <p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/15/vaLItP.png" alt="vaLItP.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
 <p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
 <p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
-<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://s1.ax1x.com/2022/08/15/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://s1.ax1x.com/2022/08/15/vwi2s1.png" alt="vwi2s1.png"></p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
 </div>
 
 <p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0E9gg.png" alt="v0E9gg.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
 <p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
 <p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
 <p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
@@ -695,14 +695,14 @@
 <p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
 <h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
 <p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0naB4.png" alt="v0naB4.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
 <p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
 <p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
 <p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0uFrF.png" alt="v0uFrF.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
 <p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
 <p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0KiWt.png" alt="v0KiWt.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
 <p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
 <p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
 <h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
@@ -728,7 +728,7 @@
 <p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
 <h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://s1.ax1x.com/2022/08/17/vBh4sA.png" alt="vBh4sA.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
 <h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
 
 <h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
@@ -849,13 +849,13 @@
 <p>可以选择下最新版, 不过不是那么的推荐, 而是适当旧一点, 比如现在最新的版本是 <code>3.10.6</code>, 那么可以下 <code>3.8.10</code> (<code>3.8.x</code> 发布的最后一个有安装包的版本). 这样子兼容度大一点. (曾经遇见过要装的某个包还没发布适配新版本 <code>python</code> 的版本, 害得我又重装降级了 <code>python</code>).</p>
 <p>这里直接提供 <a href="https://www.python.org/downloads/release/python-3810/"><code>Python 3.8.10</code></a> 的官方下载页面, 点进去之后选 &quot;Windows installer (64-bit)&quot; 这个版本就好了.</p>
 <p>下载好之后双击进入安装界面. 下面两项都勾上, 并且选择 &quot;Customize installation&quot;.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtamNQ.png" alt="vtamNQ.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtamNQ.png" alt="vtamNQ.png"></p>
 <p>这一面也是直接全勾.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtaN4J.png" alt="vtaN4J.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtaN4J.png" alt="vtaN4J.png"></p>
 <p>再次 Next 之后, 这个界面里, 勾选 &quot;Install for all users&quot;, 并且可以在下方调整 <code>python</code> 的安装路径. 推荐装到 D 盘或者其他方便找到的地方, 比如 <code>D:\Program Files\Python38</code>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtd9VU.png" alt="vtd9VU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtd9VU.png" alt="vtd9VU.png"></p>
 <p>重启一下电脑, 快捷键 <code>Win + R</code>, 输入 <code>cmd</code> 打开命令提示符, 敲一下 <code>python --version</code>, 如下图所示则安装成功.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtdqeK.png" alt="vtdqeK.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtdqeK.png" alt="vtdqeK.png"></p>
 <h2 id="Python-虚拟环境"><a href="#Python-虚拟环境" class="headerlink" title="Python 虚拟环境"></a>Python 虚拟环境</h2><h3 id="虚拟环境简介"><a href="#虚拟环境简介" class="headerlink" title="虚拟环境简介"></a>虚拟环境简介</h3><p>关于虚拟环境的详细介绍很多, 必应一搜就有很多<span class="exturl" data-url="aHR0cHM6Ly9jbi5iaW5nLmNvbS9zZWFyY2g/cT1weXRob24lRTclOUElODQlRTglOTklOUElRTYlOEIlOUYlRTclOEUlQUYlRTUlQTIlODMlRTYlOTglQUYlRTQlQkIlODAlRTQlQjklODg=">结果<i class="fa fa-external-link-alt"></i></span>, 有时间可以慢慢理解.</p>
 <p>当你写代码时, 不可能完全都靠自己从零开始, 这样子很低效<del>并且很蠢</del>, 所以对于 <code>python</code> 而言, 写代码之前确定并安装合适的第三方包就是基本操作.</p>
 <p>然而, 第三方包在发布的时候, 可能会存在许多不同的版本, 不同项目之间所需要的包版本也不尽相同, 会造成巨大的兼容问题 (比如万恶的 <code>tensorflow 1.x</code> 和 <code>tensorflow 2.x</code>). 这种时候就需要使用虚拟环境.</p>
@@ -898,28 +898,28 @@
 <p>其中 <code>torch</code> 的安装需要前往官网 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">https://pytorch.org/<i class="fa fa-external-link-alt"></i></span> 按说明进行安装.</p>
 <h2 id="在-VS-Code-中使用-Python"><a href="#在-VS-Code-中使用-Python" class="headerlink" title="在 VS Code 中使用 Python"></a>在 VS Code 中使用 Python</h2><p>这一节将会实践一下前面所有的内容, 在 <code>VS Code</code> 中使用 <code>python</code> 完成一次向量乘法计算.</p>
 <p>打开之前曾经创建的 <code>example</code> 文件夹, 并且新建一个终端.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNUegI.png" alt="vNUegI.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNUegI.png" alt="vNUegI.png"></p>
 <p>我们使用以下命令为这个项目建立一个单独的虚拟环境, 取名为 <code>env</code>.</p>
 <p><code>python -m venv env</code></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNami4.png" alt="vNami4.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNami4.png" alt="vNami4.png"></p>
 <p>命令执行完成后, 左边的资源管理器面板上多出来一个 <code>env</code> 文件夹, 这就是我们刚刚创建好的虚拟环境. 我们使用 <code>.\env\Scripts\activate</code> 在终端中激活这个虚拟环境, 激活完成后可以看到终端的提示信息前面多了一个 <code>(env)</code> 标记, 表示当前终端处于 <code>env</code> 的虚拟环境之下.</p>
 <p>如果出现不能执行的情况, 可以参考<span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vZGF4aW9uZzEzMTQvcC8xNjI2NTU0OS5odG1s">这篇博客<i class="fa fa-external-link-alt"></i></span>解决权限问题. 或者在 <code>VS Code</code> 的设置里把默认的终端类型调成 <code>cmd</code> 而不是 <code>powershell</code>, 我推荐改成 <code>cmd</code> 一劳永逸. <del><code>powershell</code> 屁事多</del>.</p>
 <p>解决完问题之后就如下图所示了.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNdYn0.png" alt="vNdYn0.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNdYn0.png" alt="vNdYn0.png"></p>
 <p>此时在终端里直接执行 <code>python</code> 有关的命令, 都会映射到虚拟环境里的命令.</p>
 <p>然后我们继续, 使用 <code>pip</code> 向虚拟环境里添加一个第三方库 <code>numpy</code>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNwSvn.png" alt="vNwSvn.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNwSvn.png" alt="vNwSvn.png"></p>
 <p>顺利安装完成之后, 可以看到左边的 <code>env</code> 文件夹里 <code>site-packages</code> 下多出来一个 <code>numpy</code> 的文件夹, 这就是我们刚刚安装好的第三方库了. 同时终端里给了我们一个 <code>WARNING</code>, 提示我们可以对 <code>pip</code> 模块进行升级. 虽然影响不是很大, 不过推荐复制它提供的指令升一下级, 这样 <code>pip</code> 在查找和安装包时能够使用最新的功能, 减小安装失败的风险<del>主要是有彩色进度条</del>.</p>
 <p>然后清空之前 <code>main.py</code> 里面的代码, 并且敲入以下新的内容.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNDSvd.png" alt="vNDSvd.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDSvd.png" alt="vNDSvd.png"></p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    vector1 = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">    vector2 = np.array([<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(np.dot(vector1, vector2))</span><br><span class="line">    <span class="built_in">print</span>(np.multiply(vector1, vector2))</span><br></pre></td></tr></table></figure>
 
 <p>会发现 <code>import</code> 语句的 <code>numpy</code> 有黄色波浪线, 同时下面的 &quot;问题&quot; 面板有写出来原因, 意思是没有 <code>numpy</code> 这个库.</p>
 <p>这是因为虽然我们刚刚在终端里是已经成功激活了虚拟环境, 但是对于 <code>VS Code</code> 来说, 它并不关心终端里是什么情况, 而是对于这个项目来说, 它需要使用什么环境来处理项目内容, 所以我们还需要在下方的状态栏里切换 <code>VS Code</code> 对于当前项目使用的 <code>python</code> 环境.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vN0OpQ.png" alt="vN0OpQ.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vN0OpQ.png" alt="vN0OpQ.png"></p>
 <p>点击下方状态栏的环境选择, 并且切换到刚刚创建的 <code>env</code> 环境, 此时下方的环境已经换成了 <code>&#39;env&#39;:venv</code>, 并且刚刚的黄色波浪线与问题也消失了.</p>
 <p>此时我们可以选择在激活了虚拟环境的终端里运行这份代码, 或者使用快捷键 <code>Ctrl + F5</code> 让 <code>VS Code</code> 帮我们运行. 这里展示一下在终端里直接运行的结果, 可以看到成功输出, 一个是向量内积结果, 一个是向量按位乘法结果.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNDsPO.png" alt="vNDsPO.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDsPO.png" alt="vNDsPO.png"></p>
 <h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>到这里就结束了, 说实话只讲了 <code>VS Code</code> 中使用 <code>python</code> 的最基本技巧, 这些操作之后写代码的时候多操作几次应该就烂熟于心了.</p>
 <p>但是对于进校没多久的萌新们来说, 估计看的还是很晕的, 因为有很多新名词, 特别是 &quot;环境变量&quot; 这种, 可能是完全第一次听说, 而且也容易出问题. 所以还是建议多动手尝试尝试, 并且善用搜索引擎, 多翻几篇博客, 总会能够找到适合你问题的解决方案.</p>
 <p>就这样了, 下回单独写写怎么合理的科学上网, 为使用 <code>Github</code> <del>抄代码</del>打下坚实基础.</p>
@@ -944,17 +944,17 @@
 <p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
 <h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
 <p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0cQQx.png" alt="v0cQQx.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
 <p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
 <h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
 <h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
 <p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0hSFU.png" alt="v0hSFU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
 <p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
 <p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0hhc9.png" alt="v0hhc9.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
 <p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v04mBq.png" alt="v04mBq.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
 <p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
 <p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
 <h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
@@ -967,9 +967,9 @@
 <p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
 <h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
 <p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0oHrd.png" alt="v0oHrd.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
 <p>定位完成后, 我们分析数据附近的结构.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0TFZn.png" alt="v0TFZn.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
 <p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
 <p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
 <p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
@@ -1017,13 +1017,13 @@
 <p>所以就我四年的本科使用经验来说, <code>Visual Studio Code</code> 和 <code>Visual Studio</code> 用来写上述两种语言的体验还是非常舒适的, 所以在此进行推荐和软件的使用方法入门.</p>
 <h2 id="Visual-Studio-Code"><a href="#Visual-Studio-Code" class="headerlink" title="Visual Studio Code"></a>Visual Studio Code</h2><p>首先是 <code>VS Code</code>. 从本质上来说, <code>VS Code</code> 是一个多功能的文本编辑器, 不管你是否需要写代码, 我都建议你在电脑上装一个, 可以极大的提高你的文本处理效率. <del>珍爱生命, 远离记事本</del>.</p>
 <h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9jb2RlLnZpc3VhbHN0dWRpby5jb20v">https://code.visualstudio.com/<i class="fa fa-external-link-alt"></i></span>. 进去之后的界面现在长这样.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/11/vGcccj.jpg" alt="vGcccj.jpg"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vGcccj.jpg" alt="vGcccj.jpg"></p>
 <p>可以直接点 Download 下载然后快速安装, 不过我不是那么的推荐, 因为直接点下载的是 User 版本, 可能会有奇怪的权限问题. 推荐下能够获取系统权限的版本比较好, 并且可以安装在系统目录.</p>
 <p>所以按下图直接点到其他版本的选择页面, 选 64 bit System 版本下载.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/11/vGgPvd.png" alt="vGgPvd.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/11/vGgNPU.png" alt="vGgNPU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vGgPvd.png" alt="vGgPvd.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vGgNPU.png" alt="vGgNPU.png"></p>
 <p>下载完之后点击安装, 接下来提一下几个比较有用的安装选项, 可以极大的提高你的使用体验.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/11/vGRJ9U.png" alt="vGRJ9U.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vGRJ9U.png" alt="vGRJ9U.png"></p>
 <p>这个界面上的选项建议全勾上, 第 2 个和第 3 个选项可以在你的右键菜单里添加 &quot;通过 Code 打开&quot; 的选项, 这样子你可以很方便的直接使用右键点击文件或者文件夹或者文件夹的空白处, 然后把他们在 <code>VS Code</code> 中打开进行操作.</p>
 <p>第 5 个选项平常不会怎么用到, 但是保持默认选项勾上就可以了, 它可以让你在命令行中用 <code>Code</code> 进行操作</p>
 <p>一路下一步, 然后就安装完成, 之后可以选择重启一下电脑让一些配置立即生效, 不过不重启也没关系, 没啥影响.</p>
@@ -1031,38 +1031,38 @@
 <p>这个文件夹就是你的项目文件夹, 一个 Project, 之后会在这个基础上开展你后续的 Coding 工作.</p>
 <p>所以基本上你要写点啥课程大作业代码的时候, 第一步就是找个地方新建一个文件夹, 然后用 Code 打开. 这里用一个叫 &quot;example&quot; 的文件夹作为示例, 讲解一下 <code>VS Code</code> 的基本使用方法.</p>
 <h4 id="插件安装"><a href="#插件安装" class="headerlink" title="插件安装"></a>插件安装</h4><p>不管你是用通过右键打开的项目文件夹还是从 &quot;文件&quot; 菜单栏打开的, 之后的界面都应该和下面的图长得差不多, 一片空白.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJ85wR.png" alt="vJ85wR.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJ85wR.png" alt="vJ85wR.png"></p>
 <p>然后我们选到左边的长得像方块的图标, 也就是扩展, 开始按照工作需求自定义我们的 <code>VS Code</code>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJGk6g.png" alt="vJGk6g.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJGk6g.png" alt="vJGk6g.png"></p>
 <p>可以看到这里已经有一个扩展了, 这也是我们下载 <code>VS Code</code> 几乎必装的一个扩展, 中文汉化扩展, 如果没有预装, 则直接搜索对应的扩展名字装上就可以了. <del>英语大佬请无视中文扩展</del>.</p>
 <p>装完会提示重新启动 <code>VS Code</code> 加载, 之后的界面就会像我图里那样全中文了.</p>
 <p>然后是编程语言扩展, 这也是最基本的东西, 需要用 <code>VS Code</code> 写什么语言的代码就装什么语言的扩展, 一般直接装 Microsoft 官方的或者 Star 最多的就行.</p>
 <p>由于 <code>VS Code</code> 之后基本上用来写 <code>python</code>, 因此这里把 <code>python</code> 扩展先装上, 日后有需求可以自行举一反三.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJGj3T.png" alt="vJGj3T.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJGj3T.png" alt="vJGj3T.png"></p>
 <p>安装完成之后可能会弹出来一些 Get Start 页面, 不用管, 不过有时间的话可以稍微翻一翻, 也是一些新手教程.</p>
-<h4 id="第一份代码"><a href="#第一份代码" class="headerlink" title="第一份代码"></a>第一份代码</h4><p><img data-src="https://s1.ax1x.com/2022/08/12/vJJhI1.png" alt="vJJhI1.png"></p>
+<h4 id="第一份代码"><a href="#第一份代码" class="headerlink" title="第一份代码"></a>第一份代码</h4><p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJJhI1.png" alt="vJJhI1.png"></p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sub</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a - b</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">mul</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a * b</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">div</span>(<span class="params">a, b</span>):</span><br><span class="line">    <span class="keyword">return</span> a / b</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    num1 = add(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">    num2 = mul(num1, <span class="number">7</span>)</span><br><span class="line">    num3 = sub(num2, num1)</span><br><span class="line">    num4 = div(num3, num1)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Result: <span class="subst">&#123;num4&#125;</span>&quot;</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>新建一份文件, 然后随便敲一点东西之后, 得到了现在的 <code>main.py</code> 文件. 下面说说对这份文件最简单的运行和调试.</p>
 <h5 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h5><p>有很多方法可以运行, 这里只说两种最简单的, 一是靠鼠标或者快捷键, 二是在命令行里敲命令.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJYkZj.png" alt="vJYkZj.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJYkZj.png" alt="vJYkZj.png"></p>
 <p>图内可以看到菜单栏有个运行选项, 点开就是两个, 一个叫 &quot;启动调试&quot; (<code>F5</code>), 另一个是 &quot;以非调试模式运行&quot; (<code>Ctrl + F5</code>).</p>
 <p>前者是调试, 后者是单纯的运行, 对于我们来说, 只需要点击后者, 或者直接快捷键 <code>Ctrl + F5</code>, 就可以看到运行效果了.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJY3w9.png" alt="vJY3w9.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJY3w9.png" alt="vJY3w9.png"></p>
 <p>自动弹出了一个终端, 并且成功的打印出了我们的结果. 到这里第一种方法就结束了, 更多细致的功能日后再慢慢探索吧.</p>
 <p>然后是第二种方式, 自己在命令行里敲命令, 那么首先需要知道怎么把终端调用出来.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJYBeH.png" alt="vJYBeH.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJYyFI.png" alt="vJYyFI.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJY4mQ.png" alt="vJY4mQ.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJYBeH.png" alt="vJYBeH.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJYyFI.png" alt="vJYyFI.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJY4mQ.png" alt="vJY4mQ.png"></p>
 <p>如上图新建一个终端, 然后敲入指令 <code>python main.py</code>, 同样输出了我们的运行结果. 可以看到, 新建的终端会自动打开到我们的项目文件夹目录, 所以可以直接访问到里面的内容, 而我们的所有命令, 也都是基于项目文件夹作为根目录来运行的. (这一点很重要, 如果命令行的工作目录和项目文件夹不一致, 可以自己手动 <code>cd</code> 切换一下, 可以免去写代码时带来的一些路径问题)</p>
 <h5 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h5><p>这里简单的调试一下这份文件, 打一下断点, 查看一下运行中变量.</p>
 <p>所谓断点, 就是你在调试的时候需要让程序停在哪个点, 从而在某个点可以查看程序的运行情况, 快速定位问题来源.</p>
 <p>打上断点的方式也很简单, 比如在第 15 行停下, 那么只需要在行号左边点一下就可以了, 这样子当程序运行到第 15 行的时候, 会停下, 且第 15 行<strong>不会执行</strong>, 是即将要执行的语句.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJtKht.png" alt="vJtKht.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJtKht.png" alt="vJtKht.png"></p>
 <p>然后, 从运行菜单里选择 &quot;进行调试&quot; 或者快捷键 <code>F5</code>, 会弹出提示让你选择要使用的调试配置 (因为我们没有给这个项目设定自己的调试配置, 所以需要选择一种系统提供的默认调试配置), 这里直接选第一个就行了.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJtyB4.png" alt="vJtyB4.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJtyB4.png" alt="vJtyB4.png"></p>
 <p>不出意外的话, 程序会稳稳的停在第 15 行, 并且左边跳转到了调试面板, 显示了各种调试信息.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJtouD.png" alt="vJtouD.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJtouD.png" alt="vJtouD.png"></p>
 <ul>
 <li>变量: 显示了各种局部或者全局的变量值.</li>
 <li>监视: 可以手动输入一些变量或者表达式来进行单独观察.</li>
@@ -1081,62 +1081,62 @@
 <h2 id="Visual-Studio"><a href="#Visual-Studio" class="headerlink" title="Visual Studio"></a>Visual Studio</h2><p>第二个推荐的编程工具是 <code>VS</code>, 相比于 <code>VS Code</code>, <code>VS</code> 更加臃肿但是功能更加强大, 如果用习惯了, 在 Windows 平台上写 <code>c</code> 语言之类的课程作业,  将会是无比舒适.</p>
 <h3 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h3><p><code>VS</code> 的安装分成两步, 首先是安装它专属的 Installer, 然后再决定安装具体的 <code>VS</code> 内容.</p>
 <p>官方网站是 <span class="exturl" data-url="aHR0cHM6Ly92aXN1YWxzdHVkaW8ubWljcm9zb2Z0LmNvbS8=">https://visualstudio.microsoft.com/<i class="fa fa-external-link-alt"></i></span>, 目前是 2022 的最新版本, 下的时候选择 Community 版本下载, 这个版本是<strong>面向个人免费使用</strong>的, 只需要注册微软的账户就可以授权给个人了.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJ5QCq.png" alt="vJ5QCq.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJ5QCq.png" alt="vJ5QCq.png"></p>
 <p>这个东西下完之后是 VS 的 Installer, 直接无脑装好然后运行, 会进入如下的选择界面. (找不到就去开始菜单里翻, 它是不会有桌面快捷方式的)</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJI6S0.png" alt="vJI6S0.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJIfw4.png" alt="vJIfw4.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJI6S0.png" alt="vJI6S0.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJIfw4.png" alt="vJIfw4.png"></p>
 <p>默认会直接进到第二张图, 如果不是的话按第一张图自己选安装.</p>
 <p>对于我们日常写写作业来说, 我们只需要能够写 <code>c</code> 语言就够了, 所以只需勾选下面其中的一个就完全足够使用了, 那就是 &quot;使用 C++ 的桌面开发&quot;. 虽然写的是 <code>c++</code>, 但是其实写 <code>c</code> 也是用这个写的, 只要你创建源文件的时候, 后缀名自己改成 <code>.c</code> 而不是 <code>.cpp</code>, 这样子编译的时候就会换成 <code>c</code> 的编译方式.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJIqOO.png" alt="vJIqOO.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJIqOO.png" alt="vJIqOO.png"></p>
 <p>这一坨子东西装下来还是要一点空间和时间的, 推荐电脑有空闲时间的时候慢慢挂机安装, 安装完之后重启一下电脑, 让一些系统项生效.</p>
 <h3 id="基本使用-1"><a href="#基本使用-1" class="headerlink" title="基本使用"></a>基本使用</h3><p>打开装好的 <code>VS</code>, 我们开始用 <code>c</code> 写一个 Hello World 程序<del>程序员绕不过去的新手代码</del>.</p>
 <p>首先会跳出来这个界面, 我们直接选择创建新项目.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJOeqP.png" alt="vJOeqP.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJOeqP.png" alt="vJOeqP.png"></p>
 <p>然后是选择项目模板, 模板类型有很多, 但是我们选择最简单的 &quot;空项目&quot;, 这样子可以后续自己手动创建文件, 了解一下具体的项目结构.</p>
 <p>然后是设置名称. 这里有两个内容可以自定义, 一个是项目名称, 一个是解决方案名称.</p>
 <p>在 <code>VS</code> 里面创建项目时, 顶层结构不是 &quot;项目&quot; 而是 &quot;解决方案&quot;, 这是与 <code>VS Code</code> 不同的一点. 一个 &quot;解决方案&quot; 是一个更大的容器, 里面可以包含很多的 &quot;项目&quot;, 然后每一个 &quot;项目&quot; 是一个个单独的内容, 用不同的文件夹分门别类的区分开来.</p>
 <p>这样子的好处就是, 适应性范围更广, 能够很方便的做多个项目之间的互相调用, 比如你可以一个项目用来写测试, 另一个项目是你实际上要写的代码库.</p>
 <p>这里我们把 &quot;解决方案&quot; 的名称设为 &quot;example&quot;, 把项目名称设置为 &quot;c_project&quot;. 这样子实际的物理结构就会是一个 <code>example</code> 的总文件夹下面还有一个 <code>c_project</code> 的项目文件夹.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJXf00.png" alt="vJXf00.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJXf00.png" alt="vJXf00.png"></p>
 <p>创建好之后大概长下图所示, 解决方案资源管理器位置可以自己调, 我调左边去了, 视图菜单里也可以手动显示出来.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJXztO.png" alt="vJXztO.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJXztO.png" alt="vJXztO.png"></p>
 <h4 id="认识解决方案资源管理器"><a href="#认识解决方案资源管理器" class="headerlink" title="认识解决方案资源管理器"></a>认识解决方案资源管理器</h4><p><code>VS</code> 里面的解决方案资源管理器是一个集合了非常多功能的管理器, 需要熟悉一下它提供给我们的基本功能.</p>
 <p>管理器的顶层是解决方案, 也就是刚刚我们命名的 <code>example</code> 文件夹, 然后列出来了里面包含的所有项目, 目前只有一个项目, 就是一起创建的 <code>c_project</code>.</p>
 <p>目前看到的这个视图是 &quot;解决方案视图&quot;, 是解决方案内的<strong>逻辑结构</strong>而不是在磁盘上的<strong>物理结构</strong>.</p>
 <p>那么我们首先尝试创建一份 <code>main.c</code>, 并写几句代码.</p>
 <p>右键 &quot;源文件&quot;, 选择 &quot;添加&quot;, 然后选择 &quot;新建项&quot;, 选择源文件, 同时把文件名设为 <code>main.c</code>. 然后键入经典的 Hello world 程序代码.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJjO2Q.png" alt="vJjO2Q.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJviPU.png" alt="vJviPU.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJvKIK.png" alt="vJvKIK.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJjO2Q.png" alt="vJjO2Q.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJviPU.png" alt="vJviPU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJvKIK.png" alt="vJvKIK.png"></p>
 <p>可以看到左侧已经成功的在源文件项下面多出来了一份 <code>main.c</code>. 但是刚刚说了目前的界面是解决方案的 &quot;逻辑结构&quot;, 所以我们需要切换一下视图, 看看刚刚创建的文件究竟在哪.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJv6Ln.png" alt="vJv6Ln.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJv6Ln.png" alt="vJv6Ln.png"></p>
 <p>管理器的上方有一个切换视图按钮, 点击之后可以选择是 &quot;解决方案&quot; 还是 &quot;文件夹视图&quot;, 我们直接换到文件夹视图.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJv4WF.png" alt="vJv4WF.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJv4WF.png" alt="vJv4WF.png"></p>
 <p>这个时候就非常清晰了, 顶层文件夹 <code>example</code>, 次级项目文件夹 <code>c_project</code>, 然后在项目文件夹内有一份 <code>main.c</code>.</p>
 <p>切回解决方案视图, 现在再看 &quot;源文件&quot; 这一项, 它其实只是人为设置的一个分类结构, 在 <code>VS</code> 里叫 &quot;筛选器&quot;, 可以在不影响物理结构文件实际路径的同时给开发人员一个合适的文件分类方法, 可以右键新建里添加新的自定义筛选器.</p>
 <h4 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h4><p>既然是写 <code>c</code> 语言, 运行前必不可少的步骤就是编译, 那么首先我们要知道, <code>VS</code> 是如何知道哪些文件是需要被纳入编译范围的.</p>
 <p>一个最简单的设置方法就是将文件或者文件夹设置是否包含在项目中. 解决方案视图只会显示在项目中的内容. 即使文件实际上在项目文件夹内, 如果不在项目中, 那它也不会纳入 <code>VS</code> 项目的各种判断逻辑中, 比如不会参与编译.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJxqXj.png" alt="vJxqXj.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJxqXj.png" alt="vJxqXj.png"></p>
 <p>这种方式可以很轻松的把文件排除项目. 那么对于添加到项目里, 比如需要添加现有的文件与源代码, 我们需要首先把对应的文件在物理上移到我们的项目文件夹内合适的地方, 然后使用管理器切换到 &quot;所有文件&quot; 视图.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/12/vJzQjH.png" alt="vJzQjH.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vJzQjH.png" alt="vJzQjH.png"></p>
 <p>如果刚刚把 <code>main.c</code> 排除了, 那么就会像图上那样有个红色符号, 表示这个文件没有纳入项目逻辑考虑范围. 我们可以用右键把它重新包含到项目内, 这样子红色符号就消失了, 解决方案视图里也能重新看到这个文件了.</p>
 <p>当确定了那些文件被包含到项目中后, 就可以开始编译了.</p>
 <p>有两种方式会进行编译, 一种是直接运行或者调试程序, 如果项目没有被编译, 则会先进行编译, 再运行程序. 另一种就是只编译不运行, 分步骤进行.</p>
 <p>我这里还是推荐分步骤进行, 先编译看看是否存在什么警告或者错误, 再进行运行或者调试.</p>
 <p>编译的时候有一些基本选项可以调整.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtQxRU.png" alt="vtQxRU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vtQxRU.png" alt="vtQxRU.png"></p>
 <p><code>x86</code> 和 <code>x64</code> 好理解, 指的是编译出来的二进制文件是 32 位程序还是 64 位程序, 一般来说调成 <code>x64</code> 会让程序能更充分利用现在的 64 位处理器性能.</p>
 <p>而 <code>Release</code> 与 <code>Debug</code>, 翻译一般叫 &quot;发布&quot; 与 &quot;调试&quot;. 调试版本是适合于调试代码的版本, <code>VS</code> 在编译时会加入很多调试信息进入最终的二进制文件, 能够在调试时充分的获得程序运行的每一步信息. 而 &quot;发布&quot; 则是适合最终运行的优化版本, <code>VS</code> 会在编译时尽可能的减少代码冗余, 对代码结构进行优化, 提高最终程序的运行效率.</p>
 <p>所以写代码的时候用 <code>Debug</code> 版本, 而交程序的时候用 <code>Release</code> 版本. (这两个版本的运行效率差异非常大, 如果你觉得代码太慢, 不妨试一下 <code>Release</code> 来尝试提高效率. <del>说不定有奇效</del>)</p>
 <p>然后进入编译的正题. 选择菜单栏里的 &quot;生成&quot;, 在这里可以对解决方案和每个项目进行生成操作. 此处 &quot;生成&quot; 不一定指编译, 而是去生成每个项目的目标文件, 对于 <code>c</code> 语言来说就是编译链接操作. </p>
 <p>选择生成整个解决方案, 则 <code>VS</code> 会按照项目间的依赖关系依次生成方案内所有的项目. 选择生成某一个项目, 那就是生成单独的一个项目. 每次可以选择 &quot;重新生成&quot; 或者 &quot;生成&quot;, 前者会先进行一步 &quot;清理&quot; 操作, 把上一次生成时产生的所有文件先清除再进行生成.</p>
 <p>一般来说, 直接使用快捷键 <code>Ctrl + B</code> 即可, 会生成当前正在操作的项目.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtlezD.png" alt="vtlezD.png"></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtlnQe.png" alt="vtlnQe.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vtlezD.png" alt="vtlezD.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vtlnQe.png" alt="vtlnQe.png"></p>
 <p>运行一下生成, 可以看到下方的输出里显示生成成功, 并且也输出了生成的二进制文件的路径.</p>
 <h4 id="运行与调试"><a href="#运行与调试" class="headerlink" title="运行与调试"></a>运行与调试</h4><p>这里就简单说说, 不赘述了, 因为同为微软家的产品, 基本概念和快捷键都是一样的, 具体的操作和前面 <code>VS Code</code> 中说的大同小异, 几乎是一致的. 这里就放一下成功运行截图了.</p>
 <p>按下快捷键 <code>Ctrl + F5</code>, <code>VS</code> 就会自动弹出来一个运行黑框了, &quot;Hello world!&quot;</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtlJW8.png" alt="vtlJW8.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-vscandvs/vtlJW8.png" alt="vtlJW8.png"></p>
 <h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>这一篇就打算写这么多了, 第一次写这种新手教程额, 尽可能的按照一个没有接触过编程但是来到了网安学院的大一新生视角来写, 希望能够有所帮助, 快速入门吧. <del>上啊, 卷死他们!</del></p>
 ]]></content>
       <categories>
@@ -1184,7 +1184,7 @@
     <content><![CDATA[<p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
 <span id="more"></span>
 
-<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p><img data-src="https://s1.ax1x.com/2022/10/29/x5xJiR.jpg" alt="x5xJiR.jpg"></p>
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p><img data-src="https://ww-rm.github.io/static/image/diffusion-model/x5xJiR.jpg" alt="x5xJiR.jpg"></p>
 <p>前向过程为一张图片 $x_0$ 在经过 $T$ 轮高斯噪声叠加后会变成一张近似纯高斯噪声图 $x_T$, 而网络则是学习反向过程中的参数, 能够通过 $x_T$ 一步步还原出 $x_0$.</p>
 <h2 id="前向扩散"><a href="#前向扩散" class="headerlink" title="前向扩散"></a>前向扩散</h2><p>设共进行 $T$ 轮扩散, 有 $\beta_1 &lt; \beta_2 &lt; \dots &lt; \beta_T (0 &lt; \beta_i &lt; 1)$ 的方差参数.</p>
 <p>设 $q(x_t|x_{t-1})$ 服从高斯分布, 且:</p>

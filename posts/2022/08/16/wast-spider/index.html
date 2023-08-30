@@ -27,19 +27,19 @@
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="本篇是基于 python 语言及其第三方库 requests 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0cQQx.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0hSFU.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0hhc9.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v04mBq.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0oHrd.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/16/v0TFZn.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png">
 <meta property="article:published_time" content="2022-08-16T14:03:17.000Z">
-<meta property="article:modified_time" content="2023-08-30T05:21:12.626Z">
+<meta property="article:modified_time" content="2023-08-30T05:50:12.902Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="爬虫">
 <meta property="article:tag" content="requests">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/16/v0cQQx.png">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png">
 
 
 <link rel="canonical" href="https://ww-rm.github.io/posts/2022/08/16/wast-spider/">
@@ -311,17 +311,17 @@
 <p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
 <h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
 <p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0cQQx.png" alt="v0cQQx.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
 <p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
 <h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
 <h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
 <p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0hSFU.png" alt="v0hSFU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
 <p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
 <p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0hhc9.png" alt="v0hhc9.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
 <p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v04mBq.png" alt="v04mBq.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
 <p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
 <p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
 <h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
@@ -334,9 +334,9 @@
 <p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
 <h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
 <p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0oHrd.png" alt="v0oHrd.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
 <p>定位完成后, 我们分析数据附近的结构.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/16/v0TFZn.png" alt="v0TFZn.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
 <p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
 <p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
 <p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>

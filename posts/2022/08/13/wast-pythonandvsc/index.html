@@ -27,24 +27,24 @@
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="网安专业几乎 99% 的作业都可以用 python 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 c 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 python 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用. 因此本篇主要基于个人经验介">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtamNQ.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtaN4J.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtd9VU.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vtdqeK.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNUegI.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNami4.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNdYn0.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNwSvn.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNDSvd.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vN0OpQ.png">
-<meta property="og:image" content="https://s1.ax1x.com/2022/08/13/vNDsPO.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtamNQ.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtaN4J.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtd9VU.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtdqeK.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNUegI.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNami4.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNdYn0.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNwSvn.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDSvd.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vN0OpQ.png">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDsPO.png">
 <meta property="article:published_time" content="2022-08-13T05:53:17.000Z">
-<meta property="article:modified_time" content="2023-08-30T05:21:12.626Z">
+<meta property="article:modified_time" content="2023-08-30T05:50:12.902Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="python">
 <meta property="article:tag" content="VS Code">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://s1.ax1x.com/2022/08/13/vtamNQ.png">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtamNQ.png">
 
 
 <link rel="canonical" href="https://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/">
@@ -318,13 +318,13 @@
 <p>可以选择下最新版, 不过不是那么的推荐, 而是适当旧一点, 比如现在最新的版本是 <code>3.10.6</code>, 那么可以下 <code>3.8.10</code> (<code>3.8.x</code> 发布的最后一个有安装包的版本). 这样子兼容度大一点. (曾经遇见过要装的某个包还没发布适配新版本 <code>python</code> 的版本, 害得我又重装降级了 <code>python</code>).</p>
 <p>这里直接提供 <a target="_blank" rel="noopener" href="https://www.python.org/downloads/release/python-3810/"><code>Python 3.8.10</code></a> 的官方下载页面, 点进去之后选 &quot;Windows installer (64-bit)&quot; 这个版本就好了.</p>
 <p>下载好之后双击进入安装界面. 下面两项都勾上, 并且选择 &quot;Customize installation&quot;.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtamNQ.png" alt="vtamNQ.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtamNQ.png" alt="vtamNQ.png"></p>
 <p>这一面也是直接全勾.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtaN4J.png" alt="vtaN4J.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtaN4J.png" alt="vtaN4J.png"></p>
 <p>再次 Next 之后, 这个界面里, 勾选 &quot;Install for all users&quot;, 并且可以在下方调整 <code>python</code> 的安装路径. 推荐装到 D 盘或者其他方便找到的地方, 比如 <code>D:\Program Files\Python38</code>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtd9VU.png" alt="vtd9VU.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtd9VU.png" alt="vtd9VU.png"></p>
 <p>重启一下电脑, 快捷键 <code>Win + R</code>, 输入 <code>cmd</code> 打开命令提示符, 敲一下 <code>python --version</code>, 如下图所示则安装成功.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vtdqeK.png" alt="vtdqeK.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vtdqeK.png" alt="vtdqeK.png"></p>
 <h2 id="Python-虚拟环境"><a href="#Python-虚拟环境" class="headerlink" title="Python 虚拟环境"></a>Python 虚拟环境</h2><h3 id="虚拟环境简介"><a href="#虚拟环境简介" class="headerlink" title="虚拟环境简介"></a>虚拟环境简介</h3><p>关于虚拟环境的详细介绍很多, 必应一搜就有很多<span class="exturl" data-url="aHR0cHM6Ly9jbi5iaW5nLmNvbS9zZWFyY2g/cT1weXRob24lRTclOUElODQlRTglOTklOUElRTYlOEIlOUYlRTclOEUlQUYlRTUlQTIlODMlRTYlOTglQUYlRTQlQkIlODAlRTQlQjklODg=">结果<i class="fa fa-external-link-alt"></i></span>, 有时间可以慢慢理解.</p>
 <p>当你写代码时, 不可能完全都靠自己从零开始, 这样子很低效<del>并且很蠢</del>, 所以对于 <code>python</code> 而言, 写代码之前确定并安装合适的第三方包就是基本操作.</p>
 <p>然而, 第三方包在发布的时候, 可能会存在许多不同的版本, 不同项目之间所需要的包版本也不尽相同, 会造成巨大的兼容问题 (比如万恶的 <code>tensorflow 1.x</code> 和 <code>tensorflow 2.x</code>). 这种时候就需要使用虚拟环境.</p>
@@ -367,28 +367,28 @@
 <p>其中 <code>torch</code> 的安装需要前往官网 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">https://pytorch.org/<i class="fa fa-external-link-alt"></i></span> 按说明进行安装.</p>
 <h2 id="在-VS-Code-中使用-Python"><a href="#在-VS-Code-中使用-Python" class="headerlink" title="在 VS Code 中使用 Python"></a>在 VS Code 中使用 Python</h2><p>这一节将会实践一下前面所有的内容, 在 <code>VS Code</code> 中使用 <code>python</code> 完成一次向量乘法计算.</p>
 <p>打开之前曾经创建的 <code>example</code> 文件夹, 并且新建一个终端.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNUegI.png" alt="vNUegI.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNUegI.png" alt="vNUegI.png"></p>
 <p>我们使用以下命令为这个项目建立一个单独的虚拟环境, 取名为 <code>env</code>.</p>
 <p><code>python -m venv env</code></p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNami4.png" alt="vNami4.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNami4.png" alt="vNami4.png"></p>
 <p>命令执行完成后, 左边的资源管理器面板上多出来一个 <code>env</code> 文件夹, 这就是我们刚刚创建好的虚拟环境. 我们使用 <code>.\env\Scripts\activate</code> 在终端中激活这个虚拟环境, 激活完成后可以看到终端的提示信息前面多了一个 <code>(env)</code> 标记, 表示当前终端处于 <code>env</code> 的虚拟环境之下.</p>
 <p>如果出现不能执行的情况, 可以参考<span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vZGF4aW9uZzEzMTQvcC8xNjI2NTU0OS5odG1s">这篇博客<i class="fa fa-external-link-alt"></i></span>解决权限问题. 或者在 <code>VS Code</code> 的设置里把默认的终端类型调成 <code>cmd</code> 而不是 <code>powershell</code>, 我推荐改成 <code>cmd</code> 一劳永逸. <del><code>powershell</code> 屁事多</del>.</p>
 <p>解决完问题之后就如下图所示了.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNdYn0.png" alt="vNdYn0.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNdYn0.png" alt="vNdYn0.png"></p>
 <p>此时在终端里直接执行 <code>python</code> 有关的命令, 都会映射到虚拟环境里的命令.</p>
 <p>然后我们继续, 使用 <code>pip</code> 向虚拟环境里添加一个第三方库 <code>numpy</code>.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNwSvn.png" alt="vNwSvn.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNwSvn.png" alt="vNwSvn.png"></p>
 <p>顺利安装完成之后, 可以看到左边的 <code>env</code> 文件夹里 <code>site-packages</code> 下多出来一个 <code>numpy</code> 的文件夹, 这就是我们刚刚安装好的第三方库了. 同时终端里给了我们一个 <code>WARNING</code>, 提示我们可以对 <code>pip</code> 模块进行升级. 虽然影响不是很大, 不过推荐复制它提供的指令升一下级, 这样 <code>pip</code> 在查找和安装包时能够使用最新的功能, 减小安装失败的风险<del>主要是有彩色进度条</del>.</p>
 <p>然后清空之前 <code>main.py</code> 里面的代码, 并且敲入以下新的内容.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNDSvd.png" alt="vNDSvd.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDSvd.png" alt="vNDSvd.png"></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    vector1 = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">    vector2 = np.array([<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(np.dot(vector1, vector2))</span><br><span class="line">    <span class="built_in">print</span>(np.multiply(vector1, vector2))</span><br></pre></td></tr></table></figure>
 
 <p>会发现 <code>import</code> 语句的 <code>numpy</code> 有黄色波浪线, 同时下面的 &quot;问题&quot; 面板有写出来原因, 意思是没有 <code>numpy</code> 这个库.</p>
 <p>这是因为虽然我们刚刚在终端里是已经成功激活了虚拟环境, 但是对于 <code>VS Code</code> 来说, 它并不关心终端里是什么情况, 而是对于这个项目来说, 它需要使用什么环境来处理项目内容, 所以我们还需要在下方的状态栏里切换 <code>VS Code</code> 对于当前项目使用的 <code>python</code> 环境.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vN0OpQ.png" alt="vN0OpQ.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vN0OpQ.png" alt="vN0OpQ.png"></p>
 <p>点击下方状态栏的环境选择, 并且切换到刚刚创建的 <code>env</code> 环境, 此时下方的环境已经换成了 <code>&#39;env&#39;:venv</code>, 并且刚刚的黄色波浪线与问题也消失了.</p>
 <p>此时我们可以选择在激活了虚拟环境的终端里运行这份代码, 或者使用快捷键 <code>Ctrl + F5</code> 让 <code>VS Code</code> 帮我们运行. 这里展示一下在终端里直接运行的结果, 可以看到成功输出, 一个是向量内积结果, 一个是向量按位乘法结果.</p>
-<p><img data-src="https://s1.ax1x.com/2022/08/13/vNDsPO.png" alt="vNDsPO.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDsPO.png" alt="vNDsPO.png"></p>
 <h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>到这里就结束了, 说实话只讲了 <code>VS Code</code> 中使用 <code>python</code> 的最基本技巧, 这些操作之后写代码的时候多操作几次应该就烂熟于心了.</p>
 <p>但是对于进校没多久的萌新们来说, 估计看的还是很晕的, 因为有很多新名词, 特别是 &quot;环境变量&quot; 这种, 可能是完全第一次听说, 而且也容易出问题. 所以还是建议多动手尝试尝试, 并且善用搜索引擎, 多翻几篇博客, 总会能够找到适合你问题的解决方案.</p>
 <p>就这样了, 下回单独写写怎么合理的科学上网, 为使用 <code>Github</code> <del>抄代码</del>打下坚实基础.</p>
