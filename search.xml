@@ -26,17 +26,17 @@
 <ul>
 <li>轻量的性能监视器: 可以显示电脑占用和网速监视浮窗</li>
 </ul>
-<p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
 <ul>
 <li>可自定义桌宠: 支持基于 <code>spine v3.6.53</code> 导出的碧蓝航线全角色小人动画</li>
 </ul>
-<p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
 <h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 下载 <code>Latest</code> 版本的 <code>zip</code> 压缩包, 解压后双击运行里面的 <code>DesktopSprite.msi</code> 安装文件进行安装, 可以自定义安装位置.</p>
 <p>安装完成后, 开始菜单和桌面都会出现程序启动图标. 双击运行, 通知栏会有程序图标, 首次运行桌面默认会显示自带的碧蓝小人角色, 且有一个性能浮窗.</p>
 <h3 id="更换角色"><a href="#更换角色" class="headerlink" title="更换角色"></a>更换角色</h3><p>右键通知区域程序图标, 可以进入设置界面, 设置对应的 <code>atlas</code> 和 <code>skel/json</code> 文件, 然后应用/确定设置即可完成更换.</p>
 <p>需要注意 <code>*.atlas</code>, <code>*.png</code>, <code>*.skel/*.json</code> 三份文件需要互相匹配, 且 <code>*.atlas</code> 和 <code>*.png</code> 文件名必须相同 (选择 <code>atlas</code> 的时候会自动填入 <code>png</code> 文件).</p>
-<p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
-<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="https://ww-rm.github.io/gp-static/image/desktopsprite/config.png" alt="config.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
+<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/config.png" alt="config.png"></p>
 <h5 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h5><ul>
 <li>开机启动: 程序是否开机启动</li>
 <li>整点报时: 一个小功能, 可以在整点时间弹出通知提醒</li>
