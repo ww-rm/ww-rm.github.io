@@ -1,11 +1,11 @@
 ---
 title: 基于 Spine 的碧蓝航线桌宠
+categories:
+  - "个人项目"
 tags:
   - "桌宠"
   - "碧蓝航线"
   - "Spine"
-categories:
-  - "个人项目"
 date: 2023-08-30 19:36:29
 mathjax: true
 ---

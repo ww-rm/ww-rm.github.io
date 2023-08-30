@@ -1,9 +1,9 @@
 ---
 title: '解决学习道路上的 "最后 1 KB"'
+categories:
+  - "杂学"
 tags:
   - "科学上网"
-categories:
-  - "实用技能"
 date: 2022-08-14 14:03:33
 ---
 

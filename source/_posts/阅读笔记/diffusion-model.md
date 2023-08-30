@@ -1,11 +1,11 @@
 ---
 title: 扩散模型阅读笔记
+categories:
+  - "阅读笔记"
 tags:
   - "图像生成"
   - "扩散模型"
   - "Diffusion Model"
-categories:
-  - "AI相关"
 date: 2022-10-29 22:45:56
 mathjax: true
 ---

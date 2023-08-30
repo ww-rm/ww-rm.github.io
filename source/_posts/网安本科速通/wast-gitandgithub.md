@@ -1,11 +1,11 @@
 ---
 title: Git 与 Github 入门
-tags:
-  - "git"
-  - "github"
 categories:
   - "网安本科速通"
   - "必备技能"
+tags:
+  - "git"
+  - "github"
 date: 2022-08-15 17:22:32
 ---
 

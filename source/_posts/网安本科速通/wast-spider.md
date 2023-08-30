@@ -1,11 +1,11 @@
 ---
 title: 基于 Requests 的爬虫入门
-tags:
-  - "爬虫"
-  - "requests"
 categories:
   - "网安本科速通"
   - "必备技能"
+tags:
+  - "爬虫"
+  - "requests"
 date: 2022-08-16 22:03:17
 ---
 

@@ -1,11 +1,11 @@
 ---
 title: NJ 树算法原理与实现
+categories:
+  - "杂学"
 tags:
   - "聚类算法"
   - "生信"
   - "NJ 树"
-categories:
-  - "数据分析"
 date: 2023-03-08 21:54:27
 mathjax: true
 ---

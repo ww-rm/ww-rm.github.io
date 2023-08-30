@@ -1,11 +1,11 @@
 ---
 title: 打造一个舒适的 Python 编程环境
-tags:
-  - "python"
-  - "VS Code"
 categories:
   - "网安本科速通"
   - "新手入门"
+tags:
+  - "python"
+  - "VS Code"
 date: 2022-08-13 13:53:17
 ---
 

@@ -1,13 +1,13 @@
 ---
 title: 给新生的编程工具推荐与基本使用方法
+categories:
+  - "网安本科速通"
+  - "新手入门"
 tags:
   - "Visual Studio Code"
   - "VS Code"
   - "Visual Studio"
   - "VS"
-categories:
-  - "网安本科速通"
-  - "新手入门"
 date: 2022-08-11 21:55:28
 ---
 

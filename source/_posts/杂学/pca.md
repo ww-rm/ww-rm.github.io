@@ -1,9 +1,9 @@
 ---
 title: PCA 算法原理与实现
+categories:
+  - "杂学"
 tags:
   - "数据降维"
-categories:
-  - "数据分析"
 date: 2023-02-18 23:20:08
 mathjax: true
 ---

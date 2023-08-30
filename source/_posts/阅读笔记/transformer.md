@@ -1,10 +1,10 @@
 ---
 title: Transformer 的训练与推理
+categories:
+  - "阅读笔记"
 tags:
   - "Transformer"
   - "NLP"
-categories:
-  - "AI相关"
 date: 2023-08-29 14:48:13
 mathjax: true
 ---

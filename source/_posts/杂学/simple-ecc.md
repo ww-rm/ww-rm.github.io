@@ -1,10 +1,10 @@
 ---
 title: ECC 算法原理简介与实现
+categories:
+  - "杂学"
 tags:
   - "公钥算法"
   - "椭圆曲线密码"
-categories:
-  - "密码相关"
 date: 2022-12-07 11:04:56
 mathjax: true
 ---
