@@ -22,14 +22,14 @@ mathjax: true
 
 - 轻量的性能监视器: 可以显示电脑占用和网速监视浮窗
 
-![性能浮窗动图](https://ww-rm.github.io/gp-static/image/desktopsprite/perfmonitor.gif)
+![性能浮窗动图](https://ww-rm.github.io/static/image/desktopsprite/perfmonitor.gif)
 
 - 可自定义桌宠: 支持基于 `spine v3.6.53` 导出的碧蓝航线全角色小人动画
 
-![guanghui_2 动图](https://ww-rm.github.io/gp-static/image/desktopsprite/guanghui_2.gif)
-![biaoqiang_h 动图](https://ww-rm.github.io/gp-static/image/desktopsprite/biaoqiang_h.gif)
-![lafei_h 动图](https://ww-rm.github.io/gp-static/image/desktopsprite/lafei_h.gif)
-![z23_h 动图](https://ww-rm.github.io/gp-static/image/desktopsprite/z23_h.gif)
+![guanghui_2 动图](https://ww-rm.github.io/static/image/desktopsprite/guanghui_2.gif)
+![biaoqiang_h 动图](https://ww-rm.github.io/static/image/desktopsprite/biaoqiang_h.gif)
+![lafei_h 动图](https://ww-rm.github.io/static/image/desktopsprite/lafei_h.gif)
+![z23_h 动图](https://ww-rm.github.io/static/image/desktopsprite/z23_h.gif)
 
 ## 安装与使用
 
@@ -45,13 +45,13 @@ mathjax: true
 
 需要注意 `*.atlas`, `*.png`, `*.skel/*.json` 三份文件需要互相匹配, 且 `*.atlas` 和 `*.png` 文件名必须相同 (选择 `atlas` 的时候会自动填入 `png` 文件).
 
-![atlasconfig](https://ww-rm.github.io/gp-static/image/desktopsprite/atlasconfig.png)
+![atlasconfig](https://ww-rm.github.io/static/image/desktopsprite/atlasconfig.png)
 
 ### 详细使用说明
 
 #### 设置面板
 
-![config.png](https://ww-rm.github.io/gp-static/image/desktopsprite/config.png)
+![config.png](https://ww-rm.github.io/static/image/desktopsprite/config.png)
 
 ##### 系统设置
 
