@@ -52,7 +52,7 @@ date: 2023-04-11 09:53:19
 
 当遇到无法通过 `Mesh` 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:
 
-![ppLHg1I.png](https://s1.ax1x.com/2023/04/11/ppLHg1I.png)
+![ppLHg1I.png](https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png)
 
 ```python
 import shutil
@@ -245,43 +245,43 @@ if __name__ == "__main__":
 放一些还原前和还原后的图作对比~夹带私货~.
 
 {% note danger guanghui_h.png %}
-![ppLI7y8.png](https://s1.ax1x.com/2023/04/11/ppLI7y8.png)
-![ppLIDRx.png](https://s1.ax1x.com/2023/04/11/ppLIDRx.png)
+![ppLI7y8.png](https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png)
+![ppLIDRx.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png)
 🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹
 <div style="text-align:center;">🌹{% curtain %}为光辉老婆献上 99 朵玫瑰!{% endcurtain %}🌹</div>
 {% endnote %}
 
 {% note info guanghui.png %}
-![ppLITQf.png](https://s1.ax1x.com/2023/04/11/ppLITQf.png)
-![ppLIBJ1.png](https://s1.ax1x.com/2023/04/11/ppLIBJ1.png)
+![ppLITQf.png](https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png)
+![ppLIBJ1.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png)
 {% endnote %}
 
 {% note info guanghui_2.png %}
-![ppLIoSP.png](https://s1.ax1x.com/2023/04/11/ppLIoSP.png)
-![ppLI0iR.png](https://s1.ax1x.com/2023/04/11/ppLI0iR.png)
+![ppLIoSP.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png)
+![ppLI0iR.png](https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png)
 {% endnote %}
 
 {% note info guanghui_3.png %}
-![ppLI5Wt.png](https://s1.ax1x.com/2023/04/11/ppLI5Wt.png)
-![ppLIdo9.png](https://s1.ax1x.com/2023/04/11/ppLIdo9.png)
+![ppLI5Wt.png](https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png)
+![ppLIdo9.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png)
 {% endnote %}
 
 {% note info guanghui_4.png %}
-![ppLIhFA.png](https://s1.ax1x.com/2023/04/11/ppLIhFA.png)
-![ppLIadJ.png](https://s1.ax1x.com/2023/04/11/ppLIadJ.png)
+![ppLIhFA.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png)
+![ppLIadJ.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png)
 {% endnote %}
 
 {% note info guanghui_5.png %}
-![ppLIHOS.png](https://s1.ax1x.com/2023/04/11/ppLIHOS.png)
-![ppLIrz6.png](https://s1.ax1x.com/2023/04/11/ppLIrz6.png)
+![ppLIHOS.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png)
+![ppLIrz6.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png)
 {% endnote %}
 
 {% note info guanghui_idol.png %}
-![ppLHstH.png](https://s1.ax1x.com/2023/04/11/ppLHstH.png)
-![ppLI6sO.png](https://s1.ax1x.com/2023/04/11/ppLI6sO.png)
+![ppLHstH.png](https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png)
+![ppLI6sO.png](https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png)
 {% endnote %}
 
 {% note info guanghui_idol_n.png %}
-![ppLIqeg.png](https://s1.ax1x.com/2023/04/11/ppLIqeg.png)
-![ppLIyQK.png](https://s1.ax1x.com/2023/04/11/ppLIyQK.png)
+![ppLIqeg.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png)
+![ppLIyQK.png](https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png)
 {% endnote %}
