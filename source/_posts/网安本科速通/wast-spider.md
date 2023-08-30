@@ -27,7 +27,7 @@ date: 2022-08-16 22:03:17
 
 我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.
 
-![v0cQQx.png](https://s1.ax1x.com/2022/08/16/v0cQQx.png)
+![v0cQQx.png](https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png)
 
 我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.
 
@@ -41,17 +41,17 @@ date: 2022-08-16 22:03:17
 
 目标网页网址为 `https://top.baidu.com/board?tab=game`, 浏览器查看一下长这样.
 
-![v0hSFU.png](https://s1.ax1x.com/2022/08/16/v0hSFU.png)
+![v0hSFU.png](https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png)
 
 我们的目标是获得整个榜按顺序所有游戏的**名字**, **热搜指数**, **类型**以及**详情页链接**.
 
 打开我们的 `Firefox` 浏览器 (其他浏览器也是类似的), 首先快捷键 `F12` 或者更多工具里打开 "开发者工具", 并切换到 "网络" 选项卡.
 
-![v0hhc9.png](https://s1.ax1x.com/2022/08/16/v0hhc9.png)
+![v0hhc9.png](https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png)
 
 此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 "重新载入" 或者刷新一次页面, 让浏览器重新发起一次请求.
 
-![v04mBq.png](https://s1.ax1x.com/2022/08/16/v04mBq.png)
+![v04mBq.png](https://ww-rm.github.io/static/image/wast-spider/v04mBq.png)
 
 查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.
 
@@ -87,11 +87,11 @@ Path("a.html").write_text(res.text, encoding="utf8")
 
 在 `VS Code` 中打开刚刚保存的 `a.html`, 并且使用自带格式化程序整理一下, 再使用 `Ctrl + F` 搜索内容中的关键词进行快速定位.
 
-![v0oHrd.png](https://s1.ax1x.com/2022/08/16/v0oHrd.png)
+![v0oHrd.png](https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png)
 
 定位完成后, 我们分析数据附近的结构.
 
-![v0TFZn.png](https://s1.ax1x.com/2022/08/16/v0TFZn.png)
+![v0TFZn.png](https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png)
 
 贴一个缩小后的图, 由 `html` 的树形结构可以知道, 红框里的每一个 `<div>` 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 `<main>` 的第二个 `<div>` 的第一个 `<div>` 的第二个 `<div>` 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 `div` 是否有独特性.
 

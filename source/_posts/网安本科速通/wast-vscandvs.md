@@ -35,19 +35,19 @@ date: 2022-08-11 21:55:28
 
 官网地址是 [https://code.visualstudio.com/](https://code.visualstudio.com/). 进去之后的界面现在长这样.
 
-![vGcccj.jpg](https://s1.ax1x.com/2022/08/11/vGcccj.jpg)
+![vGcccj.jpg](https://ww-rm.github.io/static/image/wast-vscandvs/vGcccj.jpg)
 
 可以直接点 Download 下载然后快速安装, 不过我不是那么的推荐, 因为直接点下载的是 User 版本, 可能会有奇怪的权限问题. 推荐下能够获取系统权限的版本比较好, 并且可以安装在系统目录.
 
 所以按下图直接点到其他版本的选择页面, 选 64 bit System 版本下载.
 
-![vGgPvd.png](https://s1.ax1x.com/2022/08/11/vGgPvd.png)
+![vGgPvd.png](https://ww-rm.github.io/static/image/wast-vscandvs/vGgPvd.png)
 
-![vGgNPU.png](https://s1.ax1x.com/2022/08/11/vGgNPU.png)
+![vGgNPU.png](https://ww-rm.github.io/static/image/wast-vscandvs/vGgNPU.png)
 
 下载完之后点击安装, 接下来提一下几个比较有用的安装选项, 可以极大的提高你的使用体验.
 
-![vGRJ9U.png](https://s1.ax1x.com/2022/08/11/vGRJ9U.png)
+![vGRJ9U.png](https://ww-rm.github.io/static/image/wast-vscandvs/vGRJ9U.png)
 
 这个界面上的选项建议全勾上, 第 2 个和第 3 个选项可以在你的右键菜单里添加 "通过 Code 打开" 的选项, 这样子你可以很方便的直接使用右键点击文件或者文件夹或者文件夹的空白处, 然后把他们在 `VS Code` 中打开进行操作.
 
@@ -67,11 +67,11 @@ date: 2022-08-11 21:55:28
 
 不管你是用通过右键打开的项目文件夹还是从 "文件" 菜单栏打开的, 之后的界面都应该和下面的图长得差不多, 一片空白.
 
-![vJ85wR.png](https://s1.ax1x.com/2022/08/12/vJ85wR.png)
+![vJ85wR.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJ85wR.png)
 
 然后我们选到左边的长得像方块的图标, 也就是扩展, 开始按照工作需求自定义我们的 `VS Code`.
 
-![vJGk6g.png](https://s1.ax1x.com/2022/08/12/vJGk6g.png)
+![vJGk6g.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJGk6g.png)
 
 可以看到这里已经有一个扩展了, 这也是我们下载 `VS Code` 几乎必装的一个扩展, 中文汉化扩展, 如果没有预装, 则直接搜索对应的扩展名字装上就可以了. ~~英语大佬请无视中文扩展~~.
 
@@ -81,13 +81,13 @@ date: 2022-08-11 21:55:28
 
 由于 `VS Code` 之后基本上用来写 `python`, 因此这里把 `python` 扩展先装上, 日后有需求可以自行举一反三.
 
-![vJGj3T.png](https://s1.ax1x.com/2022/08/12/vJGj3T.png)
+![vJGj3T.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJGj3T.png)
 
 安装完成之后可能会弹出来一些 Get Start 页面, 不用管, 不过有时间的话可以稍微翻一翻, 也是一些新手教程.
 
 #### 第一份代码
 
-![vJJhI1.png](https://s1.ax1x.com/2022/08/12/vJJhI1.png)
+![vJJhI1.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJJhI1.png)
 
 ```python
 def add(a, b):
@@ -117,23 +117,23 @@ if __name__ == "__main__":
 
 有很多方法可以运行, 这里只说两种最简单的, 一是靠鼠标或者快捷键, 二是在命令行里敲命令.
 
-![vJYkZj.png](https://s1.ax1x.com/2022/08/12/vJYkZj.png)
+![vJYkZj.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJYkZj.png)
 
 图内可以看到菜单栏有个运行选项, 点开就是两个, 一个叫 "启动调试" (`F5`), 另一个是 "以非调试模式运行" (`Ctrl + F5`).
 
 前者是调试, 后者是单纯的运行, 对于我们来说, 只需要点击后者, 或者直接快捷键 `Ctrl + F5`, 就可以看到运行效果了.
 
-![vJY3w9.png](https://s1.ax1x.com/2022/08/12/vJY3w9.png)
+![vJY3w9.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJY3w9.png)
 
 自动弹出了一个终端, 并且成功的打印出了我们的结果. 到这里第一种方法就结束了, 更多细致的功能日后再慢慢探索吧.
 
 然后是第二种方式, 自己在命令行里敲命令, 那么首先需要知道怎么把终端调用出来.
 
-![vJYBeH.png](https://s1.ax1x.com/2022/08/12/vJYBeH.png)
+![vJYBeH.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJYBeH.png)
 
-![vJYyFI.png](https://s1.ax1x.com/2022/08/12/vJYyFI.png)
+![vJYyFI.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJYyFI.png)
 
-![vJY4mQ.png](https://s1.ax1x.com/2022/08/12/vJY4mQ.png)
+![vJY4mQ.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJY4mQ.png)
 
 如上图新建一个终端, 然后敲入指令 `python main.py`, 同样输出了我们的运行结果. 可以看到, 新建的终端会自动打开到我们的项目文件夹目录, 所以可以直接访问到里面的内容, 而我们的所有命令, 也都是基于项目文件夹作为根目录来运行的. (这一点很重要, 如果命令行的工作目录和项目文件夹不一致, 可以自己手动 `cd` 切换一下, 可以免去写代码时带来的一些路径问题)
 
@@ -145,15 +145,15 @@ if __name__ == "__main__":
 
 打上断点的方式也很简单, 比如在第 15 行停下, 那么只需要在行号左边点一下就可以了, 这样子当程序运行到第 15 行的时候, 会停下, 且第 15 行**不会执行**, 是即将要执行的语句.
 
-![vJtKht.png](https://s1.ax1x.com/2022/08/12/vJtKht.png)
+![vJtKht.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJtKht.png)
 
 然后, 从运行菜单里选择 "进行调试" 或者快捷键 `F5`, 会弹出提示让你选择要使用的调试配置 (因为我们没有给这个项目设定自己的调试配置, 所以需要选择一种系统提供的默认调试配置), 这里直接选第一个就行了.
 
-![vJtyB4.png](https://s1.ax1x.com/2022/08/12/vJtyB4.png)
+![vJtyB4.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJtyB4.png)
 
 不出意外的话, 程序会稳稳的停在第 15 行, 并且左边跳转到了调试面板, 显示了各种调试信息.
 
-![vJtouD.png](https://s1.ax1x.com/2022/08/12/vJtouD.png)
+![vJtouD.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJtouD.png)
 
 - 变量: 显示了各种局部或者全局的变量值.
 - 监视: 可以手动输入一些变量或者表达式来进行单独观察.
@@ -186,19 +186,19 @@ if __name__ == "__main__":
 
 官方网站是 [https://visualstudio.microsoft.com/](https://visualstudio.microsoft.com/), 目前是 2022 的最新版本, 下的时候选择 Community 版本下载, 这个版本是**面向个人免费使用**的, 只需要注册微软的账户就可以授权给个人了.
 
-![vJ5QCq.png](https://s1.ax1x.com/2022/08/12/vJ5QCq.png)
+![vJ5QCq.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJ5QCq.png)
 
 这个东西下完之后是 VS 的 Installer, 直接无脑装好然后运行, 会进入如下的选择界面. (找不到就去开始菜单里翻, 它是不会有桌面快捷方式的)
 
-![vJI6S0.png](https://s1.ax1x.com/2022/08/12/vJI6S0.png)
+![vJI6S0.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJI6S0.png)
 
-![vJIfw4.png](https://s1.ax1x.com/2022/08/12/vJIfw4.png)
+![vJIfw4.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJIfw4.png)
 
 默认会直接进到第二张图, 如果不是的话按第一张图自己选安装.
 
 对于我们日常写写作业来说, 我们只需要能够写 `c` 语言就够了, 所以只需勾选下面其中的一个就完全足够使用了, 那就是 "使用 C++ 的桌面开发". 虽然写的是 `c++`, 但是其实写 `c` 也是用这个写的, 只要你创建源文件的时候, 后缀名自己改成 `.c` 而不是 `.cpp`, 这样子编译的时候就会换成 `c` 的编译方式.
 
-![vJIqOO.png](https://s1.ax1x.com/2022/08/12/vJIqOO.png)
+![vJIqOO.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJIqOO.png)
 
 这一坨子东西装下来还是要一点空间和时间的, 推荐电脑有空闲时间的时候慢慢挂机安装, 安装完之后重启一下电脑, 让一些系统项生效.
 
@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
 首先会跳出来这个界面, 我们直接选择创建新项目.
 
-![vJOeqP.png](https://s1.ax1x.com/2022/08/12/vJOeqP.png)
+![vJOeqP.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJOeqP.png)
 
 然后是选择项目模板, 模板类型有很多, 但是我们选择最简单的 "空项目", 这样子可以后续自己手动创建文件, 了解一下具体的项目结构.
 
@@ -220,11 +220,11 @@ if __name__ == "__main__":
 
 这里我们把 "解决方案" 的名称设为 "example", 把项目名称设置为 "c_project". 这样子实际的物理结构就会是一个 `example` 的总文件夹下面还有一个 `c_project` 的项目文件夹.
 
-![vJXf00.png](https://s1.ax1x.com/2022/08/12/vJXf00.png)
+![vJXf00.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJXf00.png)
 
 创建好之后大概长下图所示, 解决方案资源管理器位置可以自己调, 我调左边去了, 视图菜单里也可以手动显示出来.
 
-![vJXztO.png](https://s1.ax1x.com/2022/08/12/vJXztO.png)
+![vJXztO.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJXztO.png)
 
 #### 认识解决方案资源管理器
 
@@ -238,19 +238,19 @@ if __name__ == "__main__":
 
 右键 "源文件", 选择 "添加", 然后选择 "新建项", 选择源文件, 同时把文件名设为 `main.c`. 然后键入经典的 Hello world 程序代码.
 
-![vJjO2Q.png](https://s1.ax1x.com/2022/08/12/vJjO2Q.png)
+![vJjO2Q.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJjO2Q.png)
 
-![vJviPU.png](https://s1.ax1x.com/2022/08/12/vJviPU.png)
+![vJviPU.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJviPU.png)
 
-![vJvKIK.png](https://s1.ax1x.com/2022/08/12/vJvKIK.png)
+![vJvKIK.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJvKIK.png)
 
 可以看到左侧已经成功的在源文件项下面多出来了一份 `main.c`. 但是刚刚说了目前的界面是解决方案的 "逻辑结构", 所以我们需要切换一下视图, 看看刚刚创建的文件究竟在哪.
 
-![vJv6Ln.png](https://s1.ax1x.com/2022/08/12/vJv6Ln.png)
+![vJv6Ln.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJv6Ln.png)
 
 管理器的上方有一个切换视图按钮, 点击之后可以选择是 "解决方案" 还是 "文件夹视图", 我们直接换到文件夹视图.
 
-![vJv4WF.png](https://s1.ax1x.com/2022/08/12/vJv4WF.png)
+![vJv4WF.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJv4WF.png)
 
 这个时候就非常清晰了, 顶层文件夹 `example`, 次级项目文件夹 `c_project`, 然后在项目文件夹内有一份 `main.c`.
 
@@ -262,11 +262,11 @@ if __name__ == "__main__":
 
 一个最简单的设置方法就是将文件或者文件夹设置是否包含在项目中. 解决方案视图只会显示在项目中的内容. 即使文件实际上在项目文件夹内, 如果不在项目中, 那它也不会纳入 `VS` 项目的各种判断逻辑中, 比如不会参与编译.
 
-![vJxqXj.png](https://s1.ax1x.com/2022/08/12/vJxqXj.png)
+![vJxqXj.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJxqXj.png)
 
 这种方式可以很轻松的把文件排除项目. 那么对于添加到项目里, 比如需要添加现有的文件与源代码, 我们需要首先把对应的文件在物理上移到我们的项目文件夹内合适的地方, 然后使用管理器切换到 "所有文件" 视图.
 
-![vJzQjH.png](https://s1.ax1x.com/2022/08/12/vJzQjH.png)
+![vJzQjH.png](https://ww-rm.github.io/static/image/wast-vscandvs/vJzQjH.png)
 
 如果刚刚把 `main.c` 排除了, 那么就会像图上那样有个红色符号, 表示这个文件没有纳入项目逻辑考虑范围. 我们可以用右键把它重新包含到项目内, 这样子红色符号就消失了, 解决方案视图里也能重新看到这个文件了.
 
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
 编译的时候有一些基本选项可以调整.
 
-![vtQxRU.png](https://s1.ax1x.com/2022/08/13/vtQxRU.png)
+![vtQxRU.png](https://ww-rm.github.io/static/image/wast-vscandvs/vtQxRU.png)
 
 `x86` 和 `x64` 好理解, 指的是编译出来的二进制文件是 32 位程序还是 64 位程序, 一般来说调成 `x64` 会让程序能更充分利用现在的 64 位处理器性能.
 
@@ -292,9 +292,9 @@ if __name__ == "__main__":
 
 一般来说, 直接使用快捷键 `Ctrl + B` 即可, 会生成当前正在操作的项目.
 
-![vtlezD.png](https://s1.ax1x.com/2022/08/13/vtlezD.png)
+![vtlezD.png](https://ww-rm.github.io/static/image/wast-vscandvs/vtlezD.png)
 
-![vtlnQe.png](https://s1.ax1x.com/2022/08/13/vtlnQe.png)
+![vtlnQe.png](https://ww-rm.github.io/static/image/wast-vscandvs/vtlnQe.png)
 
 运行一下生成, 可以看到下方的输出里显示生成成功, 并且也输出了生成的二进制文件的路径.
 
@@ -304,7 +304,7 @@ if __name__ == "__main__":
 
 按下快捷键 `Ctrl + F5`, `VS` 就会自动弹出来一个运行黑框了, "Hello world!"
 
-![vtlJW8.png](https://s1.ax1x.com/2022/08/13/vtlJW8.png)
+![vtlJW8.png](https://ww-rm.github.io/static/image/wast-vscandvs/vtlJW8.png)
 
 ## 后话
 

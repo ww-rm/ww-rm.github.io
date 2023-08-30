@@ -16,7 +16,7 @@ mathjax: true
 
 ## 基本原理
 
-![x5xJiR.jpg](https://s1.ax1x.com/2022/10/29/x5xJiR.jpg)
+![x5xJiR.jpg](https://ww-rm.github.io/static/image/diffusion-model/x5xJiR.jpg)
 
 前向过程为一张图片 $x_0$ 在经过 $T$ 轮高斯噪声叠加后会变成一张近似纯高斯噪声图 $x_T$, 而网络则是学习反向过程中的参数, 能够通过 $x_T$ 一步步还原出 $x_0$.
 

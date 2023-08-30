@@ -25,7 +25,7 @@ PC 端 `V2RayN`: [Github 项目地址](https://github.com/2dust/v2rayN/), [下�
 
 考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 `V2RayN-Core v5.32` 的网盘[下载地址](https://ww-rm.lanzout.com/iPm0S09j6vqh/) (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).
 
-![vUBwJU.jpg](https://s1.ax1x.com/2022/08/14/vUBwJU.jpg)
+![vUBwJU.jpg](https://ww-rm.github.io/static/image/kxsw/vUBwJU.jpg)
 
 ## 工具使用
 
@@ -63,7 +63,7 @@ PC 端上, `V2RayN` 的本地代理默认监听地址是 `127.0.0.1`, 其中 `ht
 
 但是某些程序是可以单独设置使用代理服务器的, 比如 `Firefox` 浏览器, 这种就需要自己去浏览器设置里手动设置代理.
 
-![vUyCmd.png](https://s1.ax1x.com/2022/08/14/vUyCmd.png)
+![vUyCmd.png](https://ww-rm.github.io/static/image/kxsw/vUyCmd.png)
 
 个人推荐备一个 `Firefox` 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 `Edge` 等浏览器访问国内网站.
 
@@ -91,6 +91,6 @@ So, 为了解决上网的最后 "1 KB", 我们需要首先获得工具, 然后�
 
 尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.
 
-![vUc2TA.png](https://s1.ax1x.com/2022/08/14/vUc2TA.png)
+![vUc2TA.png](https://ww-rm.github.io/static/image/kxsw/vUc2TA.png)
 
 PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.
