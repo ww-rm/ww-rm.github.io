@@ -166,3 +166,10 @@ void GetAffineMatrix(
 
 - [单角色下载](https://pan.baidu.com/s/1tSaBzZTWCyvcrgbGh_mgrg?pwd=blhx), 提取码: `blhx`.
 - [全角色下载](https://pan.baidu.com/s/1qpZnJRB4PaC9Eb3tkZdACw?pwd=blhx), 提取码: `blhx`.
+
+如果 [Release](https://github.com/ww-rm/DesktopSprite/releases) 界面进不去 (可能需要魔法才能访问), 这里贴一下程序的网盘链接.
+
+- [安装包 - 百度网盘](https://pan.baidu.com/s/1Qhnrrhl_bPH0EG58FkFAbQ?pwd=blhx), 提取码: `blhx`.
+- [免安装 - 百度网盘](https://pan.baidu.com/s/10RrSIWr71gKM8ww6mwcBTQ?pwd=blhx), 提取码: `blhx`.
+- [安装包 - 蓝奏云](https://ww-rm.lanzout.com/iUtUt171wrqf).
+- [免安装 - 蓝奏云](https://ww-rm.lanzout.com/iUtUt171wrqf).
