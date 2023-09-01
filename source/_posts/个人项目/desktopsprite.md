@@ -169,7 +169,7 @@ void GetAffineMatrix(
 
 如果 [Release](https://github.com/ww-rm/DesktopSprite/releases) 界面进不去 (可能需要魔法才能访问), 这里贴一下程序的网盘链接.
 
-- [安装包 - 百度网盘](https://pan.baidu.com/s/1Qhnrrhl_bPH0EG58FkFAbQ?pwd=blhx), 提取码: `blhx`.
-- [免安装 - 百度网盘](https://pan.baidu.com/s/10RrSIWr71gKM8ww6mwcBTQ?pwd=blhx), 提取码: `blhx`.
-- [安装包 - 蓝奏云](https://ww-rm.lanzout.com/iUtUt171wrqf).
-- [免安装 - 蓝奏云](https://ww-rm.lanzout.com/iUtUt171wrqf).
+- [安装包 - 百度网盘](https://pan.baidu.com/s/1vDFr0KYRknDjGDH1HaEX6g?pwd=blhx), 提取码: `blhx`.
+- [免安装 - 百度网盘](https://pan.baidu.com/s/1TxsvHbk2TVjlvv9Lv-C7yg?pwd=blhx), 提取码: `blhx`.
+- [安装包 - 蓝奏云](https://ww-rm.lanzout.com/iyKWe174crre).
+- [免安装 - 蓝奏云](https://ww-rm.lanzout.com/iFUML174crli).
