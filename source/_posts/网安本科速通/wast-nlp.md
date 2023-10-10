@@ -147,7 +147,6 @@ class MyNetwork(nn.Module):
         outputs = outputs.transpose(1, 2)                               # (L, 128) -> (128, L)
         outputs = self._convpool(outputs)                               # (128, L) -> (384,)
         outputs = self.fc(outputs)                                      # (384,) -> (7,)
-        outputs = torch.log_softmax(outputs, -1)
         return outputs
 ```
 
