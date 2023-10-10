@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在我导安排下作为防守方出了个题到看雪 2023·KCTF 上, 第十一题 步步逼近, 有幸拿了精致奖, 第一次参加这类比赛, 属实是走大运了. 这里把出题思路和题解贴一下, 和看雪的是一样的, 原文链接 https:&#x2F;&#x2F;bbs.kanxue.com&#x2F;thread-278478.htm.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="看雪 2023·KCTF 第十一题设计思路与题解">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2023/10/07/kctf-2023/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="在我导安排下作为防守方出了个题到看雪 2023·KCTF 上, 第十一题 步步逼近, 有幸拿了精致奖, 第一次参加这类比赛, 属实是走大运了. 这里把出题思路和题解贴一下, 和看雪的是一样的, 原文链接 https:&#x2F;&#x2F;bbs.kanxue.com&#x2F;thread-278478.htm.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-07T08:44:56.000Z">
+<meta property="article:modified_time" content="2023-10-10T09:04:09.605Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="看雪">
+<meta property="article:tag" content="KCTF">
+<meta property="article:tag" content="逆向">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2023/10/07/kctf-2023/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/10/07/kctf-2023/","path":"/posts/2023/10/07/kctf-2023/","title":"看雪 2023·KCTF 第十一题设计思路与题解"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>看雪 2023·KCTF 第十一题设计思路与题解 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">题目分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E4%B8%8E%E7%BB%93%E6%9E%9C"><span class="nav-number">1.1.</span> <span class="nav-text">输入与结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E6%9C%BA%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">验证机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E9%A2%98%E6%80%9D%E8%B7%AF"><span class="nav-number">2.</span> <span class="nav-text">解题思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9A%B4%E5%8A%9B%E6%9E%9A%E4%B8%BE"><span class="nav-number">2.1.</span> <span class="nav-text">暴力枚举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AC%E5%BC%8F%E6%9E%9A%E4%B8%BE"><span class="nav-number">2.2.</span> <span class="nav-text">公式枚举</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E7%AD%94%E6%A1%88"><span class="nav-number">2.3.</span> <span class="nav-text">最终答案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E7%9B%AE%E5%8F%8A%E6%BA%90%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">题目及源代码</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/10/07/kctf-2023/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="看雪 2023·KCTF 第十一题设计思路与题解 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          看雪 2023·KCTF 第十一题设计思路与题解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-07 16:44:56" itemprop="dateCreated datePublished" datetime="2023-10-07T16:44:56+08:00">2023-10-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9D%82%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">杂学</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在我导安排下作为防守方出了个题到<span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXRlYW1fbGlzdC0xOS0zMy5odG0=">看雪 2023·KCTF<i class="fa fa-external-link-alt"></i></span> 上, <span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXNlYXNvbl9maWdodC0yMzYuaHRt">第十一题 步步逼近<i class="fa fa-external-link-alt"></i></span>, 有幸拿了精致奖, 第一次参加这类比赛, 属实是走大运了. 这里把出题思路和题解贴一下, 和看雪的是一样的, 原文链接 <span class="exturl" data-url="aHR0cHM6Ly9iYnMua2FueHVlLmNvbS90aHJlYWQtMjc4NDc4Lmh0bQ==">https://bbs.kanxue.com/thread-278478.htm<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="题目分析"><a href="#题目分析" class="headerlink" title="题目分析"></a>题目分析</h2><h3 id="输入与结果"><a href="#输入与结果" class="headerlink" title="输入与结果"></a>输入与结果</h3><p>简单试错以及使用 IDA 获取伪代码可以知道题目的输入是一个不超过 10 位的十进制数字, 并且将范围限制在了 4K (0x1000) 至 4G (0x100000000) 之间 (包含两头端点). 所以解出此题的关键在于弄清楚题目如何对输入的数字进行验证.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***** 省略前文 *****/</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Please input: &quot;</span>);</span><br><span class="line">  v0 = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v1 = _getchar();</span><br><span class="line">    <span class="keyword">if</span> ( v1 == <span class="number">10</span> )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    v2 = v0 + <span class="number">1</span>;</span><br><span class="line">    _Buffer[v0] = v1;</span><br><span class="line">    <span class="keyword">if</span> ( v0 + <span class="number">1</span> &gt;= <span class="number">0xB</span> )</span><br><span class="line">      <span class="keyword">goto</span> LABEL_43;</span><br><span class="line">    _Buffer[v2] = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> ( v0 == <span class="number">9</span> &amp;&amp; _getchar() != <span class="number">10</span> )</span><br><span class="line">      <span class="keyword">goto</span> LABEL_41;</span><br><span class="line">    ++v0;</span><br><span class="line">    <span class="keyword">if</span> ( v2 &gt;= <span class="number">10</span> )</span><br><span class="line">      <span class="keyword">goto</span> LABEL_10;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( v0 &gt;= <span class="number">0xB</span> )</span><br><span class="line">  &#123;</span><br><span class="line">LABEL_43:</span><br><span class="line">    __report_rangecheckfailure();</span><br><span class="line">    __debugbreak();</span><br><span class="line">    JUMPOUT(*(_DWORD *)__security_check_cookie);</span><br><span class="line">  &#125;</span><br><span class="line">  _Buffer[v0] = <span class="number">0</span>;</span><br><span class="line">LABEL_10:</span><br><span class="line">  v3 = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">if</span> ( _Buffer[<span class="number">0</span>] )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">while</span> ( ++v3 &lt;= <span class="number">10</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ( !_Buffer[v3] )</span><br><span class="line">        <span class="keyword">goto</span> LABEL_15;</span><br><span class="line">    &#125;</span><br><span class="line">    v3 = <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">LABEL_15:</span><br><span class="line">  <span class="keyword">if</span> ( sscanf_s(_Buffer, <span class="string">&quot;%lld&quot;</span>, &amp;x) == <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    v4 = sprintf_s(v18, <span class="number">0xB</span>u, <span class="string">&quot;%lld&quot;</span>, x);</span><br><span class="line">    <span class="keyword">if</span> ( v3 &gt; <span class="number">0</span> &amp;&amp; v4 &gt; <span class="number">0</span> &amp;&amp; v3 == v4 )</span><br><span class="line">    &#123;</span><br><span class="line">      v5 = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">while</span> ( _Buffer[v5] == v18[v5] )</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">if</span> ( ++v5 &gt;= v3 )</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">if</span> ( SHIDWORD(x) &gt;= <span class="number">0</span> &amp;&amp; (SHIDWORD(x) &gt; <span class="number">0</span> || (_DWORD)x) )</span><br><span class="line">          &#123;</span><br><span class="line">            v6 = FindWindowW(<span class="string">L&quot;OLLYDBG&quot;</span>, <span class="number">0</span>);</span><br><span class="line">            v7 = HIDWORD(x);</span><br><span class="line">            v8 = x;</span><br><span class="line">            <span class="keyword">if</span> ( v6 )</span><br><span class="line">            &#123;</span><br><span class="line">              v8 = x | <span class="number">0xFFFF</span>;</span><br><span class="line">              LODWORD(x) = x | <span class="number">0xFFFF</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> ( __PAIR__(HIDWORD(x), v8) - <span class="number">4096</span> &lt;= <span class="number">0xFFFFF000</span> )</span><br><span class="line"><span class="comment">/***** 省略后文 *****/</span></span><br></pre></td></tr></table></figure>
+
+<p>如果输入错误, 则弹框提示 <code>Wrong answer!</code>, 输入正确则弹框提示 <code>Accepted!</code>.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***** 省略前文 *****/</span></span><br><span class="line">                    MessageBoxW(<span class="number">0</span>, <span class="string">L&quot;Accepted!&quot;</span>, <span class="string">L&quot;Result&quot;</span>, <span class="number">0x40</span>u);</span><br><span class="line">                    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">                  &#125;</span><br><span class="line">                &#125;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">LABEL_41:</span><br><span class="line">  MessageBoxW(<span class="number">0</span>, <span class="string">L&quot;Wrong answer!&quot;</span>, <span class="string">L&quot;Result&quot;</span>, <span class="number">0x10</span>u);</span><br><span class="line"><span class="comment">/***** 省略后文 *****/</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="验证机制"><a href="#验证机制" class="headerlink" title="验证机制"></a>验证机制</h3><p>程序只有一些简单的反调试检测, 没有太多 anti, 主要难度还是在算法原理上, 因此可以比较容易逆向出算法流程和对应的伪代码.</p>
+<p>核心部分是一个编码算法和一个解码算法, 而输入的序列号是两个算法的参数, 程序通过对随机输入进行编码与解码操作, 并检测是否能正确还原出原始输入序列来判断序列号是否正确.</p>
+<p>用 IDA 可以还原出编码和解码算法的伪代码如下:</p>
+<p>编码部分</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***** 省略前文 *****/</span></span><br><span class="line">    <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      v51 = v16;</span><br><span class="line">      v43 = v15;</span><br><span class="line">      <span class="keyword">if</span> ( v18 &gt;= <span class="number">10000</span> &amp;&amp; (v15 &lt; <span class="number">0</span> || v15 &lt;= <span class="number">0</span> &amp;&amp; !v16) )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">if</span> ( v19 &gt;= <span class="number">20000</span> )</span><br><span class="line">      &#123;</span><br><span class="line">LABEL_38:</span><br><span class="line">        WaitForSingleObject(g_worker_mutex, <span class="number">0xFFFFFFFF</span>);</span><br><span class="line">        g_has_error = <span class="number">1</span>;</span><br><span class="line">        ReleaseMutex(g_worker_mutex);</span><br><span class="line">        v2 = v49;</span><br><span class="line">        <span class="keyword">goto</span> LABEL_39;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> ( v18 &gt;= <span class="number">10000</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        v22 = *(_DWORD *)&amp;v14[<span class="number">4</span> * v19];</span><br><span class="line">        v23 = __PAIR__(v15, v16) % v22;</span><br><span class="line">        HIDWORD(v53) = HIDWORD(v23);</span><br><span class="line">        v24 = __PAIR__(v15, v51) / v22;</span><br><span class="line">        v15 = (<span class="type">unsigned</span> __int64)(__PAIR__(v15, v51) / v22) &gt;&gt; <span class="number">32</span>;</span><br><span class="line">        v16 = v24;</span><br><span class="line">        v14 = v45;</span><br><span class="line">        *(_DWORD *)&amp;v50[<span class="number">4</span> * v19++] = v23;</span><br><span class="line">        v18 = v46;</span><br><span class="line">        v17 = (<span class="type">int</span>)v40;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        v20 = *v40 + *(_DWORD *)(v17 + v54) * __PAIR__(v15, v16);</span><br><span class="line">        v15 = HIDWORD(v20);</span><br><span class="line">        v55 = v20;</span><br><span class="line">        v39 = *(_DWORD *)&amp;v45[<span class="number">4</span> * v19];</span><br><span class="line">        v16 = v20;</span><br><span class="line">        v53 = (<span class="type">signed</span> __int64)__PAIR__(v43, v51) % v39;</span><br><span class="line">        <span class="keyword">if</span> ( (<span class="type">signed</span> __int64)((<span class="type">signed</span> __int64)__PAIR__(v43, v51) / v39 * v20) &lt; (<span class="type">signed</span> __int64)__PAIR__(v56, v58) )</span><br><span class="line">        &#123;</span><br><span class="line">          v18 = v46 + <span class="number">1</span>;</span><br><span class="line">          v14 = v45;</span><br><span class="line">          v17 = (<span class="type">int</span>)(v40 + <span class="number">1</span>);</span><br><span class="line">          <span class="keyword">goto</span> LABEL_12;</span><br><span class="line">        &#125;</span><br><span class="line">        v21 = (<span class="type">signed</span> __int64)__PAIR__(v43, v51) / v39;</span><br><span class="line">        v15 = v21 &gt;&gt; <span class="number">32</span>;</span><br><span class="line">        v16 = v21;</span><br><span class="line">        v14 = v45;</span><br><span class="line">        *(_DWORD *)&amp;v50[<span class="number">4</span> * v19++] = v53;</span><br><span class="line">        v18 = v46;</span><br><span class="line">        v17 = (<span class="type">int</span>)v40;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">/***** 省略后文 *****/</span></span><br></pre></td></tr></table></figure>
+
+<p>解码部分</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***** 省略前文 *****/</span></span><br><span class="line">    <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      v54 = v30;</span><br><span class="line">      v52 = v27;</span><br><span class="line">      <span class="keyword">if</span> ( v25 &lt; <span class="number">0</span> &amp;&amp; (v27 &lt; <span class="number">0</span> || v27 &lt;= <span class="number">0</span> &amp;&amp; !v30) )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">if</span> ( v28 &lt; <span class="number">0</span> )</span><br><span class="line">        <span class="keyword">goto</span> LABEL_38;</span><br><span class="line">      <span class="keyword">if</span> ( v25 &lt; <span class="number">0</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        v34 = *((_DWORD *)in_r + v28);</span><br><span class="line">        HIDWORD(v53) = (<span class="type">unsigned</span> __int64)(__PAIR__(v27, v54) % v34) &gt;&gt; <span class="number">32</span>;</span><br><span class="line">        v35 = __PAIR__(v27, v54) / v34;</span><br><span class="line">        v27 = (<span class="type">unsigned</span> __int64)(__PAIR__(v27, v54) / v34) &gt;&gt; <span class="number">32</span>;</span><br><span class="line">        v30 = v35;</span><br><span class="line">        v33 = (<span class="type">unsigned</span> <span class="type">int</span>)(__PAIR__(v52, v54) % v34) == v49[v28];</span><br><span class="line">LABEL_34:</span><br><span class="line">        <span class="keyword">if</span> ( !v33 )</span><br><span class="line">          <span class="keyword">goto</span> LABEL_38;</span><br><span class="line">        v25 = v47;</span><br><span class="line">        --v28;</span><br><span class="line">        v29 = (<span class="type">int</span>)v41;</span><br><span class="line">        v26 = v44;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        v31 = *(_DWORD *)v41 + *(_DWORD *)(v26 + v29) * __PAIR__(v27, v30);</span><br><span class="line">        v27 = HIDWORD(v31);</span><br><span class="line">        LODWORD(v53) = v31;</span><br><span class="line">        v32 = *((_DWORD *)in_r + v28);</span><br><span class="line">        v30 = v31;</span><br><span class="line">        v55 = __PAIR__(v52, v54) % v32;</span><br><span class="line">        b_high = (<span class="type">unsigned</span> __int64)(__PAIR__(v52, v54) / v32) &gt;&gt; <span class="number">32</span>;</span><br><span class="line">        b_low = __PAIR__(v52, v54) / v32;</span><br><span class="line">        <span class="keyword">if</span> ( (<span class="type">signed</span> __int64)(__PAIR__(v52, v54) / v32 * v31) &gt;= *(_QWORD *)parameters )</span><br><span class="line">        &#123;</span><br><span class="line">          v30 = b_low;</span><br><span class="line">          v27 = b_high;</span><br><span class="line">          v33 = v55 == v49[v28];</span><br><span class="line">          <span class="keyword">goto</span> LABEL_34;</span><br><span class="line">        &#125;</span><br><span class="line">        v25 = v47 - <span class="number">1</span>;</span><br><span class="line">        v26 = v44;</span><br><span class="line">        v29 = (<span class="type">int</span>)(v41 - <span class="number">4</span>);</span><br><span class="line">        --v47;</span><br><span class="line">        v41 -= <span class="number">4</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">/***** 省略后文 *****/</span></span><br></pre></td></tr></table></figure>
+
+<p>算法流程不是太复杂, 可以看出是一种自定义的混合进制编解码算法, 而输入的序列号作为参数来控制算法正确运行, 算法涉及到的关键参数如下图:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***** 省略前文 *****/</span></span><br><span class="line">  in_r = _calloc(<span class="number">10000u</span>, <span class="number">4u</span>);</span><br><span class="line">  in = _calloc(<span class="number">10000u</span>, <span class="number">4u</span>);</span><br><span class="line">  v2 = in;</span><br><span class="line">  v49 = in;</span><br><span class="line">  out_r = (<span class="type">char</span> *)_calloc(<span class="number">20000u</span>, <span class="number">4u</span>);</span><br><span class="line">  v4 = out_r;</span><br><span class="line">  v45 = out_r;</span><br><span class="line">  out = (<span class="type">char</span> *)_calloc(<span class="number">20000u</span>, <span class="number">4u</span>);</span><br><span class="line"><span class="comment">/***** 省略片段 *****/</span></span><br><span class="line">    b_low = *(_DWORD *)parameters;</span><br><span class="line">    v17 = (<span class="type">int</span>)v49;</span><br><span class="line">    b_high = *((_DWORD *)parameters + <span class="number">1</span>);</span><br><span class="line"><span class="comment">/***** 省略后文 *****/</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>b</code>: 输入的序列号整数.</li>
+<li><code>in</code>: 随机输入序列.</li>
+<li><code>in_r</code>: 随机输入序列的进制序列.</li>
+<li><code>out_</code> 开头的则是输出结果.</li>
+</ul>
+<p>解码算法流程与编码算法几乎一致, 但是把编码的输入和输出交换了一下, 同时进行了倒序处理, 并对解码序列与原始随机输入序列进行比较, 判断是否还原成功.</p>
+<p>而验证步骤的关键伪代码还原如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***** 省略前文 ******/</span></span><br><span class="line">                  g_has_error = <span class="number">0</span>;</span><br><span class="line">                  v9 = <span class="number">0</span>;</span><br><span class="line">                  <span class="keyword">if</span> ( check_error_in_x(__PAIR__(v7, v8)) )</span><br><span class="line">                  &#123;</span><br><span class="line">                    <span class="keyword">if</span> ( !g_has_error )</span><br><span class="line">                    &#123;</span><br><span class="line">                      g_has_error = <span class="number">0</span>;</span><br><span class="line">                      <span class="keyword">if</span> ( check_error_in_x(__PAIR__(v7, v8) - <span class="number">1</span>) )</span><br><span class="line">                      &#123;</span><br><span class="line">                        <span class="keyword">if</span> ( g_has_error )</span><br><span class="line">                          v9 = <span class="number">1</span>;</span><br><span class="line">                      &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                  &#125;</span><br><span class="line"><span class="comment">/***** 省略后文 ******/</span></span><br></pre></td></tr></table></figure>
+
+<p>要求对于输入的 <code>b</code> 能够使算法正确工作, 但是 <code>b - 1</code> 不能使算法正确工作.</p>
+<h2 id="解题思路"><a href="#解题思路" class="headerlink" title="解题思路"></a>解题思路</h2><h3 id="暴力枚举"><a href="#暴力枚举" class="headerlink" title="暴力枚举"></a>暴力枚举</h3><p>此题的输入数据范围是介于 4K 到 4G 之间的一个整数, 可以考虑把核心算法单独摘出来整理重写, 然后进行暴力枚举.</p>
+<p>但是枚举的难度在于, 原程序使用的随机输入序列长度为 <code>10000</code>, 且使用多线程进行了约 <code>10000</code> 轮测试, 也就是说纯随机情况下, 如果数据量不够大, 很可能造成误判, 从而无法枚举出正确的序列号, 因此枚举的时间成本很高, 只是一个保底下策.</p>
+<h3 id="公式枚举"><a href="#公式枚举" class="headerlink" title="公式枚举"></a>公式枚举</h3><p>程序的算法是一个用于混合进制序列的编解码算法, 且需要一个控制参数来使算法正确工作. 而程序的验证机制是 <code>b</code> 正确且 <code>b - 1</code> 错误, 可以合理推测能够使算法正确工作的参数不止一个, 应该是一个连续区间, 且题目的正确答案是这个区间的左端点, 因此我们需要找出参数的取值规律, 从而快速求解答案.</p>
+<p>翻一下逆向后的代码, 可以找到程序使用的进制集是 <code>&#123; 2, 4, 5, 6, 7, 8, 13 &#125;</code>, 且输入和输出使用了同一组进制.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.rdata:004031C8 _TEST_RADIX_LEN:</span><br><span class="line">.rdata:004031C8                 dw 7, 0</span><br><span class="line">.rdata:004031CC ; int TEST_RADIX[]</span><br><span class="line">.rdata:004031CC _TEST_RADIX     dd 2, 4, 5, 6, 7, 8, 13 ; DATA XREF: do_error_check(x)+114r</span><br><span class="line">.rdata:004031CC                                         ; do_error_check(x)+15Er</span><br></pre></td></tr></table></figure>
+
+<p>猜想 <code>b</code> 的取值与进制组合有关, 因此可以从简单的入手, 暴力枚举小区间, 寻找规律.</p>
+<p>分别设置以下几种方式去进行枚举, 可以得到正确的取值区间如下:</p>
+<ul>
+<li>输入进制 <code>&#123; 2 &#125;</code>, 输出进制 <code>&#123; 2 &#125;</code>: <code>[1, 5], [7, 18], [21, 39], [43, 68], [73, 105], ...</code></li>
+<li>输入进制 <code>&#123; 2 &#125;</code>, 输出进制 <code>&#123; 3 &#125;</code>: <code>[1, 7], [11, 26], [33, 57], [67, 100], [113, 155], ...</code></li>
+<li>输入进制 <code>&#123; 3 &#125;</code>, 输出进制 <code>&#123; 3 &#125;</code>: <code>[1, 10], [17, 38], [51, 84], [103, 148], ...</code></li>
+<li>输入进制 <code>&#123; 2 &#125;</code>, 输出进制 <code>&#123; 2, 3 &#125;</code>: <code>[1, 5], [7, 7], [11, 18], [21, 26], [33, 39], [43, 57], [67, 68], [73, 100], [113, 150], ...</code></li>
+<li>输入进制 <code>&#123; 2, 3 &#125;</code>, 输出进制 <code>&#123; 2, 3 &#125;</code>: <code>[1, 5], [7, 7], [17, 18], [21, 26], [33, 38], [51, 57], [67, 68], [73, 84], [113, 148], ...</code></li>
+</ul>
+<p>观察一下可以发现, 对于混合进制的情况, 正确的取值区间是通过单个的输入输出进制的取值区间取交集得到的:</p>
+<ul>
+<li><code>&#123; 2 &#125;_&#123; 2, 3 &#125; = &#123; 2 &#125;_&#123; 2 &#125; &amp; &#123; 2 &#125;_&#123; 3 &#125;</code></li>
+<li><code>&#123; 2, 3 &#125;_&#123; 2, 3 &#125; = &#123; 2 &#125;_&#123; 2, 3 &#125; &amp; &#123; 3 &#125;_&#123; 3 &#125;</code></li>
+</ul>
+<p>因此, 只要能找出单个的输入输出进制的取值区间规律就能解出题目.</p>
+<p>继续观察寻找规律, 可以发现规律:</p>
+<ul>
+<li><code>&#123; 2 &#125;_&#123; 2 &#125;</code>: <code>[4 * n^2 - (4 + 2) * n + 3, 4 * n^2 + n]</code></li>
+<li><code>&#123; 2 &#125;_&#123; 3 &#125;</code>: <code>[6 * n^2 - (6 + 2) * n + 3, 6 * n^2 + n]</code></li>
+<li><code>&#123; 3 &#125;_&#123; 3 &#125;</code>: <code>[9 * n^2 - (9 + 2) * n + 3, 9 * n^2 + n]</code></li>
+</ul>
+<p>因此可以得到通项公式为: <code>[r1 * r2 * n^2 - (r1 * r2 + 2) * n + 3, r1 * r2 * n^2 + n]</code></p>
+<p>而题目使用了 7 种不同的进制, 且输入输出进制相同, 因此共需要枚举 21 种情况, 然后取交集最终得到题目里正确的取值范围, 并取左端点作为序列号.</p>
+<p>这里需要注意的是, 取交集这个操作并不高效, 但是可以翻过来操作, 每次将错误取值区间筛去, 能够更快速的计算出正确答案, 这里贴一下核心计算代码.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">search_b</span><span class="params">(<span class="type">long</span> <span class="type">long</span> start, <span class="type">long</span> <span class="type">long</span> end)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> p = <span class="number">0</span>;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> n_s = <span class="number">0</span>;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> n_e = <span class="number">0</span>;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> b1 = <span class="number">0</span>;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> b2 = <span class="number">0</span>;</span><br><span class="line">    <span class="type">long</span> <span class="type">long</span> b_count = end - start + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="type">bool</span>* full_set = <span class="built_in">calloc</span>((<span class="type">size_t</span>)b_count, <span class="keyword">sizeof</span>(<span class="type">bool</span>));</span><br><span class="line">    <span class="keyword">if</span> (!full_set)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">memset</span>(full_set, <span class="number">1</span>, (<span class="type">size_t</span>)b_count * <span class="keyword">sizeof</span>(<span class="type">bool</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; in_r_len; i++) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = i; j &lt; out_r_len; j++) &#123;</span><br><span class="line">            p = in_r[i] * out_r[j];</span><br><span class="line">            n_s = left_floor(p, start);</span><br><span class="line">            n_e = right_ceil(p, end);</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">for</span> (<span class="type">long</span> <span class="type">long</span> n = n_s; n &lt;= n_e; n++) &#123;</span><br><span class="line">                b1 = left(p, n);</span><br><span class="line">                b2 = right(p, n);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (b1 &lt; start)</span><br><span class="line">                    b1 = start;</span><br><span class="line">                <span class="keyword">if</span> (b2 &gt; end)</span><br><span class="line">                    b2 = end;</span><br><span class="line">                </span><br><span class="line">                <span class="keyword">for</span> (<span class="type">long</span> <span class="type">long</span> b_idx = b1 - start; b_idx &lt;= b2 - start; b_idx++) &#123;</span><br><span class="line">                    full_set[b_idx] = <span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">long</span> <span class="type">long</span> b_s = <span class="number">0</span>; b_s &lt; b_count; b_s++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (full_set[b_s]) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">long</span> <span class="type">long</span> b_e = b_s; b_e &lt; b_count; b_e++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!full_set[b_e]) &#123;</span><br><span class="line">                    <span class="built_in">printf</span>(<span class="string">&quot;Valid: [%lld, %lld] Count: %lld\n&quot;</span>, b_s + start, b_e - <span class="number">1</span> + start, b_e - b_s);</span><br><span class="line">                    b_s = b_e;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (full_set)</span><br><span class="line">        <span class="built_in">free</span>(full_set);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="最终答案"><a href="#最终答案" class="headerlink" title="最终答案"></a>最终答案</h3><p>最后算出来题目的进制组合下 100 亿范围内只有这些正确区间:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Valid: [1, 5] Count: 5</span><br><span class="line">Valid: [7, 9] Count: 3</span><br><span class="line">Valid: [1898766093, 1898766391] Count: 299</span><br><span class="line">Valid: [79233213543, 79233230703] Count: 17161</span><br></pre></td></tr></table></figure>
+
+<p>题目要求范围在 4K 到 4G 的范围, 因此序列号为 <code>1898766093</code>, 输入之后得到正确结果 <code>Accepted!</code>.</p>
+<h2 id="题目及源代码"><a href="#题目及源代码" class="headerlink" title="题目及源代码"></a>题目及源代码</h2><p>看雪的帖子里有下载地址, 这里也贴一下蓝奏云的下载链接.</p>
+<p>蓝奏云: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pTnM5bzFiZHBnMGg=">2023KCTF竞赛.zip<i class="fa fa-external-link-alt"></i></span></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%9C%8B%E9%9B%AA/" rel="tag"><i class="fa fa-tag"></i> 看雪</a>
+              <a href="/tags/KCTF/" rel="tag"><i class="fa fa-tag"></i> KCTF</a>
+              <a href="/tags/%E9%80%86%E5%90%91/" rel="tag"><i class="fa fa-tag"></i> 逆向</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2023/08/30/desktopsprite/" rel="prev" title="基于 Spine 的碧蓝航线桌宠">
+                  <i class="fa fa-chevron-left"></i> 基于 Spine 的碧蓝航线桌宠
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">86k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">2:36</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
