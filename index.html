@@ -161,7 +161,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -172,7 +172,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-count">46</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -293,6 +293,316 @@
 
 </blockquote>
 
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/posts/2023/10/15/cnn-numpy-3/" class="post-title-link" itemprop="url">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-15 15:59:21" itemprop="dateCreated datePublished" datetime="2023-10-15T15:59:21+08:00">2023-10-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BB%A3%E7%A0%81%E5%9D%97/" itemprop="url" rel="index"><span itemprop="name">代码块</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>7.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+</blockquote>
+<p>本文为第三篇, 也是最后一篇, 结合前两篇的内容搭建完整的卷积神经网络并完成训练和评估.</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/2023/10/15/cnn-numpy-3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/posts/2023/10/14/cnn-numpy-2/" class="post-title-link" itemprop="url">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-14 16:17:10" itemprop="dateCreated datePublished" datetime="2023-10-14T16:17:10+08:00">2023-10-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BB%A3%E7%A0%81%E5%9D%97/" itemprop="url" rel="index"><span itemprop="name">代码块</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>13k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>23 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote>
+<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+</blockquote>
+<p>本文为第二篇, 介绍含参数网络层和损失函数的实现, 以及反向传播时的梯度推导.</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/2023/10/14/cnn-numpy-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/10/13/cnn-numpy-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/posts/2023/10/13/cnn-numpy-1/" class="post-title-link" itemprop="url">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-13 18:41:27" itemprop="dateCreated datePublished" datetime="2023-10-13T18:41:27+08:00">2023-10-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BB%A3%E7%A0%81%E5%9D%97/" itemprop="url" rel="index"><span itemprop="name">代码块</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>13 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+<p>本文为第一篇, 简单介绍了神经网络的基本学习原理和一些无参数网络层的实现.</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/posts/2023/10/13/cnn-numpy-1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -908,304 +1218,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/02/27/win10activation/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
-      <meta itemprop="name" content="ww-rm">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="暗香画楼">
-      <meta itemprop="description" content="Code saves the world.">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 暗香画楼">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/posts/2023/02/27/win10activation/" class="post-title-link" itemprop="url">Windows 10 激活工具</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-02-27 13:23:32" itemprop="dateCreated datePublished" datetime="2023-02-27T13:23:32+08:00">2023-02-27</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E8%B5%84%E6%BA%90%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">资源分享</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>302</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/02/18/pca/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
-      <meta itemprop="name" content="ww-rm">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="暗香画楼">
-      <meta itemprop="description" content="Code saves the world.">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 暗香画楼">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/posts/2023/02/18/pca/" class="post-title-link" itemprop="url">PCA 算法原理与实现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-02-18 23:20:08" itemprop="dateCreated datePublished" datetime="2023-02-18T23:20:08+08:00">2023-02-18</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%9D%82%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">杂学</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>5.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>9 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/posts/2023/02/18/pca/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2022/12/07/simple-ecc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
-      <meta itemprop="name" content="ww-rm">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="暗香画楼">
-      <meta itemprop="description" content="Code saves the world.">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | 暗香画楼">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/posts/2022/12/07/simple-ecc/" class="post-title-link" itemprop="url">ECC 算法原理简介与实现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-12-07 11:04:56" itemprop="dateCreated datePublished" datetime="2022-12-07T11:04:56+08:00">2022-12-07</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%9D%82%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">杂学</span></a>
-        </span>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>8.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>15 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/posts/2022/12/07/simple-ecc/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
@@ -1228,13 +1242,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">86k</span>
+    <span title="站点总字数">114k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">2:36</span>
+    <span title="站点阅读时长">3:26</span>
   </span>
 </div>
 <div class="busuanzi-count">

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高(代码复用率也是相当之高). 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 numpy 实现一个简单的卷积神经网络进行手写数字识别,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 NumPy 的手写数字识别 (卷积神经网络) (二)">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高(代码复用率也是相当之高). 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 numpy 实现一个简单的卷积神经网络进行手写数字识别,">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-2/linear.jpg">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-2/conv.jpg">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-2/unfold_x.jpg">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-2/unfold_k.jpg">
+<meta property="article:published_time" content="2023-10-14T08:17:10.000Z">
+<meta property="article:modified_time" content="2023-10-15T10:46:11.839Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="矩阵求导">
+<meta property="article:tag" content="卷积矩阵化">
+<meta property="article:tag" content="交叉熵损失函数">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/cnn-numpy-2/linear.jpg">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/","path":"/posts/2023/10/14/cnn-numpy-2/","title":"基于 NumPy 的手写数字识别 (卷积神经网络) (二)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于 NumPy 的手写数字识别 (卷积神经网络) (二) | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AB%E5%8F%82%E6%95%B0%E7%BD%91%E7%BB%9C%E5%B1%82"><span class="nav-number">1.</span> <span class="nav-text">含参数网络层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Linear"><span class="nav-number">1.1.</span> <span class="nav-text">Linear</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Convolution"><span class="nav-number">1.2.</span> <span class="nav-text">Convolution</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%B7%E7%A7%AF%E5%8F%8A%E5%85%B6%E5%8F%82%E6%95%B0%E7%BB%B4%E5%BA%A6"><span class="nav-number">1.2.1.</span> <span class="nav-text">卷积及其参数维度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%B7%E7%A7%AF%E7%9F%A9%E9%98%B5%E5%8C%96"><span class="nav-number">1.2.2.</span> <span class="nav-text">卷积矩阵化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E8%AE%A1%E7%AE%97"><span class="nav-number">1.2.3.</span> <span class="nav-text">梯度计算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-number">1.2.4.</span> <span class="nav-text">代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E5%B1%82"><span class="nav-number">2.</span> <span class="nav-text">损失函数层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CrossEntropy"><span class="nav-number">2.1.</span> <span class="nav-text">CrossEntropy</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">小结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于 NumPy 的手写数字识别 (卷积神经网络) (二) | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于 NumPy 的手写数字识别 (卷积神经网络) (二)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-14 16:17:10" itemprop="dateCreated datePublished" datetime="2023-10-14T16:17:10+08:00">2023-10-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BB%A3%E7%A0%81%E5%9D%97/" itemprop="url" rel="index"><span itemprop="name">代码块</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>13k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>23 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+</blockquote>
+<p>本文为第二篇, 介绍含参数网络层和损失函数的实现, 以及反向传播时的梯度推导.</p>
+<span id="more"></span>
+
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+<h2 id="含参数网络层"><a href="#含参数网络层" class="headerlink" title="含参数网络层"></a>含参数网络层</h2><p>上一篇中我们结束了无参数网络层的内容, 我们来到网络的重点部分, 含参数层. 这一类层依然需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是在 <code>backward</code> 方法中需要计算自己拥有的参数的梯度值并存起来, 同时需要新增 <code>update</code> 方法, 用于按照梯度值更新自己的参数.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ParamLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
+
+<p>继承一下 <code>NetworkLayer</code> 类, 并且增加一个 <code>update</code> 方法, 该方法接收学习率 <code>lr</code> 作为参数.</p>
+<h3 id="Linear"><a href="#Linear" class="headerlink" title="Linear"></a>Linear</h3><p>首先是线性层, 也是含学习参数中最简单的层, 先上图.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-2/linear.jpg" alt="linear.jpg"></p>
+<p>方便起见, 这里我们的输入都是行向量的形式, 因此第一维是样本数, 第二维是特征数.</p>
+<p>一般的, 设 $\mathbf{X}$ 为一个 $n \times d_1$ 的矩阵, 权重 $\mathbf{W}$ 为一个 $d_1 \times d_2$ 的矩阵, $\mathbf{b}$ 为长度 $d_2$ 的偏置向量, 则 $\mathbf{Y}, \mathbf{Z}$ 均为 $n \times d_2$. 线性层的可学习参数就是 $\mathbf{W}$ 和 $\mathbf{b}$.</p>
+<p>图上高亮部分表示对最终输出 $z_{11}$ 的计算过程, 而对 $z_{ik}$ 的计算过程用公式表示如下:</p>
+<p>$$<br>z_{ik} = \sum_{j=1}^{d_1}{x_{ij}w_{jk}} + b_k<br>$$</p>
+<p>写成矩阵形式就是:</p>
+<p>$$<br>\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}<br>$$</p>
+<p>其中 $\mathbf{b}$ 需要重复每一行扩展成矩阵.</p>
+<p>前向计算就到此结束了, 下面我们看看反向中梯度是如何计算的.</p>
+<p>首先是 $\mathbf{b}$ 的, 这一层中, 对于 $b_k$ 而言, 因为是加上常数, 所以都是 1, 因此只需要直接等于上一层传进来的梯度即可. 再由链式法则里的加法法则可知, 同一个 $b_k$ 每个样本中都参与了运算, 因此需要把后一层传过来的梯度进行累加.</p>
+<p>设最终损失为 $L$, 则:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{b_k}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{b_k}}} \\<br>  ~ &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}} \cdot 1<br>\end{aligned}<br>$$</p>
+<p>所以 $\mathbf{b}$ 的梯度就是把后一层传进来关于 $z$ 的梯度按行累加即可.</p>
+<p>下面来看关于 $\mathbf{W}$ 的梯度. 在 $z_{ik}$ 的表达式中, $b_k$ 作为常数存在, 因此可以忽略, 所以梯度只与 $x_{ij}$ 有关, 所以我们第一步是找出来含有 $w_{jk}$ 的结果有哪些.</p>
+<p>注意到 $w_{jk}$ 是不包含下标 $i$ 的, 因此在 $z_{1k}, z_{2k}, \ldots, z_{nk}$ 中都是有 $w_{jk}$ 的. 所以:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{w_{jk}}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{w_{jk}}}} \\<br>  ~ &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}x_{ij}}<br>\end{aligned}<br>$$</p>
+<p>换成矩阵形式则是:</p>
+<p>$$<br>\frac{\partial{L}}{\partial{\mathbf{W}}} = \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Z}}}<br>$$</p>
+<p>其中 $\frac{\partial{L}}{\partial{\mathbf{Z}}}$ 是最终损失 $L$ 对 $z_{ik}$ 的梯度矩阵, 形状与 $\mathbf{Z}$ 相同.</p>
+<p>最后我们来看关于 $\mathbf{X}$ 的梯度, 有了求 $\mathbf{W}$ 梯度的经验, 我们很容易写出下列推导:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{x_{ij}}} &amp;= \sum_{k=1}^{d_2}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{x_{ij}}}} \\<br>  ~ &amp;= \sum_{k=1}^{d_2}{\frac{\partial{L}}{\partial{z_{ik}}}w_{jk}}<br>\end{aligned}<br>$$</p>
+<p>同样可以换成矩阵形式:</p>
+<p>$$<br>\frac{\partial{L}}{\partial{\mathbf{X}}} = \frac{\partial{L}}{\partial{\mathbf{Z}}}\mathbf{W}^\top<br>$$</p>
+<p>到这里我们已经完成对线性层的前向和反向过程推导, 矩阵形式的公式总结就是:</p>
+<p>前向:</p>
+<p>$$<br>\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}<br>$$</p>
+<p>反向:</p>
+<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{b_k}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{W}}} &amp;= \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Z}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Z}}}\mathbf{W}^\top<br>\end{aligned}<br>$$</p>
+<p>这个结论很重要, 在卷积层中还会用到.</p>
+<p>然后我们可以按照公式完成线性层的代码.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LinearLayer</span>(<span class="title class_ inherited__">ParamLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;线性层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, d1: <span class="built_in">int</span>, d2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.w = np.random.random((d1, d2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.b = np.random.random((<span class="number">1</span>, d2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        self.w_grad = np.zeros_like(self.w)</span><br><span class="line">        self.b_grad = np.zeros_like(self.b)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, d1)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, d2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x @ self.w + self.b</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, d1)</span></span><br><span class="line"><span class="string">            last_grad: (B, d2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, d1)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        self.b_grad = last_x_grad.<span class="built_in">sum</span>(<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        self.w_grad = x.T @ last_x_grad</span><br><span class="line"></span><br><span class="line">        x_grad = last_x_grad @ self.w.T</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.w -= lr * self.w_grad</span><br><span class="line">        self.b -= lr * self.b_grad</span><br></pre></td></tr></table></figure>
+
+<p><code>update</code> 方法就是按学习率 <code>lr</code> 给每个参数减去相应的梯度就行了.</p>
+<p>一个值得注意的地方是 <code>__init__</code> 中, 对 <code>w</code> 和 <code>b</code> 的初始化是使用了 -1 到 1 之间的均匀分布, 这有助于训练的稳定性, 防止出现梯度爆炸.</p>
+<h3 id="Convolution"><a href="#Convolution" class="headerlink" title="Convolution"></a>Convolution</h3><p>这里我们只实现步长为 1 的无填充卷积操作.</p>
+<h4 id="卷积及其参数维度"><a href="#卷积及其参数维度" class="headerlink" title="卷积及其参数维度"></a>卷积及其参数维度</h4><p>卷积层是整个网络的核心层, 网络也因此得名卷积神经网络, 用下图来简单回顾一下网络里的卷积操作.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-2/conv.jpg" alt="conv.jpg"></p>
+<p>卷积核 $\mathbf{K}$ 在输入 $\mathbf{X}$ 上逐步移动, 将每个位置上的值相乘并求和, 得到卷积后的结果 $\mathbf{Y}$, 然后对于每一次卷积都加上一个偏置常数 $b$, 得到网络中对于单张图片单通道的完整卷积过程.</p>
+<p>如果是多通道的情况, 设输入 $\mathbf{X}$ 的通道数是 $c_1$, 输出通道数是 $c_2$.</p>
+<p>输入 $\mathbf{X}$ 的形状变为 $n \times c_1 \times h_\mathbf{X} \times w_\mathbf{X}$, 其中 $n$ 是样本数, $h_\mathbf{X}, w_\mathbf{X}$ 分别是图片的高宽.</p>
+<p>那么对于 $\mathbf{K}$ 而言, 输入通道数从 $1$ 变成 $c_1$, 所以每一次卷积都需要 $c_1$ 个单层的 $\mathbf{K}$. 进一步, 输出通道数从 $1$ 变成 $c_2$, 因此总共需要 $c_2 \times c_1$ 个单层卷积核. 所以最终卷积核 $\mathbf{K}$ 的形状为 $c_2 \times c_1 \times h_\mathbf{K} \times w_\mathbf{K}$, 其中 $h_\mathbf{K}, w_\mathbf{K}$ 分别表示卷积核的高宽.</p>
+<p>对于 $b$ 而言, 只和输出通道数有关, 因此变成了一个长度为 $c_2$ 向量 $\mathbf{b}$, 在其他维度上重复数值即可.</p>
+<p>在卷积层中, $\mathbf{K}$ 和 $\mathbf{b}$ 就是需要被学习的参数.</p>
+<h4 id="卷积矩阵化"><a href="#卷积矩阵化" class="headerlink" title="卷积矩阵化"></a>卷积矩阵化</h4><p>基本的卷积操作需要多重循环, 无法充分利用 GPU 等硬件设备的加速效果, 因此需要将常规的卷积操作转化成矩阵形式, 从而批量运算.</p>
+<p>有两种数据重组方式可以达到同样的效果, 分别是对输入 $\mathbf{X}$ 和卷积核 $\mathbf{K}$ 进行数据重组. 首先介绍第一种方式, 对 $\mathbf{X}$ 进行数据重组, 而 $\mathbf{K}$ 只需要保持数据不变, 维度变换即可.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-2/unfold_x.jpg" alt="unfold_x.jpg"></p>
+<p>上图展示的是对于一个样本下矩阵化运算, 如果是 $n$ 个样本, $\mathbf{X&#39;}$ 和 $\mathbf{Y&#39;}$ 在行上变成 $n$ 倍即可.</p>
+<p>这里, $h_{\mathbf{Y}} = h_{\mathbf{X}} - h_{\mathbf{K}} + 1$, $w_{\mathbf{Y}} = w_{\mathbf{X}} - w_{\mathbf{K}} + 1$, 是卷积后的图像高宽.</p>
+<p>在这种情况下, 变形后的 $\mathbf{K}&#39;$ 和原始的 $\mathbf{K}$ 数据相同, 前向公式为:</p>
+<p>$$<br>\mathbf{Y}&#39; = \mathbf{X}&#39;\mathbf{K}&#39;^\top<br>$$</p>
+<p>第二种方式则是只对输入数据 $\mathbf{X}$ 进行变形, 对卷积核 $\mathbf{K}$ 进行数据重组.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-2/unfold_k.jpg" alt="unfold_k.jpg"></p>
+<p>图太大画不下, 所以中间部分用省略号省去, 只保留了一些关键内容和维度信息.</p>
+<p>同样的, 这里也是展示了对于一个样本的矩阵化运算.</p>
+<p>图片被完全展平, 而卷积核被重组成中间包含一些 0 值的矩阵. 在这种情况下, $\mathbf{X}&#39;&#39;$ 和原本的 $\mathbf{X}$ 内容完全相同. 前向公式为:</p>
+<p>$$<br>\mathbf{Y}&#39;&#39; = \mathbf{X}&#39;&#39;\mathbf{K}&#39;&#39;^\top<br>$$</p>
+<h4 id="梯度计算"><a href="#梯度计算" class="headerlink" title="梯度计算"></a>梯度计算</h4><p>卷积层的梯度计算都是基于矩阵化之后的卷积操作. 首先是偏置向量 $\mathbf{b}$ 的梯度计算, 前向中有两种方式能算出 $\mathbf{Y}$, 但是通过数据变形后, 与 $\mathbf{b}$ 的相加方式相同, 结合前面线性层的结论, $\mathbf{b}$ 的梯度就是将除了 $c_2$ 的其他维度求和即可.</p>
+<p>现在我们来看最关键的 $\mathbf{K}$ 和 $\mathbf{X}$ 的梯度怎么求, 首先回忆线性层得到的结论.</p>
+<div class="note info"><p>设最终的损失为 $L$, 当前向传播为:</p>
+<p>$$<br>\mathbf{Y} = \mathbf{X}\mathbf{W}<br>$$</p>
+<p>时, 则反向传播 $\mathbf{X}$ 和 $\mathbf{W}$ 的梯度为:</p>
+<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{\mathbf{W}}} &amp;= \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Y}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Y}}}\mathbf{W}^\top<br>\end{aligned}<br>$$</p>
+<p>其中 $\frac{\partial{L}}{\partial{\mathbf{Y}}}$ 是损失 $L$ 对输出 $\mathbf{Y}$ 的损失矩阵, 形状与 $\mathbf{Y}$ 相同.</p></div>
+
+<p>这是一个通用结论, 可以用于任意的两个矩阵相乘. 结合我们前面得到了两种不同的前向计算方式:</p>
+<p>$$<br>\begin{aligned}<br>  \mathbf{Y}&#39; &amp;= \mathbf{X}&#39;\mathbf{K}&#39;^\top \\<br>  \mathbf{Y}&#39;&#39; &amp;= \mathbf{X}&#39;&#39;\mathbf{K}&#39;&#39;^\top<br>\end{aligned}<br>$$</p>
+<p>在这两个不同的计算中, $\mathbf{K}&#39;$ 与原始的 $\mathbf{K}$ 相同, $\mathbf{X}&#39;&#39;$ 与原始的 $\mathbf{X}$ 数据相同, 只是进行了数据变形. 因此只要分别求出 $\mathbf{K}&#39;$ 和 $\mathbf{X}&#39;&#39;$ 的梯度, 再通过变形就能得到原始 $\mathbf{K}$ 和 $\mathbf{X}$ 的梯度. 结合结论, 有:</p>
+<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{\mathbf{K}&#39;}} &amp;= \mathbf{X}&#39;^\top\frac{\partial{L}}{\partial{\mathbf{Y}&#39;}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}&#39;&#39;}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Y}&#39;&#39;}}\mathbf{K}&#39;&#39;^\top<br>\end{aligned}<br>$$</p>
+<p>其中, $\frac{\partial{L}}{\partial{\mathbf{Y}&#39;}}$ 和 $\frac{\partial{L}}{\partial{\mathbf{Y}&#39;&#39;}}$ 都可以通过对后一层传进来的 $\frac{\partial{L}}{\partial{\mathbf{Y}}}$ 进行数据变形得到.</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p>到这里我们已经完成了卷积层的前向和反向推导, 按照前面的内容便可完成代码.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionLayer</span>(<span class="title class_ inherited__">ParamLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;步长为 1 的卷积层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, c1: <span class="built_in">int</span>, c2: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            c1: 输入通道数</span></span><br><span class="line"><span class="string">            c2: 输出通道数</span></span><br><span class="line"><span class="string">            k1: 卷积核高</span></span><br><span class="line"><span class="string">            k2: 卷积核宽</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        self.k = np.random.random((c2, c1, k1, k2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.b = np.random.random((<span class="number">1</span>, c2, <span class="number">1</span>, <span class="number">1</span>)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.k_grad = np.zeros_like(self.k)</span><br><span class="line">        self.b_grad = np.zeros_like(self.b)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_unfold_k</span>(<span class="params">self, h: <span class="built_in">int</span>, w: <span class="built_in">int</span>, c1: <span class="built_in">int</span>, c2: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span>, o1: <span class="built_in">int</span>, o2: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;展开卷积核 k, 能够与展平的多通道图像直接相乘</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            k: (c2 * o1 * o2, c1 * H * W)</span></span><br><span class="line"><span class="string">                有 c2 个 (o1 * o2, c1 * H * W) 的展平卷积核, 每一个核大小是 c1 * H * W, 将在一张 c1 通道的一维图片上进行 o1 * o2 次卷积</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        ridx = np.arange(o1 * o2).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        cidx1 = np.arange(o2).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>).repeat(o1, <span class="number">0</span>).reshape(o1 * o2, k1 * k2)</span><br><span class="line">        cidx2 = np.arange(k2).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(o1 * o2 * k1, <span class="number">0</span>).reshape(o1 * o2, k1 * k2)</span><br><span class="line">        cidx3 = np.arange(<span class="number">0</span>, k1 * w, w).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(k2, <span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        cidx4 = np.arange(<span class="number">0</span>, o1 * w, w).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(o2, <span class="number">0</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        cidx = cidx1 + cidx2 + cidx3 + cidx4</span><br><span class="line"></span><br><span class="line">        k = np.zeros((c2, c1, o1 * o2, h * w))</span><br><span class="line">        k[:, :, ridx, cidx] = self.k.reshape(c2, c1, <span class="number">1</span>, k1 * k2).repeat(o1 * o2, <span class="number">2</span>)</span><br><span class="line">        k = k.transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>).reshape(c2 * o1 * o2, c1 * h * w)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> k</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_unfold_x</span>(<span class="params">self, x: np.ndarray, c1: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span>, o1: <span class="built_in">int</span>, o2: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;展开输入 x, 能够与展平的卷积核直接相乘</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, o1 * o2, c1 * k1 * k2)</span></span><br><span class="line"><span class="string">                每张图片将与 c1 通道的一维卷积核进行 o1 * o2 次卷积</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        ridx_r = np.arange(k1).reshape(<span class="number">1</span>, k1).repeat(k2, <span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        ridx_c = np.arange(o1).reshape(o1, <span class="number">1</span>).repeat(o2, <span class="number">0</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        ridx = ridx_r + ridx_c</span><br><span class="line"></span><br><span class="line">        cidx_r = np.arange(k2).reshape(<span class="number">1</span>, k2).repeat(k1, <span class="number">0</span>).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        cidx_c = np.arange(o2).reshape(<span class="number">1</span>, o2).repeat(o1, <span class="number">0</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        cidx = cidx_r + cidx_c</span><br><span class="line"></span><br><span class="line">        x = x[:, :, ridx, cidx].transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>).reshape(-<span class="number">1</span>, o1 * o2, c1 * k1 * k2)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, c2, o1, o2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        _, _, h, w = x.shape</span><br><span class="line">        c2, c1, k1, k2 = self.k.shape</span><br><span class="line">        o1 = h - k1 + <span class="number">1</span></span><br><span class="line">        o2 = w - k2 + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 展开卷积核</span></span><br><span class="line">        output = x.reshape(-<span class="number">1</span>, c1 * h * w) @ self._unfold_k(h, w, c1, c2, k1, k2, o1, o2).T</span><br><span class="line">        output = output.reshape(-<span class="number">1</span>, c2, o1, o2) + self.b</span><br><span class="line">        <span class="keyword">return</span> output</span><br><span class="line"></span><br><span class="line">        <span class="comment"># # 展开输入 (B, o1 * o2, c1 * k1 * k2) @ (c1 * k1 * k2, c2) = (B, o1 * o2, c2)</span></span><br><span class="line">        <span class="comment"># output = self._unfold_x(x, c1, k1, k2, o1, o2) @ self.k.reshape(c2, c1 * k1 * k2).T</span></span><br><span class="line">        <span class="comment"># output = output.transpose(0, 2, 1).reshape(-1, c2, o1, o2) + self.b</span></span><br><span class="line">        <span class="comment"># return output</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string">            last_x_grad: (B, c2, o1, o2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, c1, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, _, h, w = x.shape</span><br><span class="line">        c2, c1, k1, k2 = self.k.shape</span><br><span class="line">        o1 = h - k1 + <span class="number">1</span></span><br><span class="line">        o2 = w - k2 + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        unfold_x = self._unfold_x(x, c1, k1, k2, o1, o2)</span><br><span class="line">        unfold_k = self._unfold_k(h, w, c1, c2, k1, k2, o1, o2)</span><br><span class="line"></span><br><span class="line">        self.b_grad = last_x_grad.<span class="built_in">sum</span>((<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">        self.k_grad = unfold_x.reshape(-<span class="number">1</span>, c1 * k1 * k2).T @ last_x_grad.transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>).reshape(-<span class="number">1</span>, c2)</span><br><span class="line">        self.k_grad = self.k_grad.transpose().reshape(c2, c1, k1, k2)</span><br><span class="line"></span><br><span class="line">        x_grad = last_x_grad.reshape(-<span class="number">1</span>, c2 * o1 * o2) @ unfold_k</span><br><span class="line">        x_grad = x_grad.reshape(-<span class="number">1</span>, c1, h, w)</span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>):</span><br><span class="line">        self.k -= lr * self.k_grad</span><br><span class="line">        self.b -= lr * self.b_grad</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>_unfold_k</code> 和 <code>_unfold_x</code> 就是对卷积核 $\mathbf{K}$ 和输入 $\mathbf{X}$ 进行数据重组的方法, 可以用于不同的前向和反向梯度计算. 前向中实现两种矩阵化方法的一种就行, 而反向中则需要同时使用两个方法来计算参数梯度.</p>
+<h2 id="损失函数层"><a href="#损失函数层" class="headerlink" title="损失函数层"></a>损失函数层</h2><p>最后是网络的损失函数, 从 <code>Linear</code> 层往后, 将网络的输出与真实标签进行损失计算.</p>
+<p>这里我们实现分类任务最常用的损失函数, 交叉熵损失函数, 它的前向和反向所需要的参数与前面的网络层有一些小的区别, 均需要输入真实标签值.</p>
+<h3 id="CrossEntropy"><a href="#CrossEntropy" class="headerlink" title="CrossEntropy"></a>CrossEntropy</h3><p>首先上交叉熵损失的公式. 损失计算从线性层的输出开始, 设函数输入为 $\mathbf{X}$, 形状为 $n \times C$, 真实标签 $\mathbf{y}$ 为长度是 $n$ , 取值范围 $[1, C]$ 的向量, 则损失 $L$:</p>
+<p>$$<br>\begin{aligned}<br>  L &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( -\log\left( \frac{\exp\left( {x_{i y_i}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( -\log\left( \frac{\exp\left({x_{i y_i} - \max_{j=1}^{C}{x_{ij}}}\right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}} \right)}} \right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( \log\left( \sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}} \right)} \right) - \left({x_{i y_i} - \max_{j=1}^{C}{x_{ij}}}\right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( \log\left( \sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)} \right) - x_{i y_i}&#39; \right)}<br>\end{aligned}<br>$$</p>
+<p>详细的原理就不说了, 网上都有, 这里说一下为什么要给每个 $x$ 减去 $\max_{j=1}^{C}{x_{ij}}$, 因为中间用到了指数函数, 所以为了防止数据溢出, 将数据都变换到小于等于 0 的区间, 这样指数函数的值域就在 $(0, 1]$, 容易看出来这种变换是等价不影响计算结果的.</p>
+<p>前向计算就这样了, 然后看反向梯度计算. 注意到最外层是将每个样本的 &quot;小损失 $L_i$&quot; 进行了求和平均, 所以我们先看求和符号内每一个样本的值如何求梯度.</p>
+<p>掏出高中求导知识, 很容易得到:</p>
+<p>$$<br>\frac{\partial{L_i}}{\partial{x_{ij}}} = \left\{<br>  \begin{aligned}<br>    &amp; \frac{\exp{(x_{ij}&#39;)}}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}}     &amp; , ~ &amp; j \neq y_i \\<br>    &amp; \frac{\exp{(x_{ij}&#39;)}}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} - 1 &amp; , ~ &amp; j = y_i<br>  \end{aligned}<br>\right.<br>$$</p>
+<p>这里为了防止数据溢出, 同样使用 $x&#39;_{ij}$ 而不是原始输入值.</p>
+<p>最后, 由于求和平均的关系, 整个梯度也需要乘上一个系数, 因此有最终的梯度计算公式:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{x_{ij}}} &amp;= \frac{\partial{L}}{\partial{L_i}}\frac{\partial{L_i}}{\partial{x_{ij}}} \\<br>  ~ &amp;= \frac{1}{n}\frac{\partial{L_i}}{\partial{x_{ij}}} \\<br>  ~ &amp;= \left\{<br>  \begin{aligned}<br>    &amp; \frac{1}{n}\left( \frac{\exp{(x_{ij}&#39;)}}{n\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} \right) &amp; , ~ &amp; j \neq y_i \\<br>    &amp; \frac{1}{n}\left( \frac{\exp{(x_{ij}&#39;)}}{n\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} - 1 \right) &amp; , ~ &amp; j = y_i<br>  \end{aligned}<br>\right.<br>\end{aligned}<br>$$</p>
+<p>至此, 损失函数的前向和反向都已经推导完成, 然后完成代码实现.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CrossEntropyLoss</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, y: np.ndarray</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C)</span></span><br><span class="line"><span class="string">            y: (B, )</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: float number</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        x = x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        loss = np.log(np.exp(x).<span class="built_in">sum</span>(-<span class="number">1</span>)) - x[np.arange(x.shape[<span class="number">0</span>]), y]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">float</span>(loss.mean())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, y: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C)</span></span><br><span class="line"><span class="string">            y: (B, )</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, C)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        x_grad = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        x_grad[np.arange(x.shape[<span class="number">0</span>]), y] -= <span class="number">1</span></span><br><span class="line">        x_grad /= x.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本篇到此结束, 我们终于完成了网络需要的所有基础结构. 而下一篇, 也是最后一篇, 我们将把这些零件拼接起来, 组合出最终的卷积神经网络, 并完成对网络的训练和评估.</p>
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/%E7%9F%A9%E9%98%B5%E6%B1%82%E5%AF%BC/" rel="tag"><i class="fa fa-tag"></i> 矩阵求导</a>
+              <a href="/tags/%E5%8D%B7%E7%A7%AF%E7%9F%A9%E9%98%B5%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i> 卷积矩阵化</a>
+              <a href="/tags/%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" rel="tag"><i class="fa fa-tag"></i> 交叉熵损失函数</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2023/10/13/cnn-numpy-1/" rel="prev" title="基于 NumPy 的手写数字识别 (卷积神经网络) (一)">
+                  <i class="fa fa-chevron-left"></i> 基于 NumPy 的手写数字识别 (卷积神经网络) (一)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2023/10/15/cnn-numpy-3/" rel="next" title="基于 NumPy 的手写数字识别 (卷积神经网络) (三)">
+                  基于 NumPy 的手写数字识别 (卷积神经网络) (三) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">114k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:26</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
