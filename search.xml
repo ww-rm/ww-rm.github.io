@@ -243,7 +243,7 @@
 <p>那么, 回忆高数最基本的知识, 如果一个函数存在最 (极) 小值, 那么该点的导数等于 0. 所以纯理论计算最暴力的方式就是对 $z$ 关于所有参数求导, 然后看所有参数极值点的组合, 最后得到 $z$ 的最小值.</p>
 <p>但是上述方法不能充分利用计算机的优势, 就是数值计算, 并且很多时候函数十分复杂无法推导, 而且我们也不需要精确求出最小值, 只要接近某个极小值就行了, 因此有了梯度下降法.</p>
 <p>所谓梯度, 简单理解就是函数的导数, 只不过是对每个参数都求偏导数, 所有参数的偏导数组合在一起就叫梯度. 而梯度所指向的参数变化方向永远使得整个函数值变大, 因此如果朝着梯度的反方向更新参数, 就会使得函数值减小.</p>
-<p>例如我们知道了 $z$ 关于三个参数的梯度是 $(\frac{\partial{z}}{\partial{x_1}}, \frac{\partial{z}}{\partial{x_2}}, \frac{\partial{z}}{\partial{x_3}})$, 那么 $z(x_1 - \eta\frac{\partial{z}}{\partial{x_1}}, x_2 - \eta\frac{\partial{z}}{\partial{x_2}}, x_3 - \eta\frac{\partial{z}}{\partial{x_3}}) &lt; z(x_1, x_2, x_3)$, 其中 $\eta$ 可以视作&quot;学习率&quot;, 取一个相对较小的值.</p>
+<p>例如我们知道了 $z$ 关于三个参数的梯度是 $(\frac{\partial{z}}{\partial{x_1}}, \frac{\partial{z}}{\partial{x_2}}, \frac{\partial{z}}{\partial{x_3}})$, 那么 $z(x_1 - \eta\frac{\partial{z}}{\partial{x_1}}, x_2 - \eta\frac{\partial{z}}{\partial{x_2}}, x_3 - \eta\frac{\partial{z}}{\partial{x_3}})$ 小于 $z(x_1, x_2, x_3)$, 其中 $\eta$ 可以视作&quot;学习率&quot;, 取一个相对较小的值.</p>
 <h3 id="链式法则与反向传播"><a href="#链式法则与反向传播" class="headerlink" title="链式法则与反向传播"></a>链式法则与反向传播</h3><p>知道了梯度下降的基本原理之后, 我们下一步目标就是高效的求解梯度.</p>
 <p>先说链式法则, 这个内容也是高数的基本知识, 在此回顾一下.</p>
 <p>例如要求 $z$ 的所有偏导数, 则:</p>
