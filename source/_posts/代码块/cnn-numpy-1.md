@@ -59,7 +59,7 @@ $$
 
 所谓梯度, 简单理解就是函数的导数, 只不过是对每个参数都求偏导数, 所有参数的偏导数组合在一起就叫梯度. 而梯度所指向的参数变化方向永远使得整个函数值变大, 因此如果朝着梯度的反方向更新参数, 就会使得函数值减小.
 
-例如我们知道了 $z$ 关于三个参数的梯度是 $(\frac{\partial{z}}{\partial{x_1}}, \frac{\partial{z}}{\partial{x_2}}, \frac{\partial{z}}{\partial{x_3}})$, 那么 $z(x_1 - \eta\frac{\partial{z}}{\partial{x_1}}, x_2 - \eta\frac{\partial{z}}{\partial{x_2}}, x_3 - \eta\frac{\partial{z}}{\partial{x_3}}) < z(x_1, x_2, x_3)$, 其中 $\eta$ 可以视作"学习率", 取一个相对较小的值.
+例如我们知道了 $z$ 关于三个参数的梯度是 $(\frac{\partial{z}}{\partial{x_1}}, \frac{\partial{z}}{\partial{x_2}}, \frac{\partial{z}}{\partial{x_3}})$, 那么 $z(x_1 - \eta\frac{\partial{z}}{\partial{x_1}}, x_2 - \eta\frac{\partial{z}}{\partial{x_2}}, x_3 - \eta\frac{\partial{z}}{\partial{x_3}})$ 小于 $z(x_1, x_2, x_3)$, 其中 $\eta$ 可以视作"学习率", 取一个相对较小的值.
 
 ### 链式法则与反向传播
 
