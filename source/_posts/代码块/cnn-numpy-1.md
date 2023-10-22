@@ -103,6 +103,15 @@ from sklearn.metrics import classification_report
 
 `matplotlib.pyplot` 用来绘制损失曲线, `numpy` 提供神经网络所需要的矩阵计算, `PIL` 用来读取数据集, `sklearn.metrics` 里有一些评价分类任务的指标函数, 借用一下.
 
+本文使用的 `python` 版本为 `3.9.13`, 各依赖库的版本如下:
+
+```plain
+numpy==1.24.3
+Pillow==10.0.0
+scikit-learn==1.2.2
+matplotlib==3.7.2
+```
+
 ## 加载数据集
 
 数据集使用一个较小的手写数字分类图片数据集, 之前文章里也一直用这个举例, 这里再贴一下蓝奏云下载地址, [手写数字分类.zip](https://ww-rm.lanzout.com/iTPkK09pfnha), 里面包含 10000 张训练数据和 5000 张测试数据.
