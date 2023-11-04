@@ -290,9 +290,6 @@ table {
   margin: 0 0 20px;
   width: 100%;
 }
-tbody tr:nth-of-type(odd) {
-  background: var(--table-row-odd-bg-color);
-}
 tbody tr:hover {
   background: var(--table-row-hover-bg-color);
 }
@@ -303,8 +300,8 @@ td {
 }
 th,
 td {
-  border: 1px solid #ddd;
-  border-bottom: 3px solid #ddd;
+  border: 1px solid #666;
+  border-bottom: 2px solid #666;
 }
 th {
   font-weight: 700;
@@ -955,17 +952,17 @@ pre code {
 .post-body .tabs ul.nav-tabs li.tab.active,
 .tabs-comment ul.nav-tabs li.tab.active {
   border-bottom-color: transparent;
-  border-left-color: #ddd;
-  border-right-color: #ddd;
+  border-left-color: #666;
+  border-right-color: #666;
   border-top-color: #fc6423;
 }
 @media (max-width: 413px) {
   .post-body .tabs ul.nav-tabs li.tab.active,
   .tabs-comment ul.nav-tabs li.tab.active {
-    border-bottom-color: #ddd;
+    border-bottom-color: #666;
     border-left-color: #fc6423;
-    border-right-color: #ddd;
-    border-top-color: #ddd;
+    border-right-color: #666;
+    border-top-color: #666;
   }
 }
 .post-body .tabs ul.nav-tabs li.tab.active a,
@@ -974,7 +971,7 @@ pre code {
 }
 .post-body .tabs .tab-content,
 .tabs-comment .tab-content {
-  border: 1px solid #ddd;
+  border: 1px solid #666;
   border-radius: 0 0 0 0;
   border-top-color: transparent;
 }
@@ -982,7 +979,7 @@ pre code {
   .post-body .tabs .tab-content,
   .tabs-comment .tab-content {
     border-radius: 0;
-    border-top-color: #ddd;
+    border-top-color: #666;
   }
 }
 .post-body .tabs .tab-content .tab-pane,

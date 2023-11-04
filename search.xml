@@ -131,6 +131,149 @@
       </tags>
   </entry>
   <entry>
+    <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
+    <url>//posts/2023/11/04/ncmdump/</url>
+    <content><![CDATA[<p>这段时间打算用网易云音乐屯点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
+<p>本文包括以下内容, 首先整理一下网上已有的 <code>ncm</code> 格式转换代码, 然后增加补充专辑和封面信息的功能, 并实现批量转换和界面友好, 最后打包成二进制文件和 Python 库, 并上传到 PyPI 上.</p>
+<p>文末附有项目的 Github 地址, 以及使用 PyInstaller 打包的二进制文件下载地址和 PyPI 项目地址.</p>
+<span id="more"></span>
+
+<h2 id="NCM-格式分析"><a href="#NCM-格式分析" class="headerlink" title="NCM 格式分析"></a>NCM 格式分析</h2><p>Github 上搜 <code>ncmdump</code>, 有很多现成的项目, 通过源码和自己尝试后总结一下 <code>ncm</code> 格式如下表:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>MAGIC_HEADER</code></td>
+<td align="center">8 字节</td>
+<td align="center">ncm 文件的文件头标识, 内容为 <code>b&quot;CTENFDAM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>gap1</code></td>
+<td align="center">2 字节</td>
+<td align="center">不确定, 据观察所有的文件都相同, 为 <code>b&quot;\x01\x61&quot;</code>, 猜测也是文件头一部分</td>
+</tr>
+<tr>
+<td align="center"><code>rc4_key_enc_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>rc4_key_enc</code></td>
+<td align="center"><code>rc4_key_enc_size</code></td>
+<td align="center">加密后的 RC4 算法密钥</td>
+</tr>
+<tr>
+<td align="center"><code>metadata_enc_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>metadata_enc</code></td>
+<td align="center"><code>metadata_enc_size</code></td>
+<td align="center">加密后的 <code>metadata</code>, 包含音乐的专辑和封面信息</td>
+</tr>
+<tr>
+<td align="center"><code>crc32</code></td>
+<td align="center">4 字节</td>
+<td align="center">不确定, 据网上流传为 CRC32 校验码, 但是没找到是算哪个值的</td>
+</tr>
+<tr>
+<td align="center"><code>gap2</code></td>
+<td align="center">5 字节</td>
+<td align="center">不确定, 据观察都为 <code>b&quot;\x01&quot;</code> 开头, <code>b&quot;\x00&quot;</code> 结尾</td>
+</tr>
+<tr>
+<td align="center"><code>cover_data_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>cover_data</code></td>
+<td align="center"><code>cover_data_size</code></td>
+<td align="center">专辑封面图片二进制数据</td>
+</tr>
+<tr>
+<td align="center"><code>music_data_enc</code></td>
+<td align="center">任意长度</td>
+<td align="center">加密后的音乐二进制数据, 处于 <code>ncm</code> 文件的最末尾</td>
+</tr>
+</tbody></table>
+<p>格式很清晰, 虽然有一些未知项, 但是不影响核心内容. 其中 <code>rc4_key_enc</code>, <code>metadata_enc</code>, <code>music_data_enc</code> 是加密过的, 只要全部解密就能还原出原本完整的音乐文件.</p>
+<h2 id="NCM-文件解密"><a href="#NCM-文件解密" class="headerlink" title="NCM 文件解密"></a>NCM 文件解密</h2><p>这部分内容也是总结已有的源码.</p>
+<p><code>ncm</code> 文件中使用了两种密码算法:</p>
+<ul>
+<li>一种是经过魔改的 <code>RC4</code> 算法, 后文称它为 <code>NCMRC4</code></li>
+<li>另一种是标准的 <code>AES</code> 算法, 分组长度 <code>128</code> 比特, 工作模式 <code>ECB</code>, 填充算法为 <code>PKCS7</code>, 后文称它为 <code>NCMAES</code></li>
+</ul>
+<p><code>ncm</code> 文件的加密方式如下:</p>
+<ul>
+<li><code>music_data_enc = NCMRC4.encrypt(music_data, rc4_key)</code></li>
+<li><code>metadata_enc = NCMAES.encrypt(metadata_enc, AES_KEY_METADATA)</code></li>
+<li><code>rc4_key_enc = NCMAES.encrypt(rc4_key, AES_KEY_RC4_KEY)</code></li>
+</ul>
+<p>较大的 <code>music_data</code> 用魔改后的流密码加密, 节省时间; 较短的 <code>metadata</code> 和 <code>rc4_key</code> 用对称密码加密, 提高安全性.</p>
+<p>这里 <code>AES_KEY_RC4_KEY</code> 和 <code>AES_KEY_METADATA</code> 是两个关键的对称密码密钥, 前人已经通过逆向等手段挖出来了, 这里就不放出来了, 可以去看看别人的分析或者看本文的源码, 里面都有.</p>
+<p>除了使用加密手段, 还有一些简单的混淆操作, 以及去除解密后内容多余的头部字段等, 这里也不详细写了, 源码里面写的很清楚, 可以直接看源码.</p>
+<h2 id="添加专辑和封面信息"><a href="#添加专辑和封面信息" class="headerlink" title="添加专辑和封面信息"></a>添加专辑和封面信息</h2><p>来到本文的重点部分, 前面对 <code>ncm</code> 格式和加密方式的分析都是已有的, 我们主要想扩展功能, 自动添加专辑和封面信息到解密后的文件里, 这里主要用到 <code>mutagen</code> 这个库, 支持向 <code>mp3</code> 和 <code>flac</code> 文件内加入专辑等信息.</p>
+<p>解密后的 <code>metadata</code> 是一份 <code>json</code> 数据, 格式如下:</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;format&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flac&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">431259256</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;カタオモイ&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">[</span><span class="string">&quot;Aimer&quot;</span><span class="punctuation">,</span> <span class="number">16152</span><span class="punctuation">]</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;daydream&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">34826361</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951165052089697</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/2QRYxUqXfW0zQpm2_DVYRA==/109951165052089697.jpg&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">876923</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">207866</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;单相思&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们需要把 <code>musicName</code>, <code>artist</code>, <code>album</code> 这三个字段的内容保留, 同时把 <code>ncm</code> 中附带的封面图片也保留.</p>
+<p>我们导入一下要用到的库:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> mutagen <span class="keyword">import</span> flac, id3, mp3</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
+
+<p>对于 <code>mp3</code>, 如下操作:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_mp3</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for mp3 format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = mp3.MP3(path)</span><br><span class="line"></span><br><span class="line">    audio[<span class="string">&quot;TIT2&quot;</span>] = id3.TIT2(text=self.name, encoding=id3.Encoding.UTF8)  <span class="comment"># title</span></span><br><span class="line">    audio[<span class="string">&quot;TALB&quot;</span>] = id3.TALB(text=self.album, encoding=id3.Encoding.UTF8)  <span class="comment"># album</span></span><br><span class="line">    audio[<span class="string">&quot;TPE1&quot;</span>] = id3.TPE1(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># artists</span></span><br><span class="line">    audio[<span class="string">&quot;TPE2&quot;</span>] = id3.TPE2(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># album artists</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        audio[<span class="string">&quot;APIC&quot;</span>] = id3.APIC(<span class="built_in">type</span>=id3.PictureType.COVER_FRONT, mime=self.cover_mime, data=self._cover_data)  <span class="comment"># cover</span></span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>cover_mime</code> 就是图像的内容类型, 例如 <code>image/jpeg</code> 这种, 可以通过 <code>mimetypes</code> 库获取.</p>
+<p>而对于 <code>flac</code>, 如下操作:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_flac</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for flac format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = flac.FLAC(path)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add music info</span></span><br><span class="line">    audio[<span class="string">&quot;title&quot;</span>] = self.name</span><br><span class="line">    audio[<span class="string">&quot;artist&quot;</span>] = self.artists</span><br><span class="line">    audio[<span class="string">&quot;album&quot;</span>] = self.album</span><br><span class="line">    audio[<span class="string">&quot;albumartist&quot;</span>] = <span class="string">&quot;/&quot;</span>.join(self.artists)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add cover</span></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        cover = flac.Picture()</span><br><span class="line">        cover.<span class="built_in">type</span> = id3.PictureType.COVER_FRONT</span><br><span class="line">        cover.data = self._cover_data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> BytesIO(self._cover_data) <span class="keyword">as</span> data:</span><br><span class="line">            <span class="keyword">with</span> Image.<span class="built_in">open</span>(data) <span class="keyword">as</span> f:</span><br><span class="line">                cover.mime = self.cover_mime</span><br><span class="line">                cover.width = f.width</span><br><span class="line">                cover.height = f.height</span><br><span class="line">                cover.depth = <span class="built_in">len</span>(f.getbands()) * <span class="number">8</span></span><br><span class="line"></span><br><span class="line">        audio.add_picture(cover)</span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
+
+<p>添加专辑封面图片的时候稍微复杂一点, 需要使用 <code>Pillow</code> 库读取一下图像的基本信息, 然后填进去.</p>
+<p>值得注意的是, <code>ncm</code> 文件里可能没有存放专辑封面图片, 这种时候可以借助 <code>metadata</code> 里的 <code>albumPic</code> 字段, 它代表专辑封面图片的一个 url, 我们可以用 <code>urllib</code> 尝试联网获取内容, 代码片段如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># if no cover data, try get cover data by url in metadata</span></span><br><span class="line"><span class="keyword">if</span> self._cover_data_size &lt;= <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> request.urlopen(self._metadata.get(<span class="string">&quot;albumPic&quot;</span>, <span class="string">&quot;&quot;</span>)) <span class="keyword">as</span> res:</span><br><span class="line">            <span class="keyword">if</span> res.status &lt; <span class="number">400</span>:</span><br><span class="line">                self._cover_data = res.read()</span><br><span class="line">                self._cover_data_size = <span class="built_in">len</span>(self._cover_data)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是, 代码里需要判断, 如果最终就是没有办法获得图片数据, 那么就放弃添加图片信息, 避免报错.</p>
+<h2 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h2><p>到这里, 我们的包目录结构长这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ncmdump</span><br><span class="line">  ├── core.py</span><br><span class="line">  ├── crypto.py</span><br><span class="line">  ├── __init__.py</span><br><span class="line">  └── __main__.py</span><br></pre></td></tr></table></figure>
+
+<p>共有四份文件, 为了能够在命令行里运行这个包, 我们需要在 <code>__main__.py</code> 里添加一些内容.</p>
+<p>这里我们使用 <code>ArgumentParser</code> 解析命令行输入, <code>rich</code> 库显示进度条和日志输出, 完整代码如下.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> rich.progress <span class="keyword">import</span> Progress, SpinnerColumn, TimeElapsedColumn</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser(<span class="string">&quot;ncmdump&quot;</span>, description=<span class="string">&quot;Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;files&quot;</span>, nargs=<span class="string">&quot;*&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Files to dump, can follow multiple files.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--in-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Input folder of files to dump.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Output folder of files dumped.&quot;</span>, default=<span class="string">&quot;.&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-metadata&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump metadata.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-cover&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump album cover.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    out_folder = Path(args.out_folder)</span><br><span class="line">    out_folder.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    dump_metadata = args.dump_metadata</span><br><span class="line">    dump_cover = args.dump_cover</span><br><span class="line"></span><br><span class="line">    files = args.files</span><br><span class="line">    <span class="keyword">if</span> args.in_folder:</span><br><span class="line">        files.extend(Path(args.in_folder).iterdir())</span><br><span class="line">    files = <span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.suffix == <span class="string">&quot;.ncm&quot;</span>, <span class="built_in">map</span>(Path, files)))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> files:</span><br><span class="line">        parser.print_help()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">with</span> Progress(SpinnerColumn(), *Progress.get_default_columns(), TimeElapsedColumn()) <span class="keyword">as</span> progress:</span><br><span class="line">            task = progress.add_task(<span class="string">&quot;[#d75f00]Dumping files&quot;</span>, total=<span class="built_in">len</span>(files))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> ncm_path <span class="keyword">in</span> files:</span><br><span class="line">                output_path = out_folder.joinpath(ncm_path.stem)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    ncmfile = NeteaseCloudMusicFile(ncm_path).decrypt()</span><br><span class="line">                    music_path = ncmfile.dump_music(output_path)</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> dump_metadata:</span><br><span class="line">                        ncmfile.dump_metadata(output_path)</span><br><span class="line">                    <span class="keyword">if</span> dump_cover:</span><br><span class="line">                        ncmfile.dump_cover(output_path)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                    progress.log(<span class="string">f&quot;[red]ERROR[/red]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.metadata:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no metadata found&quot;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.cover_data:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no cover data found&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    progress.advance(task)</span><br></pre></td></tr></table></figure>
+
+<p>该命令行可以接收若干数量的 <code>.ncm</code> 文件作为输入, 可以用 <code>--in-folder</code> 指定一整个文件夹, 会和输入的单个文件合并一起处理, 比如有下面几种使用示例.</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定某些文件</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+
+<p>输出文件的文件名和原本的 <code>.ncm</code> 文件名相同, 但是后缀会自动替换成对应格式的后缀 (<code>.mp3</code> 或者 <code>.flac</code>).</p>
+<h2 id="打包到-PyPI"><a href="#打包到-PyPI" class="headerlink" title="打包到 PyPI"></a>打包到 PyPI</h2><p>最后就是打包上传<del>造福大众的时间</del>, 这也是我第一次在 PyPI 上上传自己的包, 之后会单独写一篇文章说说中途遇到的一些问题.</p>
+<p>上传完成之后, 就可以通过命令 <code>pip install ncmdump-py</code> 安装使用了~</p>
+<p>PS: 虽然库名字叫 <code>ncmdump-py</code>, 但是导入的时候还是 <code>import ncmdump</code>, 因为 <code>ncmdump</code> 这个项目名字在 PyPI 上已经被前人注册了, 只好加点东西区分一下.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL25jbWR1bXAtcHk=">https://github.com/ww-rm/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyPI 项目页: <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy9wcm9qZWN0L25jbWR1bXAtcHkv">https://pypi.org/project/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pbEtDSjFkczBlN2U=">ncmdump.zip<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>ncm</tag>
+        <tag>格式转换</tag>
+        <tag>ncmdump</tag>
+        <tag>python 库</tag>
+        <tag>PyPI</tag>
+        <tag>网易云音乐</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>碧蓝航线立绘提取与批量还原</title>
     <url>//posts/2023/04/11/blhx-painting/</url>
     <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
