@@ -28,7 +28,7 @@
 <meta property="og:description" content="这段时间打算用网易云音乐屯点资源, 但是下载之后才发现内容已经全部加密, 变成了 ncm 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息强迫症大怒. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-11-04T15:04:34.000Z">
-<meta property="article:modified_time" content="2023-11-04T15:01:31.266Z">
+<meta property="article:modified_time" content="2023-11-04T16:32:08.187Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="ncm">
 <meta property="article:tag" content="格式转换">
@@ -412,9 +412,9 @@
 <p>该命令行可以接收若干数量的 <code>.ncm</code> 文件作为输入, 可以用 <code>--in-folder</code> 指定一整个文件夹, 会和输入的单个文件合并一起处理, 比如有下面几种使用示例.</p>
 <figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">REM 指定某些文件</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+<figure class="highlight bat"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
 
 <p>输出文件的文件名和原本的 <code>.ncm</code> 文件名相同, 但是后缀会自动替换成对应格式的后缀 (<code>.mp3</code> 或者 <code>.flac</code>).</p>
 <h2 id="打包到-PyPI"><a href="#打包到-PyPI" class="headerlink" title="打包到 PyPI"></a>打包到 PyPI</h2><p>最后就是打包上传<del>造福大众的时间</del>, 这也是我第一次在 PyPI 上上传自己的包, 之后会单独写一篇文章说说中途遇到的一些问题.</p>

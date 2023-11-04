@@ -20,51 +20,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2021/05/21/prologue/</loc>
-    
-    <lastmod>2023-11-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/08/30/desktopsprite/</loc>
-    
-    <lastmod>2023-11-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/11/04/ncmdump/</loc>
-    
-    <lastmod>2023-11-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/04/11/blhx-painting/</loc>
-    
-    <lastmod>2023-11-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/10/13/cnn-numpy-1/</loc>
-    
-    <lastmod>2023-11-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/</loc>
     
     <lastmod>2023-11-04</lastmod>
@@ -110,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2023/02/18/pca/</loc>
+    <loc>https://ww-rm.github.io/posts/2022/12/07/simple-ecc/</loc>
     
     <lastmod>2023-11-04</lastmod>
     
@@ -119,7 +74,7 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2022/12/07/simple-ecc/</loc>
+    <loc>https://ww-rm.github.io/posts/2023/02/18/pca/</loc>
     
     <lastmod>2023-11-04</lastmod>
     
@@ -236,15 +191,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/404.html</loc>
-    
-    <lastmod>2023-11-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/about/</loc>
     
     <lastmod>2023-11-04</lastmod>
@@ -255,6 +201,60 @@
   
   <url>
     <loc>https://ww-rm.github.io/categories/</loc>
+    
+    <lastmod>2023-11-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2021/05/21/prologue/</loc>
+    
+    <lastmod>2023-11-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/08/30/desktopsprite/</loc>
+    
+    <lastmod>2023-11-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/11/04/ncmdump/</loc>
+    
+    <lastmod>2023-11-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/04/11/blhx-painting/</loc>
+    
+    <lastmod>2023-11-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/10/13/cnn-numpy-1/</loc>
+    
+    <lastmod>2023-11-04</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/404.html</loc>
     
     <lastmod>2023-11-04</lastmod>
     
@@ -461,13 +461,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/tags/%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4/</loc>
-    <lastmod>2023-11-04</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/tags/%E5%85%AC%E9%92%A5%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2023-11-04</lastmod>
     <changefreq>weekly</changefreq>
@@ -476,6 +469,13 @@
   
   <url>
     <loc>https://ww-rm.github.io/tags/%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E5%AF%86%E7%A0%81/</loc>
+    <lastmod>2023-11-04</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/tags/%E6%95%B0%E6%8D%AE%E9%99%8D%E7%BB%B4/</loc>
     <lastmod>2023-11-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
