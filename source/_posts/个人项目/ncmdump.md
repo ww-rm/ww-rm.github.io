@@ -252,12 +252,12 @@ python -m ncmdump file1.ncm file2.ncm
 
 ```bat
 REM 指定一整个文件夹, 同时指定输出目录
-python -m ncmdump --folder ncmfiles --out-folder musicfolder
+python -m ncmdump --in-folder ncmfiles --out-folder musicfolder
 ```
 
 ```bat
 REM 同时指定
-python -m ncmdump file1.ncm file2.ncm --folder ncmfiles --out-folder musicfolder
+python -m ncmdump file1.ncm file2.ncm --in-folder ncmfiles --out-folder musicfolder
 ```
 
 输出文件的文件名和原本的 `.ncm` 文件名相同, 但是后缀会自动替换成对应格式的后缀 (`.mp3` 或者 `.flac`).
