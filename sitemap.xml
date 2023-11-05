@@ -11,42 +11,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2022/10/29/diffusion-model/</loc>
-    
-    <lastmod>2023-11-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/08/29/transformer/</loc>
-    
-    <lastmod>2023-11-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/about/</loc>
-    
-    <lastmod>2023-11-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/categories/</loc>
-    
-    <lastmod>2023-11-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/festival/</loc>
     
     <lastmod>2023-11-05</lastmod>
@@ -218,15 +182,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/</loc>
-    
-    <lastmod>2023-11-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/posts/2022/08/16/wast-spider/</loc>
     
     <lastmod>2023-11-05</lastmod>
@@ -236,7 +191,7 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2023/02/27/win10activation/</loc>
+    <loc>https://ww-rm.github.io/posts/2022/08/11/wast-vscandvs/</loc>
     
     <lastmod>2023-11-05</lastmod>
     
@@ -254,7 +209,52 @@
   </url>
   
   <url>
+    <loc>https://ww-rm.github.io/posts/2023/02/27/win10activation/</loc>
+    
+    <lastmod>2023-11-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/10/29/diffusion-model/</loc>
+    
+    <lastmod>2023-11-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/08/29/transformer/</loc>
+    
+    <lastmod>2023-11-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://ww-rm.github.io/404.html</loc>
+    
+    <lastmod>2023-11-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/about/</loc>
+    
+    <lastmod>2023-11-05</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/categories/</loc>
     
     <lastmod>2023-11-05</lastmod>
     
@@ -552,6 +552,20 @@
   </url>
   
   <url>
+    <loc>https://ww-rm.github.io/tags/%E7%88%AC%E8%99%AB/</loc>
+    <lastmod>2023-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/tags/requests/</loc>
+    <lastmod>2023-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://ww-rm.github.io/tags/Visual-Studio-Code/</loc>
     <lastmod>2023-11-05</lastmod>
     <changefreq>weekly</changefreq>
@@ -573,14 +587,7 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/tags/%E7%88%AC%E8%99%AB/</loc>
-    <lastmod>2023-11-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/tags/requests/</loc>
+    <loc>https://ww-rm.github.io/tags/%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7/</loc>
     <lastmod>2023-11-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -588,13 +595,6 @@
   
   <url>
     <loc>https://ww-rm.github.io/tags/%E6%BF%80%E6%B4%BB%E5%B7%A5%E5%85%B7/</loc>
-    <lastmod>2023-11-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/tags/%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7/</loc>
     <lastmod>2023-11-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -680,6 +680,13 @@
   </url>
   
   <url>
+    <loc>https://ww-rm.github.io/categories/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2023-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%90%8E%E8%AE%B0/</loc>
     <lastmod>2023-11-05</lastmod>
     <changefreq>weekly</changefreq>
@@ -695,13 +702,6 @@
   
   <url>
     <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E6%96%B0%E6%89%8B%E5%85%A5%E9%97%A8/</loc>
-    <lastmod>2023-11-05</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/categories/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2023-11-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

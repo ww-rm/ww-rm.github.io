@@ -971,6 +971,7 @@ pre code {
 }
 .post-body .tabs .tab-content,
 .tabs-comment .tab-content {
+  background-color: rgba(255,255,255,0.5);
   border: 1px solid #666;
   border-radius: 0 0 0 0;
   border-top-color: transparent;
