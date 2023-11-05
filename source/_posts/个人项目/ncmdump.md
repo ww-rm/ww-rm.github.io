@@ -20,6 +20,51 @@ date: 2023-11-04 23:04:34
 
 <!-- more -->
 
+## 快速上手
+
+安装:
+
+`pip install ncmdump-py`
+
+命令行使用:
+
+```plain
+python -m ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]
+```
+
+```plain
+usage: ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]
+
+Dump ncm files with progress bar and logging info, only process files with suffix '.ncm'
+
+positional arguments:
+  files                 Files to dump, can follow multiple files.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --in-folder IN_FOLDER
+                        Input folder of files to dump.
+  --out-folder OUT_FOLDER
+                        Output folder of files dumped.
+  --dump-metadata       Whether dump metadata.
+  --dump-cover          Whether dump album cover.
+```
+
+导入代码使用:
+
+```python
+from ncmdump import NeteaseCloudMusicFile
+
+ncmfile = NeteaseCloudMusicFile("filename.ncm")
+ncmfile.decrypt()
+
+ncmfile.dump_music("filename.mp3")  # auto detect correct suffix
+
+# Maybe you need metadata or cover image
+# ncmfile.dump_metadata("filename.json")  
+# ncmfile.dump_cover("filename.jpeg")
+```
+
 ## NCM 格式分析
 
 Github 上搜 `ncmdump`, 有很多现成的项目, 通过源码和自己尝试后总结一下 `ncm` 格式如下表:
