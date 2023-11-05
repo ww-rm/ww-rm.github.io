@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="基于上一篇NCM 文件批量转换 (保留专辑和封面信息), 记录一下自己第一次往 PyPI 上发布包的过程. 本文结合 Python 官方教程 Packaging Python Projects 和 Setuptools 的 User guide 进行打包和发布.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在 PyPI 上发布一个包">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2023/11/05/pypi/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="基于上一篇NCM 文件批量转换 (保留专辑和封面信息), 记录一下自己第一次往 PyPI 上发布包的过程. 本文结合 Python 官方教程 Packaging Python Projects 和 Setuptools 的 User guide 进行打包和发布.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-11-05T09:43:40.000Z">
+<meta property="article:modified_time" content="2023-11-05T09:56:38.900Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="pypi">
+<meta property="article:tag" content="setuptools">
+<meta property="article:tag" content="python 包发布">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2023/11/05/pypi/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/11/05/pypi/","path":"/posts/2023/11/05/pypi/","title":"如何在 PyPI 上发布一个包"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>如何在 PyPI 上发布一个包 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">项目结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E5%B7%A5%E5%85%B7%E5%BA%93"><span class="nav-number">2.</span> <span class="nav-text">安装必要的工具库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">编写项目配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%93%E5%8C%85"><span class="nav-number">4.</span> <span class="nav-text">打包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%91%E5%B8%83"><span class="nav-number">5.</span> <span class="nav-text">发布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">55</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/11/05/pypi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="如何在 PyPI 上发布一个包 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何在 PyPI 上发布一个包
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-05 17:43:40" itemprop="dateCreated datePublished" datetime="2023-11-05T17:43:40+08:00">2023-11-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9D%82%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">杂学</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>基于上一篇<a href="https://ww-rm.github.io/posts/2023/11/04/ncmdump/">NCM 文件批量转换 (保留专辑和封面信息)</a>, 记录一下自己第一次往 PyPI 上发布包的过程.</p>
+<p>本文结合 Python 官方教程 <span class="exturl" data-url="aHR0cHM6Ly9wYWNrYWdpbmcucHl0aG9uLm9yZy9lbi9sYXRlc3QvdHV0b3JpYWxzL3BhY2thZ2luZy1wcm9qZWN0cy8=">Packaging Python Projects<i class="fa fa-external-link-alt"></i></span> 和 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L2luZGV4Lmh0bWw=">Setuptools<i class="fa fa-external-link-alt"></i></span> 的 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS8=">User guide<i class="fa fa-external-link-alt"></i></span> 进行打包和发布.</p>
+<span id="more"></span>
+
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ncmdump-py</span><br><span class="line">  ├─ ncmdump</span><br><span class="line">  │   ├─ core.py</span><br><span class="line">  │   ├─ crypto.py</span><br><span class="line">  │   ├─ __init__.py</span><br><span class="line">  │   └─ __main__.py</span><br><span class="line">  ├─ .gitignore</span><br><span class="line">  ├─ LICENSE</span><br><span class="line">  ├─ pyproject.toml</span><br><span class="line">  └─ README.md</span><br></pre></td></tr></table></figure>
+
+<p>这是本项目的目录结构, 其中 <code>ncmdump-py</code> 是项目根目录, 而 <code>ncmdump</code> 是我们要发布的包, 其他文件是一些项目文件.</p>
+<p>这种结构被称为 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9wYWNrYWdlX2Rpc2NvdmVyeS5odG1sI2ZsYXQtbGF5b3V0">flat-layout<i class="fa fa-external-link-alt"></i></span> 布局, 也就是直接将要构建的包放在项目的根目录下.</p>
+<p>除此之外还有 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9wYWNrYWdlX2Rpc2NvdmVyeS5odG1sI3NyYy1sYXlvdXQ=">src-layout<i class="fa fa-external-link-alt"></i></span> 和用于单模块构建的 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9wYWNrYWdlX2Rpc2NvdmVyeS5odG1sI3NpbmdsZS1tb2R1bGUtZGlzdHJpYnV0aW9u">single-module-distribution<i class="fa fa-external-link-alt"></i></span>. 此外 <code>Setuptools</code> 还支持各种详细的自定义功能, 具体可以看 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9wYWNrYWdlX2Rpc2NvdmVyeS5odG1s">Package Discovery and Namespace Packages<i class="fa fa-external-link-alt"></i></span> 页面.</p>
+<h2 id="安装必要的工具库"><a href="#安装必要的工具库" class="headerlink" title="安装必要的工具库"></a>安装必要的工具库</h2><p>使用 <code>pip install build</code> 安装 <code>build</code> 库. 这是一个命令行工具, 能够自动下载 <code>setuptools</code> 和其他构建时的必要依赖, 之后通过 <code>python -m build</code> 即可完成项目构建.</p>
+<p>另一个工具是 <code>twine</code>, 使用 <code>pip install twine</code> 安装, 该工具用来将我们构建后的文件上传至 PyPI 中.</p>
+<h2 id="编写项目配置文件"><a href="#编写项目配置文件" class="headerlink" title="编写项目配置文件"></a>编写项目配置文件</h2><p><code>setuptools</code> 支持三种方式编写项目配置文件, 在项目根目录下创建 <code>pyproject.toml</code>, <code>setup.cfg</code> 或者 <code>setup.py</code>.</p>
+<p>这里我们使用推荐的 <code>pyproject.toml</code> 方式, 并且尽量避免使用 <code>setup.py</code> (<span class="exturl" data-url="aHR0cHM6Ly9ibG9nLmdhbnNzbGUuaW8vYXJ0aWNsZXMvMjAyMS8xMC9zZXR1cC1weS1kZXByZWNhdGVkLmh0bWw=">Why you shouldn’t invoke setup.py directly<i class="fa fa-external-link-alt"></i></span>).</p>
+<p>下面贴出本项目的 <code>pyproject.toml</code>, 并对其进行解释.</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[build-system]</span></span><br><span class="line"><span class="attr">requires</span> = [<span class="string">&quot;setuptools&quot;</span>]</span><br><span class="line"><span class="attr">build-backend</span> = <span class="string">&quot;setuptools.build_meta&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="section">[project]</span></span><br><span class="line"><span class="attr">name</span> = <span class="string">&quot;ncmdump-py&quot;</span></span><br><span class="line"><span class="attr">authors</span> = [</span><br><span class="line">    &#123;name = <span class="string">&quot;ww-rm&quot;</span>, email = <span class="string">&quot;ww-rm@qq.com&quot;</span>&#125;,</span><br><span class="line">]</span><br><span class="line"><span class="attr">description</span> = <span class="string">&quot;Dump ncm files to mp3 or flac files.&quot;</span></span><br><span class="line"><span class="attr">requires-python</span> = <span class="string">&quot;&gt;=3.7&quot;</span></span><br><span class="line"><span class="attr">dependencies</span> = [</span><br><span class="line">    <span class="string">&quot;mutagen&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Pillow&quot;</span>,</span><br><span class="line">    <span class="string">&quot;pycryptodome&quot;</span>,</span><br><span class="line">    <span class="string">&quot;rich&quot;</span>,</span><br><span class="line">]</span><br><span class="line"><span class="attr">dynamic</span> = [<span class="string">&quot;version&quot;</span>, <span class="string">&quot;readme&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="section">[project.urls]</span></span><br><span class="line"><span class="attr">&quot;Homepage&quot;</span> = <span class="string">&quot;https://github.com/ww-rm/ncmdump-py&quot;</span></span><br><span class="line"><span class="attr">&quot;Bug Tracker&quot;</span> = <span class="string">&quot;https://github.com/ww-rm/ncmdump-py/issues&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="section">[tool.setuptools]</span></span><br><span class="line"><span class="attr">packages</span> = [<span class="string">&quot;ncmdump&quot;</span>]</span><br><span class="line"></span><br><span class="line"><span class="section">[tool.setuptools.dynamic]</span></span><br><span class="line"><span class="attr">version</span> = &#123;attr = <span class="string">&quot;ncmdump.__version__&quot;</span>&#125;</span><br><span class="line"><span class="attr">readme</span> = &#123;file = [<span class="string">&quot;README.md&quot;</span>], content-type = <span class="string">&quot;text/markdown&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先是 <code>build-system</code>, 必填项, 该键下面定义了使用什么方式进行构建, 这里使用 <code>setuptools</code>, 一般不需要更改.</p>
+<p>接着下面的是 <code>project</code> 键, 这下面有很多关于项目的配置, 并且和 PyPI 项目页面上有对应关系, 这里挑一些关键的来解释.</p>
+<p><code>name</code> 是包的名字, 指的是用 <code>pip</code> 安装时指定的名字, 在代码导入的时候还是和包本身文件夹名字相同. 比如这个项目, 安装的命令是 <code>pip install ncmdump-py</code>, 但是代码导入的时候是 <code>import ncmdump</code>.</p>
+<p><code>dependencies</code> 定义了项目的依赖库, 语法和 <code>requirements.txt</code> 一样, 列表里每一项都是一个依赖, 详细语法可以参考 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9kZXBlbmRlbmN5X21hbmFnZW1lbnQuaHRtbA==">Dependencies Management in Setuptools<i class="fa fa-external-link-alt"></i></span>.</p>
+<p><code>dynamic</code> 定义了一些变量, 常见的就是定义版本号和项目文档, 毕竟手动填写繁琐且容易出错. 它需要与后面 <code>tool.setuptools.dynamic</code> 进行对应. 详细语法可以参考 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9weXByb2plY3RfY29uZmlnLmh0bWwjZHluYW1pYy1tZXRhZGF0YQ==">Dynamic Metadata<i class="fa fa-external-link-alt"></i></span> 页面内容.</p>
+<p>更多与 <code>pyproject.toml</code> 有关的内容可以参考 <span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L3VzZXJndWlkZS9weXByb2plY3RfY29uZmlnLmh0bWw=">Configuring setuptools using pyproject.toml files<i class="fa fa-external-link-alt"></i></span>, 以及 Python 官方 <span class="exturl" data-url="aHR0cHM6Ly9wYWNrYWdpbmcucHl0aG9uLm9yZy9lbi9sYXRlc3Qvc3BlY2lmaWNhdGlvbnMvZGVjbGFyaW5nLXByb2plY3QtbWV0YWRhdGEv">Declaring project metadata<i class="fa fa-external-link-alt"></i></span> 页面规定的项目配置项.</p>
+<h2 id="打包"><a href="#打包" class="headerlink" title="打包"></a>打包</h2><p>首先确保已经安装了前文说的 <code>build</code> 库, 以及准备了一个合适的版本号和 <code>LICENSE</code> 文件, 可以参考 <span class="exturl" data-url="aHR0cHM6Ly9zZW12ZXIub3JnLw==">Semantic Versioning<i class="fa fa-external-link-alt"></i></span> 与 <span class="exturl" data-url="aHR0cHM6Ly9jaG9vc2VhbGljZW5zZS5jb20v">Choose an open source license<i class="fa fa-external-link-alt"></i></span> 让自己的项目看起来更规范一点.</p>
+<p>然后就是傻瓜式构建, 在当前根目录下运行:</p>
+<p><code>python -m build</code></p>
+<p>然后就会生成一个 <code>dist</code> 文件夹, 里面包含打包好的项目文件.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ncmdump-py</span><br><span class="line">  └─ dist</span><br><span class="line">      ├─ ncmdump_py-1.0.1-py3-none-any.whl</span><br><span class="line">      └─ ncmdump-py-1.0.1.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h2 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h2><p>首先确保已经安装了前文说的 <code>twine</code> 库, 然后需要去 <span class="exturl" data-url="aHR0cHM6Ly90ZXN0LnB5cGkub3JnLw==">TestPyPI<i class="fa fa-external-link-alt"></i></span> 和 <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy8=">PyPI<i class="fa fa-external-link-alt"></i></span> 分别注册自己的账号.</p>
+<p>其中 <code>TestPyPI</code> 是用来测试的, 而 <code>PyPI</code> 是真实发布页, 建议第一次尝试还是用 <code>TestPyPI</code> 先测试熟悉一下流程, 避免出错无法修改. 下面的内容将分别说明在 <code>TestPyPI</code> 和 <code>PyPI</code> 上的命令差异.</p>
+<p>这里先说说遇到的小问题, 在写本文时, <code>TestPyPI</code> 和 <code>PyPI</code> 在注册账号后, 已经强制要求开启双因素认证 (2FA), 但是开启了双因素认证的账号不能使用账密的形式上传文件, 因此成功注册账号后, 我们还需要去申请一个通用的 API token.</p>
+<p>在 <code>Account settings</code> 中往下翻, 可以找到 <code>API tokens</code> 设置项, 我们选择 <code>Add API token</code>, 并且将 <code>Scope</code> 选择为 <code>Entire account (all projects)</code> (第一次发布肯定只能选成全局的).</p>
+<p>添加完成之后, 我们需要及时的<strong>将 token 复制并保存</strong>下来, 之后再进来就<strong>不会显示</strong> token 了.</p>
+<p>然后使用 <code>twine</code> 进行上传.</p>
+<div class="tabs" id="upload-by-twine"><ul class="nav-tabs"><li class="tab active"><a href="#upload-by-twine-1">TestPyPI</a></li><li class="tab"><a href="#upload-by-twine-2">PyPI</a></li></ul><div class="tab-content"><div class="tab-pane active" id="upload-by-twine-1"><p><code>python -m twine upload --repository testpypi dist/*</code></p></div><div class="tab-pane" id="upload-by-twine-2"><p><code>python -m twine upload dist/*</code></p></div></div></div>
+
+<p>运行之后, 会要求你输入 <code>username</code> 和 <code>password</code>. 在使用 token 的情况下, <code>username</code> 填 <code>__token__</code>, 而 <code>password</code> 填刚刚复制并保存下来的 token 字符串.</p>
+<p>成功上传之后, 会显示上传后的页面链接.</p>
+<p>然后可以通过 <code>pip</code> 测试一下是否可以正常安装:</p>
+<div class="tabs" id="install-by-pip"><ul class="nav-tabs"><li class="tab active"><a href="#install-by-pip-1">TestPyPI</a></li><li class="tab"><a href="#install-by-pip-2">PyPI</a></li></ul><div class="tab-content"><div class="tab-pane active" id="install-by-pip-1"><p><code>pip install -i https://test.pypi.org/simple/ ncmdump-py</code></p></div><div class="tab-pane" id="install-by-pip-2"><p><code>pip install ncmdump-py</code></p></div></div></div>
+
+<p>最后的最后, 如果不想每次都输入用户名和密码, 我们可以写一份 <code>~/.pypirc</code> 配置文件.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[testpypi]</span><br><span class="line">username = __token__</span><br><span class="line">password = &lt;token value&gt;</span><br><span class="line"></span><br><span class="line">[pypi]</span><br><span class="line">username = __token__</span><br><span class="line">password = &lt;token value&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Windows 下把文件放在用户主目录 <code>%USERPROFILE%</code> (<code>C:\Users\&lt;UserName&gt;</code>) 下即可, 之后每次运行 <code>twine upload</code> 就会自动读取 token 完成上传.</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYWNrYWdpbmcucHl0aG9uLm9yZy9lbi9sYXRlc3QvdHV0b3JpYWxzL3BhY2thZ2luZy1wcm9qZWN0cy8=">Packaging Python Projects<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9zZXR1cHRvb2xzLnB5cGEuaW8vZW4vbGF0ZXN0L2luZGV4Lmh0bWw=">Setuptools<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9zZW12ZXIub3JnLw==">Semantic Versioning<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9jaG9vc2VhbGljZW5zZS5jb20v">Choose an open source license<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+              <a href="/tags/pypi/" rel="tag"><i class="fa fa-tag"></i> pypi</a>
+              <a href="/tags/setuptools/" rel="tag"><i class="fa fa-tag"></i> setuptools</a>
+              <a href="/tags/python-%E5%8C%85%E5%8F%91%E5%B8%83/" rel="tag"><i class="fa fa-tag"></i> python 包发布</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2023/11/04/ncmdump/" rel="prev" title="NCM 文件批量转换 (保留专辑和封面信息)">
+                  <i class="fa fa-chevron-left"></i> NCM 文件批量转换 (保留专辑和封面信息)
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2022 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">125k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:48</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
