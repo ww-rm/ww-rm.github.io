@@ -275,7 +275,7 @@
 <p>PS: 虽然库名字叫 <code>ncmdump-py</code>, 但是导入的时候还是 <code>import ncmdump</code>, 因为 <code>ncmdump</code> 这个项目名字在 PyPI 上已经被前人注册了, 只好加点东西区分一下.</p>
 <h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL25jbWR1bXAtcHk=">https://github.com/ww-rm/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
 <p>PyPI 项目页: <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy9wcm9qZWN0L25jbWR1bXAtcHkv">https://pypi.org/project/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
-<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pbEtDSjFkczBlN2U=">ncmdump.zip<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pdEdRcjFlemE1YWI=">ncmdump v1.1.0.zip<i class="fa fa-external-link-alt"></i></span></p>
 ]]></content>
       <categories>
         <category>个人项目</category>
@@ -1031,6 +1031,24 @@
       </tags>
   </entry>
   <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ECC 算法原理简介与实现</title>
     <url>//posts/2022/12/07/simple-ecc/</url>
     <content><![CDATA[<p>本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.</p>
@@ -1118,24 +1136,6 @@
       <tags>
         <tag>公钥算法</tag>
         <tag>椭圆曲线密码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
-      </categories>
-      <tags>
-        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
