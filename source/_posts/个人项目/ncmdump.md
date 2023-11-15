@@ -366,4 +366,4 @@ Github 地址: [https://github.com/ww-rm/ncmdump-py/](https://github.com/ww-rm/n
 
 PyPI 项目页: [https://pypi.org/project/ncmdump-py/](https://pypi.org/project/ncmdump-py/)
 
-PyInstaller 打包的命令行工具: [ncmdump.zip](https://ww-rm.lanzout.com/ilKCJ1ds0e7e)
+PyInstaller 打包的命令行工具: [ncmdump v1.1.0.zip](https://ww-rm.lanzout.com/itGQr1eza5ab)
