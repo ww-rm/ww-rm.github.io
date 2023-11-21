@@ -20,32 +20,32 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪. 本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.">
+    <meta name="description" content="之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 C# 这门语言. 文末附有 Github 项目地址.">
 <meta property="og:type" content="article">
-<meta property="og:title" content="对话情绪检测">
-<meta property="og:url" content="https://ww-rm.github.io/posts/2022/09/10/emodetection/">
+<meta property="og:title" content="使用 C# 写一个哈希计算小工具">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2022/04/17/hashtool/">
 <meta property="og:site_name" content="暗香画楼">
-<meta property="og:description" content="本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪. 本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.">
+<meta property="og:description" content="之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 C# 这门语言. 文末附有 Github 项目地址.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg">
-<meta property="article:published_time" content="2022-09-10T07:30:17.000Z">
-<meta property="article:modified_time" content="2023-11-20T09:55:39.926Z">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/hashtool/hashtool.png">
+<meta property="article:published_time" content="2022-04-17T11:11:58.000Z">
+<meta property="article:modified_time" content="2023-11-21T12:53:02.968Z">
 <meta property="article:author" content="ww-rm">
-<meta property="article:tag" content="情绪检测">
-<meta property="article:tag" content="nlp">
-<meta property="article:tag" content="自然语言处理">
+<meta property="article:tag" content="hashtool">
+<meta property="article:tag" content="C#">
+<meta property="article:tag" content="winforms">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/hashtool/hashtool.png">
 
 
-<link rel="canonical" href="https://ww-rm.github.io/posts/2022/09/10/emodetection/">
+<link rel="canonical" href="https://ww-rm.github.io/posts/2022/04/17/hashtool/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2022/09/10/emodetection/","path":"/posts/2022/09/10/emodetection/","title":"对话情绪检测"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2022/04/17/hashtool/","path":"/posts/2022/04/17/hashtool/","title":"使用 C# 写一个哈希计算小工具"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>对话情绪检测 | 暗香画楼</title>
+<title>使用 C# 写一个哈希计算小工具 | 暗香画楼</title>
   
 
 
@@ -148,7 +148,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">软硬件环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">2.</span> <span class="nav-text">数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">网络模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96"><span class="nav-number">3.1.</span> <span class="nav-text">特征提取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%83%85%E7%BB%AA%E6%A3%80%E6%B5%8B"><span class="nav-number">3.2.</span> <span class="nav-text">情绪检测</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C"><span class="nav-number">4.</span> <span class="nav-text">结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">5.</span> <span class="nav-text">后记</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%BA%90"><span class="nav-number">6.</span> <span class="nav-text">相关资源</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">运行环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%8A%9F%E8%83%BD"><span class="nav-number">2.</span> <span class="nav-text">软件功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">实现思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AA%97%E5%8F%A3%E7%95%8C%E9%9D%A2"><span class="nav-number">3.1.</span> <span class="nav-text">窗口界面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%BA%BF%E7%A8%8B%E4%B8%8E%E8%BF%9B%E5%BA%A6%E6%9D%A1"><span class="nav-number">3.2.</span> <span class="nav-text">多线程与进度条</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.3.</span> <span class="nav-text">哈希算法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E4%B8%8E%E5%8F%91%E5%B8%83"><span class="nav-number">3.4.</span> <span class="nav-text">编译与发布</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%BA%90"><span class="nav-number">4.</span> <span class="nav-text">相关资源</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -163,7 +163,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">27</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,7 +174,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">60</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -222,7 +222,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2022/09/10/emodetection/">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2022/04/17/hashtool/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
@@ -235,12 +235,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="对话情绪检测 | 暗香画楼">
+      <meta itemprop="name" content="使用 C# 写一个哈希计算小工具 | 暗香画楼">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          对话情绪检测
+          使用 C# 写一个哈希计算小工具
         </h1>
 
         <div class="post-meta-container">
@@ -251,7 +251,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-09-10 15:30:17" itemprop="dateCreated datePublished" datetime="2022-09-10T15:30:17+08:00">2022-09-10</time>
+      <time title="创建时间：2022-04-17 19:11:58" itemprop="dateCreated datePublished" datetime="2022-04-17T19:11:58+08:00">2022-04-17</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -277,7 +277,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.2k</span>
+      <span>2k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -295,42 +295,67 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+        <p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
+<p>文末附有 Github 项目地址.</p>
 <span id="more"></span>
 
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>环境选了 <code>.NET Framework 4.6</code> 及以上, 估计绝大部分 Windows 系统都已经自带了, 能直接运行软件.</p>
+<h2 id="软件功能"><a href="#软件功能" class="headerlink" title="软件功能"></a>软件功能</h2><p>界面大概长这样:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/hashtool/hashtool.png" alt="hashtool.png"></p>
+<p>支持下列算法:</p>
 <ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+<li>MD5</li>
+<li>SHA1</li>
+<li>SHA2-256</li>
+<li>SHA2-512</li>
+<li>SHA3-256</li>
+<li>SHA3-512</li>
+<li>SM3</li>
+<li>CRC32</li>
 </ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+<p>支持以下功能:</p>
+<ul>
+<li>拖动或者使用打开按钮对多个文件进行指定的哈希值计算</li>
+<li>实时显示当前文件计算进度与总任务计算进度</li>
+<li>可以指定计算文件哈希时是否对每个算法使用单独的线程进行加速</li>
+</ul>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><h3 id="窗口界面"><a href="#窗口界面" class="headerlink" title="窗口界面"></a>窗口界面</h3><p>这是我第一次用 <code>C#</code> 写窗口程序, 学习了一下决定用 <code>WinForms</code> 这个框架, 因为作为入门程序来说, 它足够简单, 容易上手.</p>
+<p>VS 新建一个 WinForms 项目, 项目结构不复杂, 有一个主程序文件和基本的窗口文件, 我们的主要任务就是补充窗口文件的代码.</p>
+<p>思路也很简单, VS 提供了简单的窗口设计界面, 能够用键鼠直接设计窗口元素和窗口显示的内容, 然后我们自己写对应的事件响应函数, 并把对应的函数和响应事件在设计窗口里绑定即可.</p>
+<p>这里将主窗口 <code>MainWnd</code> 的代码分作了两份:</p>
+<ul>
+<li><code>MainWnd.cs</code>: 实现事件响应函数.</li>
+<li><code>MainWnd.Func.cs</code>: 实现主窗口真正要用到的计算功能函数.</li>
+</ul>
+<p>两份文件用 <code>partial</code> 类将功能组合到一起.</p>
+<p>最后额外补充了一个 <code>About</code> 窗口, 在 VS 菜单里添加窗口就能直接生成需要的模板文件.</p>
+<h3 id="多线程与进度条"><a href="#多线程与进度条" class="headerlink" title="多线程与进度条"></a>多线程与进度条</h3><p>作为一个窗口程序, 为了避免窗口响应卡死, 所有耗时的计算过程都必须用多线程的方式放到后台执行. 再就是程序支持用多线程并行多个算法之间的计算, 因此多线程的使用和同步问题是第一个麻烦之处.</p>
+<p>第二个有点麻烦的地方就是显示进度条, 由于可以一次性计算多个文件, 所以分了当前文件进度和总进度, 在多线程时也是需要考虑同步问题的.</p>
+<p>首先多线程用的 <code>System.Threading.Tasks.Task</code> 类, 这是自带封装好的多线程 API, 如果勾选了多线程选项, 那么就将每个算法的计算都分配一个 <code>Task</code>, 最后将结果汇总到一起.</p>
+<p>有关的几个方法实现如下:</p>
+<ul>
+<li><code>TaskCompHash</code>: 对指定文件计算指定哈希算法的结果, 并累加计算进度值.</li>
+<li><code>ComputeWithOneTask</code> 和 <code>ComputeWithMultiTask</code>: 每个文件的不同哈希算法计算任务. 两个方法都会创建子任务, 区别是前者每次只对 1 个算法创建 1 个任务计算, 后者根据算法数量创建多个同时计算. 然后轮询任务是否计算完成, 并更新进度条.</li>
+<li><code>TaskCompute</code>: 对每个文件计算每一种哈希算法的值.</li>
+<li><code>BeginCompute</code>: 创建后台计算任务, 创建完后立即返回, 不会使窗口假死.</li>
+</ul>
+<p>调用关系为:</p>
+<p><code>BeginCompute</code> -&gt; <code>TaskCompute</code> -&gt; <code>ComputeWithOneTask | ComputeWithMultiTask</code> -&gt; <code>TaskCompHash</code></p>
+<p>其中 <code>Task</code> 开头的是要被 <code>Task</code> 类创建以多线程方式在后台执行的方法. 如此一来便完成了对每个文件的每种哈希值的计算过程.</p>
+<p>而进度条的实现, 则是靠 <code>pbValueSingle</code> 和 <code>pbValueTotal</code> 两个成员来记录. 每次使用哈希算法计算时, 累加计算量相对于文件大小的百分比值, 这样对于一个文件的一种算法就有一个完整的单位 1, 所以总计算量就是文件数乘以算法数.</p>
+<h3 id="哈希算法实现"><a href="#哈希算法实现" class="headerlink" title="哈希算法实现"></a>哈希算法实现</h3><p><code>C#</code> 的系统库里已经提供了大部分常见的哈希算法, 都在 <code>System.Security.Cryptography</code> 命名空间中, 我们需要额外实现一下SM3 和 SHA3 等算法.</p>
+<p>具体的算法原理另写一篇记录, 这里主要看看实现思路.</p>
+<p>查阅一下 API 文档, 可以看到 <code>System.Security.Cryptography</code> 提供了一个哈希算法的基类 <code>HashAlgorithm</code> 给我们用来继承, 并且需要重写下列方法:</p>
+<ul>
+<li><code>Initialize</code>: 初始化方法, 也就是计算一个哈希的初始准备工作, 例如一些缓冲区的初始值可以在这里设置.</li>
+<li><code>HashCore</code>: 核心计算过程, 有三个参数, 接收任意长度的字节数组输入, 并完成这一部分内容的计算. 这个方法可以完成对大文件的分块哈希值计算.</li>
+<li><code>HashFinal</code>: 结束计算方法, 比如一些尾部填充操作可以在这里进行.</li>
+</ul>
+<p>继承并重写后, 我们的哈希算法就有统一的基类和接口, 这也方便我们后续的方法调用.</p>
+<h3 id="编译与发布"><a href="#编译与发布" class="headerlink" title="编译与发布"></a>编译与发布</h3><p>编译的方式和普通项目一样, 在菜单的 &quot;生成&quot; 项里进行生成即可.</p>
+<p>值得关注的是生成时的配置, 右键查看项目属性, 里面可以设置目标框架, 如果考虑兼容性, 选低一点比较好, 这里我选了 4.6 的版本.</p>
+<p>再就是生成里可以设置目标平台, 尽量选成 <code>x64</code>, 速度上有一些小的优化.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0hhc2h0b29s">https://github.com/ww-rm/Hashtool<i class="fa fa-external-link-alt"></i></span></p>
 
     </div>
 
@@ -340,22 +365,22 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%83%85%E7%BB%AA%E6%A3%80%E6%B5%8B/" rel="tag"><i class="fa fa-tag"></i> 情绪检测</a>
-              <a href="/tags/nlp/" rel="tag"><i class="fa fa-tag"></i> nlp</a>
-              <a href="/tags/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 自然语言处理</a>
+              <a href="/tags/hashtool/" rel="tag"><i class="fa fa-tag"></i> hashtool</a>
+              <a href="/tags/C/" rel="tag"><i class="fa fa-tag"></i> C#</a>
+              <a href="/tags/winforms/" rel="tag"><i class="fa fa-tag"></i> winforms</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/posts/2022/08/19/wast-afterword/" rel="prev" title=""网安本科速通" 系列后记">
-                  <i class="fa fa-chevron-left"></i> "网安本科速通" 系列后记
+                <a href="/posts/2021/09/11/emodetection/" rel="prev" title="对话情绪检测">
+                  <i class="fa fa-chevron-left"></i> 对话情绪检测
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/posts/2022/10/29/diffusion-model/" rel="next" title="扩散模型阅读笔记">
-                  扩散模型阅读笔记 <i class="fa fa-chevron-right"></i>
+                <a href="/posts/2022/08/11/wast-vscandvs/" rel="next" title="给新生的编程工具推荐与基本使用方法">
+                  给新生的编程工具推荐与基本使用方法 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
@@ -389,13 +414,13 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-line"></i>
     </span>
-    <span title="站点总字数">129k</span>
+    <span title="站点总字数">131k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:55</span>
+    <span title="站点阅读时长">3:58</span>
   </span>
 </div>
 <div class="busuanzi-count">
@@ -447,7 +472,7 @@
 
   
 
-  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
 <script src="/js/third-party/math/mathjax.js"></script>
 
 
