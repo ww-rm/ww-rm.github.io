@@ -200,6 +200,13 @@ $$
 用 python 简单实现一下上述涉及的所有运算.
 
 ```python
+from typing import Tuple
+
+Fp2Ele = Tuple[int, int]
+Fp4Ele = Tuple[int, int, int, int]
+Fp12Ele = Tuple[int, int, int, int, int, int, int, int, int, int, int, int]
+FpExEle = Tuple[int, ...]
+
 class PrimeFiledEx(PrimeField):
     """Fp2, Fp4, Fp12 operations."""
 
