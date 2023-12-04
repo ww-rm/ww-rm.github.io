@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SM9 算法中的塔式扩张公式推导">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2023/12/04/sm9fpex/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-12-04T10:35:43.000Z">
+<meta property="article:modified_time" content="2023-12-04T10:42:34.799Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="SM9">
+<meta property="article:tag" content="塔式扩张">
+<meta property="article:tag" content="扩域运算">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2023/12/04/sm9fpex/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/12/04/sm9fpex/","path":"/posts/2023/12/04/sm9fpex/","title":"SM9 算法中的塔式扩张公式推导"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SM9 算法中的塔式扩张公式推导 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SM9-%E6%89%A9%E5%9F%9F%E5%85%83%E7%B4%A0%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="nav-number">1.</span> <span class="nav-text">SM9 扩域元素的表示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC"><span class="nav-number">2.</span> <span class="nav-text">公式推导</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%AC%A1%E6%89%A9%E5%9F%9F"><span class="nav-number">2.1.</span> <span class="nav-text">2 次扩域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%AC%A1%E6%89%A9%E5%9F%9F"><span class="nav-number">2.2.</span> <span class="nav-text">4 次扩域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-%E6%AC%A1%E6%89%A9%E5%9F%9F"><span class="nav-number">2.3.</span> <span class="nav-text">12 次扩域</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">代码实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/12/04/sm9fpex/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SM9 算法中的塔式扩张公式推导 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SM9 算法中的塔式扩张公式推导
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-04 18:35:43" itemprop="dateCreated datePublished" datetime="2023-12-04T18:35:43+08:00">2023-12-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9D%82%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">杂学</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
+<span id="more"></span>
+
+<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
+<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
+<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
+<p>即解二元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
+<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
+<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
+<p>同理可得模逆运算为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
+<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
+<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
+<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
+<p>即解三元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SM9/" rel="tag"><i class="fa fa-tag"></i> SM9</a>
+              <a href="/tags/%E5%A1%94%E5%BC%8F%E6%89%A9%E5%BC%A0/" rel="tag"><i class="fa fa-tag"></i> 塔式扩张</a>
+              <a href="/tags/%E6%89%A9%E5%9F%9F%E8%BF%90%E7%AE%97/" rel="tag"><i class="fa fa-tag"></i> 扩域运算</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2023/11/05/pypi/" rel="prev" title="如何在 PyPI 上发布一个包">
+                  <i class="fa fa-chevron-left"></i> 如何在 PyPI 上发布一个包
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">137k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:09</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
