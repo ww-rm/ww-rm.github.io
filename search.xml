@@ -16,6 +16,55 @@
       </tags>
   </entry>
   <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>基于 Spine 的碧蓝航线桌宠</title>
     <url>//posts/2023/08/30/desktopsprite/</url>
     <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
@@ -131,52 +180,65 @@
       </tags>
   </entry>
   <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+    <title>国密算法的纯 Python 实现</title>
+    <url>//posts/2023/12/14/gmalg/</url>
+    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
+<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
 <span id="more"></span>
 
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
+<li>祖冲之序列密码算法</li>
+<li>SM2 椭圆曲线公钥密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>加密解密</li>
 </ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+</li>
+<li>SM3 密码杂凑算法</li>
+<li>SM4 分组密码算法</li>
+<li>SM9 标识密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>密钥封装</li>
+<li>加密解密</li>
+</ul>
+</li>
+</ul>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
 
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
 
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
 ]]></content>
       <categories>
         <category>个人项目</category>
       </categories>
       <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
+        <tag>国密</tag>
+        <tag>SM2</tag>
+        <tag>SM3</tag>
+        <tag>SM4</tag>
+        <tag>SM9</tag>
+        <tag>ZUC</tag>
+        <tag>python 库</tag>
       </tags>
   </entry>
   <entry>
@@ -404,10 +466,10 @@
         <category>个人项目</category>
       </categories>
       <tags>
+        <tag>python 库</tag>
         <tag>ncm</tag>
         <tag>格式转换</tag>
         <tag>ncmdump</tag>
-        <tag>python 库</tag>
         <tag>PyPI</tag>
         <tag>网易云音乐</tag>
       </tags>
@@ -1815,20 +1877,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>给新生的编程工具推荐与基本使用方法</title>
     <url>//posts/2022/08/11/wast-vscandvs/</url>
     <content><![CDATA[<p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
@@ -1972,6 +2020,20 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
