@@ -16,55 +16,6 @@
       </tags>
   </entry>
   <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 Spine 的碧蓝航线桌宠</title>
     <url>//posts/2023/08/30/desktopsprite/</url>
     <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
@@ -177,6 +128,55 @@
         <tag>桌宠</tag>
         <tag>碧蓝航线</tag>
         <tag>Spine</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
       </tags>
   </entry>
   <entry>
@@ -2111,6 +2111,77 @@
         <tag>图像生成</tag>
         <tag>扩散模型</tag>
         <tag>Diffusion Model</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SM9 文档阅读笔记</title>
+    <url>//posts/2023/12/15/sm9/</url>
+    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
+<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
+<span id="more"></span>
+
+<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
+<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
+<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
+<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
+<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
+<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
+<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
+<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
+<p>幂次与系数转换关系如下:</p>
+<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
+<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
+<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
+<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
+<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
+<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
+<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{x}{\beta^{\frac{1}{2}}})$.</p>
+<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
+<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
+<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
+<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
+<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
+<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
+<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
+<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
+<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
+<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
+<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
+<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
+<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
+<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
+<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
+<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
+<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
+<p>因此困难部分的指数可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
+<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
+<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
+<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
+<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>双线性对</tag>
+        <tag>R-ate</tag>
+        <tag>Frobenius</tag>
+        <tag>FinalExp</tag>
       </tags>
   </entry>
   <entry>
