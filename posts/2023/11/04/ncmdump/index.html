@@ -20,15 +20,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="这段时间打算用网易云音乐屯点资源, 但是下载之后才发现内容已经全部加密, 变成了 ncm 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息强迫症大怒. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI">
+    <meta name="description" content="这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 ncm 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息强迫症大怒. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI">
 <meta property="og:type" content="article">
 <meta property="og:title" content="NCM 文件批量转换 (保留专辑和封面信息)">
 <meta property="og:url" content="https://ww-rm.github.io/posts/2023/11/04/ncmdump/">
 <meta property="og:site_name" content="暗香画楼">
-<meta property="og:description" content="这段时间打算用网易云音乐屯点资源, 但是下载之后才发现内容已经全部加密, 变成了 ncm 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息强迫症大怒. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI">
+<meta property="og:description" content="这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 ncm 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息强迫症大怒. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-11-04T15:04:34.000Z">
-<meta property="article:modified_time" content="2023-12-17T11:49:31.778Z">
+<meta property="article:modified_time" content="2023-12-29T02:36:34.819Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="ncm">
 <meta property="article:tag" content="格式转换">
@@ -296,7 +296,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>这段时间打算用网易云音乐屯点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
+        <p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
 <p>本文包括以下内容, 首先整理一下网上已有的 <code>ncm</code> 格式转换代码, 然后增加补充专辑和封面信息的功能, 并实现批量转换和界面友好, 最后打包成二进制文件和 Python 库, 并上传到 PyPI 上.</p>
 <p>文末附有项目的 Github 地址, 以及使用 PyInstaller 打包的二进制文件下载地址和 PyPI 项目地址.</p>
 <span id="more"></span>
