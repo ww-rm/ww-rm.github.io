@@ -67,7 +67,7 @@ $ ping ssh.github.com
 
 至此, 可以确定就是最近解析的主域名 `github.com` 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 `ssh.github.com` IP 还活着.
 
-因此, 目前的解决方案就是对于已有的仓库, 添加下面的配置:
+因此, 解决方案就是添加下面的配置:
 
 ```ssh_config
 Host github.com
