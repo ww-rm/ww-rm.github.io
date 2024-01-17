@@ -10,9 +10,12 @@ date: 2024-01-15 23:17:54
 
 记录一次失败的 Github SSH 连接问题排查过程.
 
-```plain
+```bash
+$ ssh -T git@github.com
 git@github.com: Permission denied (publickey).
 ```
+
+<!-- more -->
 
 ## 起因
 
