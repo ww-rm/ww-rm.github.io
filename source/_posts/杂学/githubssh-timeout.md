@@ -65,23 +65,19 @@ $ ping ssh.github.com
     最短 = 95ms，最长 = 111ms，平均 = 100ms
 ```
 
-至此, 可以确定就是主域名 `github.com` 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 `ssh.github.com` IP 还活着.
+至此, 可以确定就是最近解析的主域名 `github.com` 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 `ssh.github.com` IP 还活着.
 
 因此, 目前的解决方案就是对于已有的仓库, 添加下面的配置:
 
 ```ssh_config
 Host github.com
-  Hostname ssh.github.com
+  Hostname 20.205.243.160
 ```
 
-将现有的 `github.com` 主机名全部映射到 `ssh.github.com` 上.
-
-或者将仓库里的 url 配置主机名进行更换.
-
-而对于将来 clone 新仓库, 可以将地址中的 `github.com` 换成 `ssh.github.com`, 进行 clone, 效果是一样的.
+将现有的 `github.com` 主机名换一个可以用的 IP.
 
 另外, 找到了 Github 官方的文档 [Using SSH over the HTTPS port](https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port).
 
-这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 `ssh.github.com`.
+这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 `ssh.github.com`. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.
 
-但是由于这个问题不是端口导致的, 因此不设置端口也是 ok 的.
+最后, Github 官方提供了它们的服务 IP 范围, [About GitHub's IP addresses](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses), 从里面可以找一个 ssh 连接成功, 然后写到配置里.
