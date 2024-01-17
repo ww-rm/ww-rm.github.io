@@ -28,7 +28,7 @@
 <meta property="og:description" content="解决 Github SSH 连接超时. 12$ ssh -T git@github.comssh: connect to host github.com port 22: Connection timed out">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-01-17T03:55:32.000Z">
-<meta property="article:modified_time" content="2024-01-17T03:56:47.790Z">
+<meta property="article:modified_time" content="2024-01-17T04:03:04.718Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="SSH">
 <meta property="article:tag" content="Github">
@@ -273,7 +273,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.2k</span>
+      <span>1.3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -315,6 +315,9 @@
 <p>将现有的 <code>github.com</code> 主机名全部映射到 <code>ssh.github.com</code> 上.</p>
 <p>或者将仓库里的 url 配置主机名进行更换.</p>
 <p>而对于将来 clone 新仓库, 可以将地址中的 <code>github.com</code> 换成 <code>ssh.github.com</code>, 进行 clone, 效果是一样的.</p>
+<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 <code>ssh.github.com</code>.</p>
+<p>但是由于这个问题不是端口导致的, 因此不设置端口也是 ok 的.</p>
 
     </div>
 

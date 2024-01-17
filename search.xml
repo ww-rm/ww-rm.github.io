@@ -316,6 +316,165 @@
       </tags>
   </entry>
   <entry>
+    <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
+    <url>//posts/2023/11/04/ncmdump/</url>
+    <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
+<p>本文包括以下内容, 首先整理一下网上已有的 <code>ncm</code> 格式转换代码, 然后增加补充专辑和封面信息的功能, 并实现批量转换和界面友好, 最后打包成二进制文件和 Python 库, 并上传到 PyPI 上.</p>
+<p>文末附有项目的 Github 地址, 以及使用 PyInstaller 打包的二进制文件下载地址和 PyPI 项目地址.</p>
+<span id="more"></span>
+
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>安装:</p>
+<p><code>pip install ncmdump-py</code></p>
+<p>命令行使用:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -m ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">usage: ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br><span class="line"></span><br><span class="line">Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;</span><br><span class="line"></span><br><span class="line">positional arguments:</span><br><span class="line">  files                 Files to dump, can follow multiple files.</span><br><span class="line"></span><br><span class="line">optional arguments:</span><br><span class="line">  -h, --help            show this help message and exit</span><br><span class="line">  --in-folder IN_FOLDER</span><br><span class="line">                        Input folder of files to dump.</span><br><span class="line">  --out-folder OUT_FOLDER</span><br><span class="line">                        Output folder of files dumped.</span><br><span class="line">  --dump-metadata       Whether dump metadata.</span><br><span class="line">  --dump-cover          Whether dump album cover.</span><br></pre></td></tr></table></figure>
+
+<p>导入代码使用:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line">ncmfile = NeteaseCloudMusicFile(<span class="string">&quot;filename.ncm&quot;</span>)</span><br><span class="line">ncmfile.decrypt()</span><br><span class="line"></span><br><span class="line">ncmfile.dump_music(<span class="string">&quot;filename.mp3&quot;</span>)  <span class="comment"># auto detect correct suffix</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Maybe you need metadata or cover image</span></span><br><span class="line"><span class="comment"># ncmfile.dump_metadata(&quot;filename.json&quot;)  </span></span><br><span class="line"><span class="comment"># ncmfile.dump_cover(&quot;filename.jpeg&quot;)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="NCM-格式分析"><a href="#NCM-格式分析" class="headerlink" title="NCM 格式分析"></a>NCM 格式分析</h2><p>Github 上搜 <code>ncmdump</code>, 有很多现成的项目, 通过源码和自己尝试后总结一下 <code>ncm</code> 格式如下表:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>MAGIC_HEADER</code></td>
+<td align="center">8 字节</td>
+<td align="center">ncm 文件的文件头标识, 内容为 <code>b&quot;CTENFDAM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>gap1</code></td>
+<td align="center">2 字节</td>
+<td align="center">不确定, 据观察所有的文件都相同, 为 <code>b&quot;\x01\x61&quot;</code>, 猜测也是文件头一部分</td>
+</tr>
+<tr>
+<td align="center"><code>rc4_key_enc_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>rc4_key_enc</code></td>
+<td align="center"><code>rc4_key_enc_size</code></td>
+<td align="center">加密后的 RC4 算法密钥</td>
+</tr>
+<tr>
+<td align="center"><code>metadata_enc_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>metadata_enc</code></td>
+<td align="center"><code>metadata_enc_size</code></td>
+<td align="center">加密后的 <code>metadata</code>, 包含音乐的专辑和封面信息</td>
+</tr>
+<tr>
+<td align="center"><code>crc32</code></td>
+<td align="center">4 字节</td>
+<td align="center">不确定, 据网上流传为 CRC32 校验码, 但是没找到是算哪个值的</td>
+</tr>
+<tr>
+<td align="center"><code>gap2</code></td>
+<td align="center">5 字节</td>
+<td align="center">不确定, 据观察都为 <code>b&quot;\x01&quot;</code> 开头, <code>b&quot;\x00&quot;</code> 结尾</td>
+</tr>
+<tr>
+<td align="center"><code>cover_data_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>cover_data</code></td>
+<td align="center"><code>cover_data_size</code></td>
+<td align="center">专辑封面图片二进制数据</td>
+</tr>
+<tr>
+<td align="center"><code>music_data_enc</code></td>
+<td align="center">任意长度</td>
+<td align="center">加密后的音乐二进制数据, 处于 <code>ncm</code> 文件的最末尾</td>
+</tr>
+</tbody></table>
+<p>格式很清晰, 虽然有一些未知项, 但是不影响核心内容. 其中 <code>rc4_key_enc</code>, <code>metadata_enc</code>, <code>music_data_enc</code> 是加密过的, 只要全部解密就能还原出原本完整的音乐文件.</p>
+<h2 id="NCM-文件解密"><a href="#NCM-文件解密" class="headerlink" title="NCM 文件解密"></a>NCM 文件解密</h2><p>这部分内容也是总结已有的源码.</p>
+<p><code>ncm</code> 文件中使用了两种密码算法:</p>
+<ul>
+<li>一种是经过魔改的 <code>RC4</code> 算法, 后文称它为 <code>NCMRC4</code></li>
+<li>另一种是标准的 <code>AES</code> 算法, 分组长度 <code>128</code> 比特, 工作模式 <code>ECB</code>, 填充算法为 <code>PKCS7</code>, 后文称它为 <code>NCMAES</code></li>
+</ul>
+<p><code>ncm</code> 文件的加密方式如下:</p>
+<ul>
+<li><code>music_data_enc = NCMRC4.encrypt(music_data, rc4_key)</code></li>
+<li><code>metadata_enc = NCMAES.encrypt(metadata_enc, AES_KEY_METADATA)</code></li>
+<li><code>rc4_key_enc = NCMAES.encrypt(rc4_key, AES_KEY_RC4_KEY)</code></li>
+</ul>
+<p>较大的 <code>music_data</code> 用魔改后的流密码加密, 节省时间; 较短的 <code>metadata</code> 和 <code>rc4_key</code> 用对称密码加密, 提高安全性.</p>
+<p>这里 <code>AES_KEY_RC4_KEY</code> 和 <code>AES_KEY_METADATA</code> 是两个关键的对称密码密钥, 前人已经通过逆向等手段挖出来了, 这里就不放出来了, 可以去看看别人的分析或者看本文的源码, 里面都有.</p>
+<p>除了使用加密手段, 还有一些简单的混淆操作, 以及去除解密后内容多余的头部字段等, 这里也不详细写了, 源码里面写的很清楚, 可以直接看源码.</p>
+<h2 id="添加专辑和封面信息"><a href="#添加专辑和封面信息" class="headerlink" title="添加专辑和封面信息"></a>添加专辑和封面信息</h2><p>来到本文的重点部分, 前面对 <code>ncm</code> 格式和加密方式的分析都是已有的, 我们主要想扩展功能, 自动添加专辑和封面信息到解密后的文件里, 这里主要用到 <code>mutagen</code> 这个库, 支持向 <code>mp3</code> 和 <code>flac</code> 文件内加入专辑等信息.</p>
+<p>解密后的 <code>metadata</code> 是一份 <code>json</code> 数据, 格式如下:</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;format&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flac&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">431259256</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;カタオモイ&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">[</span><span class="string">&quot;Aimer&quot;</span><span class="punctuation">,</span> <span class="number">16152</span><span class="punctuation">]</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;daydream&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">34826361</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951165052089697</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/2QRYxUqXfW0zQpm2_DVYRA==/109951165052089697.jpg&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">876923</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">207866</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;单相思&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<details class="note info"><summary><p>v1.1.0 中的改动</p>
+</summary>
+<p><code>metadata</code> 可能存在多种类型, 上面是最简单的 <code>music</code> 类型, 新增了 <code>dj</code> 类型, 格式如下:</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;programId&quot;</span><span class="punctuation">:</span> <span class="number">2506516081</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;mainMusic&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">1957438579</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;[DJ节目]北方文艺出版社的DJ节目 第8期&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951167551086981</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://p1.music.126.net/M48NPuT591tIqqUdQyKZlg==/109951167551086981.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">320000</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">1222948</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djId&quot;</span><span class="punctuation">:</span> <span class="number">7891086863</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北方文艺出版社&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djAvatarUrl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/DQr2q_S23tYY8vU_C-kAYw==/109951167535553901.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;createTime&quot;</span><span class="punctuation">:</span> <span class="number">1655691020376</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;brand&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;serial&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programFeeType&quot;</span><span class="punctuation">:</span> <span class="number">15</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioId&quot;</span><span class="punctuation">:</span> <span class="number">977264730</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategory&quot;</span><span class="punctuation">:</span> <span class="string">&quot;文学出版&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategoryId&quot;</span><span class="punctuation">:</span> <span class="number">3148096</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeType&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeScope&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPrice&quot;</span><span class="punctuation">:</span> <span class="number">30</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPurchaseCount&quot;</span><span class="punctuation">:</span> <span class="number">0</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</details>
+
+<p>我们需要把 <code>musicName</code>, <code>artist</code>, <code>album</code> 这三个字段的内容保留, 同时把 <code>ncm</code> 中附带的封面图片也保留.</p>
+<p>我们导入一下要用到的库:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> mutagen <span class="keyword">import</span> flac, id3, mp3</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
+
+<p>对于 <code>mp3</code>, 如下操作:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_mp3</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for mp3 format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = mp3.MP3(path)</span><br><span class="line"></span><br><span class="line">    audio[<span class="string">&quot;TIT2&quot;</span>] = id3.TIT2(text=self.name, encoding=id3.Encoding.UTF8)  <span class="comment"># title</span></span><br><span class="line">    audio[<span class="string">&quot;TALB&quot;</span>] = id3.TALB(text=self.album, encoding=id3.Encoding.UTF8)  <span class="comment"># album</span></span><br><span class="line">    audio[<span class="string">&quot;TPE1&quot;</span>] = id3.TPE1(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># artists</span></span><br><span class="line">    audio[<span class="string">&quot;TPE2&quot;</span>] = id3.TPE2(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># album artists</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        audio[<span class="string">&quot;APIC&quot;</span>] = id3.APIC(<span class="built_in">type</span>=id3.PictureType.COVER_FRONT, mime=self.cover_mime, data=self._cover_data)  <span class="comment"># cover</span></span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>cover_mime</code> 就是图像的内容类型, 例如 <code>image/jpeg</code> 这种, 可以通过 <code>mimetypes</code> 库获取.</p>
+<p>而对于 <code>flac</code>, 如下操作:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_flac</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for flac format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = flac.FLAC(path)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add music info</span></span><br><span class="line">    audio[<span class="string">&quot;title&quot;</span>] = self.name</span><br><span class="line">    audio[<span class="string">&quot;artist&quot;</span>] = self.artists</span><br><span class="line">    audio[<span class="string">&quot;album&quot;</span>] = self.album</span><br><span class="line">    audio[<span class="string">&quot;albumartist&quot;</span>] = <span class="string">&quot;/&quot;</span>.join(self.artists)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add cover</span></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        cover = flac.Picture()</span><br><span class="line">        cover.<span class="built_in">type</span> = id3.PictureType.COVER_FRONT</span><br><span class="line">        cover.data = self._cover_data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> BytesIO(self._cover_data) <span class="keyword">as</span> data:</span><br><span class="line">            <span class="keyword">with</span> Image.<span class="built_in">open</span>(data) <span class="keyword">as</span> f:</span><br><span class="line">                cover.mime = self.cover_mime</span><br><span class="line">                cover.width = f.width</span><br><span class="line">                cover.height = f.height</span><br><span class="line">                cover.depth = <span class="built_in">len</span>(f.getbands()) * <span class="number">8</span></span><br><span class="line"></span><br><span class="line">        audio.add_picture(cover)</span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
+
+<p>添加专辑封面图片的时候稍微复杂一点, 需要使用 <code>Pillow</code> 库读取一下图像的基本信息, 然后填进去.</p>
+<p>值得注意的是, <code>ncm</code> 文件里可能没有存放专辑封面图片, 这种时候可以借助 <code>metadata</code> 里的 <code>albumPic</code> 字段, 它代表专辑封面图片的一个 url, 我们可以用 <code>urllib</code> 尝试联网获取内容, 代码片段如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># if no cover data, try get cover data by url in metadata</span></span><br><span class="line"><span class="keyword">if</span> self._cover_data_size &lt;= <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> request.urlopen(self._metadata.get(<span class="string">&quot;albumPic&quot;</span>, <span class="string">&quot;&quot;</span>)) <span class="keyword">as</span> res:</span><br><span class="line">            <span class="keyword">if</span> res.status &lt; <span class="number">400</span>:</span><br><span class="line">                self._cover_data = res.read()</span><br><span class="line">                self._cover_data_size = <span class="built_in">len</span>(self._cover_data)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是, 代码里需要判断, 如果最终就是没有办法获得图片数据, 那么就放弃添加图片信息, 避免报错.</p>
+<h2 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h2><p>到这里, 我们的包目录结构长这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ncmdump</span><br><span class="line">  ├── core.py</span><br><span class="line">  ├── crypto.py</span><br><span class="line">  ├── __init__.py</span><br><span class="line">  └── __main__.py</span><br></pre></td></tr></table></figure>
+
+<p>共有四份文件, 为了能够在命令行里运行这个包, 我们需要在 <code>__main__.py</code> 里添加一些内容.</p>
+<p>这里我们使用 <code>ArgumentParser</code> 解析命令行输入, <code>rich</code> 库显示进度条和日志输出, 完整代码如下.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> rich.progress <span class="keyword">import</span> Progress, SpinnerColumn, TimeElapsedColumn</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser(<span class="string">&quot;ncmdump&quot;</span>, description=<span class="string">&quot;Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;files&quot;</span>, nargs=<span class="string">&quot;*&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Files to dump, can follow multiple files.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--in-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Input folder of files to dump.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Output folder of files dumped.&quot;</span>, default=<span class="string">&quot;.&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-metadata&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump metadata.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-cover&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump album cover.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    out_folder = Path(args.out_folder)</span><br><span class="line">    out_folder.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    dump_metadata = args.dump_metadata</span><br><span class="line">    dump_cover = args.dump_cover</span><br><span class="line"></span><br><span class="line">    files = args.files</span><br><span class="line">    <span class="keyword">if</span> args.in_folder:</span><br><span class="line">        files.extend(Path(args.in_folder).iterdir())</span><br><span class="line">    files = <span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.suffix == <span class="string">&quot;.ncm&quot;</span>, <span class="built_in">map</span>(Path, files)))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> files:</span><br><span class="line">        parser.print_help()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">with</span> Progress(SpinnerColumn(), *Progress.get_default_columns(), TimeElapsedColumn()) <span class="keyword">as</span> progress:</span><br><span class="line">            task = progress.add_task(<span class="string">&quot;[#d75f00]Dumping files&quot;</span>, total=<span class="built_in">len</span>(files))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> ncm_path <span class="keyword">in</span> files:</span><br><span class="line">                output_path = out_folder.joinpath(ncm_path.stem)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    ncmfile = NeteaseCloudMusicFile(ncm_path).decrypt()</span><br><span class="line">                    music_path = ncmfile.dump_music(output_path)</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> dump_metadata:</span><br><span class="line">                        ncmfile.dump_metadata(output_path)</span><br><span class="line">                    <span class="keyword">if</span> dump_cover:</span><br><span class="line">                        ncmfile.dump_cover(output_path)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                    progress.log(<span class="string">f&quot;[red]ERROR[/red]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.metadata:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no metadata found&quot;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.cover_data:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no cover data found&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    progress.advance(task)</span><br></pre></td></tr></table></figure>
+
+<p>该命令行可以接收若干数量的 <code>.ncm</code> 文件作为输入, 可以用 <code>--in-folder</code> 指定一整个文件夹, 会和输入的单个文件合并一起处理, 比如有下面几种使用示例.</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定某些文件</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+
+<p>输出文件的文件名和原本的 <code>.ncm</code> 文件名相同, 但是后缀会自动替换成对应格式的后缀 (<code>.mp3</code> 或者 <code>.flac</code>).</p>
+<h2 id="打包到-PyPI"><a href="#打包到-PyPI" class="headerlink" title="打包到 PyPI"></a>打包到 PyPI</h2><p>最后就是打包上传<del>造福大众的时间</del>, 这也是我第一次在 PyPI 上上传自己的包, 之后会单独写一篇文章说说中途遇到的一些问题.</p>
+<p>上传完成之后, 就可以通过命令 <code>pip install ncmdump-py</code> 安装使用了~</p>
+<p>PS: 虽然库名字叫 <code>ncmdump-py</code>, 但是导入的时候还是 <code>import ncmdump</code>, 因为 <code>ncmdump</code> 这个项目名字在 PyPI 上已经被前人注册了, 只好加点东西区分一下.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL25jbWR1bXAtcHk=">https://github.com/ww-rm/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyPI 项目页: <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy9wcm9qZWN0L25jbWR1bXAtcHkv">https://pypi.org/project/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pdEdRcjFlemE1YWI=">ncmdump v1.1.0.zip<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>ncm</tag>
+        <tag>格式转换</tag>
+        <tag>ncmdump</tag>
+        <tag>python 库</tag>
+        <tag>PyPI</tag>
+        <tag>网易云音乐</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>碧蓝航线立绘提取与批量还原</title>
     <url>//posts/2023/04/11/blhx-painting/</url>
     <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
@@ -498,165 +657,6 @@
         <tag>手写数字识别</tag>
         <tag>卷积神经网络</tag>
         <tag>深度学习</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
-    <url>//posts/2023/11/04/ncmdump/</url>
-    <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
-<p>本文包括以下内容, 首先整理一下网上已有的 <code>ncm</code> 格式转换代码, 然后增加补充专辑和封面信息的功能, 并实现批量转换和界面友好, 最后打包成二进制文件和 Python 库, 并上传到 PyPI 上.</p>
-<p>文末附有项目的 Github 地址, 以及使用 PyInstaller 打包的二进制文件下载地址和 PyPI 项目地址.</p>
-<span id="more"></span>
-
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>安装:</p>
-<p><code>pip install ncmdump-py</code></p>
-<p>命令行使用:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -m ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">usage: ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br><span class="line"></span><br><span class="line">Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;</span><br><span class="line"></span><br><span class="line">positional arguments:</span><br><span class="line">  files                 Files to dump, can follow multiple files.</span><br><span class="line"></span><br><span class="line">optional arguments:</span><br><span class="line">  -h, --help            show this help message and exit</span><br><span class="line">  --in-folder IN_FOLDER</span><br><span class="line">                        Input folder of files to dump.</span><br><span class="line">  --out-folder OUT_FOLDER</span><br><span class="line">                        Output folder of files dumped.</span><br><span class="line">  --dump-metadata       Whether dump metadata.</span><br><span class="line">  --dump-cover          Whether dump album cover.</span><br></pre></td></tr></table></figure>
-
-<p>导入代码使用:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line">ncmfile = NeteaseCloudMusicFile(<span class="string">&quot;filename.ncm&quot;</span>)</span><br><span class="line">ncmfile.decrypt()</span><br><span class="line"></span><br><span class="line">ncmfile.dump_music(<span class="string">&quot;filename.mp3&quot;</span>)  <span class="comment"># auto detect correct suffix</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Maybe you need metadata or cover image</span></span><br><span class="line"><span class="comment"># ncmfile.dump_metadata(&quot;filename.json&quot;)  </span></span><br><span class="line"><span class="comment"># ncmfile.dump_cover(&quot;filename.jpeg&quot;)</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="NCM-格式分析"><a href="#NCM-格式分析" class="headerlink" title="NCM 格式分析"></a>NCM 格式分析</h2><p>Github 上搜 <code>ncmdump</code>, 有很多现成的项目, 通过源码和自己尝试后总结一下 <code>ncm</code> 格式如下表:</p>
-<table>
-<thead>
-<tr>
-<th align="center">字段</th>
-<th align="center">长度</th>
-<th align="center">含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center"><code>MAGIC_HEADER</code></td>
-<td align="center">8 字节</td>
-<td align="center">ncm 文件的文件头标识, 内容为 <code>b&quot;CTENFDAM&quot;</code></td>
-</tr>
-<tr>
-<td align="center"><code>gap1</code></td>
-<td align="center">2 字节</td>
-<td align="center">不确定, 据观察所有的文件都相同, 为 <code>b&quot;\x01\x61&quot;</code>, 猜测也是文件头一部分</td>
-</tr>
-<tr>
-<td align="center"><code>rc4_key_enc_size</code></td>
-<td align="center">4 字节</td>
-<td align="center"><code>int</code> 整数</td>
-</tr>
-<tr>
-<td align="center"><code>rc4_key_enc</code></td>
-<td align="center"><code>rc4_key_enc_size</code></td>
-<td align="center">加密后的 RC4 算法密钥</td>
-</tr>
-<tr>
-<td align="center"><code>metadata_enc_size</code></td>
-<td align="center">4 字节</td>
-<td align="center"><code>int</code> 整数</td>
-</tr>
-<tr>
-<td align="center"><code>metadata_enc</code></td>
-<td align="center"><code>metadata_enc_size</code></td>
-<td align="center">加密后的 <code>metadata</code>, 包含音乐的专辑和封面信息</td>
-</tr>
-<tr>
-<td align="center"><code>crc32</code></td>
-<td align="center">4 字节</td>
-<td align="center">不确定, 据网上流传为 CRC32 校验码, 但是没找到是算哪个值的</td>
-</tr>
-<tr>
-<td align="center"><code>gap2</code></td>
-<td align="center">5 字节</td>
-<td align="center">不确定, 据观察都为 <code>b&quot;\x01&quot;</code> 开头, <code>b&quot;\x00&quot;</code> 结尾</td>
-</tr>
-<tr>
-<td align="center"><code>cover_data_size</code></td>
-<td align="center">4 字节</td>
-<td align="center"><code>int</code> 整数</td>
-</tr>
-<tr>
-<td align="center"><code>cover_data</code></td>
-<td align="center"><code>cover_data_size</code></td>
-<td align="center">专辑封面图片二进制数据</td>
-</tr>
-<tr>
-<td align="center"><code>music_data_enc</code></td>
-<td align="center">任意长度</td>
-<td align="center">加密后的音乐二进制数据, 处于 <code>ncm</code> 文件的最末尾</td>
-</tr>
-</tbody></table>
-<p>格式很清晰, 虽然有一些未知项, 但是不影响核心内容. 其中 <code>rc4_key_enc</code>, <code>metadata_enc</code>, <code>music_data_enc</code> 是加密过的, 只要全部解密就能还原出原本完整的音乐文件.</p>
-<h2 id="NCM-文件解密"><a href="#NCM-文件解密" class="headerlink" title="NCM 文件解密"></a>NCM 文件解密</h2><p>这部分内容也是总结已有的源码.</p>
-<p><code>ncm</code> 文件中使用了两种密码算法:</p>
-<ul>
-<li>一种是经过魔改的 <code>RC4</code> 算法, 后文称它为 <code>NCMRC4</code></li>
-<li>另一种是标准的 <code>AES</code> 算法, 分组长度 <code>128</code> 比特, 工作模式 <code>ECB</code>, 填充算法为 <code>PKCS7</code>, 后文称它为 <code>NCMAES</code></li>
-</ul>
-<p><code>ncm</code> 文件的加密方式如下:</p>
-<ul>
-<li><code>music_data_enc = NCMRC4.encrypt(music_data, rc4_key)</code></li>
-<li><code>metadata_enc = NCMAES.encrypt(metadata_enc, AES_KEY_METADATA)</code></li>
-<li><code>rc4_key_enc = NCMAES.encrypt(rc4_key, AES_KEY_RC4_KEY)</code></li>
-</ul>
-<p>较大的 <code>music_data</code> 用魔改后的流密码加密, 节省时间; 较短的 <code>metadata</code> 和 <code>rc4_key</code> 用对称密码加密, 提高安全性.</p>
-<p>这里 <code>AES_KEY_RC4_KEY</code> 和 <code>AES_KEY_METADATA</code> 是两个关键的对称密码密钥, 前人已经通过逆向等手段挖出来了, 这里就不放出来了, 可以去看看别人的分析或者看本文的源码, 里面都有.</p>
-<p>除了使用加密手段, 还有一些简单的混淆操作, 以及去除解密后内容多余的头部字段等, 这里也不详细写了, 源码里面写的很清楚, 可以直接看源码.</p>
-<h2 id="添加专辑和封面信息"><a href="#添加专辑和封面信息" class="headerlink" title="添加专辑和封面信息"></a>添加专辑和封面信息</h2><p>来到本文的重点部分, 前面对 <code>ncm</code> 格式和加密方式的分析都是已有的, 我们主要想扩展功能, 自动添加专辑和封面信息到解密后的文件里, 这里主要用到 <code>mutagen</code> 这个库, 支持向 <code>mp3</code> 和 <code>flac</code> 文件内加入专辑等信息.</p>
-<p>解密后的 <code>metadata</code> 是一份 <code>json</code> 数据, 格式如下:</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;format&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flac&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">431259256</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;カタオモイ&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">[</span><span class="string">&quot;Aimer&quot;</span><span class="punctuation">,</span> <span class="number">16152</span><span class="punctuation">]</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;daydream&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">34826361</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951165052089697</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/2QRYxUqXfW0zQpm2_DVYRA==/109951165052089697.jpg&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">876923</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">207866</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;单相思&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<details class="note info"><summary><p>v1.1.0 中的改动</p>
-</summary>
-<p><code>metadata</code> 可能存在多种类型, 上面是最简单的 <code>music</code> 类型, 新增了 <code>dj</code> 类型, 格式如下:</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;programId&quot;</span><span class="punctuation">:</span> <span class="number">2506516081</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;mainMusic&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">1957438579</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;[DJ节目]北方文艺出版社的DJ节目 第8期&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951167551086981</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://p1.music.126.net/M48NPuT591tIqqUdQyKZlg==/109951167551086981.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">320000</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">1222948</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djId&quot;</span><span class="punctuation">:</span> <span class="number">7891086863</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北方文艺出版社&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djAvatarUrl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/DQr2q_S23tYY8vU_C-kAYw==/109951167535553901.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;createTime&quot;</span><span class="punctuation">:</span> <span class="number">1655691020376</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;brand&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;serial&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programFeeType&quot;</span><span class="punctuation">:</span> <span class="number">15</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioId&quot;</span><span class="punctuation">:</span> <span class="number">977264730</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategory&quot;</span><span class="punctuation">:</span> <span class="string">&quot;文学出版&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategoryId&quot;</span><span class="punctuation">:</span> <span class="number">3148096</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeType&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeScope&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPrice&quot;</span><span class="punctuation">:</span> <span class="number">30</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPurchaseCount&quot;</span><span class="punctuation">:</span> <span class="number">0</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-</details>
-
-<p>我们需要把 <code>musicName</code>, <code>artist</code>, <code>album</code> 这三个字段的内容保留, 同时把 <code>ncm</code> 中附带的封面图片也保留.</p>
-<p>我们导入一下要用到的库:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> mutagen <span class="keyword">import</span> flac, id3, mp3</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
-
-<p>对于 <code>mp3</code>, 如下操作:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_mp3</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for mp3 format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = mp3.MP3(path)</span><br><span class="line"></span><br><span class="line">    audio[<span class="string">&quot;TIT2&quot;</span>] = id3.TIT2(text=self.name, encoding=id3.Encoding.UTF8)  <span class="comment"># title</span></span><br><span class="line">    audio[<span class="string">&quot;TALB&quot;</span>] = id3.TALB(text=self.album, encoding=id3.Encoding.UTF8)  <span class="comment"># album</span></span><br><span class="line">    audio[<span class="string">&quot;TPE1&quot;</span>] = id3.TPE1(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># artists</span></span><br><span class="line">    audio[<span class="string">&quot;TPE2&quot;</span>] = id3.TPE2(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># album artists</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        audio[<span class="string">&quot;APIC&quot;</span>] = id3.APIC(<span class="built_in">type</span>=id3.PictureType.COVER_FRONT, mime=self.cover_mime, data=self._cover_data)  <span class="comment"># cover</span></span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
-
-<p>这里 <code>cover_mime</code> 就是图像的内容类型, 例如 <code>image/jpeg</code> 这种, 可以通过 <code>mimetypes</code> 库获取.</p>
-<p>而对于 <code>flac</code>, 如下操作:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_flac</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for flac format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = flac.FLAC(path)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add music info</span></span><br><span class="line">    audio[<span class="string">&quot;title&quot;</span>] = self.name</span><br><span class="line">    audio[<span class="string">&quot;artist&quot;</span>] = self.artists</span><br><span class="line">    audio[<span class="string">&quot;album&quot;</span>] = self.album</span><br><span class="line">    audio[<span class="string">&quot;albumartist&quot;</span>] = <span class="string">&quot;/&quot;</span>.join(self.artists)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add cover</span></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        cover = flac.Picture()</span><br><span class="line">        cover.<span class="built_in">type</span> = id3.PictureType.COVER_FRONT</span><br><span class="line">        cover.data = self._cover_data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> BytesIO(self._cover_data) <span class="keyword">as</span> data:</span><br><span class="line">            <span class="keyword">with</span> Image.<span class="built_in">open</span>(data) <span class="keyword">as</span> f:</span><br><span class="line">                cover.mime = self.cover_mime</span><br><span class="line">                cover.width = f.width</span><br><span class="line">                cover.height = f.height</span><br><span class="line">                cover.depth = <span class="built_in">len</span>(f.getbands()) * <span class="number">8</span></span><br><span class="line"></span><br><span class="line">        audio.add_picture(cover)</span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
-
-<p>添加专辑封面图片的时候稍微复杂一点, 需要使用 <code>Pillow</code> 库读取一下图像的基本信息, 然后填进去.</p>
-<p>值得注意的是, <code>ncm</code> 文件里可能没有存放专辑封面图片, 这种时候可以借助 <code>metadata</code> 里的 <code>albumPic</code> 字段, 它代表专辑封面图片的一个 url, 我们可以用 <code>urllib</code> 尝试联网获取内容, 代码片段如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># if no cover data, try get cover data by url in metadata</span></span><br><span class="line"><span class="keyword">if</span> self._cover_data_size &lt;= <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> request.urlopen(self._metadata.get(<span class="string">&quot;albumPic&quot;</span>, <span class="string">&quot;&quot;</span>)) <span class="keyword">as</span> res:</span><br><span class="line">            <span class="keyword">if</span> res.status &lt; <span class="number">400</span>:</span><br><span class="line">                self._cover_data = res.read()</span><br><span class="line">                self._cover_data_size = <span class="built_in">len</span>(self._cover_data)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<p>值得注意的是, 代码里需要判断, 如果最终就是没有办法获得图片数据, 那么就放弃添加图片信息, 避免报错.</p>
-<h2 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h2><p>到这里, 我们的包目录结构长这样:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ncmdump</span><br><span class="line">  ├── core.py</span><br><span class="line">  ├── crypto.py</span><br><span class="line">  ├── __init__.py</span><br><span class="line">  └── __main__.py</span><br></pre></td></tr></table></figure>
-
-<p>共有四份文件, 为了能够在命令行里运行这个包, 我们需要在 <code>__main__.py</code> 里添加一些内容.</p>
-<p>这里我们使用 <code>ArgumentParser</code> 解析命令行输入, <code>rich</code> 库显示进度条和日志输出, 完整代码如下.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> rich.progress <span class="keyword">import</span> Progress, SpinnerColumn, TimeElapsedColumn</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser(<span class="string">&quot;ncmdump&quot;</span>, description=<span class="string">&quot;Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;files&quot;</span>, nargs=<span class="string">&quot;*&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Files to dump, can follow multiple files.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--in-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Input folder of files to dump.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Output folder of files dumped.&quot;</span>, default=<span class="string">&quot;.&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-metadata&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump metadata.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-cover&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump album cover.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    out_folder = Path(args.out_folder)</span><br><span class="line">    out_folder.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    dump_metadata = args.dump_metadata</span><br><span class="line">    dump_cover = args.dump_cover</span><br><span class="line"></span><br><span class="line">    files = args.files</span><br><span class="line">    <span class="keyword">if</span> args.in_folder:</span><br><span class="line">        files.extend(Path(args.in_folder).iterdir())</span><br><span class="line">    files = <span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.suffix == <span class="string">&quot;.ncm&quot;</span>, <span class="built_in">map</span>(Path, files)))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> files:</span><br><span class="line">        parser.print_help()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">with</span> Progress(SpinnerColumn(), *Progress.get_default_columns(), TimeElapsedColumn()) <span class="keyword">as</span> progress:</span><br><span class="line">            task = progress.add_task(<span class="string">&quot;[#d75f00]Dumping files&quot;</span>, total=<span class="built_in">len</span>(files))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> ncm_path <span class="keyword">in</span> files:</span><br><span class="line">                output_path = out_folder.joinpath(ncm_path.stem)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    ncmfile = NeteaseCloudMusicFile(ncm_path).decrypt()</span><br><span class="line">                    music_path = ncmfile.dump_music(output_path)</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> dump_metadata:</span><br><span class="line">                        ncmfile.dump_metadata(output_path)</span><br><span class="line">                    <span class="keyword">if</span> dump_cover:</span><br><span class="line">                        ncmfile.dump_cover(output_path)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                    progress.log(<span class="string">f&quot;[red]ERROR[/red]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.metadata:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no metadata found&quot;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.cover_data:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no cover data found&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    progress.advance(task)</span><br></pre></td></tr></table></figure>
-
-<p>该命令行可以接收若干数量的 <code>.ncm</code> 文件作为输入, 可以用 <code>--in-folder</code> 指定一整个文件夹, 会和输入的单个文件合并一起处理, 比如有下面几种使用示例.</p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定某些文件</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
-
-<p>输出文件的文件名和原本的 <code>.ncm</code> 文件名相同, 但是后缀会自动替换成对应格式的后缀 (<code>.mp3</code> 或者 <code>.flac</code>).</p>
-<h2 id="打包到-PyPI"><a href="#打包到-PyPI" class="headerlink" title="打包到 PyPI"></a>打包到 PyPI</h2><p>最后就是打包上传<del>造福大众的时间</del>, 这也是我第一次在 PyPI 上上传自己的包, 之后会单独写一篇文章说说中途遇到的一些问题.</p>
-<p>上传完成之后, 就可以通过命令 <code>pip install ncmdump-py</code> 安装使用了~</p>
-<p>PS: 虽然库名字叫 <code>ncmdump-py</code>, 但是导入的时候还是 <code>import ncmdump</code>, 因为 <code>ncmdump</code> 这个项目名字在 PyPI 上已经被前人注册了, 只好加点东西区分一下.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL25jbWR1bXAtcHk=">https://github.com/ww-rm/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
-<p>PyPI 项目页: <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy9wcm9qZWN0L25jbWR1bXAtcHkv">https://pypi.org/project/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
-<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pdEdRcjFlemE1YWI=">ncmdump v1.1.0.zip<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>ncm</tag>
-        <tag>格式转换</tag>
-        <tag>ncmdump</tag>
-        <tag>python 库</tag>
-        <tag>PyPI</tag>
-        <tag>网易云音乐</tag>
       </tags>
   </entry>
   <entry>
@@ -895,6 +895,9 @@
 <p>将现有的 <code>github.com</code> 主机名全部映射到 <code>ssh.github.com</code> 上.</p>
 <p>或者将仓库里的 url 配置主机名进行更换.</p>
 <p>而对于将来 clone 新仓库, 可以将地址中的 <code>github.com</code> 换成 <code>ssh.github.com</code>, 进行 clone, 效果是一样的.</p>
+<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 <code>ssh.github.com</code>.</p>
+<p>但是由于这个问题不是端口导致的, 因此不设置端口也是 ok 的.</p>
 ]]></content>
       <categories>
         <category>杂学</category>
@@ -1126,6 +1129,67 @@
       </tags>
   </entry>
   <entry>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
+<ul>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
+</ul>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
+<p>输出: $Y_{n \times q}$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>数据降维</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何在 PyPI 上发布一个包</title>
     <url>//posts/2023/11/05/pypi/</url>
     <content><![CDATA[<p>基于上一篇<a href="https://ww-rm.github.io/posts/2023/11/04/ncmdump/">NCM 文件批量转换 (保留专辑和封面信息)</a>, 记录一下自己第一次往 PyPI 上发布包的过程.</p>
@@ -1188,67 +1252,6 @@
         <tag>pypi</tag>
         <tag>setuptools</tag>
         <tag>python 包发布</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PCA 算法原理与实现</title>
-    <url>//posts/2023/02/18/pca/</url>
-    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
-<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
-<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
-<p>因此, 在 PCA 方法中, 我们希望:</p>
-<ul>
-<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
-<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
-</ul>
-<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
-<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
-<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
-<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
-<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
-<p>首先是方差与协方差的公式:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
-<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
-<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
-<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
-<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
-<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
-<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
-<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
-<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
-</div>
-
-<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
-<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
-<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
-<p>输出: $Y_{n \times q}$</p>
-<ol>
-<li>对 $X$ 进行均值方差归一化.</li>
-<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
-<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
-<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
-<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
-<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -1953,20 +1956,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>给新生的编程工具推荐与基本使用方法</title>
     <url>//posts/2022/08/11/wast-vscandvs/</url>
     <content><![CDATA[<p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
@@ -2110,6 +2099,20 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
