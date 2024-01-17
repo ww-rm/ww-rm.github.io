@@ -28,7 +28,7 @@
 <meta property="og:description" content="解决 Github SSH 连接超时. 12$ ssh -T git@github.comssh: connect to host github.com port 22: Connection timed out">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-01-17T03:55:32.000Z">
-<meta property="article:modified_time" content="2024-01-17T04:03:04.718Z">
+<meta property="article:modified_time" content="2024-01-17T04:21:51.495Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="SSH">
 <meta property="article:tag" content="Github">
@@ -308,16 +308,14 @@
 <p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
 
-<p>至此, 可以确定就是主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
+<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
 <p>因此, 目前的解决方案就是对于已有的仓库, 添加下面的配置:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
 
-<p>将现有的 <code>github.com</code> 主机名全部映射到 <code>ssh.github.com</code> 上.</p>
-<p>或者将仓库里的 url 配置主机名进行更换.</p>
-<p>而对于将来 clone 新仓库, 可以将地址中的 <code>github.com</code> 换成 <code>ssh.github.com</code>, 进行 clone, 效果是一样的.</p>
+<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
 <p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 <code>ssh.github.com</code>.</p>
-<p>但是由于这个问题不是端口导致的, 因此不设置端口也是 ok 的.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
 
     </div>
 
