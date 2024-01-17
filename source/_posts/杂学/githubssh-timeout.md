@@ -79,3 +79,9 @@ Host github.com
 或者将仓库里的 url 配置主机名进行更换.
 
 而对于将来 clone 新仓库, 可以将地址中的 `github.com` 换成 `ssh.github.com`, 进行 clone, 效果是一样的.
+
+另外, 找到了 Github 官方的文档 [Using SSH over the HTTPS port](https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port).
+
+这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 `ssh.github.com`.
+
+但是由于这个问题不是端口导致的, 因此不设置端口也是 ok 的.
