@@ -131,55 +131,6 @@
       </tags>
   </entry>
   <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>国密算法的纯 Python 实现</title>
     <url>//posts/2023/12/14/gmalg/</url>
     <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
@@ -239,6 +190,55 @@
         <tag>SM9</tag>
         <tag>ZUC</tag>
         <tag>gmalg</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
       </tags>
   </entry>
   <entry>
@@ -563,103 +563,6 @@
       </tags>
   </entry>
   <entry>
-    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (一)</title>
-    <url>//posts/2023/10/13/cnn-numpy-1/</url>
-    <content><![CDATA[<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
-<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
-<p>本文为第一篇, 简单介绍了神经网络的基本学习原理和一些无参数网络层的实现.</p>
-<span id="more"></span>
-
-<p>本系列文章传送门:</p>
-<ul>
-<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
-<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
-<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
-</ul>
-<h2 id="必要的理论知识"><a href="#必要的理论知识" class="headerlink" title="必要的理论知识"></a>必要的理论知识</h2><p>本节是对神经网络所需的数学知识进行简单介绍, 只涉及基本的高数知识. <del>全文可能有一些不严谨的数学式子, 会意即可.</del></p>
-<h3 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h3><p>神经网络的本质是一个多元复合函数, 因此在给定输入的情况下计算网络的输出, 就是网络的前向传播过程.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/forward.jpg" alt="forward.jpg"></p>
-<p>如果有上图所示的一个简单网络, 其中:</p>
-<p>$$<br>\begin{aligned}<br>  y_1 &amp;= y_1(x_1, x_2) \\<br>  y_2 &amp;= y_2(x_2, x_3) \\<br>  z &amp;= z(y_1, y_2) = z(y_1(x_1, x_2), y_2(x_2, x_3))<br>\end{aligned}<br>$$</p>
-<p>则称 $y_1$ 是关于 $x_1, x_2$ 的函数, $y_2$ 是关于 $x_2, x_3$ 的函数, $z$ 是关于 $x_1, x_2, x_3$ 的函数, 且由 $y_1, y_2$ 复合而成.</p>
-<p>则通过 $x_1, x_2, x_3$ 按照图中复合函数一步一步计算 $z$ 的过程就是网络的前向传播过程.</p>
-<h3 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h3><p>从上面的图我们可以知道 $z$ 有三个输入参数, 假设 $z$ 就是网络最终的损失函数, 我们的目标就是不断调整这些参数, 使得损失减小, 也就是 $z$ 减小.</p>
-<p>那么, 回忆高数最基本的知识, 如果一个函数存在最 (极) 小值, 那么该点的导数等于 0. 所以纯理论计算最暴力的方式就是对 $z$ 关于所有参数求导, 然后看所有参数极值点的组合, 最后得到 $z$ 的最小值.</p>
-<p>但是上述方法不能充分利用计算机的优势, 就是数值计算, 并且很多时候函数十分复杂无法推导, 而且我们也不需要精确求出最小值, 只要接近某个极小值就行了, 因此有了梯度下降法.</p>
-<p>所谓梯度, 简单理解就是函数的导数, 只不过是对每个参数都求偏导数, 所有参数的偏导数组合在一起就叫梯度. 而梯度所指向的参数变化方向永远使得整个函数值变大, 因此如果朝着梯度的反方向更新参数, 就会使得函数值减小.</p>
-<p>例如我们知道了 $z$ 关于三个参数的梯度是 $(\frac{\partial{z}}{\partial{x_1}}, \frac{\partial{z}}{\partial{x_2}}, \frac{\partial{z}}{\partial{x_3}})$, 那么 $z(x_1 - \eta\frac{\partial{z}}{\partial{x_1}}, x_2 - \eta\frac{\partial{z}}{\partial{x_2}}, x_3 - \eta\frac{\partial{z}}{\partial{x_3}})$ 小于 $z(x_1, x_2, x_3)$, 其中 $\eta$ 可以视作&quot;学习率&quot;, 取一个相对较小的值.</p>
-<h3 id="链式法则与反向传播"><a href="#链式法则与反向传播" class="headerlink" title="链式法则与反向传播"></a>链式法则与反向传播</h3><p>知道了梯度下降的基本原理之后, 我们下一步目标就是高效的求解梯度.</p>
-<p>先说链式法则, 这个内容也是高数的基本知识, 在此回顾一下.</p>
-<p>例如要求 $z$ 的所有偏导数, 则:</p>
-<p>$$<br>\begin{aligned}<br>  \frac{\partial{z}}{\partial{x_1}} &amp;= \frac{\partial{z}}{\partial{y_1}}\frac{\partial{y_1}}{\partial{x_1}} \\<br>  \frac{\partial{z}}{\partial{x_2}} &amp;= \frac{\partial{z}}{\partial{y_1}}\frac{\partial{y_1}}{\partial{x_2}} + \frac{\partial{z}}{\partial{y_2}}\frac{\partial{y_2}}{\partial{x_2}} \\<br>  \frac{\partial{z}}{\partial{x_3}} &amp;= \frac{\partial{z}}{\partial{y_2}}\frac{\partial{y_2}}{\partial{x_3}}<br>\end{aligned}<br>$$</p>
-<p>和上面的函数复合关系对应一下, 很容易就能看出链式求导逻辑, 然后可以按下图标记偏导数.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/backward.jpg" alt="backward.jpg"></p>
-<p>可以看出来整个网络图形成了一个树形结构, 也可称之为计算图, 其中树的根部是损失值, 而函数所有的输入参数是树的叶节点.</p>
-<p>显然, 从算法角度考虑, 如果要复用中间结果, 减少计算量, 最佳方式就是总树的根部开始遍历每一个叶节点, 中途不断按照链式法则进行累加和累乘, 得到根节点关于每一个叶节点的偏导值.</p>
-<p>由于这种梯度计算方式和前向计算 $z$ 的过程刚好相反, 因此得名反向传播算法. 只要在前向计算时构造好计算图, 则计算梯度时只需要反方向从计算图根部遍历叶节点即可算出所有参数的梯度值.</p>
-<h2 id="导入使用的库"><a href="#导入使用的库" class="headerlink" title="导入使用的库"></a>导入使用的库</h2><p>下面的内容将使用 <code>numpy</code> 库手搓一个简单的卷积神经网络, 并进行训练和评估. 全篇代码需要导入的库如下所示:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> PIL.Image</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br></pre></td></tr></table></figure>
-
-<p><code>matplotlib.pyplot</code> 用来绘制损失曲线, <code>numpy</code> 提供神经网络所需要的矩阵计算, <code>PIL</code> 用来读取数据集, <code>sklearn.metrics</code> 里有一些评价分类任务的指标函数, 借用一下.</p>
-<p>本文使用的 <code>python</code> 版本为 <code>3.9.13</code>, 各依赖库的版本如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">numpy==1.24.3</span><br><span class="line">Pillow==10.0.0</span><br><span class="line">scikit-learn==1.2.2</span><br><span class="line">matplotlib==3.7.2</span><br></pre></td></tr></table></figure>
-
-<h2 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h2><p>数据集使用一个较小的手写数字分类图片数据集, 之前文章里也一直用这个举例, 这里再贴一下蓝奏云下载地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVFBrSzA5cGZuaGE=">手写数字分类.zip<i class="fa fa-external-link-alt"></i></span>, 里面包含 10000 张训练数据和 5000 张测试数据.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_dataset</span>(<span class="params">folder, shuffle: <span class="built_in">bool</span> = <span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;加载数据集</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        inputs: (B, C, H, W)</span></span><br><span class="line"><span class="string">        targets: (B, )</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    inputs = []</span><br><span class="line">    targets = []</span><br><span class="line">    <span class="keyword">for</span> num <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        <span class="keyword">for</span> img_path <span class="keyword">in</span> Path(folder, <span class="built_in">str</span>(num)).iterdir():</span><br><span class="line">            inputs.append(np.asarray(PIL.Image.<span class="built_in">open</span>(img_path)))</span><br><span class="line">            targets.append(num)</span><br><span class="line"></span><br><span class="line">    inputs = np.stack(inputs, <span class="number">0</span>, dtype=np.float32) / <span class="number">255</span></span><br><span class="line">    targets = np.stack(targets, <span class="number">0</span>, dtype=np.int32)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(inputs.shape) == <span class="number">3</span>:</span><br><span class="line">        inputs = inputs[:, <span class="literal">None</span>, :, :]  <span class="comment"># (B, C, H, W)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> shuffle:</span><br><span class="line">        rnd_index = np.arange(inputs.shape[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">            np.random.shuffle(rnd_index)</span><br><span class="line">        inputs = inputs[rnd_index]</span><br><span class="line">        targets = targets[rnd_index]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> inputs, targets</span><br></pre></td></tr></table></figure>
-
-<p>这里要注意的地方是, 为了之后网络能稳定训练, 不会出现梯度爆炸等奇怪的问题, 像素值被转换到 0-1 的范围.</p>
-<h2 id="无参数网络层的实现"><a href="#无参数网络层的实现" class="headerlink" title="无参数网络层的实现"></a>无参数网络层的实现</h2><p>首先来实现网络中简单内容, 一些只有单纯函数计算的层.</p>
-<p>对于网络中的层, 我们需要实现前向和反向两个功能即可, 因此先声明基类 <code>NetworkLayer</code>.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">NetworkLayer</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
-
-<p>只有两个方法, <code>forward</code> 和 <code>bacckward</code>, 分别代表前向和反向计算, 而这两个方法的输入输出有以下关系.</p>
-<ul>
-<li><code>forward</code> 的输入 <code>x</code> 形状等于反向的输出形状, 返回值为函数计算值.</li>
-<li><code>backward</code> 的输入 <code>last_x_grad</code> 形状等于前向的输出形状, 返回值为上一层输入的梯度.</li>
-</ul>
-<div class="note info"><p>其实更完备的反向传播做法并不是直接返回 $x$ 的梯度, 因为计算图中可能存在需要梯度累加的情况, 构建完整的图然后遍历才是正确的做法.</p>
-<p>但是由于本文要实现的卷积神经网络, 整个计算图只有一条路径, 并且以 $x$ 为主线路, 所以关于 $x$ 的梯度可以直接被返回依次向前传递, 同时在每次求解各个参数的梯度时, 也不必进行累加, 直接清空重新赋值即可, 这一点在后续的代码实现中可以看到.</p></div>
-
-<h3 id="Pooling"><a href="#Pooling" class="headerlink" title="Pooling"></a>Pooling</h3><p>在卷积神经网络中, 我们需要用到最大池化层, 这里我们简单起见, 只实现核大小等于两个方向上步长且能整除图片宽高的情况. 以图片大小 $6 \times 4$, 核大小为 $3 \times 2$ 举例, 池化过程如下图所示.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/pooling.jpg" alt="pooling.jpg"></p>
-<p>对于前向传播, 虚线是使用循环遍历的方式求解, 而实线则是通过数组变形使用矩阵方式求解.</p>
-<p>我们本篇代码实现里, 对于所有计算均采用矩阵化形式实现, 每一小节都有详细的讲解. 因此只看实线部分即可.</p>
-<p>重点关注反向传播, 对于池化操作而言, 池化后的值被原封不动的传递到下一层, 相当于是 $y = x$ 函数, 因此这些值在这一层的梯度为 1. 而没有被传递的值, 相当于是常数函数 $y = 0$, 因此梯度值为 0.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MaxPoolingLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;步长与核大小相同的最大池化层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.k1 = k1</span><br><span class="line">        self.k2 = k2</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C, H / k1, W / k2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, c, h, w = x.shape</span><br><span class="line">        k1 = self.k1</span><br><span class="line">        k2 = self.k2</span><br><span class="line">        o1 = h // k1</span><br><span class="line">        o2 = w // k2</span><br><span class="line"></span><br><span class="line">        x = x.reshape(-<span class="number">1</span>, o1, k1, o2, k2).transpose(<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">4</span>).reshape(-<span class="number">1</span>, k1 * k2)</span><br><span class="line">        ridx = np.arange(x.shape[<span class="number">0</span>])</span><br><span class="line">        cidx = np.argmax(x, axis=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        x = x[ridx, cidx].reshape(-<span class="number">1</span>, c, o1, o2)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C, H, W)</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C, H / k1, W / k2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, C, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, c, h, w = x.shape</span><br><span class="line">        k1 = self.k1</span><br><span class="line">        k2 = self.k2</span><br><span class="line">        o1 = h // k1</span><br><span class="line">        o2 = w // k2</span><br><span class="line"></span><br><span class="line">        x = x.reshape(-<span class="number">1</span>, o1, k1, o2, k2).transpose(<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">4</span>).reshape(-<span class="number">1</span>, k1 * k2)</span><br><span class="line">        ridx = np.arange(x.shape[<span class="number">0</span>])</span><br><span class="line">        cidx = np.argmax(x, axis=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        x_grad: np.ndarray = np.zeros_like(x).reshape(-<span class="number">1</span>, k1 * k2)</span><br><span class="line">        x_grad[ridx, cidx] = last_x_grad.reshape(-<span class="number">1</span>)</span><br><span class="line">        x_grad = x_grad.reshape((-<span class="number">1</span>, o1, o2, k1, k2)).transpose((<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">4</span>)).reshape((-<span class="number">1</span>, c, h, w))</span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br></pre></td></tr></table></figure>
-
-<p>注意这里的输入输出都是包含样本数和通道数的, 但是没关系, 我们当作有 $B \times C$ 张二维图片即可, <code>numpy</code> 会自动把我们的步骤按单张图片进行批量操作.</p>
-<h3 id="ReLU"><a href="#ReLU" class="headerlink" title="ReLU"></a>ReLU</h3><p>ReLU 是本文卷积神经网络中将要使用的激活函数, 它的表达式为:</p>
-<p>$$<br>ReLU(x) = \left\{<br>  \begin{aligned}<br>    x \quad x &gt; 0 \\<br>    0 \quad x \leq 0<br>  \end{aligned}<br>  \right.<br>$$</p>
-<p>然后对应的导数表达式为:</p>
-<p>$$<br>ReLU&#39;(x) = \left\{<br>  \begin{aligned}<br>    1 \quad x &gt; 0 \\<br>    0 \quad x \leq 0<br>  \end{aligned}<br>  \right.<br>$$</p>
-<p>可以看到, 无论是函数还是导函数, 就是一个分段函数, 因此实现起来也是比较容易的.</p>
-<p>对于前向过程, 将小于等于 0 的部分置零, 对于反向部分, 将输入中小于等于 0 部分的梯度置零, 其余梯度按原值传递即可.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ReLULayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;ReLU&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> x * (x &gt; <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> last_x_grad * (x &gt; <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h3><p>在我们网络的末尾, 全连接层的之前, 需要一个 Flatten 层, 它能够将二维的样本展平成一维, 从而送进全连接层进行最后的分类.</p>
-<p>这里的前向和反向就十分简单了, 这是一个等值函数, 只需要对输入输出进行维度变换就能完成正确的计算过程.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FlattenLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Flatten&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, start: <span class="built_in">int</span> = <span class="number">1</span>, end: <span class="built_in">int</span> = -<span class="number">1</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.start = start</span><br><span class="line">        self.end = end</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        shape = x.shape</span><br><span class="line">        shapen_len = <span class="built_in">len</span>(shape)</span><br><span class="line">        start = (self.start + shapen_len) % shapen_len</span><br><span class="line">        end = (self.end + shapen_len) % shapen_len</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x.reshape(shape[:start] + (-<span class="number">1</span>, ) + shape[end + <span class="number">1</span>:])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> last_x_grad.reshape(x.shape)</span><br></pre></td></tr></table></figure>
-
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>受限于篇幅问题, 本文到此就暂告一段落了. 在本篇中, 我们完成了对数据集的加载和简单的预处理, 同时回顾了神经网络的基本原理并实现了简单的无参数网络层, 包括一些变换和激活函数等等.</p>
-<p>下一篇中, 我们将实现卷积神经网络中用到的两个有参数网络层, 线性层和卷积层, 并且完成对它们前向和反向过程的推导, 以及网络的最后一层, 损失函数的推导和实现.</p>
-<p>本系列文章传送门:</p>
-<ul>
-<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
-<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
-<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>numpy</tag>
-        <tag>手写数字识别</tag>
-        <tag>卷积神经网络</tag>
-        <tag>深度学习</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 NumPy 的手写数字识别 (卷积神经网络) (二)</title>
     <url>//posts/2023/10/14/cnn-numpy-2/</url>
     <content><![CDATA[<blockquote>
@@ -779,10 +682,107 @@
         <category>代码块</category>
       </categories>
       <tags>
-        <tag>深度学习</tag>
         <tag>矩阵求导</tag>
         <tag>卷积矩阵化</tag>
         <tag>交叉熵损失函数</tag>
+        <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (一)</title>
+    <url>//posts/2023/10/13/cnn-numpy-1/</url>
+    <content><![CDATA[<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+<p>本文为第一篇, 简单介绍了神经网络的基本学习原理和一些无参数网络层的实现.</p>
+<span id="more"></span>
+
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+<h2 id="必要的理论知识"><a href="#必要的理论知识" class="headerlink" title="必要的理论知识"></a>必要的理论知识</h2><p>本节是对神经网络所需的数学知识进行简单介绍, 只涉及基本的高数知识. <del>全文可能有一些不严谨的数学式子, 会意即可.</del></p>
+<h3 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h3><p>神经网络的本质是一个多元复合函数, 因此在给定输入的情况下计算网络的输出, 就是网络的前向传播过程.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/forward.jpg" alt="forward.jpg"></p>
+<p>如果有上图所示的一个简单网络, 其中:</p>
+<p>$$<br>\begin{aligned}<br>  y_1 &amp;= y_1(x_1, x_2) \\<br>  y_2 &amp;= y_2(x_2, x_3) \\<br>  z &amp;= z(y_1, y_2) = z(y_1(x_1, x_2), y_2(x_2, x_3))<br>\end{aligned}<br>$$</p>
+<p>则称 $y_1$ 是关于 $x_1, x_2$ 的函数, $y_2$ 是关于 $x_2, x_3$ 的函数, $z$ 是关于 $x_1, x_2, x_3$ 的函数, 且由 $y_1, y_2$ 复合而成.</p>
+<p>则通过 $x_1, x_2, x_3$ 按照图中复合函数一步一步计算 $z$ 的过程就是网络的前向传播过程.</p>
+<h3 id="梯度下降"><a href="#梯度下降" class="headerlink" title="梯度下降"></a>梯度下降</h3><p>从上面的图我们可以知道 $z$ 有三个输入参数, 假设 $z$ 就是网络最终的损失函数, 我们的目标就是不断调整这些参数, 使得损失减小, 也就是 $z$ 减小.</p>
+<p>那么, 回忆高数最基本的知识, 如果一个函数存在最 (极) 小值, 那么该点的导数等于 0. 所以纯理论计算最暴力的方式就是对 $z$ 关于所有参数求导, 然后看所有参数极值点的组合, 最后得到 $z$ 的最小值.</p>
+<p>但是上述方法不能充分利用计算机的优势, 就是数值计算, 并且很多时候函数十分复杂无法推导, 而且我们也不需要精确求出最小值, 只要接近某个极小值就行了, 因此有了梯度下降法.</p>
+<p>所谓梯度, 简单理解就是函数的导数, 只不过是对每个参数都求偏导数, 所有参数的偏导数组合在一起就叫梯度. 而梯度所指向的参数变化方向永远使得整个函数值变大, 因此如果朝着梯度的反方向更新参数, 就会使得函数值减小.</p>
+<p>例如我们知道了 $z$ 关于三个参数的梯度是 $(\frac{\partial{z}}{\partial{x_1}}, \frac{\partial{z}}{\partial{x_2}}, \frac{\partial{z}}{\partial{x_3}})$, 那么 $z(x_1 - \eta\frac{\partial{z}}{\partial{x_1}}, x_2 - \eta\frac{\partial{z}}{\partial{x_2}}, x_3 - \eta\frac{\partial{z}}{\partial{x_3}})$ 小于 $z(x_1, x_2, x_3)$, 其中 $\eta$ 可以视作&quot;学习率&quot;, 取一个相对较小的值.</p>
+<h3 id="链式法则与反向传播"><a href="#链式法则与反向传播" class="headerlink" title="链式法则与反向传播"></a>链式法则与反向传播</h3><p>知道了梯度下降的基本原理之后, 我们下一步目标就是高效的求解梯度.</p>
+<p>先说链式法则, 这个内容也是高数的基本知识, 在此回顾一下.</p>
+<p>例如要求 $z$ 的所有偏导数, 则:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{z}}{\partial{x_1}} &amp;= \frac{\partial{z}}{\partial{y_1}}\frac{\partial{y_1}}{\partial{x_1}} \\<br>  \frac{\partial{z}}{\partial{x_2}} &amp;= \frac{\partial{z}}{\partial{y_1}}\frac{\partial{y_1}}{\partial{x_2}} + \frac{\partial{z}}{\partial{y_2}}\frac{\partial{y_2}}{\partial{x_2}} \\<br>  \frac{\partial{z}}{\partial{x_3}} &amp;= \frac{\partial{z}}{\partial{y_2}}\frac{\partial{y_2}}{\partial{x_3}}<br>\end{aligned}<br>$$</p>
+<p>和上面的函数复合关系对应一下, 很容易就能看出链式求导逻辑, 然后可以按下图标记偏导数.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/backward.jpg" alt="backward.jpg"></p>
+<p>可以看出来整个网络图形成了一个树形结构, 也可称之为计算图, 其中树的根部是损失值, 而函数所有的输入参数是树的叶节点.</p>
+<p>显然, 从算法角度考虑, 如果要复用中间结果, 减少计算量, 最佳方式就是总树的根部开始遍历每一个叶节点, 中途不断按照链式法则进行累加和累乘, 得到根节点关于每一个叶节点的偏导值.</p>
+<p>由于这种梯度计算方式和前向计算 $z$ 的过程刚好相反, 因此得名反向传播算法. 只要在前向计算时构造好计算图, 则计算梯度时只需要反方向从计算图根部遍历叶节点即可算出所有参数的梯度值.</p>
+<h2 id="导入使用的库"><a href="#导入使用的库" class="headerlink" title="导入使用的库"></a>导入使用的库</h2><p>下面的内容将使用 <code>numpy</code> 库手搓一个简单的卷积神经网络, 并进行训练和评估. 全篇代码需要导入的库如下所示:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> PIL.Image</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br></pre></td></tr></table></figure>
+
+<p><code>matplotlib.pyplot</code> 用来绘制损失曲线, <code>numpy</code> 提供神经网络所需要的矩阵计算, <code>PIL</code> 用来读取数据集, <code>sklearn.metrics</code> 里有一些评价分类任务的指标函数, 借用一下.</p>
+<p>本文使用的 <code>python</code> 版本为 <code>3.9.13</code>, 各依赖库的版本如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">numpy==1.24.3</span><br><span class="line">Pillow==10.0.0</span><br><span class="line">scikit-learn==1.2.2</span><br><span class="line">matplotlib==3.7.2</span><br></pre></td></tr></table></figure>
+
+<h2 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h2><p>数据集使用一个较小的手写数字分类图片数据集, 之前文章里也一直用这个举例, 这里再贴一下蓝奏云下载地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVFBrSzA5cGZuaGE=">手写数字分类.zip<i class="fa fa-external-link-alt"></i></span>, 里面包含 10000 张训练数据和 5000 张测试数据.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_dataset</span>(<span class="params">folder, shuffle: <span class="built_in">bool</span> = <span class="literal">False</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;加载数据集</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        inputs: (B, C, H, W)</span></span><br><span class="line"><span class="string">        targets: (B, )</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    inputs = []</span><br><span class="line">    targets = []</span><br><span class="line">    <span class="keyword">for</span> num <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">        <span class="keyword">for</span> img_path <span class="keyword">in</span> Path(folder, <span class="built_in">str</span>(num)).iterdir():</span><br><span class="line">            inputs.append(np.asarray(PIL.Image.<span class="built_in">open</span>(img_path)))</span><br><span class="line">            targets.append(num)</span><br><span class="line"></span><br><span class="line">    inputs = np.stack(inputs, <span class="number">0</span>, dtype=np.float32) / <span class="number">255</span></span><br><span class="line">    targets = np.stack(targets, <span class="number">0</span>, dtype=np.int32)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="built_in">len</span>(inputs.shape) == <span class="number">3</span>:</span><br><span class="line">        inputs = inputs[:, <span class="literal">None</span>, :, :]  <span class="comment"># (B, C, H, W)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> shuffle:</span><br><span class="line">        rnd_index = np.arange(inputs.shape[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">10</span>):</span><br><span class="line">            np.random.shuffle(rnd_index)</span><br><span class="line">        inputs = inputs[rnd_index]</span><br><span class="line">        targets = targets[rnd_index]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> inputs, targets</span><br></pre></td></tr></table></figure>
+
+<p>这里要注意的地方是, 为了之后网络能稳定训练, 不会出现梯度爆炸等奇怪的问题, 像素值被转换到 0-1 的范围.</p>
+<h2 id="无参数网络层的实现"><a href="#无参数网络层的实现" class="headerlink" title="无参数网络层的实现"></a>无参数网络层的实现</h2><p>首先来实现网络中简单内容, 一些只有单纯函数计算的层.</p>
+<p>对于网络中的层, 我们需要实现前向和反向两个功能即可, 因此先声明基类 <code>NetworkLayer</code>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">NetworkLayer</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
+
+<p>只有两个方法, <code>forward</code> 和 <code>bacckward</code>, 分别代表前向和反向计算, 而这两个方法的输入输出有以下关系.</p>
+<ul>
+<li><code>forward</code> 的输入 <code>x</code> 形状等于反向的输出形状, 返回值为函数计算值.</li>
+<li><code>backward</code> 的输入 <code>last_x_grad</code> 形状等于前向的输出形状, 返回值为上一层输入的梯度.</li>
+</ul>
+<div class="note info"><p>其实更完备的反向传播做法并不是直接返回 $x$ 的梯度, 因为计算图中可能存在需要梯度累加的情况, 构建完整的图然后遍历才是正确的做法.</p>
+<p>但是由于本文要实现的卷积神经网络, 整个计算图只有一条路径, 并且以 $x$ 为主线路, 所以关于 $x$ 的梯度可以直接被返回依次向前传递, 同时在每次求解各个参数的梯度时, 也不必进行累加, 直接清空重新赋值即可, 这一点在后续的代码实现中可以看到.</p></div>
+
+<h3 id="Pooling"><a href="#Pooling" class="headerlink" title="Pooling"></a>Pooling</h3><p>在卷积神经网络中, 我们需要用到最大池化层, 这里我们简单起见, 只实现核大小等于两个方向上步长且能整除图片宽高的情况. 以图片大小 $6 \times 4$, 核大小为 $3 \times 2$ 举例, 池化过程如下图所示.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/pooling.jpg" alt="pooling.jpg"></p>
+<p>对于前向传播, 虚线是使用循环遍历的方式求解, 而实线则是通过数组变形使用矩阵方式求解.</p>
+<p>我们本篇代码实现里, 对于所有计算均采用矩阵化形式实现, 每一小节都有详细的讲解. 因此只看实线部分即可.</p>
+<p>重点关注反向传播, 对于池化操作而言, 池化后的值被原封不动的传递到下一层, 相当于是 $y = x$ 函数, 因此这些值在这一层的梯度为 1. 而没有被传递的值, 相当于是常数函数 $y = 0$, 因此梯度值为 0.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MaxPoolingLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;步长与核大小相同的最大池化层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.k1 = k1</span><br><span class="line">        self.k2 = k2</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C, H / k1, W / k2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, c, h, w = x.shape</span><br><span class="line">        k1 = self.k1</span><br><span class="line">        k2 = self.k2</span><br><span class="line">        o1 = h // k1</span><br><span class="line">        o2 = w // k2</span><br><span class="line"></span><br><span class="line">        x = x.reshape(-<span class="number">1</span>, o1, k1, o2, k2).transpose(<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">4</span>).reshape(-<span class="number">1</span>, k1 * k2)</span><br><span class="line">        ridx = np.arange(x.shape[<span class="number">0</span>])</span><br><span class="line">        cidx = np.argmax(x, axis=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        x = x[ridx, cidx].reshape(-<span class="number">1</span>, c, o1, o2)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C, H, W)</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C, H / k1, W / k2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, C, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, c, h, w = x.shape</span><br><span class="line">        k1 = self.k1</span><br><span class="line">        k2 = self.k2</span><br><span class="line">        o1 = h // k1</span><br><span class="line">        o2 = w // k2</span><br><span class="line"></span><br><span class="line">        x = x.reshape(-<span class="number">1</span>, o1, k1, o2, k2).transpose(<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">4</span>).reshape(-<span class="number">1</span>, k1 * k2)</span><br><span class="line">        ridx = np.arange(x.shape[<span class="number">0</span>])</span><br><span class="line">        cidx = np.argmax(x, axis=-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        x_grad: np.ndarray = np.zeros_like(x).reshape(-<span class="number">1</span>, k1 * k2)</span><br><span class="line">        x_grad[ridx, cidx] = last_x_grad.reshape(-<span class="number">1</span>)</span><br><span class="line">        x_grad = x_grad.reshape((-<span class="number">1</span>, o1, o2, k1, k2)).transpose((<span class="number">0</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">4</span>)).reshape((-<span class="number">1</span>, c, h, w))</span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br></pre></td></tr></table></figure>
+
+<p>注意这里的输入输出都是包含样本数和通道数的, 但是没关系, 我们当作有 $B \times C$ 张二维图片即可, <code>numpy</code> 会自动把我们的步骤按单张图片进行批量操作.</p>
+<h3 id="ReLU"><a href="#ReLU" class="headerlink" title="ReLU"></a>ReLU</h3><p>ReLU 是本文卷积神经网络中将要使用的激活函数, 它的表达式为:</p>
+<p>$$<br>ReLU(x) = \left\{<br>  \begin{aligned}<br>    x \quad x &gt; 0 \\<br>    0 \quad x \leq 0<br>  \end{aligned}<br>  \right.<br>$$</p>
+<p>然后对应的导数表达式为:</p>
+<p>$$<br>ReLU&#39;(x) = \left\{<br>  \begin{aligned}<br>    1 \quad x &gt; 0 \\<br>    0 \quad x \leq 0<br>  \end{aligned}<br>  \right.<br>$$</p>
+<p>可以看到, 无论是函数还是导函数, 就是一个分段函数, 因此实现起来也是比较容易的.</p>
+<p>对于前向过程, 将小于等于 0 的部分置零, 对于反向部分, 将输入中小于等于 0 部分的梯度置零, 其余梯度按原值传递即可.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ReLULayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;ReLU&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> x * (x &gt; <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> last_x_grad * (x &gt; <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h3><p>在我们网络的末尾, 全连接层的之前, 需要一个 Flatten 层, 它能够将二维的样本展平成一维, 从而送进全连接层进行最后的分类.</p>
+<p>这里的前向和反向就十分简单了, 这是一个等值函数, 只需要对输入输出进行维度变换就能完成正确的计算过程.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">FlattenLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Flatten&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, start: <span class="built_in">int</span> = <span class="number">1</span>, end: <span class="built_in">int</span> = -<span class="number">1</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.start = start</span><br><span class="line">        self.end = end</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        shape = x.shape</span><br><span class="line">        shapen_len = <span class="built_in">len</span>(shape)</span><br><span class="line">        start = (self.start + shapen_len) % shapen_len</span><br><span class="line">        end = (self.end + shapen_len) % shapen_len</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x.reshape(shape[:start] + (-<span class="number">1</span>, ) + shape[end + <span class="number">1</span>:])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">return</span> last_x_grad.reshape(x.shape)</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>受限于篇幅问题, 本文到此就暂告一段落了. 在本篇中, 我们完成了对数据集的加载和简单的预处理, 同时回顾了神经网络的基本原理并实现了简单的无参数网络层, 包括一些变换和激活函数等等.</p>
+<p>下一篇中, 我们将实现卷积神经网络中用到的两个有参数网络层, 线性层和卷积层, 并且完成对它们前向和反向过程的推导, 以及网络的最后一层, 损失函数的推导和实现.</p>
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>numpy</tag>
+        <tag>手写数字识别</tag>
+        <tag>卷积神经网络</tag>
       </tags>
   </entry>
   <entry>
@@ -862,9 +862,9 @@
         <category>代码块</category>
       </categories>
       <tags>
+        <tag>深度学习</tag>
         <tag>手写数字识别</tag>
         <tag>卷积神经网络</tag>
-        <tag>深度学习</tag>
         <tag>pytorch</tag>
       </tags>
   </entry>
@@ -894,7 +894,7 @@
 
 <p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
 <p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
 <p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
 ]]></content>
       <categories>
@@ -2206,41 +2206,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Transformer 的训练与推理</title>
-    <url>//posts/2023/08/29/transformer/</url>
-    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
-<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
-<span id="more"></span>
-
-<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
-<p>这张图是一个简略的 Transformer 整体框架图.</p>
-<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
-<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
-<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
-<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
-<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
-<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
-<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
-<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
-<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
-<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
-<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
-<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
-<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
-<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Transformer</tag>
-        <tag>NLP</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SM9 文档阅读笔记</title>
     <url>//posts/2023/12/15/sm9/</url>
     <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
@@ -2309,6 +2274,41 @@
         <tag>R-ate</tag>
         <tag>Frobenius</tag>
         <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Transformer 的训练与推理</title>
+    <url>//posts/2023/08/29/transformer/</url>
+    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
+<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
+<span id="more"></span>
+
+<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
+<p>这张图是一个简略的 Transformer 整体框架图.</p>
+<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
+<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
+<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
+<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
+<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
+<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
+<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
+<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
+<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
+<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
+<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
+<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
+<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
+<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Transformer</tag>
+        <tag>NLP</tag>
       </tags>
   </entry>
 </search>

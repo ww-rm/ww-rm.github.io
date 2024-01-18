@@ -28,7 +28,7 @@
 <meta property="og:description" content="解决 Github SSH 连接超时. 12$ ssh -T git@github.comssh: connect to host github.com port 22: Connection timed out">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-01-17T03:55:32.000Z">
-<meta property="article:modified_time" content="2024-01-17T15:32:35.254Z">
+<meta property="article:modified_time" content="2024-01-18T02:56:49.195Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="SSH">
 <meta property="article:tag" content="Github">
@@ -314,7 +314,7 @@
 
 <p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
 <p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
 <p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
 
     </div>
