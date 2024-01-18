@@ -78,6 +78,6 @@ Host github.com
 
 另外, 找到了 Github 官方的文档 [Using SSH over the HTTPS port](https://docs.github.com/en/authentication/troubleshooting-ssh/using-ssh-over-the-https-port).
 
-这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端必须使用 `ssh.github.com`. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.
+这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 `ssh.github.com`. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.
 
 最后, Github 官方提供了它们的服务 IP 范围, [About GitHub's IP addresses](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses), 从里面可以找一个 ssh 连接成功, 然后写到配置里.
