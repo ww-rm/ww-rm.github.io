@@ -1127,6 +1127,67 @@
       </tags>
   </entry>
   <entry>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
+<ul>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
+</ul>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
+<p>输出: $Y_{n \times q}$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>数据降维</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>如何在 PyPI 上发布一个包</title>
     <url>//posts/2023/11/05/pypi/</url>
     <content><![CDATA[<p>基于上一篇<a href="https://ww-rm.github.io/posts/2023/11/04/ncmdump/">NCM 文件批量转换 (保留专辑和封面信息)</a>, 记录一下自己第一次往 PyPI 上发布包的过程.</p>
@@ -1189,67 +1250,6 @@
         <tag>pypi</tag>
         <tag>setuptools</tag>
         <tag>python 包发布</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PCA 算法原理与实现</title>
-    <url>//posts/2023/02/18/pca/</url>
-    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
-<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
-<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
-<p>因此, 在 PCA 方法中, 我们希望:</p>
-<ul>
-<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
-<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
-</ul>
-<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
-<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
-<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
-<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
-<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
-<p>首先是方差与协方差的公式:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
-<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
-<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
-<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
-<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
-<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
-<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
-<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
-<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
-</div>
-
-<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
-<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
-<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
-<p>输出: $Y_{n \times q}$</p>
-<ol>
-<li>对 $X$ 进行均值方差归一化.</li>
-<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
-<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
-<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
-<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
-<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -2100,12 +2100,11 @@
       </tags>
   </entry>
   <entry>
-    <title>Typora 破解版</title>
-    <url>//posts/2023/07/03/typora-cracked/</url>
-    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
 <p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>资源分享</category>
@@ -2115,11 +2114,12 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+    <title>Typora 破解版</title>
+    <url>//posts/2023/07/03/typora-cracked/</url>
+    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
 <p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>资源分享</category>
@@ -2242,12 +2242,14 @@
 <p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
 <h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
 <ul>
-<li>参数 <code>embed_size</code> 对应 $E_q$, 且 $E_q = d_{model}$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
 <li>参数 <code>k_dim</code> 对应 $E_k$.</li>
 <li>参数 <code>v_dim</code> 对应 $E_v$.</li>
 <li>参数 <code>num_heads</code> 对应 $h$.</li>
-<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>, 且在单头 $h = 1$ 时, $d_k = d_{model} = E_q$.</li>
-<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同, 并且 $hd_v = d_{model}$.</li>
+<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
+<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
+<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
 </ul>
 <p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
