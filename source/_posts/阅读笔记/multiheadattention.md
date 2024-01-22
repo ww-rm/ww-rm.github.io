@@ -66,12 +66,14 @@ $$
 
 在 PyTorch 的实现中:
 
-- 参数 `embed_size` 对应 $E_q$, 且 $E_q = d_{model}$, 也就是限制了输入 `query` 的维度和模型的输出维度相同.
+- 参数 `embed_size` 对应 $E_q$.
 - 参数 `k_dim` 对应 $E_k$.
 - 参数 `v_dim` 对应 $E_v$.
 - 参数 `num_heads` 对应 $h$.
-- $d_k = d_{model} / h$, 要求 `embed_size` 能够整除 `num_heads`, 且在单头 $h = 1$ 时, $d_k = d_{model} = E_q$.
-- $d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同, 并且 $hd_v = d_{model}$.
+- $d_{model} = E_q$, 也就是限制了输入 `query` 的维度和模型的输出维度相同.
+- $d_k = d_{model} / h$, 要求 `embed_size` 能够整除 `num_heads`.
+- $d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.
+- $hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.
 
 可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.
 
