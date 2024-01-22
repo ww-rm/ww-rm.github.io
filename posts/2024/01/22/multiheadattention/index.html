@@ -27,15 +27,15 @@
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="记录一下 PyTorch 中多头注意力 MultiheadAttention 的使用方法, 主要是对维度变换的过程梳理.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ww-rm.github.io/(https:/ww-rm.github.io/static/image/multiheadattention/attention.jpg)">
+<meta property="og:image" content="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg">
 <meta property="article:published_time" content="2024-01-22T12:14:40.000Z">
-<meta property="article:modified_time" content="2024-01-22T17:00:32.840Z">
+<meta property="article:modified_time" content="2024-01-22T17:01:18.577Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="PyTorch">
 <meta property="article:tag" content="MultiheadAttention">
 <meta property="article:tag" content="NLP">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://ww-rm.github.io/(https:/ww-rm.github.io/static/image/multiheadattention/attention.jpg)">
+<meta name="twitter:image" content="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg">
 
 
 <link rel="canonical" href="https://ww-rm.github.io/posts/2024/01/22/multiheadattention/">
@@ -319,7 +319,7 @@
 <p>下一步则是计算注意力, 也就是经典公式:</p>
 <p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
 <p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
-<p><img data-src="/(https:/ww-rm.github.io/static/image/multiheadattention/attention.jpg)" alt="attention"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
 <p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
 <p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
 <h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
