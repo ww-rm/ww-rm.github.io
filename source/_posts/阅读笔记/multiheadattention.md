@@ -44,7 +44,7 @@ $$
 
 中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.
 
-![attention]((https://ww-rm.github.io/static/image/multiheadattention/attention.jpg))
+![attention](https://ww-rm.github.io/static/image/multiheadattention/attention.jpg)
 
 如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.
 
