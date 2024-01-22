@@ -660,89 +660,6 @@
       </tags>
   </entry>
   <entry>
-    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (三)</title>
-    <url>//posts/2023/10/15/cnn-numpy-3/</url>
-    <content><![CDATA[<blockquote>
-<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
-<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
-</blockquote>
-<p>本文为第三篇, 也是最后一篇, 结合前两篇的内容搭建完整的卷积神经网络并完成训练和评估.</p>
-<span id="more"></span>
-
-<p>本系列文章传送门:</p>
-<ul>
-<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
-<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
-<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
-</ul>
-<h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><h3 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h3><p>因为只是一个简单的示例, 所以弄一个小一点的网络, 大概长这样.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-3/cnn.jpg" alt="cnn.jpg"></p>
-<p>然后就是按照这个结构用代码把前面实现的层串起来.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.layers = [</span><br><span class="line">            ConvolutionLayer(<span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">5</span>),  <span class="comment"># 24 * 24</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 12 * 12</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            ConvolutionLayer(<span class="number">4</span>, <span class="number">16</span>, <span class="number">3</span>, <span class="number">3</span>),  <span class="comment"># 10 * 10</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 5 * 5</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            FlattenLayer(),</span><br><span class="line">            LinearLayer(<span class="number">16</span> * <span class="number">5</span> * <span class="number">5</span>, <span class="number">10</span>)</span><br><span class="line">        ]</span><br><span class="line">        self.loss_func = CrossEntropyLoss()</span><br><span class="line">        self.layer_inputs = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string">            keepgrad: whether keep temp layer inputs</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), logits</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> keepgrad:</span><br><span class="line">                self.layer_inputs.append(x)</span><br><span class="line">            x = layer.forward(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_cls), computed by loss function</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_ch, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> x, layer <span class="keyword">in</span> <span class="built_in">zip</span>(self.layer_inputs[::-<span class="number">1</span>], self.layers[::-<span class="number">1</span>]):</span><br><span class="line">            last_x_grad = layer.backward(x, last_x_grad)</span><br><span class="line">        <span class="keyword">return</span> last_x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(layer, ParamLayer):</span><br><span class="line">                layer.update(lr)</span><br></pre></td></tr></table></figure>
-
-<p>这里网络同样需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是增加了 <code>layer_inputs</code> 成员, 用于保存网络的计算图中间节点, 在反向传播时能直接读取数据计算.</p>
-<p>至于网络每层的参数填多大, 得视数据量和网络深度决定<del>玄学问题</del>, 这里就填了几个比较小的值, 方便下一步训练.</p>
-<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>然后实现网络的训练代码.</p>
-<p>训练分几个固定步骤:</p>
-<ol>
-<li>前向传播</li>
-<li>计算损失</li>
-<li>反向传播</li>
-<li>更新参数</li>
-<li>清空本次计算的中间值和梯度</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for train_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, train_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = train_x[i:i+batch_size], train_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs, <span class="literal">True</span>)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># backward</span></span><br><span class="line">            last_x_grad = self.loss_func.backward(logits, targets)</span><br><span class="line">            self.backward(last_x_grad)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># update</span></span><br><span class="line">            self.update(lr)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># clear temp values</span></span><br><span class="line">            self.layer_inputs.clear()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试和预测"><a href="#测试和预测" class="headerlink" title="测试和预测"></a>测试和预测</h3><p>测试和训练步骤是类似的, 但是不需要计算损失和梯度, 同时也不需要保留中间计算结果.</p>
-<p>而预测则是在 <code>forward</code> 的基础上, 将输出结果使用 <code>Softmax</code> 函数转换成概率值, 公式如下:</p>
-<p>$$<br>\begin{aligned}<br>  Softmax(x_{ij}) &amp;= \frac{\exp\left( {x_{ij}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij} - \max_{j=1}^{C}{x_{ij}}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij}&#39;} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39;\right)}}<br>\end{aligned}<br>$$</p>
-<p>其实就是在计算交叉熵损失中间 $\log$ 括号内的内容, 并且同样可以减去最大值来防止数据溢出.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">self, test_x: np.ndarray, test_y: np.ndarray, batch_size: <span class="built_in">int</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for test_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, test_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = test_x[i:i+batch_size], test_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), probs by softmax</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        x = self.forward(x)</span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        outputs = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
-
-<h2 id="训练并评估网络"><a href="#训练并评估网络" class="headerlink" title="训练并评估网络"></a>训练并评估网络</h2><p>完成网络搭建后, 接下来就是进行训练和评估. 先贴上完整的代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    np.random.seed(<span class="number">1234</span>)</span><br><span class="line"></span><br><span class="line">    train_x, train_y = load_dataset(<span class="string">&quot;./cv-data/train&quot;</span>, <span class="literal">True</span>)</span><br><span class="line">    test_x, test_y = load_dataset(<span class="string">&quot;./cv-data/test&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(train_x.shape, train_y.shape)</span><br><span class="line">    <span class="built_in">print</span>(test_x.shape, test_y.shape)</span><br><span class="line"></span><br><span class="line">    batch_size = <span class="number">100</span></span><br><span class="line">    epochs = <span class="number">200</span></span><br><span class="line">    lr = <span class="number">0.1</span></span><br><span class="line">    cnn = ConvolutionNeuralNetwork()</span><br><span class="line"></span><br><span class="line">    train_losses = []</span><br><span class="line">    test_losses = []</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Begin Train ===============&quot;</span>)</span><br><span class="line">    start_time = time.time()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">        train_loss = cnn.train(train_x, train_y, batch_size, epochs, lr)</span><br><span class="line">        test_loss = cnn.test(test_x, test_y, batch_size)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Epoch: <span class="subst">&#123;i + <span class="number">1</span>:3d&#125;</span> Train Loss: <span class="subst">&#123;train_loss:<span class="number">.4</span>f&#125;</span> Test Loss: <span class="subst">&#123;test_loss:<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        train_losses.append(train_loss)</span><br><span class="line">        test_losses.append(test_loss)</span><br><span class="line"></span><br><span class="line">    time_elapsed = time.time() - start_time</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;=============== End Train: <span class="subst">&#123;time_elapsed / <span class="number">60</span>:<span class="number">.2</span>f&#125;</span> min ===============&quot;</span>)</span><br><span class="line"></span><br><span class="line">    train_losses = np.array(train_losses)</span><br><span class="line">    test_losses = np.array(test_losses)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制损失变化曲线, 忽略第一轮损失</span></span><br><span class="line">    plt.plot(np.arange(train_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), train_losses[<span class="number">1</span>:], label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">    plt.plot(np.arange(test_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), test_losses[<span class="number">1</span>:], label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.savefig(<span class="string">&quot;loss.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    y_true = train_y</span><br><span class="line">    y_pred = cnn.predict(train_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Train ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br><span class="line"></span><br><span class="line">    y_true = test_y</span><br><span class="line">    y_pred = cnn.predict(test_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Test ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br></pre></td></tr></table></figure>
-
-<p>这里为了稳定结果, 固定了一下随机种子为 <code>1234</code>.</p>
-<p>有三个训练的超参数:</p>
-<ul>
-<li><code>batch_size</code>: 每一轮 mini-batch 的大小.</li>
-<li><code>epochs</code>: 共训练多少轮.</li>
-<li><code>lr</code>: 网络学习率.</li>
-</ul>
-<p>具体填多少得反复尝试<del>也是炼丹的精髓</del>, 这里学习率是尝试后收敛比较快而且比较稳定的一个值.</p>
-<p>中途把每一轮的损失记录一下, 并且用 <code>matplotlib.pyplot</code> 画个简单的曲线图, 对比一下训练集和测试集损失随轮数的变化关系.</p>
-<p>最后借用一下 <code>classification_report</code> 来看看网络在训练集和测试集上的分类性能报告.</p>
-<p>200 轮的训练大概跑了 20 分钟左右, 挺久的.</p>
-<p>损失曲线图:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-3/loss.png" alt="loss.jpg"></p>
-<p>分类性能报告:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">=============== Classification Report: Train ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9970    0.9900    0.9935       999</span><br><span class="line">           1     0.9955    0.9928    0.9941      1106</span><br><span class="line">           2     0.9871    0.9765    0.9818      1020</span><br><span class="line">           3     0.9814    0.9786    0.9800      1027</span><br><span class="line">           4     0.9958    0.9712    0.9834       973</span><br><span class="line">           5     0.9821    0.9854    0.9838       891</span><br><span class="line">           6     0.9959    0.9939    0.9949       977</span><br><span class="line">           7     0.9750    0.9887    0.9818      1063</span><br><span class="line">           8     0.9567    0.9888    0.9725       984</span><br><span class="line">           9     0.9781    0.9771    0.9776       960</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9844     10000</span><br><span class="line">   macro avg     0.9845    0.9843    0.9843     10000</span><br><span class="line">weighted avg     0.9845    0.9844    0.9844     10000</span><br><span class="line"></span><br><span class="line">=============== Classification Report: Test ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9517    0.9848    0.9679       460</span><br><span class="line">           1     0.9723    0.9825    0.9774       571</span><br><span class="line">           2     0.9618    0.9491    0.9554       530</span><br><span class="line">           3     0.9298    0.9540    0.9418       500</span><br><span class="line">           4     0.9630    0.9360    0.9493       500</span><br><span class="line">           5     0.9538    0.9518    0.9528       456</span><br><span class="line">           6     0.9581    0.9416    0.9498       462</span><br><span class="line">           7     0.9384    0.9219    0.9300       512</span><br><span class="line">           8     0.9039    0.9427    0.9229       489</span><br><span class="line">           9     0.9324    0.9019    0.9169       520</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9466      5000</span><br><span class="line">   macro avg     0.9465    0.9466    0.9464      5000</span><br><span class="line">weighted avg     0.9468    0.9466    0.9466      5000</span><br></pre></td></tr></table></figure>
-
-<p>效果还不错, 损失曲线也很经典, 大约从 15 轮开始收敛, 120 轮左右测试集损失就差不多到底了. 中途试过一些别的随机种子, 收敛速度有差异, 但是最终的损失值都差不多.</p>
-<p>分类性能的话, 训练集的 F1 值和测试集差了 4% 左右, 看着也还不错, 正常表现.</p>
-<h2 id="进一步探索"><a href="#进一步探索" class="headerlink" title="进一步探索"></a>进一步探索</h2><p>到这里我们就已经彻底完成了基于纯 NumPy 手工搭建的卷积神经网络了, 从这个过程中我们可以了解到很多底层原理以及一些细节问题, 比如参数的初始化和训练超参数的调节. 大部分时间我们都是使用深度学习框架来完成这些事情, 我们只需要专注于搭积木即可. 这里联系一下我常用的 PyTorch 库, 里面内置了很多不同的模块, 分别对应整个网络搭建和训练过程中的基本环节.</p>
-<ul>
-<li><code>torch.utils.data</code>: 数据处理模块, 控制数据的读取和迭代方式.</li>
-<li><code>torch.nn</code>: 常用的网络模块, 例如 <code>Linear</code> 和 <code>Conv2d</code>.</li>
-<li><code>torch.nn.functional</code>: <code>torch.nn</code> 中模块的函数形式, 需要手动传入计算的参数.</li>
-<li><code>torch.nn.init</code>: 不同的网络参数初始化方法.</li>
-<li><code>torch.optim</code>: 优化器模块, 包含不同的学习率调整算法, 控制网络的优化过程.</li>
-</ul>
-<p>这是一些常用的, 还有很多, 可以去看看 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9pbmRleC5odG1s">PyTorch 文档<i class="fa fa-external-link-alt"></i></span>并加以实践.</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>这份文档写了很久, 起因是觉得要是下次再碰到相关的问题, 自己有轮子和内容就不用上网找了<del>属实是闲着没事</del>. 前后花了一两周的时间, 因为要从头跑一份代码, 然后又是调公式又是画图, 不过算是彻底复习了一遍神经网络, 把很多深度学习框架的使用原理都串起来了, 还是挺好的.</p>
-<p>这个系列就此圆满结束<del>作业报告从此一劳永逸</del>.</p>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>手写数字识别</tag>
-        <tag>卷积神经网络</tag>
-        <tag>深度学习</tag>
-        <tag>pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 NumPy 的手写数字识别 (卷积神经网络) (二)</title>
     <url>//posts/2023/10/14/cnn-numpy-2/</url>
     <content><![CDATA[<blockquote>
@@ -869,40 +786,86 @@
       </tags>
   </entry>
   <entry>
-    <title>解决 Github SSH 连接超时</title>
-    <url>//posts/2024/01/17/githubssh-timeout/</url>
-    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
-
+    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (三)</title>
+    <url>//posts/2023/10/15/cnn-numpy-3/</url>
+    <content><![CDATA[<blockquote>
+<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+</blockquote>
+<p>本文为第三篇, 也是最后一篇, 结合前两篇的内容搭建完整的卷积神经网络并完成训练和评估.</p>
 <span id="more"></span>
 
-<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
-<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
-<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+<h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><h3 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h3><p>因为只是一个简单的示例, 所以弄一个小一点的网络, 大概长这样.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-3/cnn.jpg" alt="cnn.jpg"></p>
+<p>然后就是按照这个结构用代码把前面实现的层串起来.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.layers = [</span><br><span class="line">            ConvolutionLayer(<span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">5</span>),  <span class="comment"># 24 * 24</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 12 * 12</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            ConvolutionLayer(<span class="number">4</span>, <span class="number">16</span>, <span class="number">3</span>, <span class="number">3</span>),  <span class="comment"># 10 * 10</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 5 * 5</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            FlattenLayer(),</span><br><span class="line">            LinearLayer(<span class="number">16</span> * <span class="number">5</span> * <span class="number">5</span>, <span class="number">10</span>)</span><br><span class="line">        ]</span><br><span class="line">        self.loss_func = CrossEntropyLoss()</span><br><span class="line">        self.layer_inputs = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string">            keepgrad: whether keep temp layer inputs</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), logits</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> keepgrad:</span><br><span class="line">                self.layer_inputs.append(x)</span><br><span class="line">            x = layer.forward(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_cls), computed by loss function</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_ch, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> x, layer <span class="keyword">in</span> <span class="built_in">zip</span>(self.layer_inputs[::-<span class="number">1</span>], self.layers[::-<span class="number">1</span>]):</span><br><span class="line">            last_x_grad = layer.backward(x, last_x_grad)</span><br><span class="line">        <span class="keyword">return</span> last_x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(layer, ParamLayer):</span><br><span class="line">                layer.update(lr)</span><br></pre></td></tr></table></figure>
 
-<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
-<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
-<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
-<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
-<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
+<p>这里网络同样需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是增加了 <code>layer_inputs</code> 成员, 用于保存网络的计算图中间节点, 在反向传播时能直接读取数据计算.</p>
+<p>至于网络每层的参数填多大, 得视数据量和网络深度决定<del>玄学问题</del>, 这里就填了几个比较小的值, 方便下一步训练.</p>
+<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>然后实现网络的训练代码.</p>
+<p>训练分几个固定步骤:</p>
+<ol>
+<li>前向传播</li>
+<li>计算损失</li>
+<li>反向传播</li>
+<li>更新参数</li>
+<li>清空本次计算的中间值和梯度</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for train_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, train_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = train_x[i:i+batch_size], train_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs, <span class="literal">True</span>)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># backward</span></span><br><span class="line">            last_x_grad = self.loss_func.backward(logits, targets)</span><br><span class="line">            self.backward(last_x_grad)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># update</span></span><br><span class="line">            self.update(lr)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># clear temp values</span></span><br><span class="line">            self.layer_inputs.clear()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br></pre></td></tr></table></figure>
 
-<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
-<p>因此, 解决方案就是添加下面的配置:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
+<h3 id="测试和预测"><a href="#测试和预测" class="headerlink" title="测试和预测"></a>测试和预测</h3><p>测试和训练步骤是类似的, 但是不需要计算损失和梯度, 同时也不需要保留中间计算结果.</p>
+<p>而预测则是在 <code>forward</code> 的基础上, 将输出结果使用 <code>Softmax</code> 函数转换成概率值, 公式如下:</p>
+<p>$$<br>\begin{aligned}<br>  Softmax(x_{ij}) &amp;= \frac{\exp\left( {x_{ij}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij} - \max_{j=1}^{C}{x_{ij}}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij}&#39;} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39;\right)}}<br>\end{aligned}<br>$$</p>
+<p>其实就是在计算交叉熵损失中间 $\log$ 括号内的内容, 并且同样可以减去最大值来防止数据溢出.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">self, test_x: np.ndarray, test_y: np.ndarray, batch_size: <span class="built_in">int</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for test_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, test_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = test_x[i:i+batch_size], test_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), probs by softmax</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        x = self.forward(x)</span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        outputs = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
 
-<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
-<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
-<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
+<h2 id="训练并评估网络"><a href="#训练并评估网络" class="headerlink" title="训练并评估网络"></a>训练并评估网络</h2><p>完成网络搭建后, 接下来就是进行训练和评估. 先贴上完整的代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    np.random.seed(<span class="number">1234</span>)</span><br><span class="line"></span><br><span class="line">    train_x, train_y = load_dataset(<span class="string">&quot;./cv-data/train&quot;</span>, <span class="literal">True</span>)</span><br><span class="line">    test_x, test_y = load_dataset(<span class="string">&quot;./cv-data/test&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(train_x.shape, train_y.shape)</span><br><span class="line">    <span class="built_in">print</span>(test_x.shape, test_y.shape)</span><br><span class="line"></span><br><span class="line">    batch_size = <span class="number">100</span></span><br><span class="line">    epochs = <span class="number">200</span></span><br><span class="line">    lr = <span class="number">0.1</span></span><br><span class="line">    cnn = ConvolutionNeuralNetwork()</span><br><span class="line"></span><br><span class="line">    train_losses = []</span><br><span class="line">    test_losses = []</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Begin Train ===============&quot;</span>)</span><br><span class="line">    start_time = time.time()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">        train_loss = cnn.train(train_x, train_y, batch_size, epochs, lr)</span><br><span class="line">        test_loss = cnn.test(test_x, test_y, batch_size)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Epoch: <span class="subst">&#123;i + <span class="number">1</span>:3d&#125;</span> Train Loss: <span class="subst">&#123;train_loss:<span class="number">.4</span>f&#125;</span> Test Loss: <span class="subst">&#123;test_loss:<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        train_losses.append(train_loss)</span><br><span class="line">        test_losses.append(test_loss)</span><br><span class="line"></span><br><span class="line">    time_elapsed = time.time() - start_time</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;=============== End Train: <span class="subst">&#123;time_elapsed / <span class="number">60</span>:<span class="number">.2</span>f&#125;</span> min ===============&quot;</span>)</span><br><span class="line"></span><br><span class="line">    train_losses = np.array(train_losses)</span><br><span class="line">    test_losses = np.array(test_losses)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制损失变化曲线, 忽略第一轮损失</span></span><br><span class="line">    plt.plot(np.arange(train_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), train_losses[<span class="number">1</span>:], label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">    plt.plot(np.arange(test_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), test_losses[<span class="number">1</span>:], label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.savefig(<span class="string">&quot;loss.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    y_true = train_y</span><br><span class="line">    y_pred = cnn.predict(train_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Train ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br><span class="line"></span><br><span class="line">    y_true = test_y</span><br><span class="line">    y_pred = cnn.predict(test_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Test ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br></pre></td></tr></table></figure>
+
+<p>这里为了稳定结果, 固定了一下随机种子为 <code>1234</code>.</p>
+<p>有三个训练的超参数:</p>
+<ul>
+<li><code>batch_size</code>: 每一轮 mini-batch 的大小.</li>
+<li><code>epochs</code>: 共训练多少轮.</li>
+<li><code>lr</code>: 网络学习率.</li>
+</ul>
+<p>具体填多少得反复尝试<del>也是炼丹的精髓</del>, 这里学习率是尝试后收敛比较快而且比较稳定的一个值.</p>
+<p>中途把每一轮的损失记录一下, 并且用 <code>matplotlib.pyplot</code> 画个简单的曲线图, 对比一下训练集和测试集损失随轮数的变化关系.</p>
+<p>最后借用一下 <code>classification_report</code> 来看看网络在训练集和测试集上的分类性能报告.</p>
+<p>200 轮的训练大概跑了 20 分钟左右, 挺久的.</p>
+<p>损失曲线图:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-3/loss.png" alt="loss.jpg"></p>
+<p>分类性能报告:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">=============== Classification Report: Train ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9970    0.9900    0.9935       999</span><br><span class="line">           1     0.9955    0.9928    0.9941      1106</span><br><span class="line">           2     0.9871    0.9765    0.9818      1020</span><br><span class="line">           3     0.9814    0.9786    0.9800      1027</span><br><span class="line">           4     0.9958    0.9712    0.9834       973</span><br><span class="line">           5     0.9821    0.9854    0.9838       891</span><br><span class="line">           6     0.9959    0.9939    0.9949       977</span><br><span class="line">           7     0.9750    0.9887    0.9818      1063</span><br><span class="line">           8     0.9567    0.9888    0.9725       984</span><br><span class="line">           9     0.9781    0.9771    0.9776       960</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9844     10000</span><br><span class="line">   macro avg     0.9845    0.9843    0.9843     10000</span><br><span class="line">weighted avg     0.9845    0.9844    0.9844     10000</span><br><span class="line"></span><br><span class="line">=============== Classification Report: Test ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9517    0.9848    0.9679       460</span><br><span class="line">           1     0.9723    0.9825    0.9774       571</span><br><span class="line">           2     0.9618    0.9491    0.9554       530</span><br><span class="line">           3     0.9298    0.9540    0.9418       500</span><br><span class="line">           4     0.9630    0.9360    0.9493       500</span><br><span class="line">           5     0.9538    0.9518    0.9528       456</span><br><span class="line">           6     0.9581    0.9416    0.9498       462</span><br><span class="line">           7     0.9384    0.9219    0.9300       512</span><br><span class="line">           8     0.9039    0.9427    0.9229       489</span><br><span class="line">           9     0.9324    0.9019    0.9169       520</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9466      5000</span><br><span class="line">   macro avg     0.9465    0.9466    0.9464      5000</span><br><span class="line">weighted avg     0.9468    0.9466    0.9466      5000</span><br></pre></td></tr></table></figure>
+
+<p>效果还不错, 损失曲线也很经典, 大约从 15 轮开始收敛, 120 轮左右测试集损失就差不多到底了. 中途试过一些别的随机种子, 收敛速度有差异, 但是最终的损失值都差不多.</p>
+<p>分类性能的话, 训练集的 F1 值和测试集差了 4% 左右, 看着也还不错, 正常表现.</p>
+<h2 id="进一步探索"><a href="#进一步探索" class="headerlink" title="进一步探索"></a>进一步探索</h2><p>到这里我们就已经彻底完成了基于纯 NumPy 手工搭建的卷积神经网络了, 从这个过程中我们可以了解到很多底层原理以及一些细节问题, 比如参数的初始化和训练超参数的调节. 大部分时间我们都是使用深度学习框架来完成这些事情, 我们只需要专注于搭积木即可. 这里联系一下我常用的 PyTorch 库, 里面内置了很多不同的模块, 分别对应整个网络搭建和训练过程中的基本环节.</p>
+<ul>
+<li><code>torch.utils.data</code>: 数据处理模块, 控制数据的读取和迭代方式.</li>
+<li><code>torch.nn</code>: 常用的网络模块, 例如 <code>Linear</code> 和 <code>Conv2d</code>.</li>
+<li><code>torch.nn.functional</code>: <code>torch.nn</code> 中模块的函数形式, 需要手动传入计算的参数.</li>
+<li><code>torch.nn.init</code>: 不同的网络参数初始化方法.</li>
+<li><code>torch.optim</code>: 优化器模块, 包含不同的学习率调整算法, 控制网络的优化过程.</li>
+</ul>
+<p>这是一些常用的, 还有很多, 可以去看看 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9pbmRleC5odG1s">PyTorch 文档<i class="fa fa-external-link-alt"></i></span>并加以实践.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>这份文档写了很久, 起因是觉得要是下次再碰到相关的问题, 自己有轮子和内容就不用上网找了<del>属实是闲着没事</del>. 前后花了一两周的时间, 因为要从头跑一份代码, 然后又是调公式又是画图, 不过算是彻底复习了一遍神经网络, 把很多深度学习框架的使用原理都串起来了, 还是挺好的.</p>
+<p>这个系列就此圆满结束<del>作业报告从此一劳永逸</del>.</p>
 ]]></content>
       <categories>
-        <category>杂学</category>
+        <category>代码块</category>
       </categories>
       <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
+        <tag>手写数字识别</tag>
+        <tag>卷积神经网络</tag>
+        <tag>深度学习</tag>
+        <tag>pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -989,6 +952,43 @@
       </tags>
   </entry>
   <entry>
+    <title>解决 Github SSH 连接超时</title>
+    <url>//posts/2024/01/17/githubssh-timeout/</url>
+    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
+<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
+<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
+
+<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
+<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
+<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
+<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
+<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
+
+<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
+<p>因此, 解决方案就是添加下面的配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
+
+<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
+<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
     <url>//posts/2022/08/14/kxsw/</url>
     <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
@@ -1040,6 +1040,67 @@
       </categories>
       <tags>
         <tag>科学上网</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
+<ul>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
+</ul>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
+<p>输出: $Y_{n \times q}$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -1124,67 +1185,6 @@
         <tag>聚类算法</tag>
         <tag>生信</tag>
         <tag>NJ 树</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PCA 算法原理与实现</title>
-    <url>//posts/2023/02/18/pca/</url>
-    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
-<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
-<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
-<p>因此, 在 PCA 方法中, 我们希望:</p>
-<ul>
-<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
-<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
-</ul>
-<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
-<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
-<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
-<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
-<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
-<p>首先是方差与协方差的公式:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
-<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
-<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
-<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
-<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
-<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
-<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
-<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
-<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
-</div>
-
-<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
-<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
-<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
-<p>输出: $Y_{n \times q}$</p>
-<ol>
-<li>对 $X$ 进行均值方差归一化.</li>
-<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
-<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
-<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
-<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
-<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -1468,6 +1468,103 @@
       </tags>
   </entry>
   <entry>
+    <title>Git 与 Github 入门</title>
+    <url>//posts/2022/08/15/wast-gitandgithub/</url>
+    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
+<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
+<span id="more"></span>
+
+<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
+<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
+<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
+<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
+<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
+<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
+<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
+<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
+<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
+<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
+<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
+<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
+<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
+<p><code>git init</code>: 初始化一个本地仓库.</p>
+<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
+<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
+<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
+<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
+<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
+<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
+<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
+<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
+<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
+
+<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
+<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
+<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
+<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
+<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
+<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
+<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
+<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
+<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
+<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
+<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
+<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
+<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
+<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
+<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
+<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
+</div>
+
+<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
+<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
+<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
+<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
+<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
+<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
+<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
+<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
+<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
+<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
+<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
+<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
+<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
+<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
+<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
+<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
+<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
+<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
+<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
+<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
+<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
+<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+        <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>基于 PyTorch 的手写数字分类</title>
     <url>//posts/2022/08/18/wast-dl/</url>
     <content><![CDATA[<p>本篇算是对 <code>pytorch</code> 这一 <code>python</code> 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 <code>pytorch</code> 来搭建一个自定义的网络结构, 并加以训练.</p>
@@ -1570,100 +1667,58 @@
       </tags>
   </entry>
   <entry>
-    <title>Git 与 Github 入门</title>
-    <url>//posts/2022/08/15/wast-gitandgithub/</url>
-    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
-<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
+    <title>经典问题之文本分类</title>
+    <url>//posts/2022/08/17/wast-ml/</url>
+    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
 <span id="more"></span>
 
-<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
-<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
-<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
-<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
-<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
-<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
-<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
-<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
-<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
-<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
-<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
-<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
-<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
-<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
-<p><code>git init</code>: 初始化一个本地仓库.</p>
-<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
-<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
-<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
-<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
-<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
-<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
-<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
-<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
-<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
+<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
+<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
 
-<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
-<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
-<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
-<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
-<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
-<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
-<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
-<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
-<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
-<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
-<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
-<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
-<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
-<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
-<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
-<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
-<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
-</div>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
 
-<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
-<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
-<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
-<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
-<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
-<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
-<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
-<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
-<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
-<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
-<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
-<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
-<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
-<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
-<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
-<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
-<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
-<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
-<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
-<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
-<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
-<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
+<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
+<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
+<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
+<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
+<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
+<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
+
+<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
+<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
+<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
+<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
+<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
+<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
+
+<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
+<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
+<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
+
+<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
+
+<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
+<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
 ]]></content>
       <categories>
         <category>网安本科速通</category>
         <category>必备技能</category>
       </categories>
       <tags>
-        <tag>git</tag>
-        <tag>github</tag>
+        <tag>机器学习</tag>
+        <tag>scikit-learn</tag>
+        <tag>文本分类</tag>
       </tags>
   </entry>
   <entry>
@@ -1728,61 +1783,6 @@
         <tag>深度学习</tag>
         <tag>pytorch</tag>
         <tag>文本分类</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>经典问题之文本分类</title>
-    <url>//posts/2022/08/17/wast-ml/</url>
-    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
-<span id="more"></span>
-
-<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
-<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
-<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
-<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
-
-<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
-<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
-<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
-<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
-<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
-<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
-
-<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
-<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
-<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
-<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
-<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
-<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
-
-<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
-<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
-<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
-
-<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
-
-<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
-<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>文本分类</tag>
-        <tag>机器学习</tag>
-        <tag>scikit-learn</tag>
       </tags>
   </entry>
   <entry>
@@ -2206,6 +2206,66 @@
       </tags>
   </entry>
   <entry>
+    <title>多头注意力机制中的 Q, K, V</title>
+    <url>//posts/2024/01/22/multiheadattention/</url>
+    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
+<blockquote>
+<ul>
+<li><code>embed_dim</code> – Total dimension of the model.</li>
+<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
+<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
+<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
+</ul>
+</blockquote>
+<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
+<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
+</div>
+
+<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
+<ul>
+<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
+<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
+</ul>
+<p>下一步则是计算注意力, 也就是经典公式:</p>
+<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
+<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
+<p><img data-src="/(https:/ww-rm.github.io/static/image/multiheadattention/attention.jpg)" alt="attention"></p>
+<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
+<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
+<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
+<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
+<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
+<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
+<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
+<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
+<ul>
+<li>参数 <code>embed_size</code> 对应 $E_q$, 且 $E_q = d_{model}$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
+<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
+<li>参数 <code>num_heads</code> 对应 $h$.</li>
+<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>, 且在单头 $h = 1$ 时, $d_k = d_{model} = E_q$.</li>
+<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同, 并且 $hd_v = d_{model}$.</li>
+</ul>
+<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>PyTorch</tag>
+        <tag>MultiheadAttention</tag>
+        <tag>NLP</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 文档阅读笔记</title>
     <url>//posts/2023/12/15/sm9/</url>
     <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
@@ -2307,8 +2367,8 @@
         <category>阅读笔记</category>
       </categories>
       <tags>
-        <tag>Transformer</tag>
         <tag>NLP</tag>
+        <tag>Transformer</tag>
       </tags>
   </entry>
 </search>
