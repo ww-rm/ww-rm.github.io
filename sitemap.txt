@@ -1,4 +1,6 @@
 https://ww-rm.github.io/tags/
+https://ww-rm.github.io/about/
+https://ww-rm.github.io/categories/
 https://ww-rm.github.io/festival/
 https://ww-rm.github.io/posts/2021/05/21/prologue/
 https://ww-rm.github.io/posts/2023/08/30/desktopsprite/
@@ -35,8 +37,6 @@ https://ww-rm.github.io/posts/2024/01/22/multiheadattention/
 https://ww-rm.github.io/posts/2023/12/15/sm9/
 https://ww-rm.github.io/posts/2023/08/29/transformer/
 https://ww-rm.github.io/404.html
-https://ww-rm.github.io/about/
-https://ww-rm.github.io/categories/
 https://ww-rm.github.io/
 https://ww-rm.github.io/tags/%E5%BA%8F/
 https://ww-rm.github.io/tags/%E6%A1%8C%E5%AE%A0/

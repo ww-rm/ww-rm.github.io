@@ -2206,7 +2206,7 @@
       </tags>
   </entry>
   <entry>
-    <title>多头注意力机制中的 Q, K, V</title>
+    <title>MultiheadAttention 使用方法</title>
     <url>//posts/2024/01/22/multiheadattention/</url>
     <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
 <span id="more"></span>
