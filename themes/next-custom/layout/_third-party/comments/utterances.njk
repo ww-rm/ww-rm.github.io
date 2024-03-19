@@ -1,2 +1,4 @@
+{%- if page.utterances is undefined or page.utterances %}
 {{ next_data('utterances', theme.utterances) }}
 {{ next_js('third-party/comments/utterances.js') }}
+{%- endif %}
