@@ -869,43 +869,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决 Github SSH 连接超时</title>
-    <url>//posts/2024/01/17/githubssh-timeout/</url>
-    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
-<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
-<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
-
-<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
-<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
-<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
-<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
-<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
-
-<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
-<p>因此, 解决方案就是添加下面的配置:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
-
-<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
-<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
-<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>从零开始的 DDPM 动漫头像生成</title>
     <url>//posts/2024/02/16/ddpm/</url>
     <content><![CDATA[<p>Stable Diffusion 已经火了很久了, 在此之前也是在自己电脑上部署过 Github 上那个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0FVVE9NQVRJQzExMTEvc3RhYmxlLWRpZmZ1c2lvbi13ZWJ1aQ==">stable-diffusion-webui<i class="fa fa-external-link-alt"></i></span>. 作为一个折腾分子, 本着更深入了解一下概率扩散模型的想法, 决定在参考其他教程的基础上从零开始炼制一个基于 DDPM 的动漫头像生成模型.</p>
@@ -997,6 +960,43 @@
         <tag>DDPM</tag>
         <tag>动漫头像生成</tag>
         <tag>概率扩散模型</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决 Github SSH 连接超时</title>
+    <url>//posts/2024/01/17/githubssh-timeout/</url>
+    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
+<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
+<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
+
+<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
+<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
+<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
+<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
+<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
+
+<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
+<p>因此, 解决方案就是添加下面的配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
+
+<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
+<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
@@ -1544,6 +1544,80 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 transformers.Pipeline 迭代生成数据</title>
+    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
+    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后这样子进行推理.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
+<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
+<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
+<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
+<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>其中提到了:</p>
+<blockquote>
+<p>For ease of use, a generator is also possible:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
+<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
+<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
+<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
+<ul>
+<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
+<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
+</ul>
+<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
+<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
+<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
+<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
+<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>transformers</tag>
+        <tag>Pipeline</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>腾讯测试开发实习面试经验分享</title>
     <url>//posts/2024/03/19/tencent-intership-interview/</url>
     <content><![CDATA[<p>腾讯 IEG 25 届测试开发实习生面试经验分享.</p>
@@ -1639,24 +1713,6 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
-      </categories>
-      <tags>
-        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
