@@ -28,7 +28,7 @@
 <meta property="og:description" content="之前项目里用到了 NUPACK 这个软件, 用来做引物二级结构预测, 但是就官方文档上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程. 太长不看: 直接前往仓">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-05-11T15:36:16.000Z">
-<meta property="article:modified_time" content="2024-05-12T14:58:58.210Z">
+<meta property="article:modified_time" content="2024-05-12T15:12:19.238Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="NUPACK">
 <meta property="article:tag" content="MSYS2">
@@ -321,6 +321,9 @@
 <p>首先得把原项目 <code>external/vcpkg</code> 下的 <code>scripts</code> 文件夹一整个替换掉, 因为旧版本有些操作完成不了, 且下载的编译工具不是最新的.</p>
 <p>然后按正常步骤运行 <code>bootstrap-vcpkg.sh</code>.</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ ./external/vcpkg/bootstrap-vcpkg.sh</span><br><span class="line">Downloading https://github.com/microsoft/vcpkg-tool/releases/download/2024-04-23/vcpkg.exe -&gt; D:\Projects\VsProjects\nupack-4.0.1.8\<span class="built_in">source</span>\external\vcpkg\vcpkg.exe (using IE proxy: 127.0.0.1:10809)... <span class="keyword">done</span>.</span><br><span class="line">Validating signature... <span class="keyword">done</span>.</span><br><span class="line"></span><br><span class="line">vcpkg package management program version 2024-04-23-d6945642ee5c3076addd1a42c331bbf4cfc97457</span><br><span class="line"></span><br><span class="line">See LICENSE.txt <span class="keyword">for</span> license information.</span><br><span class="line">Telemetry</span><br><span class="line">---------</span><br><span class="line">vcpkg collects usage data <span class="keyword">in</span> order to <span class="built_in">help</span> us improve your experience.</span><br><span class="line">The data collected by Microsoft is anonymous.</span><br><span class="line">You can opt-out of telemetry by re-running the bootstrap-vcpkg script with -disableMetrics,</span><br><span class="line">passing --disable-metrics to vcpkg on the <span class="built_in">command</span> line,</span><br><span class="line">or by setting the VCPKG_DISABLE_METRICS environment variable.</span><br><span class="line"></span><br><span class="line">Read more about vcpkg telemetry at docs/about/privacy.md</span><br></pre></td></tr></table></figure>
+
+<p>安装之前记得先在终端里设置一下默认的 triplet.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> VCPKG_DEFAULT_TRIPLET=x64-mingw-dynamic</span><br><span class="line"><span class="built_in">export</span> VCPKG_DEFAULT_HOST_TRIPLET=x64-mingw-dynamic</span><br></pre></td></tr></table></figure>
 
 <p>结合官方教程里的步骤以及 <code>cmake/Libraries.cmake</code> 和 <code>cmake/BuildCXX.cmake</code> 里的内容, 所有要安装的包大概可以分成下面几类.</p>
 <ol>
