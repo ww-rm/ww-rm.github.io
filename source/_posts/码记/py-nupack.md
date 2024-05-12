@@ -425,9 +425,26 @@ setup(
 
 在 Windows 下 Python 的扩展模块文件名后缀是 `.pyd`, 所以得把编译后生成的 `cpp.so` 重命名成 `cpp.pyd`.
 
-然后刚刚编译生成的 `cpp.pyd`, 还依赖于我们编译环境里以及安装的一些库的动态链接库 DLL 文件, 所以还得挨个把这些 DLL 文件复制过来和 `cpp.pyd` 放在同一个目录下一起打包进去.
+然后刚刚编译生成的 `cpp.pyd`, 还依赖于我们编译环境里以及安装的一些库的动态链接库 DLL 文件, 所以还得挨个把这些 DLL 文件复制过来和 `cpp.pyd` 放在同一个目录下一起打包进去. 如果缺少某些库则在 `import nupack` 的时候会有类似下面的报错信息.
 
-c++ 运行时依赖:
+```plain
+ImportError: DLL load failed while importing cpp: 找不到指定的模块。
+```
+
+{% note info "*如何知道哪些 DLL 文件是必需的?*" %}
+
+有两种方案, 首先这些必需的 DLL 来自于两部分:
+
+- MSYS2 环境变量里的系统库.
+- 通过 vcpkg 安装的第三方库.
+
+因此第一种方式是把所有可能的系统库和第三方库安装后生成的 DLL 文件都复制到 `cpp.pyd` 一起, 然后启动 `python` 会话并 `import cpp`, 此时将所有复制过来的 DLL 文件尝试删除, 最后留下来提示正在占用无法删除的就是必需 DLL.
+
+第二种方式是使用 [Dependency Walker](https://www.dependencywalker.com/) 查看 `cpp.pyd` 依赖的 DLL 文件, 并在系统目录和第三方库目录里对照, 看看涉及哪些就复制哪些, Dependency Walker 可能会把 VC 运行时的 DLL 也算进去 (就是一大堆名字里带 `api-ms` 的), 但是一般情况下电脑上都是装了的, 如果最后真没有的话可以去 [Microsoft Visual C++ Redistributable latest supported downloads](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) 这里下载安装最新的运行时库.
+
+{% endnote %}
+
+系统依赖库:
 
 - `libc++.dll`: 位于 MSYS2 安装目录的 `clang64/bin` 下面.
 
