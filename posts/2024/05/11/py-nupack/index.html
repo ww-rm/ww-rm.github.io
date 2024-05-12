@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="之前项目里用到了 NUPACK 这个软件, 用来做引物二级结构预测, 但是就官方文档上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程. 太长不看: 直接前往仓">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在 Windows 上编译安装 NUPACK">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2024/05/11/py-nupack/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="之前项目里用到了 NUPACK 这个软件, 用来做引物二级结构预测, 但是就官方文档上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程. 太长不看: 直接前往仓">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-05-11T15:36:16.000Z">
+<meta property="article:modified_time" content="2024-05-12T14:56:49.751Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="NUPACK">
+<meta property="article:tag" content="MSYS2">
+<meta property="article:tag" content="MinGW">
+<meta property="article:tag" content="Clang">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2024/05/11/py-nupack/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2024/05/11/py-nupack/","path":"/posts/2024/05/11/py-nupack/","title":"在 Windows 上编译安装 NUPACK"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>在 Windows 上编译安装 NUPACK | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E5%86%B5"><span class="nav-number">1.</span> <span class="nav-text">项目概况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">准备环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%BA%93"><span class="nav-number">3.</span> <span class="nav-text">安装依赖库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%85%E8%A3%85%E4%B8%80%E4%B8%8B%E6%B5%8B%E8%AF%95%E5%87%BD%E6%95%B0-%E5%8F%AF%E9%80%89"><span class="nav-number">4.</span> <span class="nav-text">包装一下测试函数 (可选)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C-CMake"><span class="nav-number">5.</span> <span class="nav-text">运行 CMake</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E5%BA%93%E6%9F%A5%E6%89%BE%E9%94%99%E8%AF%AF"><span class="nav-number">5.1.</span> <span class="nav-text">解决库查找错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-Python-%E5%8C%85%E5%90%AB%E7%9B%AE%E5%BD%95%E9%94%99%E8%AF%AF"><span class="nav-number">5.2.</span> <span class="nav-text">解决 Python 包含目录错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-yaml-cpp-%E7%9A%84%E8%AD%A6%E5%91%8A"><span class="nav-number">5.3.</span> <span class="nav-text">解决 yaml-cpp 的警告</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E7%9B%AE%E6%A0%87%E6%96%87%E4%BB%B6"><span class="nav-number">6.</span> <span class="nav-text">生成目标文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E5%8F%82%E6%95%B0%E8%B7%AF%E5%BE%84%E9%94%99%E8%AF%AF"><span class="nav-number">6.1.</span> <span class="nav-text">解决参数路径错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-simdpp-%E5%8C%85%E5%90%AB%E7%9B%AE%E5%BD%95%E9%94%99%E8%AF%AF"><span class="nav-number">6.2.</span> <span class="nav-text">解决 simdpp 包含目录错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E7%B1%BB%E5%9E%8B%E9%94%99%E8%AF%AF"><span class="nav-number">6.3.</span> <span class="nav-text">解决类型错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E7%AC%A6%E5%8F%B7%E9%87%8D%E5%AE%9A%E4%B9%89%E9%94%99%E8%AF%AF"><span class="nav-number">6.4.</span> <span class="nav-text">解决符号重定义错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-Python-%E7%AC%A6%E5%8F%B7%E6%9C%AA%E5%AE%9A%E4%B9%89%E9%94%99%E8%AF%AF"><span class="nav-number">6.5.</span> <span class="nav-text">解决 Python 符号未定义错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3-ImageHlp-%E7%AC%A6%E5%8F%B7%E6%9C%AA%E5%AE%9A%E4%B9%89"><span class="nav-number">6.6.</span> <span class="nav-text">解决 ImageHlp 符号未定义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90-Python-%E5%8C%85"><span class="nav-number">7.</span> <span class="nav-text">生成 Python 包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">8.</span> <span class="nav-text">后记</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">92</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2024/05/11/py-nupack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="在 Windows 上编译安装 NUPACK | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在 Windows 上编译安装 NUPACK
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-05-11 23:36:16" itemprop="dateCreated datePublished" datetime="2024-05-11T23:36:16+08:00">2024-05-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%A0%81%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">码记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>13k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>23 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>之前项目里用到了 <span class="exturl" data-url="aHR0cHM6Ly9udXBhY2sub3JnLw==">NUPACK<i class="fa fa-external-link-alt"></i></span> 这个软件, 用来做引物二级结构预测, 但是就<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQv">官方文档<i class="fa fa-external-link-alt"></i></span>上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程.</p>
+<p>太长不看: 直接前往仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL251cGFjay13aW4=">nupack-win<i class="fa fa-external-link-alt"></i></span> 下载安装包.</p>
+<span id="more"></span>
+
+<h2 id="项目概况"><a href="#项目概况" class="headerlink" title="项目概况"></a>项目概况</h2><p>这次使用的是 <code>v4.0.1.8</code> 的 NUPACK 源码. 项目是基于 <span class="exturl" data-url="aHR0cHM6Ly9jbWFrZS5vcmcv">CMake<i class="fa fa-external-link-alt"></i></span> 的, 并且使用了 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21pY3Jvc29mdC92Y3BrZw==">vcpkg<i class="fa fa-external-link-alt"></i></span> 作为包管理器, 在官方文档中有 Mac/Linux 环境下的源码安装步骤 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQvI3NvdXJjZS1pbnN0YWxsYXRpb24=">Source installation<i class="fa fa-external-link-alt"></i></span> 可供参考.</p>
+<p>由于 CMake 和 vcpkg 都是比较好跨平台的, 因此我们只需要在 Windows 上复现它的这些步骤就大功告成.<del>事实是被编译环境暴打.</del></p>
+<h2 id="准备环境"><a href="#准备环境" class="headerlink" title="准备环境"></a>准备环境</h2><p>首先是准备 Windows 上的 MinGW + Clang 编译环境, 这里参考微软官方的 vcpkg 文档 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybi5taWNyb3NvZnQuY29tL2VuLXVzL3ZjcGtnL3VzZXJzL3BsYXRmb3Jtcy9taW5ndw==">Mingw-w64<i class="fa fa-external-link-alt"></i></span>, 以及 <span class="exturl" data-url="aHR0cHM6Ly93d3cubXN5czIub3JnLw==">MSYS2<i class="fa fa-external-link-alt"></i></span> 的安装步骤.</p>
+<p>不同的地方在于, 我们需要同时安装 Clang 和 GCC 两套工具链, 因为部分库可能在 Clang 下编译失败, 但是 GCC 可以.</p>
+<p>安装好 MSYS2 之后, 分别启动 <code>MSYS2 CLANG64</code> 和 <code>MSYS2 MINGW</code> 两个终端, 然后用用命令分别安装对应的工具链 <span class="exturl" data-url="aHR0cHM6Ly9wYWNrYWdlcy5tc3lzMi5vcmcvZ3JvdXBzL21pbmd3LXc2NC1jbGFuZy14ODZfNjQtdG9vbGNoYWlu">mingw-w64-clang-x86_64-toolchain<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9wYWNrYWdlcy5tc3lzMi5vcmcvZ3JvdXBzL21pbmd3LXc2NC14ODZfNjQtdG9vbGNoYWlu">mingw-w64-x86_64-toolchain<i class="fa fa-external-link-alt"></i></span>.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S mingw-w64-clang-x86_64-toolchain</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pacman -S mingw-w64-x86_64-toolchain</span><br></pre></td></tr></table></figure>
+
+<p>完事之后可以看看 <code>clang</code> 和 <code>gcc</code> 的版本.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ clang --version</span><br><span class="line">clang version 17.0.6</span><br><span class="line">Target: x86_64-w64-windows-gnu</span><br><span class="line">Thread model: posix</span><br><span class="line">InstalledDir: D:/Program Files/msys64/clang64/bin</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ gcc --version</span><br><span class="line">gcc.exe (Rev3, Built by MSYS2 project) 13.2.0</span><br><span class="line">Copyright (C) 2023 Free Software Foundation, Inc.</span><br><span class="line">This is free software; see the <span class="built_in">source</span> <span class="keyword">for</span> copying conditions.  There is NO</span><br><span class="line">warranty; not even <span class="keyword">for</span> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</span><br></pre></td></tr></table></figure>
+
+<p>如无特殊说明, 后续步骤里的命令默认都是在 <code>CLANG64</code> 环境里执行.</p>
+<h2 id="安装依赖库"><a href="#安装依赖库" class="headerlink" title="安装依赖库"></a>安装依赖库</h2><p>解压 <code>nupack-4.0.1.8.zip</code>, 导航进入 <code>source</code> 目录.</p>
+<p>全篇最困难的地方当属安装依赖库, 我们遵循一个原则, 那就是能用原项目 vcpkg 版本里的内容就尽量用原项目的, 出问题了再换成新的.</p>
+<p>所以我们还要先 clone 一个最新的 vcpkg 备用.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> git@github.com:microsoft/vcpkg.git</span><br><span class="line">Cloning into <span class="string">&#x27;vcpkg&#x27;</span>...</span><br><span class="line">remote: Enumerating objects: 233259, <span class="keyword">done</span>.</span><br><span class="line">remote: Counting objects: 100% (12697/12697), <span class="keyword">done</span>.</span><br><span class="line">remote: Compressing objects: 100% (969/969), <span class="keyword">done</span>.</span><br><span class="line">remote: Total 233259 (delta 12286), reused 11775 (delta 11728), pack-reused 220562</span><br><span class="line">Receiving objects: 100% (233259/233259), 69.10 MiB | 4.18 MiB/s, <span class="keyword">done</span>.</span><br><span class="line">Resolving deltas: 100% (155206/155206), <span class="keyword">done</span>.</span><br><span class="line">Updating files: 100% (11336/11336), <span class="keyword">done</span>.</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">cd</span> vcpkg &amp;&amp; git show-ref --heads</span><br><span class="line">a1212c93cabaa9c5c36c1ffdb4bddd59fdf31e43 refs/heads/master</span><br></pre></td></tr></table></figure>
+
+<p>首先得把原项目 <code>external/vcpkg</code> 下的 <code>scripts</code> 文件夹一整个替换掉, 因为旧版本有些操作完成不了, 且下载的编译工具不是最新的.</p>
+<p>然后按正常步骤运行 <code>bootstrap-vcpkg.sh</code>.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ ./external/vcpkg/bootstrap-vcpkg.sh</span><br><span class="line">Downloading https://github.com/microsoft/vcpkg-tool/releases/download/2024-04-23/vcpkg.exe -&gt; D:\Projects\VsProjects\nupack-4.0.1.8\<span class="built_in">source</span>\external\vcpkg\vcpkg.exe (using IE proxy: 127.0.0.1:10809)... <span class="keyword">done</span>.</span><br><span class="line">Validating signature... <span class="keyword">done</span>.</span><br><span class="line"></span><br><span class="line">vcpkg package management program version 2024-04-23-d6945642ee5c3076addd1a42c331bbf4cfc97457</span><br><span class="line"></span><br><span class="line">See LICENSE.txt <span class="keyword">for</span> license information.</span><br><span class="line">Telemetry</span><br><span class="line">---------</span><br><span class="line">vcpkg collects usage data <span class="keyword">in</span> order to <span class="built_in">help</span> us improve your experience.</span><br><span class="line">The data collected by Microsoft is anonymous.</span><br><span class="line">You can opt-out of telemetry by re-running the bootstrap-vcpkg script with -disableMetrics,</span><br><span class="line">passing --disable-metrics to vcpkg on the <span class="built_in">command</span> line,</span><br><span class="line">or by setting the VCPKG_DISABLE_METRICS environment variable.</span><br><span class="line"></span><br><span class="line">Read more about vcpkg telemetry at docs/about/privacy.md</span><br></pre></td></tr></table></figure>
+
+<p>结合官方教程里的步骤以及 <code>cmake/Libraries.cmake</code> 和 <code>cmake/BuildCXX.cmake</code> 里的内容, 所有要安装的包大概可以分成下面几类.</p>
+<ol>
+<li><p>需要先更新 port 版本</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openblas yaml-cpp fmt spdlog</span><br></pre></td></tr></table></figure>
+
+<p> 这些库由于旧版本有一些 bug, 或者由于某些神秘问题导致在 MinGW 环境下安装失败, 但是通过把一些 port 换成最新的就能正常安装.</p>
+<ul>
+<li><code>openblas</code>: 被作为依赖包安装, 但是貌似存在某些不正确的依赖关系, 换成新版本后能正常安装.</li>
+<li><code>yaml-cpp</code>: 最后链接的时候找不到某个符号, 新版本已经修复了符号没导出的问题, 详见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2piZWRlci95YW1sLWNwcC9pc3N1ZXMvMTAyNg==">#1026<i class="fa fa-external-link-alt"></i></span>.</li>
+<li><code>fmt</code>: 最后编译的时候会报错找不到某个头文件, 新版本修复了这个问题, 详见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2ZtdGxpYi9mbXQvcHVsbC8zNjYz">#3663<i class="fa fa-external-link-alt"></i></span>.</li>
+<li><code>spdlog</code>: 由于依赖 <code>fmt</code> 库, 所以必须和 <code>fmt</code> 一起更新.</li>
+</ul>
+</li>
+<li><p>直接装, 在 <code>CLANG64</code> 下就能一步到位.</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">taskflow libsimdpp blas lapack armadillo nlohmann-json magic-enum protobuf</span><br></pre></td></tr></table></figure></li>
+<li><p>需要 GCC 环境安装, 在 <code>MINGW64</code> 下一步到位.</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">boost-core boost-preprocessor boost-functional boost-container boost-variant boost-iterator boost-align boost-sort boost-algorithm boost-serialization boost-multi-index</span><br></pre></td></tr></table></figure></li>
+<li><p>特殊情况</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gecode tbb</span><br></pre></td></tr></table></figure>
+
+<p> 这两个库在 MinGW 环境编译的时候存在一些配置问题, 会导致安装的时候出现一些语法和链接错误, 因此单独 fork 了仓库并修改了一些报错的配置和代码.</p>
+<ul>
+<li><code>gecode</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dlY29kZS9jb21taXQvYjc3ZDIyZTRjNmIzYjY0NDllNGUzN2NiMWJlMmMxNmIyNjlmNGQzOQ==">增加了 ws2_32 的链接选项<i class="fa fa-external-link-alt"></i></span>.</li>
+<li><code>tbb</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL29uZVRCQi9jb21taXQvNThhMDNiMDVlNjZhZTNhNGY2OWYwMmVmMjQ0OGI3ZDJiMTcyMmFjNQ==">去掉了对于宏 __MINGW32__ 的前后不一致判断<i class="fa fa-external-link-alt"></i></span>.</li>
+</ul>
+<p> 然后把对应的 port 文件改成修改后自己的仓库地址, 就能安装成功.</p>
+</li>
+</ol>
+<h2 id="包装一下测试函数-可选"><a href="#包装一下测试函数-可选" class="headerlink" title="包装一下测试函数 (可选)"></a>包装一下测试函数 (可选)</h2><p>原项目在 <code>test/python</code> 目录下提供了一些功能测试函数, 但是不是按单元测试格式写的, 也不方便调用, 所以可以重新封装一遍, 方便最后测试打包出来的 Python 包是否功能正常.</p>
+<p>大概就是每份测试文件里用 <code>globals</code> 自动运行一下 <code>test</code> 开头的测试函数.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">do_test</span>():</span><br><span class="line">    all_cases = <span class="built_in">dict</span>(<span class="built_in">globals</span>())</span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> all_cases.items():</span><br><span class="line">        <span class="keyword">if</span> k.startswith(<span class="string">&quot;test&quot;</span>):</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                v()</span><br><span class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;Test:&quot;</span>, k, <span class="string">&quot;Failed:&quot;</span>, e)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;Test:&quot;</span>, k, <span class="string">&quot;OK&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>最后把所有测试文件的函数调用都合并到包的 <code>__main__.py</code> 里.</p>
+<h2 id="运行-CMake"><a href="#运行-CMake" class="headerlink" title="运行 CMake"></a>运行 CMake</h2><p>在参考 NUPACK 官方源码安装教程的基础上, 用以下命令运行 CMake. 运行前确保目录被清空.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic -DREBIND_PYTHON_INCLUDE=<span class="string">&quot;/d/CondaEnvs/py39/include&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里比较关键的是要指定 <code>-DVCPKG_TARGET_TRIPLET</code>, 其余选项基本类似.</p>
+<p>然后需要直接指定 <code>-DREBIND_PYTHON_INCLUDE</code>, 貌似由于平台路径格式差异, 导致无法正确地自动探测 Python 头文件的位置.</p>
+<p>在运行之前, 还需要解决下面这些问题.</p>
+<h3 id="解决库查找错误"><a href="#解决库查找错误" class="headerlink" title="解决库查找错误"></a>解决库查找错误</h3><p>也不知道是哪的配置问题, 在 Windows 下生成的 lib 文件后缀都是 <code>.dll.a</code>, 但是配置文件使用 <code>find_library</code> 按路径直接查找的时候找不到, 只能查找 <code>.a | .so</code> 后缀的, 因此需要把 <code>cmake/Libraries.cmake</code> 里把库名都改一下, 补一个 <code>.dll</code> 进去.</p>
+<p>类似这样:</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">NOT</span> LAPACK_LIBRARIES)</span><br><span class="line">    <span class="comment"># find_library(LAPACK_LIBRARIES lapack)</span></span><br><span class="line">    <span class="keyword">find_library</span>(LAPACK_LIBRARIES lapack.dll)</span><br><span class="line"><span class="keyword">endif</span>()</span><br></pre></td></tr></table></figure>
+
+<p>但是 <code>lapack</code> 和 <code>blas</code> 这两个库用到了 <code>find_package</code>, 且由于按本地路径直接查找, 因此还是需要去 <code>external/vcpkg/installed/x64-mingw-dynamic/lib</code> 下面手动改一下库文件名, 建议直接复制一份, 把复制的文件改个后缀.</p>
+<ul>
+<li><code>liblapack.dll.a</code> -&gt; <code>liblapack.a</code></li>
+<li><code>libopenblas.dll.a</code> -&gt; <code>libopenblas.a</code></li>
+</ul>
+<h3 id="解决-Python-包含目录错误"><a href="#解决-Python-包含目录错误" class="headerlink" title="解决 Python 包含目录错误"></a>解决 Python 包含目录错误</h3><p>直接使用自带的 <code>-DREBIND_PYTHON</code> 和 <code>-DREBIND_PYTHON_INCLUDE</code> 参数是存在问题的, 一是 Windows 下路径格式不适配, 二是项目本身 <code>external/rebind/CMakeLists.txt:12</code> 附近的代码就写的有问题, 所以手动改改.</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># if ($&#123;REBIND_PYTHON_INCLUDE&#125;) # 这里的原本的判断存在问题, 永远是假</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">NOT</span> <span class="string">&quot;$&#123;REBIND_PYTHON_INCLUDE&#125;&quot;</span> <span class="keyword">STREQUAL</span> <span class="string">&quot;&quot;</span>)</span><br><span class="line">    <span class="keyword">message</span>(<span class="string">&quot;-- Using specified Python include&quot;</span>)</span><br><span class="line">    <span class="keyword">set</span>(python_include <span class="variable">$&#123;REBIND_PYTHON_INCLUDE&#125;</span>) <span class="comment"># 仿照 else 部分对变量 python_include 赋值</span></span><br><span class="line">    <span class="keyword">set_property</span>(GLOBAL PROPERTY rebind_python_include <span class="variable">$&#123;REBIND_PYTHON_INCLUDE&#125;</span>)</span><br><span class="line"><span class="keyword">else</span>()</span><br><span class="line">    <span class="keyword">execute_process</span>(</span><br><span class="line">        <span class="keyword">COMMAND</span> <span class="variable">$&#123;REBIND_PYTHON&#125;</span> -c <span class="string">&quot;import sys, sysconfig; sys.stdout.write(sysconfig.get_paths()[&#x27;include&#x27;])&quot;</span></span><br><span class="line">        RESULT_VARIABLE python_stat OUTPUT_VARIABLE python_include</span><br><span class="line">    )</span><br><span class="line">    <span class="keyword">if</span> (python_stat)</span><br><span class="line">        <span class="keyword">message</span>(FATAL_ERROR <span class="string">&quot;Failed to deduce include directory from &#x27;$&#123;REBIND_PYTHON&#125;&#x27; executable.\nMaybe specify REBIND_PYTHON_INCLUDE directly.&quot;</span>)</span><br><span class="line">    <span class="keyword">endif</span>()</span><br><span class="line">    <span class="keyword">message</span>(<span class="string">&quot;-- Using Python include directory deduced from REBIND_PYTHON=$&#123;REBIND_PYTHON&#125;&quot;</span>)</span><br><span class="line">    <span class="keyword">set_property</span>(GLOBAL PROPERTY rebind_python_include <span class="variable">$&#123;python_include&#125;</span>)</span><br><span class="line"><span class="keyword">endif</span>()</span><br><span class="line"></span><br><span class="line"><span class="keyword">message</span>(<span class="string">&quot;-- Using Python include directory $&#123;python_include&#125;&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>修改之后再编译就不会报 <code>Python.h</code> 头文件找不到这样的错误了.</p>
+<h3 id="解决-yaml-cpp-的警告"><a href="#解决-yaml-cpp-的警告" class="headerlink" title="解决 yaml-cpp 的警告"></a>解决 yaml-cpp 的警告</h3><p>运行之后可能会报关于 <code>yaml-cpp</code> 的警告:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CMake Warning (dev) at cmake/BuildCXX.cmake:133 (target_link_libraries):</span><br><span class="line">  The library that is being linked to, yaml-cpp, is marked as being</span><br><span class="line">  deprecated by the owner.  The message provided by the developer is:</span><br><span class="line"></span><br><span class="line">  The target yaml-cpp is deprecated and will be removed in version 0.10.0.</span><br><span class="line">  Use the yaml-cpp::yaml-cpp target instead.</span><br></pre></td></tr></table></figure>
+
+<p>这是新版本 <code>yaml-cpp</code> 的开发者警告, 可以选择去 <code>cmake/BuildCXX.cmake:133</code> 里面按照提示把 <code>yaml-cpp</code> 改成 <code>yaml-cpp::yaml-cpp</code> 再重新运行命令.</p>
+<h2 id="生成目标文件"><a href="#生成目标文件" class="headerlink" title="生成目标文件"></a>生成目标文件</h2><p>参考教程的基础上, 用以下命令生成目标文件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmake --build . --target nupack-python --verbose -j8</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>-j8</code> 可以自行修改, 用来多线程加快编译速度, 太高可能会爆内存.</p>
+<h3 id="解决参数路径错误"><a href="#解决参数路径错误" class="headerlink" title="解决参数路径错误"></a>解决参数路径错误</h3><p>不出意外会得到下面的报错.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[ 44%] Running cpp protocol buffer compiler on proto/public.proto</span><br><span class="line">/d/Projects/VsProjects/nupack-4.0.1.8/source/external/vcpkg/installed/x64-mingw-dynamic/tools/protobuf/protoc.exe --cpp_out :/d/Projects/VsProjects/nupack-4.0.1.8/source/build-py39/include/nupack/ -I /d/Projects/VsProjects/nupack-4.0.1.8/source /d/Projects/VsProjects/nupack-4.0.1.8/source/proto/public.proto</span><br><span class="line">/d/Projects/VsProjects/nupack-4.0.1.8/source/build-py39/include/nupack/: No such file or directory</span><br><span class="line">make[3]: *** [CMakeFiles/libnupack.dir/build.make:75: include/nupack/proto/public.pb.h] Error 1</span><br><span class="line">make[3]: Leaving directory &#x27;/d/Projects/VsProjects/nupack-4.0.1.8/source/build-py39&#x27;</span><br><span class="line">make[2]: *** [CMakeFiles/Makefile2:128: CMakeFiles/libnupack.dir/all] Error 2</span><br><span class="line">make[2]: Leaving directory &#x27;/d/Projects/VsProjects/nupack-4.0.1.8/source/build-py39&#x27;</span><br><span class="line">make[1]: *** [CMakeFiles/Makefile2:280: CMakeFiles/nupack-python.dir/rule] Error 2</span><br><span class="line">make[1]: Leaving directory &#x27;/d/Projects/VsProjects/nupack-4.0.1.8/source/build-py39&#x27;</span><br><span class="line">make: *** [Makefile:234: nupack-python] Error 2</span><br></pre></td></tr></table></figure>
+
+<p>这是由于其中一条命令中的参数 <code>--cpp_out</code> 后面跟的路径前面多了个冒号 <code>:</code>, 也不知道在哪配置的.</p>
+<p>所以在运行命令之前, 还得先把上一步生成的生成文件里的内容改一下, 位于 <code>CMakeFiles/libnupack.dir/build.make:75</code>.</p>
+<p>这一步每次重新生成的时候都要手动改<del>纯纯折磨</del>.</p>
+<h3 id="解决-simdpp-包含目录错误"><a href="#解决-simdpp-包含目录错误" class="headerlink" title="解决 simdpp 包含目录错误"></a>解决 simdpp 包含目录错误</h3><p>重新生成会报错找不到 <code>simdpp</code> 相关的头文件.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SIMD.h:19:14: fatal error:</span><br><span class="line">      &#x27;simdpp/simd.h&#x27; file not found</span><br><span class="line">   19 | #    include &lt;simdpp/simd.h&gt;</span><br><span class="line">      |              ^~~~~~~~~~~~~~~</span><br></pre></td></tr></table></figure>
+
+<p>这是原项目自己加的一个私有 port, 估计是没配置好, 所以我们直接在顶层 <code>CMakeLists.txt</code> 里用 <code>include_directories</code> 自己加进去, 比如这样.</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">include_directories</span>(</span><br><span class="line">    <span class="string">&quot;/d/Projects/VsProjects/nupack-4.0.1.8/source/external/vcpkg/installed/x64-mingw-dynamic/include/libsimdpp-2.1&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="解决类型错误"><a href="#解决类型错误" class="headerlink" title="解决类型错误"></a>解决类型错误</h3><p>重新生成会报错有一处类型不兼容.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Module.cc:106:17: error:</span><br><span class="line">      assigning to &#x27;hashfunc&#x27; (aka &#x27;long long (*)(_object *)&#x27;) from incompatible type</span><br><span class="line">      &#x27;long (PyObject *) noexcept&#x27; (aka &#x27;long (_object *) noexcept&#x27;): different return type</span><br><span class="line">      (&#x27;Py_hash_t&#x27; (aka &#x27;long long&#x27;) vs &#x27;long&#x27;)</span><br><span class="line">  106 |     o.tp_hash = type_index_hash;</span><br><span class="line">      |                 ^~~~~~~~~~~~~~~</span><br></pre></td></tr></table></figure>
+
+<p>这是因为 Windows 下 <code>long long</code> 和 <code>long</code> 类型位长不一致导致的, 所以直接去源码 <code>external/rebind/source/Module.cc:80</code> 处把返回值类型 <code>long</code> 改成 <code>long long</code>.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">type_index_hash</span><span class="params">(PyObject *o)</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">static_cast</span>&lt;<span class="type">long</span> <span class="type">long</span>&gt;(<span class="built_in">cast_object</span>&lt;TypeIndex&gt;(o).<span class="built_in">hash_code</span>());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="解决符号重定义错误"><a href="#解决符号重定义错误" class="headerlink" title="解决符号重定义错误"></a>解决符号重定义错误</h3><p>在最后的链接环节, 还会出现符号重定义错误.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ld.lld: error: duplicate symbol: rebind::Holder&lt;rebind::Var&gt;::type</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Python.cc.obj</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Module.cc.obj</span><br><span class="line"></span><br><span class="line">ld.lld: error: duplicate symbol: rebind::Holder&lt;rebind::TypeIndex&gt;::type</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Python.cc.obj</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Module.cc.obj</span><br><span class="line"></span><br><span class="line">ld.lld: error: duplicate symbol: rebind::Holder&lt;rebind::Function&gt;::type</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Python.cc.obj</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Module.cc.obj</span><br><span class="line"></span><br><span class="line">ld.lld: error: duplicate symbol: rebind::Holder&lt;rebind::ArrayBuffer&gt;::type</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Module.cc.obj</span><br><span class="line">&gt;&gt;&gt; defined at CMakeFiles/nupack-python.dir/external/rebind/source/Cast.cc.obj</span><br></pre></td></tr></table></figure>
+
+<p>不过这个我看了一下源码, 大概率是因为模板的实例化导致的重定义. 但是由于对 c++ 语法也不是很懂, 试了很久没改出来, 所以暴力解决, 三合一大法, 把涉及重定义的几个模块的源码合并到一份源码里, 只生成一个 <code>obj</code> 文件, 在这一份文件里就不会由于反复实例化模板导致重定义了.</p>
+<p>直接把:</p>
+<ul>
+<li><code>external/rebind/source/Cast.cc</code></li>
+<li><code>external/rebind/source/Python.cc</code></li>
+<li><code>external/rebind/source/Module.cc</code> (注意之前修改过一次)</li>
+</ul>
+<p>复制到一份新的 <code>external/rebind/source/Cast_Python_Module.cc</code> 文件里.</p>
+<p>然后修改 <code>external/rebind/CMakeLists.txt:49</code> 附近代码:</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set_property</span>(GLOBAL PROPERTY rebind_module_files</span><br><span class="line">    <span class="comment"># $&#123;CMAKE_CURRENT_SOURCE_DIR&#125;/source/Python.cc</span></span><br><span class="line">    <span class="comment"># $&#123;CMAKE_CURRENT_SOURCE_DIR&#125;/source/Module.cc</span></span><br><span class="line">    <span class="comment"># $&#123;CMAKE_CURRENT_SOURCE_DIR&#125;/source/Cast.cc</span></span><br><span class="line">    <span class="variable">$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;</span>/source/Globals.cc</span><br><span class="line">    <span class="variable">$&#123;CMAKE_CURRENT_SOURCE_DIR&#125;</span>/source/Cast_Python_Module.cc</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="解决-Python-符号未定义错误"><a href="#解决-Python-符号未定义错误" class="headerlink" title="解决 Python 符号未定义错误"></a>解决 Python 符号未定义错误</h3><p>最后, 也不知道哪没配置好, 会得到一大堆关于 Python 库符号未定义的错误, 像这样的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ld.lld: error: undefined symbol: __declspec(dllimport) PyObject_CallObject</span><br></pre></td></tr></table></figure>
+
+<p>似乎只是因为在 Windows 下没有指定 Python 链接库, 所以根据要绑定的 Python 版本, 直接在顶级 <code>CMakeLists.txt</code> 里用 <code>link_directories</code> 和 <code>link_libraries</code> 直接打补丁修复, 类似于下面这样. 库目录和命令里的 <code>-DREBIND_PYTHON_INCLUDE</code> 指定的包含目录相互匹配.</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">link_directories</span>(</span><br><span class="line">    <span class="string">&quot;/d/CondaEnvs/py39/libs&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">link_libraries</span>(</span><br><span class="line">    python39</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是, 不能链接 <code>python3</code>, 必须链接特定版本的库 (比如 <code>python39</code>), 否则还是会出现个别符号未定义.</p>
+<h3 id="解决-ImageHlp-符号未定义"><a href="#解决-ImageHlp-符号未定义" class="headerlink" title="解决 ImageHlp 符号未定义"></a>解决 ImageHlp 符号未定义</h3><p>最后的最后, 链接的时候还存在一些符号未定义, 大概长这样.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ld.lld: error: undefined symbol: __declspec(dllimport) SymGetModuleBase64</span><br><span class="line">ld.lld: error: undefined symbol: __declspec(dllimport) StackWalk64</span><br><span class="line">ld.lld: error: undefined symbol: __declspec(dllimport) ImageNtHeader</span><br></pre></td></tr></table></figure>
+
+<p>还是在 Windows 下少链接了一些库, 经过一番搜索, 找到一个可行的<span class="exturl" data-url="aHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvMjY0MDU0MjAvdzY0LW1pbmd3LWxsdm1zdXBwb3J0LWEtdW5kZWZpbmVkLXJlZmVyZW5jZS10by1pbXA=">解决方案<i class="fa fa-external-link-alt"></i></span>, 直接在顶级 <code>CMakeLists.txt</code> 的 <code>link_libraries</code> 里添加对 <code>imagehlp</code> 的链接即可.</p>
+<h2 id="生成-Python-包"><a href="#生成-Python-包" class="headerlink" title="生成 Python 包"></a>生成 Python 包</h2><p>首先需要修改一下生成目录下的 <code>setup.py</code>, 也可以在生成之前直接修改源码的 <code>package/setup.py</code>, 就不用每次修改.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">setup(</span><br><span class="line">    name=<span class="string">&#x27;nupack&#x27;</span>,</span><br><span class="line">    version=<span class="string">&#x27;@PROJECT_VERSION@&#x27;</span>,</span><br><span class="line">    description=<span class="string">&#x27;Nucleic Acid Package&#x27;</span>,</span><br><span class="line">    url=<span class="string">&#x27;www.nupack.org&#x27;</span>,</span><br><span class="line">    <span class="comment"># package_data=&#123;&#x27;nupack&#x27;: [&#x27;cpp.so&#x27;, &#x27;parameters/*&#x27;]&#125;,</span></span><br><span class="line">    package_data=&#123;<span class="string">&#x27;nupack&#x27;</span>: [<span class="string">&#x27;cpp.pyd&#x27;</span>, <span class="string">&#x27;parameters/*&#x27;</span>, <span class="string">&quot;*.dll&quot;</span>]&#125;,</span><br><span class="line">    packages=find_packages(include=(<span class="string">&#x27;nupack**&#x27;</span>,)),</span><br><span class="line">    scripts=[],</span><br><span class="line">    distclass=BinaryDistribution,</span><br><span class="line">    cmdclass=&#123;<span class="string">&#x27;install&#x27;</span>: InstallPlatlib&#125;,</span><br><span class="line">    install_requires=[</span><br><span class="line">        <span class="string">&#x27;pyyaml&gt;=5.0.0&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;scipy&gt;=1.0&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;numpy&gt;=1.17&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;pandas&gt;=1.1.0&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;jinja2&gt;=2.0&#x27;</span>,</span><br><span class="line">    ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在 Windows 下 Python 的扩展模块文件名后缀是 <code>.pyd</code>, 所以得把编译后生成的 <code>cpp.so</code> 重命名成 <code>cpp.pyd</code>.</p>
+<p>然后刚刚编译生成的 <code>cpp.pyd</code>, 还依赖于我们编译环境里以及安装的一些库的动态链接库 DLL 文件, 所以还得挨个把这些 DLL 文件复制过来和 <code>cpp.pyd</code> 放在同一个目录下一起打包进去.</p>
+<p>c++ 运行时依赖:</p>
+<ul>
+<li><code>libc++.dll</code>: 位于 MSYS2 安装目录的 <code>/clang64/bin</code> 下面.</li>
+</ul>
+<p>其余都是我们安装的库及其依赖的库, 均位于 <code>external/vcpkg/installed/x64-mingw-dynamic/bin</code> 下, 共 16 个:</p>
+<ul>
+<li><code>libgcc_s_seh-1.dll</code></li>
+<li><code>libgecodefloat.dll</code></li>
+<li><code>libgecodeint.dll</code></li>
+<li><code>libgecodekernel.dll</code></li>
+<li><code>libgecodeminimodel.dll</code></li>
+<li><code>libgecodesearch.dll</code></li>
+<li><code>libgecodeset.dll</code></li>
+<li><code>libgecodesupport.dll</code></li>
+<li><code>libgfortran-5.dll</code></li>
+<li><code>liblapack.dll</code></li>
+<li><code>libopenblas.dll</code></li>
+<li><code>libprotobuf.dll</code></li>
+<li><code>libquadmath-0.dll</code></li>
+<li><code>libtbb12.dll</code></li>
+<li><code>libwinpthread-1.dll</code></li>
+<li><code>libyaml-cpp.dll</code></li>
+</ul>
+<p>然后导航进生成目录下, 使用命令 <code>python -m build</code> 进行打包, 则会在 <code>dist</code> 下生成打包后的源码和 whl 安装包.</p>
+<p>之后可以使用 <code>pip install</code> 直接安装 <code>whl</code> 文件, 并运行命令 <code>python -m nupack.test</code> (如果封装了测试函数) 来查看功能是否正常.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>本次编译过程所有修改后的差异文件均放在自己的 Github 上了, 包括在自己电脑上打包好的 <code>whl</code> 文件也一并放上去了, 仓库地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL251cGFjay13aW4=">nupack-win<i class="fa fa-external-link-alt"></i></span>, 直接去 Releases 页面下载即可.</p>
+<p>从五一放假开始折腾, 前前后后大约折腾了一周多才编译出来, 可以说是把能踩的坑都踩了个遍, 让我深刻的认识到不同操作系统不同编译环境的天壤之别, 期间也试过用 msvc 和 gcc 去编译, 但是一坨的警告和错误让我彻底转向 clang. <del>不过那些警告和错误看着挺有道理的, 怎么 clang 就不管了呢?</del></p>
+<p>虽然之后自己的项目要用这个的时候大概率是在 Linux 环境运行, 用不到 Windows 的库了, 但是这么折腾一下也挺有收获, 至少浅浅的使用了一下三大主流 C 编译器, 以及熟悉了一下 CMake 和 vcpkg 的使用方法, 希望这次踩的坑将来都不会踩了吧~</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/NUPACK/" rel="tag"><i class="fa fa-tag"></i> NUPACK</a>
+              <a href="/tags/MSYS2/" rel="tag"><i class="fa fa-tag"></i> MSYS2</a>
+              <a href="/tags/MinGW/" rel="tag"><i class="fa fa-tag"></i> MinGW</a>
+              <a href="/tags/Clang/" rel="tag"><i class="fa fa-tag"></i> Clang</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2024/05/07/py-transformers-genexpr/" rel="prev" title="使用 transformers.Pipeline 迭代生成数据">
+                  <i class="fa fa-chevron-left"></i> 使用 transformers.Pipeline 迭代生成数据
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">195k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:54</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+</body>
+</html>
