@@ -104,6 +104,13 @@ or by setting the VCPKG_DISABLE_METRICS environment variable.
 Read more about vcpkg telemetry at docs/about/privacy.md
 ```
 
+安装之前记得先在终端里设置一下默认的 triplet.
+
+```bash
+export VCPKG_DEFAULT_TRIPLET=x64-mingw-dynamic
+export VCPKG_DEFAULT_HOST_TRIPLET=x64-mingw-dynamic
+```
+
 结合官方教程里的步骤以及 `cmake/Libraries.cmake` 和 `cmake/BuildCXX.cmake` 里的内容, 所有要安装的包大概可以分成下面几类.
 
 1. 需要先更新 port 版本
