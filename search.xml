@@ -1137,6 +1137,67 @@
       </tags>
   </entry>
   <entry>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
+<ul>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
+</ul>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
+<p>输出: $Y_{n \times q}$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>数据降维</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>NJ 树算法原理与实现</title>
     <url>//posts/2023/03/08/njtree/</url>
     <content><![CDATA[<p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
@@ -1218,67 +1279,6 @@
         <tag>聚类算法</tag>
         <tag>生信</tag>
         <tag>NJ 树</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PCA 算法原理与实现</title>
-    <url>//posts/2023/02/18/pca/</url>
-    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
-<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
-<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
-<p>因此, 在 PCA 方法中, 我们希望:</p>
-<ul>
-<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
-<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
-</ul>
-<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
-<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
-<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
-<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
-<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
-<p>首先是方差与协方差的公式:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
-<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
-<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
-<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
-<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
-<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
-<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
-<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
-<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
-</div>
-
-<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
-<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
-<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
-<p>输出: $Y_{n \times q}$</p>
-<ol>
-<li>对 $X$ 进行均值方差归一化.</li>
-<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
-<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
-<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
-<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
-<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -1437,46 +1437,6 @@
       </tags>
   </entry>
   <entry>
-    <title>一次意外的 Github SSH 连接失败</title>
-    <url>//posts/2024/01/15/ssh-github/</url>
-    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
-<p>但是 clone 仓库时, 出现了如下报错:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
-
-<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
-<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
-<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
-<p>然后 Windows 给了一个愉快的输出:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
-
-<p>但是 Ubuntu 还是失败:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
-<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
-
-<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
-<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
-<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-
-<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SM9 算法中的塔式扩张公式推导</title>
     <url>//posts/2023/12/04/sm9fpex/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
@@ -1541,6 +1501,46 @@
         <tag>SM9</tag>
         <tag>塔式扩张</tag>
         <tag>扩域运算</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一次意外的 Github SSH 连接失败</title>
+    <url>//posts/2024/01/15/ssh-github/</url>
+    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
+<p>但是 clone 仓库时, 出现了如下报错:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
+
+<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
+<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
+<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
+<p>然后 Windows 给了一个愉快的输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+
+<p>但是 Ubuntu 还是失败:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
+<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
+
+<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
+<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
+<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
@@ -1684,7 +1684,7 @@
 <p>然后刚刚编译生成的 <code>cpp.pyd</code>, 还依赖于我们编译环境里以及安装的一些库的动态链接库 DLL 文件, 所以还得挨个把这些 DLL 文件复制过来和 <code>cpp.pyd</code> 放在同一个目录下一起打包进去.</p>
 <p>c++ 运行时依赖:</p>
 <ul>
-<li><code>libc++.dll</code>: 位于 MSYS2 安装目录的 <code>/clang64/bin</code> 下面.</li>
+<li><code>libc++.dll</code>: 位于 MSYS2 安装目录的 <code>clang64/bin</code> 下面.</li>
 </ul>
 <p>其余都是我们安装的库及其依赖的库, 均位于 <code>external/vcpkg/installed/x64-mingw-dynamic/bin</code> 下, 共 16 个:</p>
 <ul>
@@ -2380,20 +2380,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>给新生的编程工具推荐与基本使用方法</title>
     <url>//posts/2022/08/11/wast-vscandvs/</url>
     <content><![CDATA[<p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
@@ -2537,6 +2523,20 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
