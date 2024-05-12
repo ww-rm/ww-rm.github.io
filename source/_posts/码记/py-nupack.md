@@ -119,7 +119,7 @@ export VCPKG_DEFAULT_HOST_TRIPLET=x64-mingw-dynamic
     openblas yaml-cpp fmt spdlog
     ```
 
-    这些库由于旧版本有一些 bug, 或者由于某些神秘问题导致在 MinGW 环境下安装失败, 但是通过把一些 port 换成最新的就能正常安装.
+    这些库由于旧版本有一些 bug, 或者由于某些神秘问题导致在 MinGW 环境下安装失败, 但是通过把 port 换成最新的就能正常安装.
 
     - `openblas`: 被作为依赖包安装, 但是貌似存在某些不正确的依赖关系, 换成新版本后能正常安装.
     - `yaml-cpp`: 最后链接的时候找不到某个符号, 新版本已经修复了符号没导出的问题, 详见 [#1026](https://github.com/jbeder/yaml-cpp/issues/1026).
@@ -188,7 +188,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE
 
 ### 解决库查找错误
 
-也不知道是哪的配置问题, 在 Windows 下生成的 lib 文件后缀都是 `.dll.a`, 但是配置文件使用 `find_library` 按路径直接查找的时候找不到, 只能查找 `.a | .so` 后缀的, 因此需要把 `cmake/Libraries.cmake` 里把库名都改一下, 补一个 `.dll` 进去.
+也不知道是哪的配置问题, 在 Windows 下生成的 lib 文件后缀都是 `.dll.a`, 但是配置文件使用 `find_library` 按路径直接查找的时候找不到, 只能查找 `.a` 或者 `.so` 后缀的, 因此需要去 `cmake/Libraries.cmake` 里把库名都改一下, 补一个 `.dll` 进去.
 
 类似这样:
 
