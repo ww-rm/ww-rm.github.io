@@ -1437,46 +1437,6 @@
       </tags>
   </entry>
   <entry>
-    <title>一次意外的 Github SSH 连接失败</title>
-    <url>//posts/2024/01/15/ssh-github/</url>
-    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
-<p>但是 clone 仓库时, 出现了如下报错:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
-
-<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
-<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
-<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
-<p>然后 Windows 给了一个愉快的输出:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
-
-<p>但是 Ubuntu 还是失败:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
-<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
-
-<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
-<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
-<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-
-<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SM9 算法中的塔式扩张公式推导</title>
     <url>//posts/2023/12/04/sm9fpex/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
@@ -1544,6 +1504,46 @@
       </tags>
   </entry>
   <entry>
+    <title>一次意外的 Github SSH 连接失败</title>
+    <url>//posts/2024/01/15/ssh-github/</url>
+    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
+<p>但是 clone 仓库时, 出现了如下报错:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
+
+<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
+<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
+<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
+<p>然后 Windows 给了一个愉快的输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+
+<p>但是 Ubuntu 还是失败:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
+<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
+
+<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
+<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
+<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>在 Windows 上编译安装 NUPACK</title>
     <url>//posts/2024/05/11/py-nupack/</url>
     <content><![CDATA[<p>之前项目里用到了 <span class="exturl" data-url="aHR0cHM6Ly9udXBhY2sub3JnLw==">NUPACK<i class="fa fa-external-link-alt"></i></span> 这个软件, 用来做引物二级结构预测, 但是就<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQv">官方文档<i class="fa fa-external-link-alt"></i></span>上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程.</p>
@@ -1582,7 +1582,7 @@
 <li><p>需要先更新 port 版本</p>
  <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">openblas yaml-cpp fmt spdlog</span><br></pre></td></tr></table></figure>
 
-<p> 这些库由于旧版本有一些 bug, 或者由于某些神秘问题导致在 MinGW 环境下安装失败, 但是通过把一些 port 换成最新的就能正常安装.</p>
+<p> 这些库由于旧版本有一些 bug, 或者由于某些神秘问题导致在 MinGW 环境下安装失败, 但是通过把 port 换成最新的就能正常安装.</p>
 <ul>
 <li><code>openblas</code>: 被作为依赖包安装, 但是貌似存在某些不正确的依赖关系, 换成新版本后能正常安装.</li>
 <li><code>yaml-cpp</code>: 最后链接的时候找不到某个符号, 新版本已经修复了符号没导出的问题, 详见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2piZWRlci95YW1sLWNwcC9pc3N1ZXMvMTAyNg==">#1026<i class="fa fa-external-link-alt"></i></span>.</li>
@@ -1616,7 +1616,7 @@
 <p>这里比较关键的是要指定 <code>-DVCPKG_TARGET_TRIPLET</code>, 其余选项基本类似.</p>
 <p>然后需要直接指定 <code>-DREBIND_PYTHON_INCLUDE</code>, 貌似由于平台路径格式差异, 导致无法正确地自动探测 Python 头文件的位置.</p>
 <p>在运行之前, 还需要解决下面这些问题.</p>
-<h3 id="解决库查找错误"><a href="#解决库查找错误" class="headerlink" title="解决库查找错误"></a>解决库查找错误</h3><p>也不知道是哪的配置问题, 在 Windows 下生成的 lib 文件后缀都是 <code>.dll.a</code>, 但是配置文件使用 <code>find_library</code> 按路径直接查找的时候找不到, 只能查找 <code>.a | .so</code> 后缀的, 因此需要把 <code>cmake/Libraries.cmake</code> 里把库名都改一下, 补一个 <code>.dll</code> 进去.</p>
+<h3 id="解决库查找错误"><a href="#解决库查找错误" class="headerlink" title="解决库查找错误"></a>解决库查找错误</h3><p>也不知道是哪的配置问题, 在 Windows 下生成的 lib 文件后缀都是 <code>.dll.a</code>, 但是配置文件使用 <code>find_library</code> 按路径直接查找的时候找不到, 只能查找 <code>.a</code> 或者 <code>.so</code> 后缀的, 因此需要去 <code>cmake/Libraries.cmake</code> 里把库名都改一下, 补一个 <code>.dll</code> 进去.</p>
 <p>类似这样:</p>
 <figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">NOT</span> LAPACK_LIBRARIES)</span><br><span class="line">    <span class="comment"># find_library(LAPACK_LIBRARIES lapack)</span></span><br><span class="line">    <span class="keyword">find_library</span>(LAPACK_LIBRARIES lapack.dll)</span><br><span class="line"><span class="keyword">endif</span>()</span><br></pre></td></tr></table></figure>
 
@@ -2543,11 +2543,12 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+    <title>Typora 破解版</title>
+    <url>//posts/2023/07/03/typora-cracked/</url>
+    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
 <p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>资源分享</category>
@@ -2557,12 +2558,11 @@
       </tags>
   </entry>
   <entry>
-    <title>Typora 破解版</title>
-    <url>//posts/2023/07/03/typora-cracked/</url>
-    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
 <p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>资源分享</category>
@@ -2649,68 +2649,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MultiheadAttention 使用方法</title>
-    <url>//posts/2024/01/22/multiheadattention/</url>
-    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
-<blockquote>
-<ul>
-<li><code>embed_dim</code> – Total dimension of the model.</li>
-<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
-<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
-<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
-</ul>
-</blockquote>
-<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
-<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
-</div>
-
-<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
-<ul>
-<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
-<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
-</ul>
-<p>下一步则是计算注意力, 也就是经典公式:</p>
-<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
-<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
-<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
-<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
-<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
-<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
-<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
-<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
-<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
-<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
-<ul>
-<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
-<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
-<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
-<li>参数 <code>num_heads</code> 对应 $h$.</li>
-<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
-<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
-<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
-<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
-</ul>
-<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>PyTorch</tag>
-        <tag>MultiheadAttention</tag>
-        <tag>NLP</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SM9 文档阅读笔记</title>
     <url>//posts/2023/12/15/sm9/</url>
     <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
@@ -2779,6 +2717,68 @@
         <tag>R-ate</tag>
         <tag>Frobenius</tag>
         <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MultiheadAttention 使用方法</title>
+    <url>//posts/2024/01/22/multiheadattention/</url>
+    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
+<blockquote>
+<ul>
+<li><code>embed_dim</code> – Total dimension of the model.</li>
+<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
+<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
+<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
+</ul>
+</blockquote>
+<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
+<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
+</div>
+
+<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
+<ul>
+<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
+<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
+</ul>
+<p>下一步则是计算注意力, 也就是经典公式:</p>
+<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
+<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
+<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
+<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
+<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
+<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
+<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
+<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
+<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
+<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
+<ul>
+<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
+<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
+<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
+<li>参数 <code>num_heads</code> 对应 $h$.</li>
+<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
+<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
+<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
+</ul>
+<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>PyTorch</tag>
+        <tag>MultiheadAttention</tag>
+        <tag>NLP</tag>
       </tags>
   </entry>
   <entry>
