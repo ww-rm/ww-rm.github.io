@@ -126,16 +126,16 @@ export VCPKG_DEFAULT_HOST_TRIPLET=x64-mingw-dynamic
     - `fmt`: 最后编译的时候会报错找不到某个头文件, 新版本修复了这个问题, 详见 [#3663](https://github.com/fmtlib/fmt/pull/3663).
     - `spdlog`: 由于依赖 `fmt` 库, 所以必须和 `fmt` 一起更新.
 
-2. 需要 GCC 环境安装, 在 `MINGW64` 下一步到位.
-
-    ```plain
-    boost-core boost-preprocessor boost-functional boost-container boost-variant boost-iterator boost-align boost-sort boost-algorithm boost-serialization boost-multi-index
-    ```
-
-3. 直接装, 在 `CLANG64` 下就能一步到位.
+2. 直接装, 在 `CLANG64` 下就能一步到位.
 
     ```plain
     taskflow libsimdpp blas lapack armadillo nlohmann-json magic-enum protobuf
+    ```
+
+3. 需要 GCC 环境安装, 在 `MINGW64` 下一步到位.
+
+    ```plain
+    boost-core boost-preprocessor boost-functional boost-container boost-variant boost-iterator boost-align boost-sort boost-algorithm boost-serialization boost-multi-index
     ```
 
 4. 特殊情况
