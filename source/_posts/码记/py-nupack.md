@@ -422,7 +422,7 @@ setup(
 
 c++ 运行时依赖:
 
-- `libc++.dll`: 位于 MSYS2 安装目录的 `/clang64/bin` 下面.
+- `libc++.dll`: 位于 MSYS2 安装目录的 `clang64/bin` 下面.
 
 其余都是我们安装的库及其依赖的库, 均位于 `external/vcpkg/installed/x64-mingw-dynamic/bin` 下, 共 16 个:
 
