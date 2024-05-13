@@ -578,7 +578,7 @@ ImportError: dynamic module does not define module export function (PyInit_cpp)
 
 这里不需要用 `PyMODINIT_FUNC`, 因为会重复定义 `extern "C"`.
 
-不过懒得重新再全部按静态方式编译链接一次, 所以 Github 上都是放的动态链接的版本~~上传完了无聊试试才发现静态链接一路畅通无阻且体积小性价比又高~~.
+不过懒得再全部重新按静态方式编译链接一次, 所以 Github 上都是放的动态链接的版本~~上传完了无聊试试才发现静态链接一路畅通无阻且体积小性价比又高~~.
 
 ## 后记
 
