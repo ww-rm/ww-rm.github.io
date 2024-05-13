@@ -151,27 +151,6 @@ export VCPKG_DEFAULT_HOST_TRIPLET=x64-mingw-dynamic
 
     然后把对应的 port 文件改成修改后自己的仓库地址, 就能安装成功.
 
-## 包装一下测试函数 (可选)
-
-原项目在 `test/python` 目录下提供了一些功能测试函数, 但是不是按单元测试格式写的, 也不方便调用, 所以可以重新封装一遍, 方便最后测试打包出来的 Python 包是否功能正常.
-
-大概就是每份测试文件里用 `globals` 自动运行一下 `test` 开头的测试函数.
-
-```python
-def do_test():
-    all_cases = dict(globals())
-    for k, v in all_cases.items():
-        if k.startswith("test"):
-            try:
-                v()
-            except Exception as e:
-                print("Test:", k, "Failed:", e)
-            else:
-                print("Test:", k, "OK")
-```
-
-最后把所有测试文件的函数调用都合并到包的 `__main__.py` 里.
-
 ## 运行 CMake
 
 在参考 NUPACK 官方源码安装教程的基础上, 用以下命令运行 CMake. 运行前确保目录被清空.
@@ -279,12 +258,25 @@ make: *** [Makefile:234: nupack-python] Error 2
 
 这一步每次重新生成的时候都要手动改~~纯纯折磨~~.
 
+### 解决 format-security 警告
+
+编译途中会有一个关于格式字符串的不安全警告.
+
+```plain
+external/backward-cpp/backward.hpp:3646:14: warning:
+      format string is not a string literal (potentially insecure) [-Wformat-security]
+ 3646 |       printf(lpMsgBuf);
+      |              ^~~~~~~~
+```
+
+我们可以根据提示信息改成 `printf("%s", lpMsgBuf)`.
+
 ### 解决 simdpp 包含目录错误
 
 重新生成会报错找不到 `simdpp` 相关的头文件.
 
 ```plain
-SIMD.h:19:14: fatal error:
+include/nupack/math/SIMD.h:19:14: fatal error:
       'simdpp/simd.h' file not found
    19 | #    include <simdpp/simd.h>
       |              ^~~~~~~~~~~~~~~
@@ -303,7 +295,7 @@ include_directories(
 重新生成会报错有一处类型不兼容.
 
 ```plain
-Module.cc:106:17: error:
+external/rebind/source/Module.cc:106:17: error:
       assigning to 'hashfunc' (aka 'long long (*)(_object *)') from incompatible type
       'long (PyObject *) noexcept' (aka 'long (_object *) noexcept'): different return type
       ('Py_hash_t' (aka 'long long') vs 'long')
@@ -469,7 +461,88 @@ ImportError: DLL load failed while importing cpp: 找不到指定的模块。
 
 然后导航进生成目录下, 使用命令 `python -m build` 进行打包, 则会在 `dist` 下生成打包后的源码和 whl 安装包.
 
-之后可以使用 `pip install` 直接安装 `whl` 文件, 并运行命令 `python -m nupack.test` (如果封装了测试函数) 来查看功能是否正常.
+之后可以使用 `pip install` 直接安装 `whl` 文件, 并运行命令 `python -m pytest -v --pyargs nupack` 来测试功能是否正常, 应当是 `45` 个测试用例全部通过, 无任何警告和错误.
+
+## 解决路径错误
+
+直接在源码目录下面测试没测出来 bug, 但是去别的目录下就会发生报错.
+
+```plain
+RuntimeError: C++: : "failed to open parameter file " (Model.cc, line 50)
+```
+
+有问题的源码在 `source/Model.cc:35` 附近.
+
+```cpp
+json ParameterFile::open() const {
+    string name = path;
+
+    if (!path_exists(name)) {
+        vec<string> defaults;
+        // boost::split(defaults, DefaultParametersPath, [](char c) {return c == ':';}, boost::token_compress_on); // Windows 下不能按冒号 : 分割, 换成分号 ;
+        boost::split(defaults, DefaultParametersPath, [](char c) {return c == ';';}, boost::token_compress_on);
+        for (auto const &d : defaults) {
+            name = path_join(d, path);
+            if (path_exists(name)) break;
+        }
+    }
+
+    if (!path_exists(name)) {
+        auto s = get_env("NUPACKHOME");
+        if (!s.empty()) name = path_join(path_join(s, "parameters"), path);
+    }
+
+    std::ifstream file(name);
+    if (!file.good()) {
+        vec<string> directories = {".", DefaultParametersPath, "$NUPACKHOME/parameters"};
+        NUPACK_ERROR("failed to open parameter file ", path, directories);
+    }
+    json j;
+    file >> j;
+    return j;
+}
+```
+
+原代码直接按冒号 `:` 对默认参数文件路径进行分割, 类似环境变量那种, 但是在 Windows 上会错误地把盘符后面的冒号切了, 所以找不到文件. 不过这地方可以曲线一下, 就是手动设置 `NUPACKHOME` 环境变量, 这部分的寻找逻辑倒是没有问题.
+
+此外还有两个地方路径格式也有问题, 也一并修改一下.
+
+```plain
+OSError: [Errno 22] Invalid argument: 'blah\\0\\checkpoint\\2024-05-13T10:46:49.json'
+OSError: [Errno 22] Invalid argument: 'design-checkpoint\\2024-05-13T10:46:50.json'
+```
+
+在 Windows 下面文件名不能包含 `:`, 因此去源码里简单修改一下即可, 位于 `python/design/components.py:96` 附近, 干脆换一个时间格式得了.
+
+```python
+class WriteToFileCheckpoint:
+    def __init__(self, path, timespec='seconds'):
+        self.path = pathlib.Path(path)
+        self.timespec = timespec
+
+    def __call__(self, result):
+        # time = datetime.datetime.now().isoformat(timespec=self.timespec)
+        time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.path.mkdir(parents=True, exist_ok=True)
+        path = self.path/'{}.json'.format(time)
+        path.write_text(result.to_json().dump(indent=4))
+```
+
+不过改了之后还需要把配套使用了 `fromisoformat` 的地方也一并修改, 位于 `python/design/trials.py:96` 附近.
+
+```python
+    def _checkpoints(self, where=None):
+        if where is None:
+            where = self.checkpoint/'checkpoint'
+        if not where.exists():
+            return []
+        return sorted(
+            (i for i in where.iterdir() if i.suffix == '.json'),
+            reverse=True, 
+            # key=lambda p: datetime.datetime.fromisoformat(p.stem) # 此处应该是可以直接按字符串大小进行比较的, 和按时间比较应该结果相同
+            key=lambda p: p.stem
+        )
+```
 
 ## 后记
 
