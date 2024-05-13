@@ -558,7 +558,7 @@ class WriteToFileCheckpoint:
 ImportError: dynamic module does not define module export function (PyInit_cpp)
 ```
 
-这个问题也比较好解决, 在文件 `external/rebind/source/Module.cc:203` (最后被合并到了 `external/rebind/source/Cast_Python_Module.cc` 里了) 处附近, 我们可以增加 Python 头文件提供的导出符号定义宏 `Py_EXPORTED_SYMBOL`.
+这个问题也比较好解决, 在文件 `external/rebind/source/Module.cc:203` (最后被合并到了 `external/rebind/source/Cast_Python_Module.cc` 里了) 处附近, 我们可以增加 Python 头文件提供的导出符号宏定义 `Py_EXPORTED_SYMBOL`.
 
 ```cpp
     Py_EXPORTED_SYMBOL PyObject* REBIND_CAT(PyInit_, REBIND_MODULE)(void) {
