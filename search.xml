@@ -475,94 +475,6 @@
       </tags>
   </entry>
   <entry>
-    <title>碧蓝航线立绘提取与批量还原</title>
-    <url>//posts/2023/04/11/blhx-painting/</url>
-    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
-<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
-<span id="more"></span>
-
-<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
-<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
-<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
-<ul>
-<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
-<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
-<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
-<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
-</ul>
-<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
-<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
-<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
-<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
-<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
-<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
-<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
-</ul>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
-<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
-<details class="note danger"><summary><p>guanghui_h.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
-<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
-</details>
-
-<details class="note info"><summary><p>guanghui.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_2.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_3.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_4.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_5.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol_n.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
-
-</details>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>工具</tag>
-        <tag>立绘还原</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 NumPy 的手写数字识别 (卷积神经网络) (一)</title>
     <url>//posts/2023/10/13/cnn-numpy-1/</url>
     <content><![CDATA[<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
@@ -657,6 +569,94 @@
         <tag>手写数字识别</tag>
         <tag>卷积神经网络</tag>
         <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>碧蓝航线立绘提取与批量还原</title>
+    <url>//posts/2023/04/11/blhx-painting/</url>
+    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
+<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
+<span id="more"></span>
+
+<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
+<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
+<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
+<ul>
+<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
+<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
+<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
+<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
+</ul>
+<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
+<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
+<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
+<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
+<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
+<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
+</ul>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
+<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
+<details class="note danger"><summary><p>guanghui_h.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
+<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
+</details>
+
+<details class="note info"><summary><p>guanghui.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_2.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_3.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_4.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_5.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol_n.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
+
+</details>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>工具</tag>
+        <tag>立绘还原</tag>
       </tags>
   </entry>
   <entry>
@@ -1221,67 +1221,6 @@
       </tags>
   </entry>
   <entry>
-    <title>PCA 算法原理与实现</title>
-    <url>//posts/2023/02/18/pca/</url>
-    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
-<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
-<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
-<p>因此, 在 PCA 方法中, 我们希望:</p>
-<ul>
-<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
-<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
-</ul>
-<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
-<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
-<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
-<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
-<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
-<p>首先是方差与协方差的公式:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
-<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
-<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
-<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
-<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
-<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
-<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
-<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
-<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
-</div>
-
-<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
-<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
-<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
-<p>输出: $Y_{n \times q}$</p>
-<ol>
-<li>对 $X$ 进行均值方差归一化.</li>
-<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
-<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
-<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
-<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
-<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>数据降维</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>如何在 PyPI 上发布一个包</title>
     <url>//posts/2023/11/05/pypi/</url>
     <content><![CDATA[<p>基于上一篇<a href="https://ww-rm.github.io/posts/2023/11/04/ncmdump/">NCM 文件批量转换 (保留专辑和封面信息)</a>, 记录一下自己第一次往 PyPI 上发布包的过程.</p>
@@ -1344,6 +1283,67 @@
         <tag>pypi</tag>
         <tag>setuptools</tag>
         <tag>python 包发布</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
+<ul>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
+</ul>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
+<p>输出: $Y_{n \times q}$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -1437,6 +1437,46 @@
       </tags>
   </entry>
   <entry>
+    <title>一次意外的 Github SSH 连接失败</title>
+    <url>//posts/2024/01/15/ssh-github/</url>
+    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
+<p>但是 clone 仓库时, 出现了如下报错:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
+
+<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
+<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
+<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
+<p>然后 Windows 给了一个愉快的输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+
+<p>但是 Ubuntu 还是失败:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
+<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
+
+<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
+<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
+<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 算法中的塔式扩张公式推导</title>
     <url>//posts/2023/12/04/sm9fpex/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
@@ -1501,46 +1541,6 @@
         <tag>SM9</tag>
         <tag>塔式扩张</tag>
         <tag>扩域运算</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>一次意外的 Github SSH 连接失败</title>
-    <url>//posts/2024/01/15/ssh-github/</url>
-    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
-<p>但是 clone 仓库时, 出现了如下报错:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
-
-<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
-<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
-<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
-<p>然后 Windows 给了一个愉快的输出:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
-
-<p>但是 Ubuntu 还是失败:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
-<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
-
-<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
-<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
-<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-
-<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
@@ -1749,7 +1749,7 @@
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">Py_EXPORTED_SYMBOL PyObject* <span class="title">REBIND_CAT</span><span class="params">(PyInit_, REBIND_MODULE)</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">Py_Initialize</span>();</span><br><span class="line">    <span class="keyword">return</span> rebind::<span class="built_in">raw_object</span>([&amp;]() -&gt; rebind::Object &#123;</span><br><span class="line">        rebind::Object mod &#123;<span class="built_in">PyModule_Create</span>(&amp;rebind_definition), <span class="literal">true</span>&#125;;</span><br><span class="line">        <span class="keyword">if</span> (!mod) <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">        rebind::<span class="built_in">init</span>(rebind::<span class="built_in">document</span>());</span><br><span class="line">        rebind::Object dict = <span class="built_in">initialize</span>(rebind::<span class="built_in">document</span>());</span><br><span class="line">        <span class="keyword">if</span> (!dict) <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">        rebind::<span class="built_in">incref</span>(+dict);</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">PyModule_AddObject</span>(+mod, <span class="string">&quot;document&quot;</span>, +dict) &lt; <span class="number">0</span>) <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">        <span class="keyword">return</span> mod;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里不需要用 <code>PyMODINIT_FUNC</code>, 因为会重复定义 <code>extern &quot;C&quot;</code>.</p>
-<p>不过懒得重新再全部按静态方式编译链接一次, 所以 Github 上都是放的动态链接的版本<del>上传完了无聊试试才发现静态链接一路畅通无阻且体积小性价比又高</del>.</p>
+<p>不过懒得再全部重新按静态方式编译链接一次, 所以 Github 上都是放的动态链接的版本<del>上传完了无聊试试才发现静态链接一路畅通无阻且体积小性价比又高</del>.</p>
 <h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>本次编译过程所有修改后的差异文件均放在自己的 Github 上了, 包括在自己电脑上打包好的 <code>whl</code> 文件 (动态链接版本) 也一并放上去了, 仓库地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL251cGFjay13aW4=">nupack-win<i class="fa fa-external-link-alt"></i></span>, 直接去 Releases 页面下载即可.</p>
 <p>从五一放假开始折腾, 前前后后大约折腾了一周多才编译出来, 可以说是把能踩的坑都踩了个遍, 让我深刻的认识到不同操作系统不同编译环境的天壤之别, 期间也试过用 msvc 和 gcc 去编译, 但是一坨的警告和错误让我彻底转向 clang. <del>不过那些警告和错误看着挺有道理的, 怎么 clang 就不管了呢?</del></p>
 <p>虽然之后自己的项目要用这个的时候大概率是在 Linux 环境运行, 用不到 Windows 的库了, 但是这么折腾一下也挺有收获, 至少浅浅的使用了一下三大主流 C 编译器, 以及熟悉了一下 CMake 和 vcpkg 的使用方法, 希望这次踩的坑将来都不会踩了吧~</p>
@@ -1818,24 +1818,6 @@
         <tag>transformers</tag>
         <tag>Pipeline</tag>
         <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
-      </categories>
-      <tags>
-        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
@@ -1934,6 +1916,24 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
