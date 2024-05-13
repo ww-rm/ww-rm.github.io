@@ -544,9 +544,45 @@ class WriteToFileCheckpoint:
         )
 ```
 
+## 静态链接
+
+编译成功之后整个 `cpp.pyd` 加上所有的 `dll` 文件合起来有约莫 67 MB 大小, 打包之后的 `whl` 文件也还有 18 MB 左右, 感觉有点太大, 所以之后又尝试了一下按静态的方式去链接第三方库.
+
+所做的改动也不多, 把前面用到的所有 `x64-mingw-dynamic` 都换成 `x64-mingw-static`, 这样在安装和链接第三方库的时候就会默认都用静态库的方式, 个别不支持静态库的会自动切换成动态库模式, 甚至 `cmake/Libraries.cmake` 里的库名也都可以不用改了, 因为安装的静态库后缀就只有一个单独的 `.a`. 不过 `lapack` 这个库还是得手动改后缀, 因为它不支持静态库, 仍然是安装的动态库.
+
+最后依赖的第三方库 DLL 文件也减少到 6 个, 整个 `cpp.pyd` 加上所有 `dll` 文件合起来只有 45 MB, 打包后的 `whl` 文件降低到 13 MB 左右.
+
+然后会产生一个新的问题, 原项目关于 Python 模块符号的导出写的有点小问题, 导致打包后的库在导入的时候会报错找不到符号.
+
+```plain
+ImportError: dynamic module does not define module export function (PyInit_cpp)
+```
+
+这个问题也比较好解决, 在文件 `external/rebind/source/Module.cc:203` (最后被合并到了 `external/rebind/source/Cast_Python_Module.cc` 里了) 处附近, 我们可以增加 Python 头文件提供的导出符号定义宏 `Py_EXPORTED_SYMBOL`.
+
+```cpp
+    Py_EXPORTED_SYMBOL PyObject* REBIND_CAT(PyInit_, REBIND_MODULE)(void) {
+        Py_Initialize();
+        return rebind::raw_object([&]() -> rebind::Object {
+            rebind::Object mod {PyModule_Create(&rebind_definition), true};
+            if (!mod) return {};
+            rebind::init(rebind::document());
+            rebind::Object dict = initialize(rebind::document());
+            if (!dict) return {};
+            rebind::incref(+dict);
+            if (PyModule_AddObject(+mod, "document", +dict) < 0) return {};
+            return mod;
+        });
+    }
+```
+
+这里不需要用 `PyMODINIT_FUNC`, 因为会重复定义 `extern "C"`.
+
+不过懒得重新再全部按静态方式编译链接一次, 所以 Github 上都是放的动态链接的版本~~上传完了无聊试试才发现静态链接一路畅通无阻且体积小性价比又高~~.
+
 ## 后记
 
-本次编译过程所有修改后的差异文件均放在自己的 Github 上了, 包括在自己电脑上打包好的 `whl` 文件也一并放上去了, 仓库地址是 [nupack-win](https://github.com/ww-rm/nupack-win), 直接去 Releases 页面下载即可.
+本次编译过程所有修改后的差异文件均放在自己的 Github 上了, 包括在自己电脑上打包好的 `whl` 文件 (动态链接版本) 也一并放上去了, 仓库地址是 [nupack-win](https://github.com/ww-rm/nupack-win), 直接去 Releases 页面下载即可.
 
 从五一放假开始折腾, 前前后后大约折腾了一周多才编译出来, 可以说是把能踩的坑都踩了个遍, 让我深刻的认识到不同操作系统不同编译环境的天壤之别, 期间也试过用 msvc 和 gcc 去编译, 但是一坨的警告和错误让我彻底转向 clang. ~~不过那些警告和错误看着挺有道理的, 怎么 clang 就不管了呢?~~
 
