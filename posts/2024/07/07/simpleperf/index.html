@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文是对性能分析工具 Simpleperf 使用文档总结, 也可以看作是文档翻译.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simpleperf 使用指南">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2024/07/07/simpleperf/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="本文是对性能分析工具 Simpleperf 使用文档总结, 也可以看作是文档翻译.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="data:image/png;base64,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">
+<meta property="article:published_time" content="2024-07-07T15:18:25.000Z">
+<meta property="article:modified_time" content="2024-07-07T15:19:01.224Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="Simpleperf">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="安卓性能分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="data:image/png;base64,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">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2024/07/07/simpleperf/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2024/07/07/simpleperf/","path":"/posts/2024/07/07/simpleperf/","title":"Simpleperf 使用指南"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Simpleperf 使用指南 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#simpleperf-%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">1.2.</span> <span class="nav-text">simpleperf 中的工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.</span> <span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E4%B8%8D%E5%90%8C-Android-%E7%89%88%E6%9C%AC%E4%B8%8A%E7%9A%84%E6%94%AF%E6%8C%81"><span class="nav-number">1.3.1.</span> <span class="nav-text">在不同 Android 版本上的支持</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E5%9F%BA%E4%BA%8E-DWARF-%E5%92%8C%E5%9F%BA%E4%BA%8E%E5%A0%86%E6%A0%88%E5%B8%A7%E7%9A%84%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">1.3.2.</span> <span class="nav-text">比较基于 DWARF 和基于堆栈帧的调用图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D%E5%9F%BA%E4%BA%8E-DWARF-%E7%9A%84%E7%A0%B4%E6%8D%9F%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">1.3.3.</span> <span class="nav-text">修复基于 DWARF 的破损调用图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D%E5%9C%A8-C-%E5%87%BD%E6%95%B0%E4%B8%AD%E5%81%9C%E6%AD%A2%E7%9A%84%E7%A0%B4%E6%8D%9F%E8%B0%83%E7%94%A8%E9%93%BE"><span class="nav-number">1.3.4.</span> <span class="nav-text">修复在 C 函数中停止的破损调用链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E6%8A%A5%E5%91%8A%E4%B8%AD%E7%BC%BA%E5%B0%91%E7%AC%A6%E5%8F%B7%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.5.</span> <span class="nav-text">如何解决报告中缺少符号的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E6%B3%A8%E9%87%8A%E7%9A%84%E6%BA%90%E4%BB%A3%E7%A0%81%E5%92%8C%E5%8F%8D%E6%B1%87%E7%BC%96"><span class="nav-number">1.3.6.</span> <span class="nav-text">显示注释的源代码和反汇编</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E4%B8%A2%E5%A4%B1%E7%9A%84%E6%A0%B7%E6%9C%AC%E5%92%8C%E5%A0%86%E6%A0%88%E8%A2%AB%E6%88%AA%E6%96%AD%E7%9A%84%E6%A0%B7%E6%9C%AC"><span class="nav-number">1.3.7.</span> <span class="nav-text">减少丢失的样本和堆栈被截断的样本</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">Android 应用程序分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%AE%89%E5%8D%93%E5%BA%94%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">准备安卓应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%92%8C%E6%8A%A5%E5%91%8A%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">2.2.</span> <span class="nav-text">记录和报告分析数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%92%8C%E6%8A%A5%E5%91%8A%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">2.3.</span> <span class="nav-text">记录和报告调用图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E7%BD%91%E9%A1%B5%E6%8E%A5%E5%8F%A3%E8%BF%9B%E8%A1%8C%E6%8A%A5%E5%91%8A"><span class="nav-number">2.4.</span> <span class="nav-text">通过网页接口进行报告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%95%E7%A4%BA%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">2.5.</span> <span class="nav-text">展示火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-Android-Studio-%E4%B8%AD%E8%BF%9B%E8%A1%8C%E6%8A%A5%E5%91%8A"><span class="nav-number">2.6.</span> <span class="nav-text">在 Android Studio 中进行报告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E6%B7%B7%E6%B7%86-Java-%E7%AC%A6%E5%8F%B7"><span class="nav-number">2.7.</span> <span class="nav-text">去混淆 Java 符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95-CPU-%E6%97%B6%E9%97%B4%E5%92%8C%E9%9D%9E-CPU-%E6%97%B6%E9%97%B4"><span class="nav-number">2.8.</span> <span class="nav-text">记录 CPU 时间和非 CPU 时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%90%AF%E5%8A%A8%E5%BC%80%E5%A7%8B%E5%88%86%E6%9E%90"><span class="nav-number">2.9.</span> <span class="nav-text">从启动开始分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%BB%A3%E7%A0%81%E4%B8%AD%E6%8E%A7%E5%88%B6%E8%AE%B0%E5%BD%95"><span class="nav-number">2.10.</span> <span class="nav-text">在应用程序代码中控制记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E8%A7%A3%E6%9E%90%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">2.11.</span> <span class="nav-text">手动解析性能分析数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">可执行命令参考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Simpleperf-%E6%98%AF%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C%E7%9A%84"><span class="nav-number">3.1.</span> <span class="nav-text">Simpleperf 是如何工作的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#list"><span class="nav-number">3.2.</span> <span class="nav-text">list</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#stat"><span class="nav-number">3.3.</span> <span class="nav-text">stat</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E8%A6%81%E7%BB%9F%E8%AE%A1%E7%9A%84%E4%BA%8B%E4%BB%B6"><span class="nav-number">3.3.1.</span> <span class="nav-text">选择要统计的事件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E8%A6%81%E7%BB%9F%E8%AE%A1%E7%9A%84%E7%9B%AE%E6%A0%87"><span class="nav-number">3.3.2.</span> <span class="nav-text">选择要统计的目标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%B3%E5%AE%9A%E7%BB%9F%E8%AE%A1%E7%9A%84%E6%97%B6%E9%95%BF"><span class="nav-number">3.3.3.</span> <span class="nav-text">决定统计的时长</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#record"><span class="nav-number">3.4.</span> <span class="nav-text">record</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E8%A6%81%E8%AE%B0%E5%BD%95%E7%9A%84%E4%BA%8B%E4%BB%B6"><span class="nav-number">3.4.1.</span> <span class="nav-text">选择要记录的事件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E8%A6%81%E8%AE%B0%E5%BD%95%E7%9A%84%E7%9B%AE%E6%A0%87"><span class="nav-number">3.4.2.</span> <span class="nav-text">选择要记录的目标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%AE%B0%E5%BD%95%E9%A2%91%E7%8E%87"><span class="nav-number">3.4.3.</span> <span class="nav-text">设置记录频率</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%B3%E5%AE%9A%E8%AE%B0%E5%BD%95%E7%9A%84%E6%97%B6%E9%95%BF"><span class="nav-number">3.4.4.</span> <span class="nav-text">决定记录的时长</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%AD%98%E5%82%A8%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="nav-number">3.4.5.</span> <span class="nav-text">设置存储分析数据的路径</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">3.4.6.</span> <span class="nav-text">记录调用图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95-CPU-%E6%97%B6%E9%97%B4%E5%92%8C%E9%9D%9E-CPU-%E6%97%B6%E9%97%B4-1"><span class="nav-number">3.4.7.</span> <span class="nav-text">记录 CPU 时间和非 CPU 时间</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#report"><span class="nav-number">3.5.</span> <span class="nav-text">report</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%AF%BB%E5%8F%96%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="nav-number">3.5.1.</span> <span class="nav-text">设置读取分析数据的路径</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E6%9F%A5%E6%89%BE%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="nav-number">3.5.2.</span> <span class="nav-text">设置查找二进制文件的路径</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%A5%E5%91%8A%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">3.5.3.</span> <span class="nav-text">报告调用图</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%84%9A%E6%9C%AC%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">脚本参考</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">4.1.</span> <span class="nav-text">记录分析数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#app-profiler-py"><span class="nav-number">4.1.1.</span> <span class="nav-text">app_profiler.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%8E%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%90%AF%E5%8A%A8%E6%97%B6%E8%BF%9B%E8%A1%8C%E5%88%86%E6%9E%90"><span class="nav-number">4.1.2.</span> <span class="nav-text">从应用程序启动时进行分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binary-cache-builder-py"><span class="nav-number">4.1.3.</span> <span class="nav-text">binary_cache_builder.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#run-simpleperf-on-device-py"><span class="nav-number">4.1.4.</span> <span class="nav-text">run_simpleperf_on_device.py</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">4.2.</span> <span class="nav-text">查看分析数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#report-py"><span class="nav-number">4.2.1.</span> <span class="nav-text">report.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#report-html-py"><span class="nav-number">4.2.2.</span> <span class="nav-text">report_html.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#inferno"><span class="nav-number">4.2.3.</span> <span class="nav-text">inferno</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#purgatorio"><span class="nav-number">4.2.4.</span> <span class="nav-text">purgatorio</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pprof-proto-generator-py"><span class="nav-number">4.2.5.</span> <span class="nav-text">pprof_proto_generator.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gecko-profile-generator-py"><span class="nav-number">4.2.6.</span> <span class="nav-text">gecko_profile_generator.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#report-sample-py"><span class="nav-number">4.2.7.</span> <span class="nav-text">report_sample.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#stackcollapse-py"><span class="nav-number">4.2.8.</span> <span class="nav-text">stackcollapse.py</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%B7%A5%E5%85%B7%E5%BA%93"><span class="nav-number">4.3.</span> <span class="nav-text">一些工具库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#simpleperf-report-lib-py"><span class="nav-number">4.3.1.</span> <span class="nav-text">simpleperf_report_lib.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ipc-py"><span class="nav-number">4.3.2.</span> <span class="nav-text">ipc.py</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sample-filter-py"><span class="nav-number">4.3.3.</span> <span class="nav-text">sample_filter.py</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%9C"><span class="nav-number">5.</span> <span class="nav-text">查看分析结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-Studio-Profiler"><span class="nav-number">5.1.</span> <span class="nav-text">Android Studio Profiler</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2024/07/07/simpleperf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Simpleperf 使用指南 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simpleperf 使用指南
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-07 23:18:25" itemprop="dateCreated datePublished" datetime="2024-07-07T23:18:25+08:00">2024-07-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">阅读笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>33k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1:01</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<span id="more"></span>
+
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>相比与直接使用 Simpleperf, Android Studio 提供了一个基于 simpleperf 的图形化前端, <span class="exturl" data-url="aHR0cHM6Ly9kZXZlbG9wZXIuYW5kcm9pZC5jb20vc3R1ZGlvL3Byb2ZpbGUvY3B1LXByb2ZpbGVy">Inspect CPU activity with CPU Profiler<i class="fa fa-external-link-alt"></i></span> 文档中介绍了如何使用 CPU Profiler 来分析安卓上的应用性能.</p>
+<p>Simpleperf 是 Android 的本地 CPU 分析工具. 它可以用来分析 Android 应用程序和运行在 Android 上的本地进程. 它可以分析 Android 上的 Java 和 c++ 代码. Simpleperf 可执行文件可以在 Android &gt;= L 上运行, Python 脚本可以在 Android &gt;= N 上使用.</p>
+<p>Simpleperf 包含两个部分: simpleperf 可执行文件和 Python 脚本.</p>
+<p>simpleperf 可执行文件类似于 linux-tools-perf, 但在 Android 性能分析环境中具有一些特定功能:</p>
+<ul>
+<li>在性能分析数据中收集更多信息. 由于常见的工作流程是&quot;在设备上记录, 并在主机上报告&quot;, simpleperf 不仅在性能分析数据中收集样本, 还收集所需的符号, 设备信息和记录时间.</li>
+<li>提供新的记录功能.<ul>
+<li>在记录基于 dwarf 的调用图时, simpleperf 在将样本写入文件之前展开堆栈. 这是为了节省设备上的存储空间.</li>
+<li>支持使用 <code>--trace-offcpu</code> 选项跟踪 CPU 时间和非 CPU 时间.</li>
+<li>支持在 Android P 及以上版本上记录 JIT 编译和解释的 Java 代码的调用图.</li>
+</ul>
+</li>
+<li>与 Android 平台紧密相关.<ul>
+<li>了解 Android 环境, 例如使用系统属性启用性能分析, 使用 <code>run-as</code> 在应用程序的上下文中进行性能分析.</li>
+<li>支持从 <code>.gnu_debugdata</code> 部分读取符号和调试信息, 因为系统库从 Android O 开始使用 <code>.gnu_debugdata</code> 部分构建.</li>
+<li>支持分析嵌入在 apk 文件中的共享库.</li>
+<li>使用标准的 Android 堆栈展开器, 因此其结果与所有其他 Android 工具一致.</li>
+</ul>
+</li>
+<li>构建用于不同用途的可执行文件和共享库.<ul>
+<li>在设备上构建静态可执行文件. 由于静态可执行文件不依赖于任何库, simpleperf 可执行文件可以推送到任何 Android 设备上并用于记录性能分析数据.</li>
+<li>在不同的主机上构建可执行文件: Linux, Mac 和 Windows. 这些可执行文件可用于在主机上报告.</li>
+<li>在不同的主机上构建报告共享库. 报告库由不同的 Python 脚本使用来解析性能分析数据.</li>
+</ul>
+</li>
+</ul>
+<p>有关 simpleperf 可执行文件的详细文档见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1kI2V4ZWN1dGFibGUtY29tbWFuZHMtcmVmZXJlbmNl">executable-commands-reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>Python 脚本根据其功能分为三个部分:</p>
+<ul>
+<li>用于记录的脚本, 如 <code>app_profiler.py</code>, <code>run_simpleperf_without_usb_connection.py</code>.</li>
+<li>用于报告的脚本, 如 <code>report.py</code>, <code>report_html.py</code>, <code>inferno</code>.</li>
+<li>用于解析性能分析数据的脚本, 如 <code>simpleperf_report_lib.py</code>.</li>
+</ul>
+<p>这些 Python 脚本在 Python &gt;= 3.9 版本上进行了测试. 旧版本可能不受支持. 有关 Python 脚本的详细文档见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1kI3NjcmlwdHMtcmVmZXJlbmNl">scripts-reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<h3 id="simpleperf-中的工具"><a href="#simpleperf-中的工具" class="headerlink" title="simpleperf 中的工具"></a>simpleperf 中的工具</h3><p>simpleperf 可执行文件和 Python 脚本位于 NDK 发布版的 simpleperf/ 目录中, 以及 AOSP 的 system/extras/simpleperf/scripts/ 目录中. 它们的功能如下所列.</p>
+<ul>
+<li><p><code>bin/</code>: 包含可执行文件和共享库.</p>
+<ul>
+<li><code>bin/android/$&#123;arch&#125;/simpleperf</code>: 用于设备上的静态 simpleperf 可执行文件.</li>
+<li><code>bin/$&#123;host&#125;/$&#123;arch&#125;/simpleperf</code>: 用于主机上的 simpleperf 可执行文件, 仅支持报告功能.</li>
+<li><code>bin/$&#123;host&#125;/$&#123;arch&#125;/libsimpleperf_report.$&#123;so/dylib/dll&#125;</code>: 用于主机上的报告共享库.</li>
+</ul>
+</li>
+<li><p><code>*.py</code>, <code>inferno</code>, <code>purgatorio</code>: 用于记录和报告的 Python 脚本. 详细信息见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">scripts_reference.md<i class="fa fa-external-link-alt"></i></span>.</p>
+</li>
+</ul>
+<h3 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h3><h4 id="在不同-Android-版本上的支持"><a href="#在不同-Android-版本上的支持" class="headerlink" title="在不同 Android 版本上的支持"></a>在不同 Android 版本上的支持</h4><p>在 Android &lt; N 上, 内核可能过旧 (&lt; 3.18), 不支持记录基于 DWARF 的调用图等功能. 在 Android M - O 上, 我们只能分析 C++ 代码和完全编译的 Java 代码. 在 Android &gt;= P 上, ART 解释器支持基于 DWARF 的展开, 因此我们可以分析 Java 代码. 在 Android &gt;= Q 上, 我们可以使用设备上的 simpleperf 来分析已发布的 Android 应用, 只需在 AndroidManifest.xml 中添加 <code>&lt;profileable android:shell=&quot;true&quot; /&gt;</code>.</p>
+<h4 id="比较基于-DWARF-和基于堆栈帧的调用图"><a href="#比较基于-DWARF-和基于堆栈帧的调用图" class="headerlink" title="比较基于 DWARF 和基于堆栈帧的调用图"></a>比较基于 DWARF 和基于堆栈帧的调用图</h4><p>Simpleperf 支持两种方式记录调用栈. 一个是基于 DWARF 的调用图, 另一个是基于堆栈帧的调用图. 以下是它们的比较:</p>
+<p>记录基于 DWARF 的调用图:</p>
+<ul>
+<li>需要二进制文件中调试信息的支持.</li>
+<li>在 ARM 和 ARM64 上表现良好, 对 Java 代码和 C++ 代码都适用.</li>
+<li>每个样本只能展开 64K 的堆栈. 因此不总是可能展开到最底部. 然而, 这在 simpleperf 中得到了缓解, 如下一节所述.</li>
+<li>比基于堆栈帧的调用图占用更多的 CPU 时间. 因此它的开销更大, 无法以很高的频率采样 (通常 &lt;= 4000 Hz).</li>
+</ul>
+<p>记录基于堆栈帧的调用图:</p>
+<ul>
+<li>需要堆栈帧寄存器的支持.</li>
+<li>在 ARM 上表现不佳. 因为 ARM 缺少寄存器, 且 ARM 和 THUMB 代码有不同的堆栈帧寄存器. 因此内核无法展开同时包含 ARM 和 THUMB 代码的用户堆栈.</li>
+<li>在 Java 代码上也表现不佳. 因为 ART 编译器不保留堆栈帧寄存器, 并且它无法获取解释的 Java 代码的帧.</li>
+<li>在分析 ARM64 上的本机程序时表现良好. 一个例子是分析 surfacelinger. 当它表现良好时, 通常会显示完整的火焰图.</li>
+<li>比基于 DWARF 的调用图占用更少的 CPU 时间. 因此采样频率可以达到 10000 Hz 或更高.</li>
+</ul>
+<p>所以, 如果需要在 ARM 上分析代码或分析 Java 代码, 基于 DWARF 的调用图更好. 如果需要在 ARM64 上分析 C++ 代码, 基于堆栈帧的调用图可能更好. 总之, 可以先尝试基于 DWARF 的调用图, 这是使用 <code>-g</code> 时的默认选项. 因为它总能产生合理的结果. 如果效果不够好, 再尝试基于堆栈帧的调用图.</p>
+<h4 id="修复基于-DWARF-的破损调用图"><a href="#修复基于-DWARF-的破损调用图" class="headerlink" title="修复基于 DWARF 的破损调用图"></a>修复基于 DWARF 的破损调用图</h4><p>基于 DWARF 的调用图是通过展开线程堆栈生成的. 当记录一个样本时, 内核会转储最多 64KB 的堆栈数据. 通过基于 DWARF 信息展开堆栈, 我们可以得到调用栈.</p>
+<p>造成调用栈破损的两个原因:</p>
+<ul>
+<li>内核每个样本只能转储最多 64KB 的堆栈数据, 但线程可能有更大的堆栈. 在这种情况下, 我们无法展开到线程的起始点.</li>
+<li>我们需要包含 DWARF 调用帧信息的二进制文件来展开堆栈帧. 二进制文件应具有以下部分之一: <code>.eh_frame</code>, <code>.debug_frame</code>, <code>.ARM.exidx</code> 或 <code>.gnu_debugdata</code>.</li>
+</ul>
+<p>为缓解这些问题:</p>
+<p>关于缺少堆栈数据的问题:</p>
+<p>为缓解这个问题, simpleperf 在记录后会连接调用链 (调用栈). 如果一个线程的两个调用链有包含相同 ip 和 sp 地址的条目, 那么 simpleperf 尝试连接它们以延长调用链. 因此, 通过更长时间的记录和更多样本的连接, 我们可以获得更完整的调用链. 虽然这不能保证获得完整的调用图, 但通常效果很好.</p>
+<p>simpleperf 在展开样本前将其存储在缓冲区中. 如果缓冲区空闲空间不足, simpleperf 可能会决定将样本的堆栈数据截断为 1K. 希望通过调用链连接可以恢复这些数据. 但如果大量样本被截断, 许多调用链可能会破损. 我们可以通过记录命令的输出判断样本是否被截断, 例如:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf record ...</span><br><span class="line">simpleperf I cmd_record.cpp:809] Samples recorded: 105584 (<span class="built_in">cut</span> 86291). Samples lost: 6501.</span><br><span class="line"></span><br><span class="line">$ simpleperf record ...</span><br><span class="line">simpleperf I cmd_record.cpp:894] Samples recorded: 7,365 (1,857 with truncated stacks).</span><br></pre></td></tr></table></figure>
+
+<p>有两种方法可以避免截断样本. 一种是增加缓冲区大小, 例如 <code>--user-buffer-size 1G</code>. 但 <code>--user-buffer-size</code> 仅在最新的 simpleperf 中可用. 如果该选项不可用, 可以使用 <code>--no-cut-samples</code> 禁止截断样本.</p>
+<p>关于缺少 DWARF 调用帧信息的问题:</p>
+<p>大多数 C++ 代码生成的二进制文件包含调用帧信息, 位于 <code>.eh_frame</code> 或 <code>.ARM.exidx</code> 部分. 这些部分不会被剥离, 通常足以进行堆栈展开.</p>
+<p>对于 C 代码和一小部分编译器确定不会生成异常的 C++ 代码, 调用帧信息生成在 <code>.debug_frame</code> 部分. 通常 <code>.debug_frame</code> 部分会与其他调试部分一起被剥离 (strip). 解决方法之一是在设备上下载未剥离的二进制文件, 如<span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1kI2ZpeC1icm9rZW4tY2FsbGNoYWluLXN0b3BwZWQtYXQtYy1mdW5jdGlvbnM=">这里<i class="fa fa-external-link-alt"></i></span>所述.</p>
+<p>编译器不会为函数的序言和尾声生成展开指令, 因为它们操作堆栈帧且不会生成异常. 但分析可能会遇到这些指令, 并且无法展开它们. 这通常在帧图中不重要, 但在基于时间的堆栈图表 (如 Android Studio 和 Firefox 分析器中) 中, 偶尔会导致堆栈间隙. 我们可以通过 <code>--remove-gaps</code> 移除堆栈间隙, 默认情况下已启用此选项.</p>
+<h4 id="修复在-C-函数中停止的破损调用链"><a href="#修复在-C-函数中停止的破损调用链" class="headerlink" title="修复在 C 函数中停止的破损调用链"></a>修复在 C 函数中停止的破损调用链</h4><p>使用基于 DWARF 的调用图时, simpleperf 在记录期间生成调用链以节省空间. 展开 C 函数所需的调试信息在 <code>.debug_frame</code> 部分, 通常在 apk 中的本机库中被剥离. 为解决此问题, 我们可以在设备上下载未剥离的本机库, 并在记录时要求 simpleperf 使用它们.</p>
+<p>直接使用 simpleperf:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在设备上创建 native_libs 目录, 并推送未剥离的库到其中 (不支持嵌套目录). </span></span><br><span class="line">$ adb shell <span class="built_in">mkdir</span> /data/local/tmp/native_libs</span><br><span class="line">$ adb push &lt;unstripped_dir&gt;/*.so /data/local/tmp/native_libs</span><br><span class="line"><span class="comment"># 使用 --symfs 选项运行 simpleperf record. </span></span><br><span class="line">$ adb shell simpleperf record xxx --symfs /data/local/tmp/native_libs</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>app_profiler.py</code>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -lib &lt;unstripped_dir&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如何解决报告中缺少符号的问题"><a href="#如何解决报告中缺少符号的问题" class="headerlink" title="如何解决报告中缺少符号的问题"></a>如何解决报告中缺少符号的问题</h4><p><code>simpleperf record</code> 命令在设备上的 <code>perf.data</code> 中收集符号. 但如果你在设备上使用的本机库被剥离, 这会导致报告中有很多未知符号. 解决方案是在主机上构建 <code>binary_cache</code>.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 收集 perf.data 中需要的二进制文件到 binary_cache/ 中. </span></span><br><span class="line">$ ./binary_cache_builder.py -lib NATIVE_LIB_DIR,...</span><br></pre></td></tr></table></figure>
+
+<p>传递给 <code>-lib</code> 选项的 NATIVE_LIB_DIR 是包含主机上未剥离本机库的目录. 运行后, 包含符号表的本机库将收集到 binary_cache/ 中供报告使用.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ./report.py --symfs binary_cache</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 会自动搜索 binary_cache/, 因此不需要传递任何参数. </span></span><br><span class="line">$ ./report_html.py</span><br></pre></td></tr></table></figure>
+
+<h4 id="显示注释的源代码和反汇编"><a href="#显示注释的源代码和反汇编" class="headerlink" title="显示注释的源代码和反汇编"></a>显示注释的源代码和反汇编</h4><p>要在源代码和指令级别显示热点位置, 我们需要显示带有事件计数注释的源代码和反汇编. simpleperf 支持显示 C++ 代码和完全编译的 Java 代码的注释源代码和反汇编. simpleperf 支持两种方法来实现这一点:</p>
+<p>通过 <code>report_html.py</code>:</p>
+<ul>
+<li>生成 perf.data 并将其拉到主机上.</li>
+<li>生成包含调试信息的 elf 文件的 binary_cache. 使用 <code>-lib</code> 选项添加带有调试信息的库. 通过 <code>binary_cache_builder.py -i perf.data -lib &lt;dir_of_lib_with_debug_info&gt;</code> 实现.</li>
+<li>使用 <code>report_html.py</code> 生成带有注释源代码和反汇编的 <code>report.html</code>, 如<span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQjcmVwb3J0X2h0bWxfcHk=">此处<i class="fa fa-external-link-alt"></i></span>所述.</li>
+</ul>
+<p>通过 <code>pprof</code>:</p>
+<ul>
+<li>如上所述生成 <code>perf.data</code> 和 <code>binary_cache</code>.</li>
+<li>使用 <code>pprof_proto_generator.py</code> 生成 pprof 原型文件.</li>
+<li>使用 pprof 报告带有注释源代码的函数, 如<span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQjcHByb2ZfcHJvdG9fZ2VuZXJhdG9yX3B5">此处<i class="fa fa-external-link-alt"></i></span>所述.</li>
+</ul>
+<h4 id="减少丢失的样本和堆栈被截断的样本"><a href="#减少丢失的样本和堆栈被截断的样本" class="headerlink" title="减少丢失的样本和堆栈被截断的样本"></a>减少丢失的样本和堆栈被截断的样本</h4><p>使用 simpleperf 记录时, 我们可能会看到丢失的样本或堆栈数据被截断的样本. 在将样本保存到文件之前, simpleperf 使用两个缓冲区在内存中缓存样本. 一个是内核缓冲区, 另一个是用户空间缓冲区. 内核将样本放入内核缓冲区. simpleperf 在处理样本之前将样本从内核缓冲区移动到用户空间缓冲区. 如果缓冲区溢出, 我们会丢失样本或得到堆栈数据被截断的样本. 以下是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf record -a --duration 1 -g --user-buffer-size 100k</span><br><span class="line">simpleperf I cmd_record.cpp:799] Recorded <span class="keyword">for</span> 1.00814 seconds. Start post processing.</span><br><span class="line">simpleperf I cmd_record.cpp:894] Samples recorded: 79 (16 with truncated stacks).</span><br><span class="line">                                 Samples lost: 2,129 (kernelspace: 18, userspace: 2,111).</span><br><span class="line">simpleperf W cmd_record.cpp:911] Lost 18.5567% of samples <span class="keyword">in</span> kernel space, consider increasing</span><br><span class="line">                                 kernel buffer size(-m), or decreasing sample frequency(-f), or</span><br><span class="line">                                 increasing sample period(-c).</span><br><span class="line">simpleperf W cmd_record.cpp:928] Lost/Truncated 97.1233% of samples <span class="keyword">in</span> user space, consider</span><br><span class="line">                                 increasing userspace buffer size(--user-buffer-size), or</span><br><span class="line">                                 decreasing sample frequency(-f), or increasing sample period(-c).</span><br></pre></td></tr></table></figure>
+
+<p>在上述示例中, 我们得到了 79 个样本, 其中 16 个样本的堆栈数据被截断. 我们在内核缓冲区中丢失了 18 个样本, 在用户空间缓冲区中丢失了 2111 个样本.</p>
+<p>要减少内核缓冲区中丢失的样本, 我们可以通过 <code>-m</code> 增加内核缓冲区大小. 要减少用户空间缓冲区中丢失的样本或减少堆栈数据被截断的样本, 我们可以通过 <code>--user-buffer-size</code> 增加用户空间缓冲区大小.</p>
+<p>我们还可以减少在固定时间段内生成的样本数量, 例如使用 <code>-f</code> 减少采样频率, 减少监控的线程数量, 不同时监控多个 perf 事件.</p>
+<h2 id="Android-应用程序分析"><a href="#Android-应用程序分析" class="headerlink" title="Android 应用程序分析"></a>Android 应用程序分析</h2><p>原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvYW5kcm9pZF9hcHBsaWNhdGlvbl9wcm9maWxpbmcubWQ=">Android application profiling<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>分析安卓应用程序涉及三个步骤:</p>
+<ol>
+<li>准备安卓应用程序.</li>
+<li>记录性能分析数据.</li>
+<li>报告性能分析数据.</li>
+</ol>
+<h3 id="准备安卓应用"><a href="#准备安卓应用" class="headerlink" title="准备安卓应用"></a>准备安卓应用</h3><p>根据分析情况, 我们可能需要定制构建脚本, 以专门生成用于分析的 apk 文件. 以下是一些建议.</p>
+<hr>
+<p>如果你想分析应用程序的调试版本:</p>
+<p>对于调试版本类型, Android Studio 在 <code>AndroidManifest.xml</code> 中设置 <code>android:debuggable=&quot;true&quot;</code>, 启用 JNI 检查, 并且可能不会优化 C/C++ 代码. 无需任何更改, simpleperf 就可以分析它.</p>
+<hr>
+<p>如果你想分析应用程序的发布版本:</p>
+<p>对于发布版本类型, Android Studio 在 <code>AndroidManifest.xml</code> 中设置 <code>android:debuggable=&quot;false&quot;</code>, 禁用 JNI 检查并优化 C/C++ 代码. 然而, 由于安全限制, 只有设置了 <code>android:debuggable</code> 为 <code>true</code> 的应用程序才能被分析. 因此, simpleperf 只能在以下三种情况下分析发布版本:</p>
+<ol>
+<li><p>如果你使用的是已 root 的设备, 可以分析任何应用程序.</p>
+</li>
+<li><p>如果你使用的是 Android &gt;= Q, 可以在 <code>AndroidManifest.xml</code> 中添加 profileableFromShell 标志, 这使得预装的分析工具可以分析发布的应用程序. 在这种情况下, 通过 adb 下载的 simpleperf 将调用系统镜像中预装的 simpleperf 来分析应用程序.</p>
+ <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">profileable</span> <span class="attr">android:shell</span>=<span class="string">&quot;true&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>如果你使用的是 Android &gt;= O, 我们可以使用 <code>wrap.sh</code> 来分析发布版本:</p>
+<ol>
+<li><p>第一步: 在 <code>AndroidManifest.xml</code> 中添加 <code>android:debuggable=&quot;true&quot;</code> 以启用分析.</p>
+ <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:debuggable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">...</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>第二步: 在 <code>lib/arch</code> 目录中添加 <code>wrap.sh</code>. <code>wrap.sh</code> 在不传递任何调试标志给 ART 的情况下运行应用程序, 因此应用程序作为发布应用程序运行. 可以通过在 <code>app/build.gradle</code> 中添加以下脚本来实现 <code>wrap.sh</code>.</p>
+ <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            sourceSets &#123;</span><br><span class="line">                release &#123;</span><br><span class="line">                    resources &#123;</span><br><span class="line">                        srcDir &#123;</span><br><span class="line">                            <span class="string">&quot;wrap_sh_lib_dir&quot;</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">task createWrapShLibDir &#123;</span><br><span class="line">    <span class="keyword">for</span> (String <span class="attr">abi :</span> [<span class="string">&quot;armeabi-v7a&quot;</span>, <span class="string">&quot;arm64-v8a&quot;</span>, <span class="string">&quot;x86&quot;</span>, <span class="string">&quot;x86_64&quot;</span>]) &#123;</span><br><span class="line">        <span class="keyword">def</span> dir = <span class="keyword">new</span> File(<span class="string">&quot;app/wrap_sh_lib_dir/lib/&quot;</span> + abi)</span><br><span class="line">        dir.mkdirs()</span><br><span class="line">        <span class="keyword">def</span> wrapFile = <span class="keyword">new</span> File(dir, <span class="string">&quot;wrap.sh&quot;</span>)</span><br><span class="line">        wrapFile.withWriter &#123; writer -&gt;</span><br><span class="line">            writer.write(<span class="string">&#x27;#!/system/bin/sh\n$@\n&#x27;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+</ol>
+<hr>
+<p>如果你想分析 C/C++ 代码:</p>
+<p>Android Studio 会在 apk 中剥离本机库的符号表和调试信息. 因此, 分析结果可能包含未知符号或损坏的调用图. 为了解决这个问题, 我们可以通过 <code>-lib</code> 选项将包含未剥离本机库的目录传递给 <code>app_profiler.py</code>. 通常, 这个目录可以是你的 Android Studio 项目的路径.</p>
+<hr>
+<p>如果你想分析 Java 代码:</p>
+<ul>
+<li>在 Android &gt;= P 上, simpleperf 支持分析 Java 代码, 无论是通过解释器执行, 还是通过 JIT 编译, 或者编译成本机指令. 因此, 你不需要做任何事情.</li>
+<li>在 Android O 上, simpleperf 支持分析编译成本机指令的 Java 代码, 并且还需要 wrap.sh 来使用编译后的 Java 代码. 要编译 Java 代码, 我们可以传递 --compile_java_code 选项给 app_profiler.py.</li>
+<li>在 Android N 上, simpleperf 支持分析编译成本机指令的 Java 代码. 要编译 Java 代码, 我们可以传递 --compile_java_code 选项给 app_profiler.py.</li>
+<li>在 Android &lt;= M 上, simpleperf 不支持分析 Java 代码.</li>
+</ul>
+<p>以下是使用 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kZW1vL1NpbXBsZXBlcmZFeGFtcGxlQ3Bw">SimpleperfExampleCpp<i class="fa fa-external-link-alt"></i></span> 应用程序的示例. 它构建了一个用于分析的 app-debug.apk.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://android.googlesource.com/platform/system/extras</span><br><span class="line">$ <span class="built_in">cd</span> extras/simpleperf/demo</span><br><span class="line"><span class="comment"># 用 Android Studio 打开 SimpleperfExampleCpp 项目, 并成功构建此项目, 否则下面的 `./gradlew` 命令将失败. </span></span><br><span class="line">$ <span class="built_in">cd</span> SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 &quot;gradlew&quot; 而不是 &quot;./gradlew&quot;. </span></span><br><span class="line">$ ./gradlew clean assemble</span><br><span class="line">$ adb install -r app/build/outputs/apk/debug/app-debug.apk</span><br></pre></td></tr></table></figure>
+
+<h3 id="记录和报告分析数据"><a href="#记录和报告分析数据" class="headerlink" title="记录和报告分析数据"></a>记录和报告分析数据</h3><p>我们可以使用 <code>app_profiler.py</code> 来分析安卓应用程序.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换到 simpleperf 脚本的目录. 记录 perf.data. </span></span><br><span class="line"><span class="comment"># -p 选项通过包名选择被分析的应用程序. </span></span><br><span class="line"><span class="comment"># --compile_java_code 选项将 Java 代码编译成本机指令, Android &gt;= P 上不需要这个选项. </span></span><br><span class="line"><span class="comment"># -a 选项选择要分析的 Activity. </span></span><br><span class="line"><span class="comment"># -lib 选项指定查找调试本机库的目录. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .MixActivity -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<p>这将在当前目录中收集 <code>perf.data</code> 作为性能分析数据, 并在 <code>binary_cache/</code> 中存储相关的本机二进制文件.</p>
+<p>通常我们在分析时需要使用应用程序, 否则可能不会记录任何样本. 但在这种情况下, MixActivity 启动了一个忙线程, 因此我们在分析时不需要使用应用程序.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 stdio 界面中报告 perf.data. </span></span><br><span class="line">$ ./report.py</span><br><span class="line">Cmdline: /data/data/simpleperf.example.cpp/simpleperf record ...</span><br><span class="line">Arch: arm64</span><br><span class="line">Event: task-clock:u (<span class="built_in">type</span> 1, config 1)</span><br><span class="line">Samples: 10023</span><br><span class="line">Event count: 10023000000</span><br><span class="line"></span><br><span class="line">Overhead  Command     Pid   Tid   Shared Object              Symbol</span><br><span class="line">27.04%    BusyThread  5703  5729  /system/lib64/libart.so    art::JniMethodStart(art::Thread*)</span><br><span class="line">25.87%    BusyThread  5703  5729  /system/lib64/libc.so      long StrToI&lt;long, ...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><code>report.py</code> 在 stdio 界面中报告性能分析数据. 如果报告中有许多未知符号, 请检查此处.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 html 界面中报告 perf.data. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码和反汇编. 如果 source_dirs 路径不正确, 请进行更改. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p><code>report_html.py</code> 会在 <code>report.html</code> 中生成报告, 并弹出浏览器标签页显示它.</p>
+<h3 id="记录和报告调用图"><a href="#记录和报告调用图" class="headerlink" title="记录和报告调用图"></a>记录和报告调用图</h3><p>我们可以按如下步骤记录和报告调用图.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录基于 DWARF 的调用图: 在 -r 选项中添加 &quot;-g&quot;. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -r <span class="string">&quot;-e task-clock:u -f 1000 --duration 10 -g&quot;</span> -lib path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录基于栈帧的调用图: 在 -r 选项中添加 &quot;--call-graph fp&quot;. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -r <span class="string">&quot;-e task-clock:u -f 1000 --duration 10 --call-graph fp&quot;</span> \</span><br><span class="line">        -lib path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 stdio 界面中报告调用图. </span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 Python Tk 界面中报告调用图. </span></span><br><span class="line">$ ./report.py -g --gui</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 html 界面中报告调用图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 flamegraphs 中报告调用图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 而不是 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过网页接口进行报告"><a href="#通过网页接口进行报告" class="headerlink" title="通过网页接口进行报告"></a>通过网页接口进行报告</h3><p>我们可以使用 report_html.py 在网页浏览器中显示性能分析结果. report_html.py 集成了图表统计, 样本表, 火焰图, 源代码注释和反汇编注释. 它是显示报告的推荐方式.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./report_html.py</span><br></pre></td></tr></table></figure>
+
+<h3 id="展示火焰图"><a href="#展示火焰图" class="headerlink" title="展示火焰图"></a>展示火焰图</h3><p>要显示火焰图, 我们需要先记录调用图. 火焰图可以在 report_html.py 的 &quot;Flamegraph&quot; 标签中显示. 我们也可以使用 inferno 直接显示火焰图.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 而不是 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc</span><br></pre></td></tr></table></figure>
+
+<p>我们还可以使用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2JyZW5kYW5ncmVnZy9GbGFtZUdyYXBo">FlameGraph<i class="fa fa-external-link-alt"></i></span> 来生成火焰图. 请确保已安装 Perl.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">./report_sample.py --symfs binary_cache &gt; out.perf</span><br><span class="line">FlameGraph/stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">FlameGraph/flamegraph.pl out.folded &gt; a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="在-Android-Studio-中进行报告"><a href="#在-Android-Studio-中进行报告" class="headerlink" title="在 Android Studio 中进行报告"></a>在 Android Studio 中进行报告</h3><p>simpleperf 的 <code>report-sample</code> 命令可以将 <code>perf.data</code> 转换为 Android Studio CPU 分析器接受的 protobuf 格式. 转换可以在设备上或主机上完成. 如果在主机上有更多符号信息, 建议使用 <code>--symdir</code> 选项在主机上进行转换.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf report-sample --protobuf --show-callchain -i perf.data -o perf.trace</span><br><span class="line"><span class="comment"># 然后在 Android Studio 中打开 perf.trace 进行查看. </span></span><br></pre></td></tr></table></figure>
+
+<h3 id="去混淆-Java-符号"><a href="#去混淆-Java-符号" class="headerlink" title="去混淆 Java 符号"></a>去混淆 Java 符号</h3><p>Java 符号可能会被 ProGuard 混淆. 要在报告中恢复原始符号, 可以通过 <code>--proguard-mapping-file</code> 将 ProGuard 映射文件传递给 report 脚本或 <code>report-sample</code> 命令.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./report_html.py --proguard-mapping-file proguard_mapping_file.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="记录-CPU-时间和非-CPU-时间"><a href="#记录-CPU-时间和非-CPU-时间" class="headerlink" title="记录 CPU 时间和非 CPU 时间"></a>记录 CPU 时间和非 CPU 时间</h3><p>我们可以记录 CPU 时间和非 CPU 时间.</p>
+<p>首先检查设备是否支持 <code>trace-offcpu</code> 功能.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py list --show-features</span><br><span class="line">dwarf-based-call-graph</span><br><span class="line">trace-offcpu</span><br></pre></td></tr></table></figure>
+
+<p>如果支持 trace-offcpu 功能, 它会显示在功能列表中. 然后我们可以尝试使用它.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity -r <span class="string">&quot;-g -e task-clock:u -f 1000 --duration 10 --trace-offcpu&quot;</span> -lib path_of_SimpleperfExampleCpp</span><br><span class="line">./report_html.py --add_disassembly --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="从启动开始分析"><a href="#从启动开始分析" class="headerlink" title="从启动开始分析"></a>从启动开始分析</h3><p>我们可以从应用程序启动时进行分析.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开始 simpleperf 录制, 然后启动要分析的 Activity. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<p>我们也可以在设备上手动启动 Activity.</p>
+<ol>
+<li><p>确保应用程序没有运行或不是最近的应用程序之一.</p>
+</li>
+<li><p>开始 simpleperf 录制.</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br></pre></td></tr></table></figure></li>
+<li><p>在设备上手动启动应用程序.</p>
+</li>
+</ol>
+<h3 id="在应用程序代码中控制记录"><a href="#在应用程序代码中控制记录" class="headerlink" title="在应用程序代码中控制记录"></a>在应用程序代码中控制记录</h3><p>Simpleperf 支持从应用程序代码中控制记录. 以下是工作流程:</p>
+<ol>
+<li>运行 <code>api_profiler.py prepare -p &lt;package_name&gt;</code> 以允许应用程序使用 simpleperf 记录自身. 默认情况下, 权限在设备重启后会被重置. 因此, 我们需要在每次设备重启后运行该脚本. 但是在 Android &gt;= 13 上, 我们可以使用 <code>--days</code> 选项设置权限持续的天数.</li>
+<li>在应用程序中链接 simpleperf app_api 代码. 应用程序需要设置为 debuggable 或 profileableFromShell, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvYW5kcm9pZF9hcHBsaWNhdGlvbl9wcm9maWxpbmcubWQjcHJlcGFyZS1hbi1hbmRyb2lkLWFwcGxpY2F0aW9u">Prepare an Android application<i class="fa fa-external-link-alt"></i></span> 所述. 然后, 应用程序可以使用 API 来开始/暂停/恢复/停止记录. 为了开始记录, app_api 会 fork 一个运行 simpleperf 的子进程, 并使用管道文件向子进程发送命令. 记录完成后, 会生成一个分析数据文件.</li>
+<li>运行 <code>api_profiler.py collect -p &lt;package_name&gt;</code> 将分析数据文件收集到主机.</li>
+</ol>
+<p>示例可以在 demo 中的 CppApi 和 JavaApi 找到.</p>
+<h3 id="手动解析性能分析数据"><a href="#手动解析性能分析数据" class="headerlink" title="手动解析性能分析数据"></a>手动解析性能分析数据</h3><p>我们也可以通过编写 Python 脚本来手动解析分析数据, 通过使用 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/extras/+/main/simpleperf/doc/scripts_reference.md#simpleperf_report_libpy"><code>simpleperf_report_lib.py</code></a> 库. 示例包括 <code>report_sample.py</code> 和<code>report_html.py</code>.</p>
+<h2 id="可执行命令参考"><a href="#可执行命令参考" class="headerlink" title="可执行命令参考"></a>可执行命令参考</h2><p>原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQ=">Executable commands reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<h3 id="Simpleperf-是如何工作的"><a href="#Simpleperf-是如何工作的" class="headerlink" title="Simpleperf 是如何工作的"></a>Simpleperf 是如何工作的</h3><p>现代 CPU 有一个名为性能监控单元 (PMU) 的硬件组件. PMU有几个硬件计数器, 用于计数诸如发生了多少CPU周期, 执行了多少指令或发生了多少缓存未命中等事件.</p>
+<p>Linux 内核将这些硬件计数器封装成硬件性能事件. 此外, Linux 内核还提供与硬件无关的软件事件和跟踪点事件. Linux 内核通过 <code>perf_event_open</code> 系统调用将所有事件暴露给用户空间, 这个调用被 simpleperf 使用.</p>
+<p>Simpleperf 有三个主要命令: <code>stat</code>, <code>record</code> 和 <code>report</code>.</p>
+<p><code>stat</code> 命令总结在一段时间内被分析的进程中发生的事件数量. 其工作原理如下:</p>
+<ul>
+<li>根据用户选项, simpleperf 通过对内核进行系统调用来启用分析.</li>
+<li>在分析的进程运行时, 内核启用计数器.</li>
+<li>分析结束后, simpleperf 从内核读取计数器, 并报告计数器摘要.</li>
+</ul>
+<p><code>record</code> 命令在一段时间内记录被分析进程的样本. 其工作原理如下:</p>
+<ul>
+<li>根据用户选项, simpleperf 通过对内核进行系统调用来启用分析.</li>
+<li>Simpleperf 在 simpleperf 和内核之间创建映射缓冲区.</li>
+<li>在分析的进程运行时, 内核启用计数器.</li>
+<li>每当发生一定数量的事件时, 内核将样本转储到映射缓冲区.</li>
+<li>Simpleperf 从映射缓冲区读取样本, 并将分析数据存储在名为<code>perf.data</code>的文件中.</li>
+</ul>
+<p><code>report</code> 命令读取 <code>perf.data</code> 文件和任何被分析进程使用的共享库, 并输出显示时间花费在哪些地方的报告.</p>
+<p>Simpleperf 支持以下几个命令:</p>
+<ul>
+<li><code>debug-unwind</code> 命令: 调试/测试基于 DWARF 的离线展开, 用于调试 simpleperf.</li>
+<li><code>dump</code> 命令: 转储 <code>perf.data</code> 中的内容, 用于调试 simpleperf.</li>
+<li><code>help</code> 命令: 打印其他命令的帮助信息.</li>
+<li><code>kmem</code> 命令: 收集内核内存分配信息 (将被Python脚本替代) .</li>
+<li><code>list</code> 命令: 列出 Android 设备上支持的所有事件类型.</li>
+<li><code>record</code> 命令: 分析进程并将分析数据存储在 <code>perf.data</code> 中.</li>
+<li><code>report</code> 命令: 报告 <code>perf.data</code> 中的分析数据.</li>
+<li><code>report-sample</code> 命令: 报告 <code>perf.data</code> 中的每个样本, 用于支持 simpleperf 在 Android Studio 中的集成.</li>
+<li><code>stat</code> 命令: 分析进程并打印计数器摘要.</li>
+</ul>
+<p>每个命令支持不同的选项, 可以通过帮助信息查看.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有命令. </span></span><br><span class="line">$ simpleperf --<span class="built_in">help</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印 record 命令的帮助信息. </span></span><br><span class="line">$ simpleperf record --<span class="built_in">help</span></span><br></pre></td></tr></table></figure>
+
+<p>以下描述了最常用的命令, 分别是 list, stat, record 和 report.</p>
+<h3 id="list"><a href="#list" class="headerlink" title="list"></a>list</h3><p>这个命令列出了设备上所有可用的事件列表. 不同的设备可能支持不同的事件, 因为它们具有不同的硬件和内核.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf list</span><br><span class="line">List of hw-cache events:</span><br><span class="line">  branch-loads</span><br><span class="line">  ...</span><br><span class="line">List of hardware events:</span><br><span class="line">  cpu-cycles</span><br><span class="line">  instructions</span><br><span class="line">  ...</span><br><span class="line">List of software events:</span><br><span class="line">  cpu-clock</span><br><span class="line">  task-clock</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+
+<p>在 ARM/ARM64 架构上, <code>list</code> 命令还显示了一组原始事件列表, 这些事件是设备上 ARM 性能监视器单元 (PMU) 支持的事件. 内核已经将其中的一部分包装成了硬件事件和硬件缓存事件. 例如, <code>raw-cpu-cycles</code> 被包装成了 <code>cpu-cycles</code>, <code>raw-instruction-retired</code> 被包装成了<code>instructions</code>. 原始事件的提供是为了在我们希望使用设备上支持的某些事件时, 但不幸的是内核没有将其包装成硬件事件时使用.</p>
+<h3 id="stat"><a href="#stat" class="headerlink" title="stat"></a>stat</h3><p>stat 命令用于获取被分析进程的事件计数器值. 通过传递选项, 我们可以选择使用哪些事件, 监控哪些进程/线程, 监控多长时间以及打印间隔.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Stat using default events (cpu-cycles,instructions,...), and monitor process 7394 for 10 seconds.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p 7394 --duration 10</span><br><span class="line">Performance counter statistics:</span><br><span class="line"></span><br><span class="line"><span class="comment">#         count  event_name                # count / runtime</span></span><br><span class="line">     16,513,564  cpu-cycles                <span class="comment"># 1.612904 GHz</span></span><br><span class="line">      4,564,133  stalled-cycles-frontend   <span class="comment"># 341.490 M/sec</span></span><br><span class="line">      6,520,383  stalled-cycles-backend    <span class="comment"># 591.666 M/sec</span></span><br><span class="line">      4,900,403  instructions              <span class="comment"># 612.859 M/sec</span></span><br><span class="line">         47,821  branch-misses             <span class="comment"># 6.085 M/sec</span></span><br><span class="line">  25.274251(ms)  task-clock                <span class="comment"># 0.002520 cpus used</span></span><br><span class="line">              4  context-switches          <span class="comment"># 158.264 /sec</span></span><br><span class="line">            466  page-faults               <span class="comment"># 18.438 K/sec</span></span><br><span class="line"></span><br><span class="line">Total <span class="built_in">test</span> time: 10.027923 seconds.</span><br></pre></td></tr></table></figure>
+
+<h4 id="选择要统计的事件"><a href="#选择要统计的事件" class="headerlink" title="选择要统计的事件"></a>选择要统计的事件</h4><p>我们可以通过 <code>-e</code> 选项选择要使用的事件 (event).</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Stat event cpu-cycles.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -e cpu-cycles -p 11904 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Stat event cache-references and cache-misses.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -e cache-references,cache-misses -p 11904 --duration 10</span><br></pre></td></tr></table></figure>
+
+<p>当运行 stat 命令时, 如果硬件事件的数量大于 PMU 可用的硬件计数器数量, 内核会在事件之间共享硬件计数器, 因此每个事件仅在总时间的一部分被监控. 结果, 显示的事件数量小于实际发生的事件数量. 以下是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Stat using event cache-references, cache-references:u,....</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p 7394 -e cache-references,cache-references:u,cache-references:k \</span><br><span class="line">      -e cache-misses,cache-misses:u,cache-misses:k,instructions --duration 1</span><br><span class="line">Performance counter statistics:</span><br><span class="line"></span><br><span class="line"><span class="comment">#   count  event_name           # count / runtime</span></span><br><span class="line">  490,713  cache-references     <span class="comment"># 151.682 M/sec</span></span><br><span class="line">  899,652  cache-references:u   <span class="comment"># 130.152 M/sec</span></span><br><span class="line">  855,218  cache-references:k   <span class="comment"># 111.356 M/sec</span></span><br><span class="line">   61,602  cache-misses         <span class="comment"># 7.710 M/sec</span></span><br><span class="line">   33,282  cache-misses:u       <span class="comment"># 5.050 M/sec</span></span><br><span class="line">   11,662  cache-misses:k       <span class="comment"># 4.478 M/sec</span></span><br><span class="line">        0  instructions         <span class="comment">#</span></span><br><span class="line"></span><br><span class="line">Total <span class="built_in">test</span> time: 1.000867 seconds.</span><br><span class="line">simpleperf W cmd_stat.cpp:946] It seems the number of hardware events are more than the number of</span><br><span class="line">available CPU PMU hardware counters. That will trigger hardware counter</span><br><span class="line">multiplexing. As a result, events are not counted all the time processes</span><br><span class="line">running, and event counts are smaller than what really happens.</span><br><span class="line">Use --print-hw-counter to show available hardware counters.</span><br></pre></td></tr></table></figure>
+
+<p>在上述示例中, 我们监控了 7 个事件. 每个事件仅在总时间的一部分被监控. 因为 <code>cache-references</code> 的数量小于 <code>cache-references:u</code> (仅在用户空间的 <code>cache-references</code>) 和 <code>cache-references:k</code> (仅在内核中的 <code>cache-references</code>) . 指令数为零. 在打印结果后, simpleperf 会检查 CPU 是否有足够的硬件计数器来同时计数硬件事件. 如果没有, 它会打印一个警告.</p>
+<p>为了避免硬件计数器复用, 我们可以使用 <code>simpleperf stat --print-hw-counter</code> 来显示每个 CPU 上的可用计数器. 然后不要监控比可用计数器更多的硬件事件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf <span class="built_in">stat</span> --print-hw-counter</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 0.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 1.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 2.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 3.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 4.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 5.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 6.</span><br><span class="line">There are 2 CPU PMU hardware counters available on cpu 7.</span><br></pre></td></tr></table></figure>
+
+<p>当发生计数器复用时, 无法保证哪些事件在何时被监控. 如果我们希望确保某些事件始终同时被监控, 我们可以使用 <code>--group</code> 选项.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Stat using event cache-references, cache-references:u,....</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p 7964 --group cache-references,cache-misses \</span><br><span class="line">      --group cache-references:u,cache-misses:u --group cache-references:k,cache-misses:k \</span><br><span class="line">      --duration 1</span><br><span class="line">Performance counter statistics:</span><br><span class="line"></span><br><span class="line"><span class="comment">#     count  event_name           # count / runtime</span></span><br><span class="line">  2,088,463  cache-references     <span class="comment"># 181.360 M/sec</span></span><br><span class="line">     47,871  cache-misses         <span class="comment"># 2.292164% miss rate</span></span><br><span class="line">  1,277,600  cache-references:u   <span class="comment"># 136.419 M/sec</span></span><br><span class="line">     25,977  cache-misses:u       <span class="comment"># 2.033265% miss rate</span></span><br><span class="line">    326,305  cache-references:k   <span class="comment"># 74.724 M/sec</span></span><br><span class="line">     13,596  cache-misses:k       <span class="comment"># 4.166654% miss rate</span></span><br><span class="line"></span><br><span class="line">Total <span class="built_in">test</span> time: 1.029729 seconds.</span><br><span class="line">simpleperf W cmd_stat.cpp:946] It seems the number of hardware events are more than the number of</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h4 id="选择要统计的目标"><a href="#选择要统计的目标" class="headerlink" title="选择要统计的目标"></a>选择要统计的目标</h4><p>我们可以通过 <code>-p</code> 或<code>-t</code> 选项选择要监控的进程或线程. 监控一个进程相当于监控该进程中的所有线程. Simpleperf 还可以派生一个子进程来运行新命令, 然后监控该子进程.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 统计进程 11904 和 11905.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p 11904,11905 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计名字里包含 &quot;chrome&quot; 的进程.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p chrome --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 正则表达式统计进程名.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p <span class="string">&quot;chrome:(privileged|sandboxed)&quot;</span> --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计线程 11904 和 11905.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -t 11904,11905 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 开启子进程 ls 并进行统计.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 统计安卓应用, 在非 root 设备上, 只能统计 debuggable</span></span><br><span class="line"><span class="comment"># 或者 profileable from shell 的应用.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> --app simpleperf.example.cpp --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 仅统计应用的某个线程.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> --app simpleperf.example.cpp -t 11904 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 -a 进行系统范围的统计.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -a --duration 10</span><br></pre></td></tr></table></figure>
+
+<h4 id="决定统计的时长"><a href="#决定统计的时长" class="headerlink" title="决定统计的时长"></a>决定统计的时长</h4><p>在监控现有线程时, 我们可以使用 <code>--duration</code> 选项来决定监控的时长. 在监控运行新命令的子进程时, simpleperf 会一直监控直到子进程结束. 在这种情况下, 我们可以随时使用 Ctrl-C 来停止监控.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Stat process 11904 for 10 seconds.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p 11904 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Stat until the child process running `ls` finishes.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Stop monitoring using Ctrl-C.</span></span><br><span class="line">$ simpleperf <span class="built_in">stat</span> -p 11904 --duration 10</span><br><span class="line">^C</span><br></pre></td></tr></table></figure>
+
+<p>如果您希望编写脚本来控制监控时长, 可以向 simpleperf 发送 <code>SIGINT</code>, <code>SIGTERM</code> 或 <code>SIGHUP</code> 信号来停止监控.</p>
+<hr>
+<p>更多内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXN0YXQtY29tbWFuZA==">The stat command<i class="fa fa-external-link-alt"></i></span>.</p>
+<h3 id="record"><a href="#record" class="headerlink" title="record"></a>record</h3><p>record 命令用于转储被分析进程的样本. 每个样本可以包含生成样本的时间, 自上次样本以来的事件数量, 线程的程序计数器, 线程的调用链等信息.</p>
+<p>通过传递选项, 我们可以选择使用哪些事件, 监控哪些进程/线程, 转储样本的频率, 监控多长时间, 以及存储样本的位置.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Record on process 7394 for 10 seconds, using default event (cpu-cycles), </span></span><br><span class="line"><span class="comment"># using default sample frequency (4000 samples per second),</span></span><br><span class="line"><span class="comment"># writing records to perf.data.</span></span><br><span class="line">$ simpleperf record -p 7394 --duration 10</span><br><span class="line">simpleperf I cmd_record.cpp:316] Samples recorded: 21430. Samples lost: 0.</span><br></pre></td></tr></table></figure>
+
+<h4 id="选择要记录的事件"><a href="#选择要记录的事件" class="headerlink" title="选择要记录的事件"></a>选择要记录的事件</h4><p>默认情况下, 使用 <code>cpu-cycles</code> 事件来评估消耗的 CPU 周期. 但我们也可以通过 <code>-e</code> 选项使用其他事件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Record using event instructions.</span></span><br><span class="line">$ simpleperf record -e instructions -p 11904 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record using task-clock, which shows the passed CPU time in nanoseconds.</span></span><br><span class="line">$ simpleperf record -e task-clock -p 11904 --duration 10</span><br></pre></td></tr></table></figure>
+
+<h4 id="选择要记录的目标"><a href="#选择要记录的目标" class="headerlink" title="选择要记录的目标"></a>选择要记录的目标</h4><p><code>record</code> 命令中选择目标的方式类似于 <code>stat</code> 命令.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Record process 11904 and 11905.</span></span><br><span class="line">$ simpleperf record -p 11904,11905 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record processes with name containing &quot;chrome&quot;.</span></span><br><span class="line">$ simpleperf record -p chrome --duration 10</span><br><span class="line"><span class="comment"># Record processes with name containing part matching regex &quot;chrome:(privileged|sandboxed)&quot;.</span></span><br><span class="line">$ simpleperf record -p <span class="string">&quot;chrome:(privileged|sandboxed)&quot;</span> --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record thread 11904 and 11905.</span></span><br><span class="line">$ simpleperf record -t 11904,11905 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record a child process running `ls`.</span></span><br><span class="line">$ simpleperf record <span class="built_in">ls</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Record the process of an Android application. On non-root devices, this only works for debuggable</span></span><br><span class="line"><span class="comment"># or profileable from shell apps.</span></span><br><span class="line">$ simpleperf record --app simpleperf.example.cpp --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record only selected thread 11904 in an app.</span></span><br><span class="line">$ simpleperf record --app simpleperf.example.cpp -t 11904 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record system wide.</span></span><br><span class="line">$ simpleperf record -a --duration 10</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置记录频率"><a href="#设置记录频率" class="headerlink" title="设置记录频率"></a>设置记录频率</h4><p>我们可以通过 <code>-f</code> 或 <code>-c</code> 选项设置转储记录的频率. 例如, <code>-f 4000</code> 表示在监控的线程运行时, 每秒钟大约转储 4000 条记录. 如果一个监控的线程在一秒钟内运行了 0.2 秒 (在其他时间它可能被抢占或阻塞) , simpleperf 每秒钟大约转储 4000 * 0.2 / 1.0 = 800 条记录. 另一种方式是使用 <code>-c</code>. 例如, <code>-c 10000</code> 表示每当发生 10000 个事件时转储一条记录.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用采样频率 1000 进行记录: 每秒运行采样 1000 次. </span></span><br><span class="line">$ simpleperf record -f 1000 -p 11904,11905 --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用采样周期 100000 进行记录: 每 100000 个事件采样一次. </span></span><br><span class="line">$ simpleperf record -c 100000 -t 11904,11905 --duration 10</span><br></pre></td></tr></table></figure>
+
+<p>为了避免生成样本花费过多时间, kernel &gt;= 3.10 设置了用于生成样本的最大 CPU 时间百分比 (默认是 25%) , 并在达到该限制时降低允许的最大采样频率. simpleperf 使用 <code>--cpu-percent</code> 选项来调整它, 但这需要 root 权限或运行 Android &gt;= Q.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用采样频率 10000 进行记录, 允许的最大 CPU 使用率为 50%. </span></span><br><span class="line">$ simpleperf record -f 1000 -p 11904,11905 --duration 10 --cpu-percent 50</span><br></pre></td></tr></table></figure>
+
+<h4 id="决定记录的时长"><a href="#决定记录的时长" class="headerlink" title="决定记录的时长"></a>决定记录的时长</h4><p>与 <code>stat</code> 类似, 也可以通过 <code>--duration</code> 来控制记录时长.</p>
+<h4 id="设置存储分析数据的路径"><a href="#设置存储分析数据的路径" class="headerlink" title="设置存储分析数据的路径"></a>设置存储分析数据的路径</h4><p>默认情况下, simpleperf 将分析数据存储在当前目录的 <code>perf.data</code> 文件中. 但可以使用 <code>-o</code> 选项更改存储路径.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Write records to data/perf2.data.</span></span><br><span class="line">$ simpleperf record -p 11904 -o data/perf2.data --duration 10</span><br></pre></td></tr></table></figure>
+
+<h4 id="记录调用图"><a href="#记录调用图" class="headerlink" title="记录调用图"></a>记录调用图</h4><p>调用图是显示函数调用关系的树结构. 以下是一个示例.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">main() &#123;</span><br><span class="line">    FunctionOne();</span><br><span class="line">    FunctionTwo();</span><br><span class="line">&#125;</span><br><span class="line">FunctionOne() &#123;</span><br><span class="line">    FunctionTwo();</span><br><span class="line">    FunctionThree();</span><br><span class="line">&#125;</span><br><span class="line">a call graph:</span><br><span class="line">    main-&gt; FunctionOne</span><br><span class="line">       |    |</span><br><span class="line">       |    |-&gt; FunctionTwo</span><br><span class="line">       |    |-&gt; FunctionThree</span><br><span class="line">       |</span><br><span class="line">       |-&gt; FunctionTwo</span><br></pre></td></tr></table></figure>
+
+<p>调用图显示了一个函数如何调用其他函数, 反向调用图则显示一个函数如何被其他函数调用. 要显示调用图, 我们首先需要记录它, 然后再报告它.</p>
+<p>有两种记录调用图的方法, 一种是记录基于 dwarf 的调用图, 另一种是记录基于栈帧的调用图. 记录基于 dwarf 的调用图需要本地二进制文件中的调试信息支持. 而记录基于栈帧的调用图则需要栈帧寄存器的支持.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录基于 dwarf 的调用图</span></span><br><span class="line">$ simpleperf record -p 11904 -g --duration 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录基于栈帧的调用图</span></span><br><span class="line">$ simpleperf record -p 11904 --call-graph fp --duration 10</span><br></pre></td></tr></table></figure>
+
+<h4 id="记录-CPU-时间和非-CPU-时间-1"><a href="#记录-CPU-时间和非-CPU-时间-1" class="headerlink" title="记录 CPU 时间和非 CPU 时间"></a>记录 CPU 时间和非 CPU 时间</h4><p>Simpleperf 是一个 CPU 分析器, 它只在线程运行在 CPU 上时生成样本. 但有时我们想知道线程在 CPU 外的时间是如何花费的 (例如, 被其他线程抢占, 在 IO 中阻塞或等待某些事件) . 为支持这一点, simpleperf 在 <code>record</code> 命令中添加了 <code>--trace-offcpu</code> 选项. 当使用 <code>--trace-offcpu</code> 时, simpleperf 会执行以下操作:</p>
+<ol>
+<li>仅允许 <code>cpu-clock``/task-clock</code> 事件与 <code>--trace-offcpu</code> 一起使用, 这使得 simpleperf 为 <code>cpu-clock</code> 事件生成 on-cpu 样本.</li>
+<li>Simpleperf 还监控 <code>sched:sched_switch</code> 事件, 每次监控的线程从 CPU 上调度时会生成一个 sched_switch 样本.</li>
+<li>Simpleperf 还记录上下文切换记录, 因此它知道线程何时被调度回 CPU.</li>
+</ol>
+<p>simpleperf 为线程收集的样本和上下文切换记录如下所示:</p>
+<p><img data-src="data:image/png;base64,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" alt="simpleperf_trace_offcpu_sample_mode"></p>
+<p>这里有两种类型的样本:</p>
+<ol>
+<li>为 cpu-clock 事件生成的 on-cpu 样本. 每个样本中的周期值表示在 CPU 上花费了多少纳秒 (针对该样本的调用链) .</li>
+<li>为 sched:sched_switch 事件生成的 off-cpu (sched_switch) 样本. 周期值由 simpleperf 计算为下一个 switch on 记录的时间戳减去当前样本的时间戳. 因此, 每个样本中的周期值表示在 CPU 外花费了多少纳秒 (针对该样本的调用链) .</li>
+</ol>
+<p>注意: 实际上, switch on 记录和样本可能会丢失. 为了减轻精度损失, 我们计算一个 off-cpu 样本的周期为下一个 switch on 记录或样本的时间戳减去当前样本的时间戳.</p>
+<p>通过 Python 脚本报告时, <code>simpleperf_report_lib.py</code> 提供 <code>SetTraceOffCpuMode()</code> 方法来控制如何报告样本:</p>
+<ol>
+<li>on-cpu 模式: 仅报告 on-cpu 样本.</li>
+<li>off-cpu 模式: 仅报告 off-cpu 样本.</li>
+<li>on-off-cpu 模式: 报告 on-cpu 和 off-cpu 样本, 可以按事件名称分开.</li>
+<li>mixed-on-off-cpu 模式: 在相同事件名称下报告 on-cpu 和 off-cpu 样本.</li>
+</ol>
+<p>如果未设置, 将使用 mixed-on-off-cpu 模式进行报告.</p>
+<p>使用 <code>report_html.py</code>, <code>inferno</code> 和 <code>report_sample.py</code> 时, 可以通过 <code>--trace-offcpu</code> 选项设置报告模式.</p>
+<p>以下是一些记录和报告 trace offcpu 配置文件的示例.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Check if --trace-offcpu is supported by the kernel (should be available on kernel &gt;= 4.2).</span></span><br><span class="line">$ simpleperf list --show-features</span><br><span class="line">trace-offcpu</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record with --trace-offcpu.</span></span><br><span class="line">$ simpleperf record -g -p 11904 --duration 10 --trace-offcpu -e cpu-clock</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record system wide with --trace-offcpu.</span></span><br><span class="line">$ simpleperf record -a -g --duration 3 --trace-offcpu -e cpu-clock</span><br><span class="line"></span><br><span class="line"><span class="comment"># Record with --trace-offcpu using app_profiler.py.</span></span><br><span class="line">$ ./app_profiler.py -p com.google.samples.apps.sunflower \</span><br><span class="line">    -r <span class="string">&quot;-g -e cpu-clock:u --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Report on-cpu samples.</span></span><br><span class="line">$ ./report_html.py --trace-offcpu on-cpu</span><br><span class="line"><span class="comment"># Report off-cpu samples.</span></span><br><span class="line">$ ./report_html.py --trace-offcpu off-cpu</span><br><span class="line"><span class="comment"># Report on-cpu and off-cpu samples under different event names.</span></span><br><span class="line">$ ./report_html.py --trace-offcpu on-off-cpu</span><br><span class="line"><span class="comment"># Report on-cpu and off-cpu samples under the same event name.</span></span><br><span class="line">$ ./report_html.py --trace-offcpu mixed-on-off-cpu</span><br></pre></td></tr></table></figure>
+
+<h3 id="report"><a href="#report" class="headerlink" title="report"></a>report</h3><p>report 命令用于报告由 record 命令生成的分析数据. 报告包含一个样本条目表, 每个样本条目是报告中的一行. report 命令将属于同一进程, 线程, 库, 函数的样本分组到同一个样本条目中. 然后根据样本条目的事件计数对样本条目进行排序.</p>
+<p>通过传递选项, 我们可以决定如何过滤掉不感兴趣的样本, 如何将样本分组到样本条目中, 以及在哪里查找分析数据和二进制文件.</p>
+<p>下面是一个示例. 记录被分组为 4 个样本条目, 每个条目是一行. 有几列, 每列显示属于样本条目的一部分信息. 第一列是 Overhead, 显示当前样本条目中事件占总事件的百分比. 由于 perf 事件是 cpu-cycles, overhead 是每个函数使用的 CPU 周期的百分比.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Reports perf.data, using only records sampled in libsudo-game-jni.so, grouping records using</span></span><br><span class="line"><span class="comment"># thread name(comm), process id(pid), thread id(tid), function name(symbol), and showing sample</span></span><br><span class="line"><span class="comment"># count for each row.</span></span><br><span class="line">$ simpleperf report --dsos /data/app/com.example.sudogame-2/lib/arm64/libsudo-game-jni.so \</span><br><span class="line">      --<span class="built_in">sort</span> <span class="built_in">comm</span>,pid,tid,symbol -n</span><br><span class="line">Cmdline: /data/data/com.example.sudogame/simpleperf record -p 7394 --duration 10</span><br><span class="line">Arch: arm64</span><br><span class="line">Event: cpu-cycles (<span class="built_in">type</span> 0, config 0)</span><br><span class="line">Samples: 28235</span><br><span class="line">Event count: 546356211</span><br><span class="line"></span><br><span class="line">Overhead  Sample  Command    Pid   Tid   Symbol</span><br><span class="line">59.25%    16680   sudogame  7394  7394  checkValid(Board const&amp;, int, int)</span><br><span class="line">20.42%    5620    sudogame  7394  7394  canFindSolution_r(Board&amp;, int, int)</span><br><span class="line">13.82%    4088    sudogame  7394  7394  randomBlock_r(Board&amp;, int, int, int, int, int)</span><br><span class="line">6.24%     1756    sudogame  7394  7394  @plt</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置读取分析数据的路径"><a href="#设置读取分析数据的路径" class="headerlink" title="设置读取分析数据的路径"></a>设置读取分析数据的路径</h4><p>默认情况下, report 命令从当前目录的 perf.data 文件中读取分析数据. 但可以使用 <code>-i</code> 选项更改读取路径.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">simpleperf report -i data/perf2.data</span><br></pre></td></tr></table></figure>
+
+<h4 id="设置查找二进制文件的路径"><a href="#设置查找二进制文件的路径" class="headerlink" title="设置查找二进制文件的路径"></a>设置查找二进制文件的路径</h4><p>为了报告函数符号, simpleperf 需要读取被监控进程使用的可执行二进制文件以获取符号表和调试信息. 默认情况下, 路径是记录时被监控进程使用的可执行二进制文件. 然而, 这些二进制文件在报告时可能不存在或不包含符号表和调试信息. 因此, 我们可以使用 <code>--symfs</code> 选项重定向路径.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># In this case, when simpleperf wants to read executable binary /A/b, it reads file in /A/b.</span></span><br><span class="line">$ simpleperf report</span><br><span class="line"></span><br><span class="line"><span class="comment"># In this case, when simpleperf wants to read executable binary /A/b, it prefers file in</span></span><br><span class="line"><span class="comment"># /debug_dir/A/b to file in /A/b.</span></span><br><span class="line">$ simpleperf report --symfs /debug_dir</span><br><span class="line"></span><br><span class="line"><span class="comment"># Read symbols for system libraries built locally. Note that this is not needed since Android O,</span></span><br><span class="line"><span class="comment"># which ships symbols for system libraries on device.</span></span><br><span class="line">$ simpleperf report --symfs <span class="variable">$ANDROID_PRODUCT_OUT</span>/symbols</span><br></pre></td></tr></table></figure>
+
+<h4 id="报告调用图"><a href="#报告调用图" class="headerlink" title="报告调用图"></a>报告调用图</h4><p>要报告调用图, 请确保分析数据是带有调用图记录的, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjcmVjb3JkLWNhbGwtZ3JhcGhz">Record call graphs<i class="fa fa-external-link-alt"></i></span> 所示.</p>
+<hr>
+<p>更多详细内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXJlY29yZC1jb21tYW5k">The record command<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="脚本参考"><a href="#脚本参考" class="headerlink" title="脚本参考"></a>脚本参考</h2><h3 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h3><h4 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h4><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h4 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h4><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h4 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h4><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h4 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h4><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h3 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h3><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h4 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h4><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h4 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h4><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h4 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h4><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h4 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h4><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h4 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h4><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h4 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h4><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h4 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h4><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h4 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h4><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h3><h4 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h4><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h4 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h4><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h4 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h4><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看分析结果"><a href="#查看分析结果" class="headerlink" title="查看分析结果"></a>查看分析结果</h2><p>使用 <code>simpleperf record</code> 或 <code>app_profiler.py</code> 后, 我们会得到一个分析数据文件. 该文件包含一个样本列表. 每个样本都有时间戳、线程 ID、调用栈、在此样本中使用的事件（如 cpu-cycles 或 cpu-clock）等. 我们有多种查看分析结果的选择. 我们可以按时间顺序显示样本, 或者显示聚合的火焰图. 我们可以以文本格式显示报告, 或者在一些交互式 UI 中显示报告.</p>
+<p>以下是一些推荐的查看分析结果的 UI. Google 开发者可以在 go/gmm-profiling 中找到更多示例.</p>
+<ul>
+<li>Continuous PProf UI (great flamegraph UI, but only available internally)</li>
+<li>Firefox Profiler (great chronological UI)</li>
+<li>FlameScope (great jank-finding UI)</li>
+<li>Differential FlameGraph</li>
+<li>Android Studio Profiler</li>
+<li>Simpleperf HTML Report</li>
+<li>PProf Interactive Command Line</li>
+<li>Simpleperf Report Command Line</li>
+<li>Custom Report Interface</li>
+</ul>
+<h3 id="Android-Studio-Profiler"><a href="#Android-Studio-Profiler" class="headerlink" title="Android Studio Profiler"></a>Android Studio Profiler</h3><p>Android Studio Profiler 支持记录和报告应用进程的分析数据. 它支持几种记录方法, 包括使用 simpleperf 作为后端的方法. 您可以使用 Android Studio Profiler 进行记录和报告.</p>
+<p>在 Android Studio 中: Open View -&gt; Tool Windows -&gt; Profiler -&gt; Click + -&gt; Your Device -&gt; Profileable Processes -&gt; Your App</p>
+<p>点击 &quot;CPU&quot; 图表</p>
+<p>选择 Callstack Sample Recording. 即使您使用 Java, 这也能提供更好的可观察性, 包括 ART、malloc 和内核.</p>
+<p>点击 Record, 在设备上运行您的测试, 完成后点击 Stop.</p>
+<p>点击一个线程轨迹, 并选择 &quot;Flame Chart&quot; 以在左侧查看按时间顺序排列的图表, 在右侧查看聚合的火焰图:</p>
+<p>如果您希望在记录选项上有更多灵活性, 或希望添加 proguard 映射文件, 可以使用 simpleperf 进行记录, 并使用 Android Studio Profiler 进行报告.</p>
+<p>我们可以使用 <code>simpleperf report-sample</code> 将 <code>perf.data</code> 转换为 Android Studio Profiler 的跟踪文件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将 perf.data 转换为 Android Studio Profiler 的 perf.trace 文件. </span></span><br><span class="line"><span class="comment"># 如果在 Mac/Windows 上, 使用相应平台的 simpleperf 主机可执行文件. </span></span><br><span class="line">bin/linux/x86_64/simpleperf report-sample --show-callchain --protobuf -i perf.data -o perf.trace</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 proguard 映射文件将 perf.data 转换为 perf.trace. </span></span><br><span class="line">bin/linux/x86_64/simpleperf report-sample --show-callchain --protobuf -i perf.data -o perf.trace \</span><br><span class="line">    --proguard-mapping-file proguard.map</span><br></pre></td></tr></table></figure>
+
+<p>在 Android Studio 中: 打开 File -&gt; Open -&gt; 选择 perf.trace</p>
+<hr>
+<p>在原文 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvdmlld190aGVfcHJvZmlsZS5tZA==">View the profile<i class="fa fa-external-link-alt"></i></span> 查看更多 UI 的介绍和用法.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Simpleperf/" rel="tag"><i class="fa fa-tag"></i> Simpleperf</a>
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/%E5%AE%89%E5%8D%93%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 安卓性能分析</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2024/06/16/sm9gfn/" rel="prev" title="SM9 算法中 $g_{U, V}(Q)$ 的展开优化">
+                  <i class="fa fa-chevron-left"></i> SM9 算法中 $g_{U, V}(Q)$ 的展开优化
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">234k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:06</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+</body>
+</html>
