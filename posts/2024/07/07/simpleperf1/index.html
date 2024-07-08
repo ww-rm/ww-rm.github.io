@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文是对性能分析工具 Simpleperf 使用文档总结, 也可以看作是文档翻译.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simpleperf 三部曲 (一)">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2024/07/07/simpleperf1/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="本文是对性能分析工具 Simpleperf 使用文档总结, 也可以看作是文档翻译.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-07-07T15:18:25.000Z">
+<meta property="article:modified_time" content="2024-07-08T14:43:09.072Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="Simpleperf">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="安卓性能分析">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2024/07/07/simpleperf1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2024/07/07/simpleperf1/","path":"/posts/2024/07/07/simpleperf1/","title":"Simpleperf 三部曲 (一)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Simpleperf 三部曲 (一) | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-number">1.1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#simpleperf-%E4%B8%AD%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">1.2.</span> <span class="nav-text">simpleperf 中的工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.</span> <span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9C%A8%E4%B8%8D%E5%90%8C-Android-%E7%89%88%E6%9C%AC%E4%B8%8A%E7%9A%84%E6%94%AF%E6%8C%81"><span class="nav-number">1.3.1.</span> <span class="nav-text">在不同 Android 版本上的支持</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E5%9F%BA%E4%BA%8E-DWARF-%E5%92%8C%E5%9F%BA%E4%BA%8E%E5%A0%86%E6%A0%88%E5%B8%A7%E7%9A%84%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">1.3.2.</span> <span class="nav-text">比较基于 DWARF 和基于堆栈帧的调用图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D%E5%9F%BA%E4%BA%8E-DWARF-%E7%9A%84%E7%A0%B4%E6%8D%9F%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">1.3.3.</span> <span class="nav-text">修复基于 DWARF 的破损调用图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D%E5%9C%A8-C-%E5%87%BD%E6%95%B0%E4%B8%AD%E5%81%9C%E6%AD%A2%E7%9A%84%E7%A0%B4%E6%8D%9F%E8%B0%83%E7%94%A8%E9%93%BE"><span class="nav-number">1.3.4.</span> <span class="nav-text">修复在 C 函数中停止的破损调用链</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3%E6%8A%A5%E5%91%8A%E4%B8%AD%E7%BC%BA%E5%B0%91%E7%AC%A6%E5%8F%B7%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.3.5.</span> <span class="nav-text">如何解决报告中缺少符号的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E6%B3%A8%E9%87%8A%E7%9A%84%E6%BA%90%E4%BB%A3%E7%A0%81%E5%92%8C%E5%8F%8D%E6%B1%87%E7%BC%96"><span class="nav-number">1.3.6.</span> <span class="nav-text">显示注释的源代码和反汇编</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E4%B8%A2%E5%A4%B1%E7%9A%84%E6%A0%B7%E6%9C%AC%E5%92%8C%E5%A0%86%E6%A0%88%E8%A2%AB%E6%88%AA%E6%96%AD%E7%9A%84%E6%A0%B7%E6%9C%AC"><span class="nav-number">1.3.7.</span> <span class="nav-text">减少丢失的样本和堆栈被截断的样本</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">Android 应用程序分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%AE%89%E5%8D%93%E5%BA%94%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">准备安卓应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%92%8C%E6%8A%A5%E5%91%8A%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">2.2.</span> <span class="nav-text">记录和报告分析数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%92%8C%E6%8A%A5%E5%91%8A%E8%B0%83%E7%94%A8%E5%9B%BE"><span class="nav-number">2.3.</span> <span class="nav-text">记录和报告调用图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E7%BD%91%E9%A1%B5%E6%8E%A5%E5%8F%A3%E8%BF%9B%E8%A1%8C%E6%8A%A5%E5%91%8A"><span class="nav-number">2.4.</span> <span class="nav-text">通过网页接口进行报告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%95%E7%A4%BA%E7%81%AB%E7%84%B0%E5%9B%BE"><span class="nav-number">2.5.</span> <span class="nav-text">展示火焰图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-Android-Studio-%E4%B8%AD%E8%BF%9B%E8%A1%8C%E6%8A%A5%E5%91%8A"><span class="nav-number">2.6.</span> <span class="nav-text">在 Android Studio 中进行报告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E6%B7%B7%E6%B7%86-Java-%E7%AC%A6%E5%8F%B7"><span class="nav-number">2.7.</span> <span class="nav-text">去混淆 Java 符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95-CPU-%E6%97%B6%E9%97%B4%E5%92%8C%E9%9D%9E-CPU-%E6%97%B6%E9%97%B4"><span class="nav-number">2.8.</span> <span class="nav-text">记录 CPU 时间和非 CPU 时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%90%AF%E5%8A%A8%E5%BC%80%E5%A7%8B%E5%88%86%E6%9E%90"><span class="nav-number">2.9.</span> <span class="nav-text">从启动开始分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%BB%A3%E7%A0%81%E4%B8%AD%E6%8E%A7%E5%88%B6%E8%AE%B0%E5%BD%95"><span class="nav-number">2.10.</span> <span class="nav-text">在应用程序代码中控制记录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E8%A7%A3%E6%9E%90%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE"><span class="nav-number">2.11.</span> <span class="nav-text">手动解析性能分析数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">查看分析结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-Studio-Profiler"><span class="nav-number">3.1.</span> <span class="nav-text">Android Studio Profiler</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">97</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2024/07/07/simpleperf1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Simpleperf 三部曲 (一) | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simpleperf 三部曲 (一)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-07 23:18:25" itemprop="dateCreated datePublished" datetime="2024-07-07T23:18:25+08:00">2024-07-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">阅读笔记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>14k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>26 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<span id="more"></span>
+
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>相比与直接使用 Simpleperf, Android Studio 提供了一个基于 simpleperf 的图形化前端, <span class="exturl" data-url="aHR0cHM6Ly9kZXZlbG9wZXIuYW5kcm9pZC5jb20vc3R1ZGlvL3Byb2ZpbGUvY3B1LXByb2ZpbGVy">Inspect CPU activity with CPU Profiler<i class="fa fa-external-link-alt"></i></span> 文档中介绍了如何使用 CPU Profiler 来分析安卓上的应用性能.</p>
+<p>Simpleperf 是 Android 的本地 CPU 分析工具. 它可以用来分析 Android 应用程序和运行在 Android 上的本地进程. 它可以分析 Android 上的 Java 和 c++ 代码. Simpleperf 可执行文件可以在 Android &gt;= L 上运行, Python 脚本可以在 Android &gt;= N 上使用.</p>
+<p>Simpleperf 包含两个部分: simpleperf 可执行文件和 Python 脚本.</p>
+<p>simpleperf 可执行文件类似于 linux-tools-perf, 但在 Android 性能分析环境中具有一些特定功能:</p>
+<ul>
+<li>在性能分析数据中收集更多信息. 由于常见的工作流程是&quot;在设备上记录, 并在主机上报告&quot;, simpleperf 不仅在性能分析数据中收集样本, 还收集所需的符号, 设备信息和记录时间.</li>
+<li>提供新的记录功能.<ul>
+<li>在记录基于 dwarf 的调用图时, simpleperf 在将样本写入文件之前展开堆栈. 这是为了节省设备上的存储空间.</li>
+<li>支持使用 <code>--trace-offcpu</code> 选项跟踪 CPU 时间和非 CPU 时间.</li>
+<li>支持在 Android P 及以上版本上记录 JIT 编译和解释的 Java 代码的调用图.</li>
+</ul>
+</li>
+<li>与 Android 平台紧密相关.<ul>
+<li>了解 Android 环境, 例如使用系统属性启用性能分析, 使用 <code>run-as</code> 在应用程序的上下文中进行性能分析.</li>
+<li>支持从 <code>.gnu_debugdata</code> 部分读取符号和调试信息, 因为系统库从 Android O 开始使用 <code>.gnu_debugdata</code> 部分构建.</li>
+<li>支持分析嵌入在 apk 文件中的共享库.</li>
+<li>使用标准的 Android 堆栈展开器, 因此其结果与所有其他 Android 工具一致.</li>
+</ul>
+</li>
+<li>构建用于不同用途的可执行文件和共享库.<ul>
+<li>在设备上构建静态可执行文件. 由于静态可执行文件不依赖于任何库, simpleperf 可执行文件可以推送到任何 Android 设备上并用于记录性能分析数据.</li>
+<li>在不同的主机上构建可执行文件: Linux, Mac 和 Windows. 这些可执行文件可用于在主机上报告.</li>
+<li>在不同的主机上构建报告共享库. 报告库由不同的 Python 脚本使用来解析性能分析数据.</li>
+</ul>
+</li>
+</ul>
+<p>有关 simpleperf 可执行文件的详细文档见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1kI2V4ZWN1dGFibGUtY29tbWFuZHMtcmVmZXJlbmNl">executable-commands-reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>Python 脚本根据其功能分为三个部分:</p>
+<ul>
+<li>用于记录的脚本, 如 <code>app_profiler.py</code>, <code>run_simpleperf_without_usb_connection.py</code>.</li>
+<li>用于报告的脚本, 如 <code>report.py</code>, <code>report_html.py</code>, <code>inferno</code>.</li>
+<li>用于解析性能分析数据的脚本, 如 <code>simpleperf_report_lib.py</code>.</li>
+</ul>
+<p>这些 Python 脚本在 Python &gt;= 3.9 版本上进行了测试. 旧版本可能不受支持. 有关 Python 脚本的详细文档见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1kI3NjcmlwdHMtcmVmZXJlbmNl">scripts-reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<h3 id="simpleperf-中的工具"><a href="#simpleperf-中的工具" class="headerlink" title="simpleperf 中的工具"></a>simpleperf 中的工具</h3><p>simpleperf 可执行文件和 Python 脚本位于 NDK 发布版的 simpleperf/ 目录中, 以及 AOSP 的 system/extras/simpleperf/scripts/ 目录中. 它们的功能如下所列.</p>
+<ul>
+<li><p><code>bin/</code>: 包含可执行文件和共享库.</p>
+<ul>
+<li><code>bin/android/$&#123;arch&#125;/simpleperf</code>: 用于设备上的静态 simpleperf 可执行文件.</li>
+<li><code>bin/$&#123;host&#125;/$&#123;arch&#125;/simpleperf</code>: 用于主机上的 simpleperf 可执行文件, 仅支持报告功能.</li>
+<li><code>bin/$&#123;host&#125;/$&#123;arch&#125;/libsimpleperf_report.$&#123;so/dylib/dll&#125;</code>: 用于主机上的报告共享库.</li>
+</ul>
+</li>
+<li><p><code>*.py</code>, <code>inferno</code>, <code>purgatorio</code>: 用于记录和报告的 Python 脚本. 详细信息见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">scripts_reference.md<i class="fa fa-external-link-alt"></i></span>.</p>
+</li>
+</ul>
+<h3 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h3><h4 id="在不同-Android-版本上的支持"><a href="#在不同-Android-版本上的支持" class="headerlink" title="在不同 Android 版本上的支持"></a>在不同 Android 版本上的支持</h4><p>在 Android &lt; N 上, 内核可能过旧 (&lt; 3.18), 不支持记录基于 DWARF 的调用图等功能. 在 Android M - O 上, 我们只能分析 C++ 代码和完全编译的 Java 代码. 在 Android &gt;= P 上, ART 解释器支持基于 DWARF 的展开, 因此我们可以分析 Java 代码. 在 Android &gt;= Q 上, 我们可以使用设备上的 simpleperf 来分析已发布的 Android 应用, 只需在 AndroidManifest.xml 中添加 <code>&lt;profileable android:shell=&quot;true&quot; /&gt;</code>.</p>
+<h4 id="比较基于-DWARF-和基于堆栈帧的调用图"><a href="#比较基于-DWARF-和基于堆栈帧的调用图" class="headerlink" title="比较基于 DWARF 和基于堆栈帧的调用图"></a>比较基于 DWARF 和基于堆栈帧的调用图</h4><p>Simpleperf 支持两种方式记录调用栈. 一个是基于 DWARF 的调用图, 另一个是基于堆栈帧的调用图. 以下是它们的比较:</p>
+<p>记录基于 DWARF 的调用图:</p>
+<ul>
+<li>需要二进制文件中调试信息的支持.</li>
+<li>在 ARM 和 ARM64 上表现良好, 对 Java 代码和 C++ 代码都适用.</li>
+<li>每个样本只能展开 64K 的堆栈. 因此不总是可能展开到最底部. 然而, 这在 simpleperf 中得到了缓解, 如下一节所述.</li>
+<li>比基于堆栈帧的调用图占用更多的 CPU 时间. 因此它的开销更大, 无法以很高的频率采样 (通常 &lt;= 4000 Hz).</li>
+</ul>
+<p>记录基于堆栈帧的调用图:</p>
+<ul>
+<li>需要堆栈帧寄存器的支持.</li>
+<li>在 ARM 上表现不佳. 因为 ARM 缺少寄存器, 且 ARM 和 THUMB 代码有不同的堆栈帧寄存器. 因此内核无法展开同时包含 ARM 和 THUMB 代码的用户堆栈.</li>
+<li>在 Java 代码上也表现不佳. 因为 ART 编译器不保留堆栈帧寄存器, 并且它无法获取解释的 Java 代码的帧.</li>
+<li>在分析 ARM64 上的本机程序时表现良好. 一个例子是分析 surfacelinger. 当它表现良好时, 通常会显示完整的火焰图.</li>
+<li>比基于 DWARF 的调用图占用更少的 CPU 时间. 因此采样频率可以达到 10000 Hz 或更高.</li>
+</ul>
+<p>所以, 如果需要在 ARM 上分析代码或分析 Java 代码, 基于 DWARF 的调用图更好. 如果需要在 ARM64 上分析 C++ 代码, 基于堆栈帧的调用图可能更好. 总之, 可以先尝试基于 DWARF 的调用图, 这是使用 <code>-g</code> 时的默认选项. 因为它总能产生合理的结果. 如果效果不够好, 再尝试基于堆栈帧的调用图.</p>
+<h4 id="修复基于-DWARF-的破损调用图"><a href="#修复基于-DWARF-的破损调用图" class="headerlink" title="修复基于 DWARF 的破损调用图"></a>修复基于 DWARF 的破损调用图</h4><p>基于 DWARF 的调用图是通过展开线程堆栈生成的. 当记录一个样本时, 内核会转储最多 64KB 的堆栈数据. 通过基于 DWARF 信息展开堆栈, 我们可以得到调用栈.</p>
+<p>造成调用栈破损的两个原因:</p>
+<ul>
+<li>内核每个样本只能转储最多 64KB 的堆栈数据, 但线程可能有更大的堆栈. 在这种情况下, 我们无法展开到线程的起始点.</li>
+<li>我们需要包含 DWARF 调用帧信息的二进制文件来展开堆栈帧. 二进制文件应具有以下部分之一: <code>.eh_frame</code>, <code>.debug_frame</code>, <code>.ARM.exidx</code> 或 <code>.gnu_debugdata</code>.</li>
+</ul>
+<p>为缓解这些问题:</p>
+<p>关于缺少堆栈数据的问题:</p>
+<p>为缓解这个问题, simpleperf 在记录后会连接调用链 (调用栈). 如果一个线程的两个调用链有包含相同 ip 和 sp 地址的条目, 那么 simpleperf 尝试连接它们以延长调用链. 因此, 通过更长时间的记录和更多样本的连接, 我们可以获得更完整的调用链. 虽然这不能保证获得完整的调用图, 但通常效果很好.</p>
+<p>simpleperf 在展开样本前将其存储在缓冲区中. 如果缓冲区空闲空间不足, simpleperf 可能会决定将样本的堆栈数据截断为 1K. 希望通过调用链连接可以恢复这些数据. 但如果大量样本被截断, 许多调用链可能会破损. 我们可以通过记录命令的输出判断样本是否被截断, 例如:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf record ...</span><br><span class="line">simpleperf I cmd_record.cpp:809] Samples recorded: 105584 (<span class="built_in">cut</span> 86291). Samples lost: 6501.</span><br><span class="line"></span><br><span class="line">$ simpleperf record ...</span><br><span class="line">simpleperf I cmd_record.cpp:894] Samples recorded: 7,365 (1,857 with truncated stacks).</span><br></pre></td></tr></table></figure>
+
+<p>有两种方法可以避免截断样本. 一种是增加缓冲区大小, 例如 <code>--user-buffer-size 1G</code>. 但 <code>--user-buffer-size</code> 仅在最新的 simpleperf 中可用. 如果该选项不可用, 可以使用 <code>--no-cut-samples</code> 禁止截断样本.</p>
+<p>关于缺少 DWARF 调用帧信息的问题:</p>
+<p>大多数 C++ 代码生成的二进制文件包含调用帧信息, 位于 <code>.eh_frame</code> 或 <code>.ARM.exidx</code> 部分. 这些部分不会被剥离, 通常足以进行堆栈展开.</p>
+<p>对于 C 代码和一小部分编译器确定不会生成异常的 C++ 代码, 调用帧信息生成在 <code>.debug_frame</code> 部分. 通常 <code>.debug_frame</code> 部分会与其他调试部分一起被剥离 (strip). 解决方法之一是在设备上下载未剥离的二进制文件, 如<span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1kI2ZpeC1icm9rZW4tY2FsbGNoYWluLXN0b3BwZWQtYXQtYy1mdW5jdGlvbnM=">这里<i class="fa fa-external-link-alt"></i></span>所述.</p>
+<p>编译器不会为函数的序言和尾声生成展开指令, 因为它们操作堆栈帧且不会生成异常. 但分析可能会遇到这些指令, 并且无法展开它们. 这通常在帧图中不重要, 但在基于时间的堆栈图表 (如 Android Studio 和 Firefox 分析器中) 中, 偶尔会导致堆栈间隙. 我们可以通过 <code>--remove-gaps</code> 移除堆栈间隙, 默认情况下已启用此选项.</p>
+<h4 id="修复在-C-函数中停止的破损调用链"><a href="#修复在-C-函数中停止的破损调用链" class="headerlink" title="修复在 C 函数中停止的破损调用链"></a>修复在 C 函数中停止的破损调用链</h4><p>使用基于 DWARF 的调用图时, simpleperf 在记录期间生成调用链以节省空间. 展开 C 函数所需的调试信息在 <code>.debug_frame</code> 部分, 通常在 apk 中的本机库中被剥离. 为解决此问题, 我们可以在设备上下载未剥离的本机库, 并在记录时要求 simpleperf 使用它们.</p>
+<p>直接使用 simpleperf:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在设备上创建 native_libs 目录, 并推送未剥离的库到其中 (不支持嵌套目录). </span></span><br><span class="line">$ adb shell <span class="built_in">mkdir</span> /data/local/tmp/native_libs</span><br><span class="line">$ adb push &lt;unstripped_dir&gt;/*.so /data/local/tmp/native_libs</span><br><span class="line"><span class="comment"># 使用 --symfs 选项运行 simpleperf record. </span></span><br><span class="line">$ adb shell simpleperf record xxx --symfs /data/local/tmp/native_libs</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>app_profiler.py</code>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -lib &lt;unstripped_dir&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="如何解决报告中缺少符号的问题"><a href="#如何解决报告中缺少符号的问题" class="headerlink" title="如何解决报告中缺少符号的问题"></a>如何解决报告中缺少符号的问题</h4><p><code>simpleperf record</code> 命令在设备上的 <code>perf.data</code> 中收集符号. 但如果你在设备上使用的本机库被剥离, 这会导致报告中有很多未知符号. 解决方案是在主机上构建 <code>binary_cache</code>.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 收集 perf.data 中需要的二进制文件到 binary_cache/ 中. </span></span><br><span class="line">$ ./binary_cache_builder.py -lib NATIVE_LIB_DIR,...</span><br></pre></td></tr></table></figure>
+
+<p>传递给 <code>-lib</code> 选项的 NATIVE_LIB_DIR 是包含主机上未剥离本机库的目录. 运行后, 包含符号表的本机库将收集到 binary_cache/ 中供报告使用.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ./report.py --symfs binary_cache</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 会自动搜索 binary_cache/, 因此不需要传递任何参数. </span></span><br><span class="line">$ ./report_html.py</span><br></pre></td></tr></table></figure>
+
+<h4 id="显示注释的源代码和反汇编"><a href="#显示注释的源代码和反汇编" class="headerlink" title="显示注释的源代码和反汇编"></a>显示注释的源代码和反汇编</h4><p>要在源代码和指令级别显示热点位置, 我们需要显示带有事件计数注释的源代码和反汇编. simpleperf 支持显示 C++ 代码和完全编译的 Java 代码的注释源代码和反汇编. simpleperf 支持两种方法来实现这一点:</p>
+<p>通过 <code>report_html.py</code>:</p>
+<ul>
+<li>生成 perf.data 并将其拉到主机上.</li>
+<li>生成包含调试信息的 elf 文件的 binary_cache. 使用 <code>-lib</code> 选项添加带有调试信息的库. 通过 <code>binary_cache_builder.py -i perf.data -lib &lt;dir_of_lib_with_debug_info&gt;</code> 实现.</li>
+<li>使用 <code>report_html.py</code> 生成带有注释源代码和反汇编的 <code>report.html</code>, 如<span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQjcmVwb3J0X2h0bWxfcHk=">此处<i class="fa fa-external-link-alt"></i></span>所述.</li>
+</ul>
+<p>通过 <code>pprof</code>:</p>
+<ul>
+<li>如上所述生成 <code>perf.data</code> 和 <code>binary_cache</code>.</li>
+<li>使用 <code>pprof_proto_generator.py</code> 生成 pprof 原型文件.</li>
+<li>使用 pprof 报告带有注释源代码的函数, 如<span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQjcHByb2ZfcHJvdG9fZ2VuZXJhdG9yX3B5">此处<i class="fa fa-external-link-alt"></i></span>所述.</li>
+</ul>
+<h4 id="减少丢失的样本和堆栈被截断的样本"><a href="#减少丢失的样本和堆栈被截断的样本" class="headerlink" title="减少丢失的样本和堆栈被截断的样本"></a>减少丢失的样本和堆栈被截断的样本</h4><p>使用 simpleperf 记录时, 我们可能会看到丢失的样本或堆栈数据被截断的样本. 在将样本保存到文件之前, simpleperf 使用两个缓冲区在内存中缓存样本. 一个是内核缓冲区, 另一个是用户空间缓冲区. 内核将样本放入内核缓冲区. simpleperf 在处理样本之前将样本从内核缓冲区移动到用户空间缓冲区. 如果缓冲区溢出, 我们会丢失样本或得到堆栈数据被截断的样本. 以下是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf record -a --duration 1 -g --user-buffer-size 100k</span><br><span class="line">simpleperf I cmd_record.cpp:799] Recorded <span class="keyword">for</span> 1.00814 seconds. Start post processing.</span><br><span class="line">simpleperf I cmd_record.cpp:894] Samples recorded: 79 (16 with truncated stacks).</span><br><span class="line">                                 Samples lost: 2,129 (kernelspace: 18, userspace: 2,111).</span><br><span class="line">simpleperf W cmd_record.cpp:911] Lost 18.5567% of samples <span class="keyword">in</span> kernel space, consider increasing</span><br><span class="line">                                 kernel buffer size(-m), or decreasing sample frequency(-f), or</span><br><span class="line">                                 increasing sample period(-c).</span><br><span class="line">simpleperf W cmd_record.cpp:928] Lost/Truncated 97.1233% of samples <span class="keyword">in</span> user space, consider</span><br><span class="line">                                 increasing userspace buffer size(--user-buffer-size), or</span><br><span class="line">                                 decreasing sample frequency(-f), or increasing sample period(-c).</span><br></pre></td></tr></table></figure>
+
+<p>在上述示例中, 我们得到了 79 个样本, 其中 16 个样本的堆栈数据被截断. 我们在内核缓冲区中丢失了 18 个样本, 在用户空间缓冲区中丢失了 2111 个样本.</p>
+<p>要减少内核缓冲区中丢失的样本, 我们可以通过 <code>-m</code> 增加内核缓冲区大小. 要减少用户空间缓冲区中丢失的样本或减少堆栈数据被截断的样本, 我们可以通过 <code>--user-buffer-size</code> 增加用户空间缓冲区大小.</p>
+<p>我们还可以减少在固定时间段内生成的样本数量, 例如使用 <code>-f</code> 减少采样频率, 减少监控的线程数量, 不同时监控多个 perf 事件.</p>
+<h2 id="Android-应用程序分析"><a href="#Android-应用程序分析" class="headerlink" title="Android 应用程序分析"></a>Android 应用程序分析</h2><p>原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvYW5kcm9pZF9hcHBsaWNhdGlvbl9wcm9maWxpbmcubWQ=">Android application profiling<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>分析安卓应用程序涉及三个步骤:</p>
+<ol>
+<li>准备安卓应用程序.</li>
+<li>记录性能分析数据.</li>
+<li>报告性能分析数据.</li>
+</ol>
+<h3 id="准备安卓应用"><a href="#准备安卓应用" class="headerlink" title="准备安卓应用"></a>准备安卓应用</h3><p>根据分析情况, 我们可能需要定制构建脚本, 以专门生成用于分析的 apk 文件. 以下是一些建议.</p>
+<hr>
+<p>如果你想分析应用程序的调试版本:</p>
+<p>对于调试版本类型, Android Studio 在 <code>AndroidManifest.xml</code> 中设置 <code>android:debuggable=&quot;true&quot;</code>, 启用 JNI 检查, 并且可能不会优化 C/C++ 代码. 无需任何更改, simpleperf 就可以分析它.</p>
+<hr>
+<p>如果你想分析应用程序的发布版本:</p>
+<p>对于发布版本类型, Android Studio 在 <code>AndroidManifest.xml</code> 中设置 <code>android:debuggable=&quot;false&quot;</code>, 禁用 JNI 检查并优化 C/C++ 代码. 然而, 由于安全限制, 只有设置了 <code>android:debuggable</code> 为 <code>true</code> 的应用程序才能被分析. 因此, simpleperf 只能在以下三种情况下分析发布版本:</p>
+<ol>
+<li><p>如果你使用的是已 root 的设备, 可以分析任何应用程序.</p>
+</li>
+<li><p>如果你使用的是 Android &gt;= Q, 可以在 <code>AndroidManifest.xml</code> 中添加 profileableFromShell 标志, 这使得预装的分析工具可以分析发布的应用程序. 在这种情况下, 通过 adb 下载的 simpleperf 将调用系统镜像中预装的 simpleperf 来分析应用程序.</p>
+ <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">profileable</span> <span class="attr">android:shell</span>=<span class="string">&quot;true&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">manifest</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>如果你使用的是 Android &gt;= O, 我们可以使用 <code>wrap.sh</code> 来分析发布版本:</p>
+<ol>
+<li><p>第一步: 在 <code>AndroidManifest.xml</code> 中添加 <code>android:debuggable=&quot;true&quot;</code> 以启用分析.</p>
+ <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">manifest</span> <span class="attr">...</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span> <span class="attr">android:debuggable</span>=<span class="string">&quot;true&quot;</span> <span class="attr">...</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>第二步: 在 <code>lib/arch</code> 目录中添加 <code>wrap.sh</code>. <code>wrap.sh</code> 在不传递任何调试标志给 ART 的情况下运行应用程序, 因此应用程序作为发布应用程序运行. 可以通过在 <code>app/build.gradle</code> 中添加以下脚本来实现 <code>wrap.sh</code>.</p>
+ <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    buildTypes &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            sourceSets &#123;</span><br><span class="line">                release &#123;</span><br><span class="line">                    resources &#123;</span><br><span class="line">                        srcDir &#123;</span><br><span class="line">                            <span class="string">&quot;wrap_sh_lib_dir&quot;</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">task createWrapShLibDir &#123;</span><br><span class="line">    <span class="keyword">for</span> (String <span class="attr">abi :</span> [<span class="string">&quot;armeabi-v7a&quot;</span>, <span class="string">&quot;arm64-v8a&quot;</span>, <span class="string">&quot;x86&quot;</span>, <span class="string">&quot;x86_64&quot;</span>]) &#123;</span><br><span class="line">        <span class="keyword">def</span> dir = <span class="keyword">new</span> File(<span class="string">&quot;app/wrap_sh_lib_dir/lib/&quot;</span> + abi)</span><br><span class="line">        dir.mkdirs()</span><br><span class="line">        <span class="keyword">def</span> wrapFile = <span class="keyword">new</span> File(dir, <span class="string">&quot;wrap.sh&quot;</span>)</span><br><span class="line">        wrapFile.withWriter &#123; writer -&gt;</span><br><span class="line">            writer.write(<span class="string">&#x27;#!/system/bin/sh\n$@\n&#x27;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+</ol>
+<hr>
+<p>如果你想分析 C/C++ 代码:</p>
+<p>Android Studio 会在 apk 中剥离本机库的符号表和调试信息. 因此, 分析结果可能包含未知符号或损坏的调用图. 为了解决这个问题, 我们可以通过 <code>-lib</code> 选项将包含未剥离本机库的目录传递给 <code>app_profiler.py</code>. 通常, 这个目录可以是你的 Android Studio 项目的路径.</p>
+<hr>
+<p>如果你想分析 Java 代码:</p>
+<ul>
+<li>在 Android &gt;= P 上, simpleperf 支持分析 Java 代码, 无论是通过解释器执行, 还是通过 JIT 编译, 或者编译成本机指令. 因此, 你不需要做任何事情.</li>
+<li>在 Android O 上, simpleperf 支持分析编译成本机指令的 Java 代码, 并且还需要 wrap.sh 来使用编译后的 Java 代码. 要编译 Java 代码, 我们可以传递 --compile_java_code 选项给 app_profiler.py.</li>
+<li>在 Android N 上, simpleperf 支持分析编译成本机指令的 Java 代码. 要编译 Java 代码, 我们可以传递 --compile_java_code 选项给 app_profiler.py.</li>
+<li>在 Android &lt;= M 上, simpleperf 不支持分析 Java 代码.</li>
+</ul>
+<p>以下是使用 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kZW1vL1NpbXBsZXBlcmZFeGFtcGxlQ3Bw">SimpleperfExampleCpp<i class="fa fa-external-link-alt"></i></span> 应用程序的示例. 它构建了一个用于分析的 app-debug.apk.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> https://android.googlesource.com/platform/system/extras</span><br><span class="line">$ <span class="built_in">cd</span> extras/simpleperf/demo</span><br><span class="line"><span class="comment"># 用 Android Studio 打开 SimpleperfExampleCpp 项目, 并成功构建此项目, 否则下面的 `./gradlew` 命令将失败. </span></span><br><span class="line">$ <span class="built_in">cd</span> SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 &quot;gradlew&quot; 而不是 &quot;./gradlew&quot;. </span></span><br><span class="line">$ ./gradlew clean assemble</span><br><span class="line">$ adb install -r app/build/outputs/apk/debug/app-debug.apk</span><br></pre></td></tr></table></figure>
+
+<h3 id="记录和报告分析数据"><a href="#记录和报告分析数据" class="headerlink" title="记录和报告分析数据"></a>记录和报告分析数据</h3><p>我们可以使用 <code>app_profiler.py</code> 来分析安卓应用程序.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换到 simpleperf 脚本的目录. 记录 perf.data. </span></span><br><span class="line"><span class="comment"># -p 选项通过包名选择被分析的应用程序. </span></span><br><span class="line"><span class="comment"># --compile_java_code 选项将 Java 代码编译成本机指令, Android &gt;= P 上不需要这个选项. </span></span><br><span class="line"><span class="comment"># -a 选项选择要分析的 Activity. </span></span><br><span class="line"><span class="comment"># -lib 选项指定查找调试本机库的目录. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .MixActivity -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<p>这将在当前目录中收集 <code>perf.data</code> 作为性能分析数据, 并在 <code>binary_cache/</code> 中存储相关的本机二进制文件.</p>
+<p>通常我们在分析时需要使用应用程序, 否则可能不会记录任何样本. 但在这种情况下, MixActivity 启动了一个忙线程, 因此我们在分析时不需要使用应用程序.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 stdio 界面中报告 perf.data. </span></span><br><span class="line">$ ./report.py</span><br><span class="line">Cmdline: /data/data/simpleperf.example.cpp/simpleperf record ...</span><br><span class="line">Arch: arm64</span><br><span class="line">Event: task-clock:u (<span class="built_in">type</span> 1, config 1)</span><br><span class="line">Samples: 10023</span><br><span class="line">Event count: 10023000000</span><br><span class="line"></span><br><span class="line">Overhead  Command     Pid   Tid   Shared Object              Symbol</span><br><span class="line">27.04%    BusyThread  5703  5729  /system/lib64/libart.so    art::JniMethodStart(art::Thread*)</span><br><span class="line">25.87%    BusyThread  5703  5729  /system/lib64/libc.so      long StrToI&lt;long, ...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><code>report.py</code> 在 stdio 界面中报告性能分析数据. 如果报告中有许多未知符号, 请检查此处.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 html 界面中报告 perf.data. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码和反汇编. 如果 source_dirs 路径不正确, 请进行更改. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p><code>report_html.py</code> 会在 <code>report.html</code> 中生成报告, 并弹出浏览器标签页显示它.</p>
+<h3 id="记录和报告调用图"><a href="#记录和报告调用图" class="headerlink" title="记录和报告调用图"></a>记录和报告调用图</h3><p>我们可以按如下步骤记录和报告调用图.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录基于 DWARF 的调用图: 在 -r 选项中添加 &quot;-g&quot;. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -r <span class="string">&quot;-e task-clock:u -f 1000 --duration 10 -g&quot;</span> -lib path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录基于栈帧的调用图: 在 -r 选项中添加 &quot;--call-graph fp&quot;. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -r <span class="string">&quot;-e task-clock:u -f 1000 --duration 10 --call-graph fp&quot;</span> \</span><br><span class="line">        -lib path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 stdio 界面中报告调用图. </span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 Python Tk 界面中报告调用图. </span></span><br><span class="line">$ ./report.py -g --gui</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 html 界面中报告调用图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 flamegraphs 中报告调用图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 而不是 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过网页接口进行报告"><a href="#通过网页接口进行报告" class="headerlink" title="通过网页接口进行报告"></a>通过网页接口进行报告</h3><p>我们可以使用 report_html.py 在网页浏览器中显示性能分析结果. report_html.py 集成了图表统计, 样本表, 火焰图, 源代码注释和反汇编注释. 它是显示报告的推荐方式.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./report_html.py</span><br></pre></td></tr></table></figure>
+
+<h3 id="展示火焰图"><a href="#展示火焰图" class="headerlink" title="展示火焰图"></a>展示火焰图</h3><p>要显示火焰图, 我们需要先记录调用图. 火焰图可以在 report_html.py 的 &quot;Flamegraph&quot; 标签中显示. 我们也可以使用 inferno 直接显示火焰图.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 而不是 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc</span><br></pre></td></tr></table></figure>
+
+<p>我们还可以使用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2JyZW5kYW5ncmVnZy9GbGFtZUdyYXBo">FlameGraph<i class="fa fa-external-link-alt"></i></span> 来生成火焰图. 请确保已安装 Perl.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">./report_sample.py --symfs binary_cache &gt; out.perf</span><br><span class="line">FlameGraph/stackcollapse-perf.pl out.perf &gt; out.folded</span><br><span class="line">FlameGraph/flamegraph.pl out.folded &gt; a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="在-Android-Studio-中进行报告"><a href="#在-Android-Studio-中进行报告" class="headerlink" title="在 Android Studio 中进行报告"></a>在 Android Studio 中进行报告</h3><p>simpleperf 的 <code>report-sample</code> 命令可以将 <code>perf.data</code> 转换为 Android Studio CPU 分析器接受的 protobuf 格式. 转换可以在设备上或主机上完成. 如果在主机上有更多符号信息, 建议使用 <code>--symdir</code> 选项在主机上进行转换.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ simpleperf report-sample --protobuf --show-callchain -i perf.data -o perf.trace</span><br><span class="line"><span class="comment"># 然后在 Android Studio 中打开 perf.trace 进行查看. </span></span><br></pre></td></tr></table></figure>
+
+<h3 id="去混淆-Java-符号"><a href="#去混淆-Java-符号" class="headerlink" title="去混淆 Java 符号"></a>去混淆 Java 符号</h3><p>Java 符号可能会被 ProGuard 混淆. 要在报告中恢复原始符号, 可以通过 <code>--proguard-mapping-file</code> 将 ProGuard 映射文件传递给 report 脚本或 <code>report-sample</code> 命令.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./report_html.py --proguard-mapping-file proguard_mapping_file.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="记录-CPU-时间和非-CPU-时间"><a href="#记录-CPU-时间和非-CPU-时间" class="headerlink" title="记录 CPU 时间和非 CPU 时间"></a>记录 CPU 时间和非 CPU 时间</h3><p>我们可以记录 CPU 时间和非 CPU 时间.</p>
+<p>首先检查设备是否支持 <code>trace-offcpu</code> 功能.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py list --show-features</span><br><span class="line">dwarf-based-call-graph</span><br><span class="line">trace-offcpu</span><br></pre></td></tr></table></figure>
+
+<p>如果支持 trace-offcpu 功能, 它会显示在功能列表中. 然后我们可以尝试使用它.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity -r <span class="string">&quot;-g -e task-clock:u -f 1000 --duration 10 --trace-offcpu&quot;</span> -lib path_of_SimpleperfExampleCpp</span><br><span class="line">./report_html.py --add_disassembly --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="从启动开始分析"><a href="#从启动开始分析" class="headerlink" title="从启动开始分析"></a>从启动开始分析</h3><p>我们可以从应用程序启动时进行分析.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开始 simpleperf 录制, 然后启动要分析的 Activity. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<p>我们也可以在设备上手动启动 Activity.</p>
+<ol>
+<li><p>确保应用程序没有运行或不是最近的应用程序之一.</p>
+</li>
+<li><p>开始 simpleperf 录制.</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br></pre></td></tr></table></figure></li>
+<li><p>在设备上手动启动应用程序.</p>
+</li>
+</ol>
+<h3 id="在应用程序代码中控制记录"><a href="#在应用程序代码中控制记录" class="headerlink" title="在应用程序代码中控制记录"></a>在应用程序代码中控制记录</h3><p>Simpleperf 支持从应用程序代码中控制记录. 以下是工作流程:</p>
+<ol>
+<li>运行 <code>api_profiler.py prepare -p &lt;package_name&gt;</code> 以允许应用程序使用 simpleperf 记录自身. 默认情况下, 权限在设备重启后会被重置. 因此, 我们需要在每次设备重启后运行该脚本. 但是在 Android &gt;= 13 上, 我们可以使用 <code>--days</code> 选项设置权限持续的天数.</li>
+<li>在应用程序中链接 simpleperf app_api 代码. 应用程序需要设置为 debuggable 或 profileableFromShell, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvYW5kcm9pZF9hcHBsaWNhdGlvbl9wcm9maWxpbmcubWQjcHJlcGFyZS1hbi1hbmRyb2lkLWFwcGxpY2F0aW9u">Prepare an Android application<i class="fa fa-external-link-alt"></i></span> 所述. 然后, 应用程序可以使用 API 来开始/暂停/恢复/停止记录. 为了开始记录, app_api 会 fork 一个运行 simpleperf 的子进程, 并使用管道文件向子进程发送命令. 记录完成后, 会生成一个分析数据文件.</li>
+<li>运行 <code>api_profiler.py collect -p &lt;package_name&gt;</code> 将分析数据文件收集到主机.</li>
+</ol>
+<p>示例可以在 demo 中的 CppApi 和 JavaApi 找到.</p>
+<h3 id="手动解析性能分析数据"><a href="#手动解析性能分析数据" class="headerlink" title="手动解析性能分析数据"></a>手动解析性能分析数据</h3><p>我们也可以通过编写 Python 脚本来手动解析分析数据, 通过使用 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/extras/+/main/simpleperf/doc/scripts_reference.md#simpleperf_report_libpy"><code>simpleperf_report_lib.py</code></a> 库. 示例包括 <code>report_sample.py</code> 和<code>report_html.py</code>.</p>
+<h2 id="查看分析结果"><a href="#查看分析结果" class="headerlink" title="查看分析结果"></a>查看分析结果</h2><p>使用 <code>simpleperf record</code> 或 <code>app_profiler.py</code> 后, 我们会得到一个分析数据文件. 该文件包含一个样本列表. 每个样本都有时间戳、线程 ID、调用栈、在此样本中使用的事件（如 cpu-cycles 或 cpu-clock）等. 我们有多种查看分析结果的选择. 我们可以按时间顺序显示样本, 或者显示聚合的火焰图. 我们可以以文本格式显示报告, 或者在一些交互式 UI 中显示报告.</p>
+<p>以下是一些推荐的查看分析结果的 UI. Google 开发者可以在 go/gmm-profiling 中找到更多示例.</p>
+<ul>
+<li>Continuous PProf UI (great flamegraph UI, but only available internally)</li>
+<li>Firefox Profiler (great chronological UI)</li>
+<li>FlameScope (great jank-finding UI)</li>
+<li>Differential FlameGraph</li>
+<li>Android Studio Profiler</li>
+<li>Simpleperf HTML Report</li>
+<li>PProf Interactive Command Line</li>
+<li>Simpleperf Report Command Line</li>
+<li>Custom Report Interface</li>
+</ul>
+<h3 id="Android-Studio-Profiler"><a href="#Android-Studio-Profiler" class="headerlink" title="Android Studio Profiler"></a>Android Studio Profiler</h3><p>Android Studio Profiler 支持记录和报告应用进程的分析数据. 它支持几种记录方法, 包括使用 simpleperf 作为后端的方法. 您可以使用 Android Studio Profiler 进行记录和报告.</p>
+<p>在 Android Studio 中: Open View -&gt; Tool Windows -&gt; Profiler -&gt; Click + -&gt; Your Device -&gt; Profileable Processes -&gt; Your App</p>
+<p>点击 &quot;CPU&quot; 图表</p>
+<p>选择 Callstack Sample Recording. 即使您使用 Java, 这也能提供更好的可观察性, 包括 ART、malloc 和内核.</p>
+<p>点击 Record, 在设备上运行您的测试, 完成后点击 Stop.</p>
+<p>点击一个线程轨迹, 并选择 &quot;Flame Chart&quot; 以在左侧查看按时间顺序排列的图表, 在右侧查看聚合的火焰图:</p>
+<p>如果您希望在记录选项上有更多灵活性, 或希望添加 proguard 映射文件, 可以使用 simpleperf 进行记录, 并使用 Android Studio Profiler 进行报告.</p>
+<p>我们可以使用 <code>simpleperf report-sample</code> 将 <code>perf.data</code> 转换为 Android Studio Profiler 的跟踪文件.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将 perf.data 转换为 Android Studio Profiler 的 perf.trace 文件. </span></span><br><span class="line"><span class="comment"># 如果在 Mac/Windows 上, 使用相应平台的 simpleperf 主机可执行文件. </span></span><br><span class="line">bin/linux/x86_64/simpleperf report-sample --show-callchain --protobuf -i perf.data -o perf.trace</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 proguard 映射文件将 perf.data 转换为 perf.trace. </span></span><br><span class="line">bin/linux/x86_64/simpleperf report-sample --show-callchain --protobuf -i perf.data -o perf.trace \</span><br><span class="line">    --proguard-mapping-file proguard.map</span><br></pre></td></tr></table></figure>
+
+<p>在 Android Studio 中: 打开 File -&gt; Open -&gt; 选择 perf.trace</p>
+<hr>
+<p>在原文 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvdmlld190aGVfcHJvZmlsZS5tZA==">View the profile<i class="fa fa-external-link-alt"></i></span> 查看更多 UI 的介绍和用法.</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Simpleperf/" rel="tag"><i class="fa fa-tag"></i> Simpleperf</a>
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/%E5%AE%89%E5%8D%93%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 安卓性能分析</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2024/06/16/sm9gfn/" rel="prev" title="SM9 算法中 $g_{U, V}(Q)$ 的展开优化">
+                  <i class="fa fa-chevron-left"></i> SM9 算法中 $g_{U, V}(Q)$ 的展开优化
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/2024/07/07/simpleperf2/" rel="next" title="Simpleperf 三部曲 (二)">
+                  Simpleperf 三部曲 (二) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">234k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:06</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+</body>
+</html>
