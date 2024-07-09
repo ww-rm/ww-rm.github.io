@@ -475,6 +475,43 @@
       </tags>
   </entry>
   <entry>
+    <title>安卓 APK 重打包</title>
+    <url>//posts/2024/07/09/apkrepack/</url>
+    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
+<span id="more"></span>
+
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
+<ol>
+<li>解包</li>
+<li>修改包体</li>
+<li>重打包</li>
+<li>对齐</li>
+<li>重签名</li>
+</ol>
+<p>顺序很重要, 签名的步骤一定是最后完成.</p>
+<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
+<p>修改包体可以自己按需手动或者脚本修改.</p>
+<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
+<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
+<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
+
+<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
+<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>安卓</tag>
+        <tag>APK</tag>
+        <tag>重打包</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>碧蓝航线立绘提取与批量还原</title>
     <url>//posts/2023/04/11/blhx-painting/</url>
     <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
@@ -2074,61 +2111,6 @@
       </tags>
   </entry>
   <entry>
-    <title>经典问题之文本分类</title>
-    <url>//posts/2022/08/17/wast-ml/</url>
-    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
-<span id="more"></span>
-
-<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
-<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
-<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
-<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
-
-<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
-<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
-<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
-<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
-<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
-<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
-
-<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
-<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
-<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
-<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
-<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
-<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
-
-<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
-<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
-<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
-
-<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
-
-<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
-<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>机器学习</tag>
-        <tag>scikit-learn</tag>
-        <tag>文本分类</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Git 与 Github 入门</title>
     <url>//posts/2022/08/15/wast-gitandgithub/</url>
     <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
@@ -2223,6 +2205,61 @@
       <tags>
         <tag>git</tag>
         <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>经典问题之文本分类</title>
+    <url>//posts/2022/08/17/wast-ml/</url>
+    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
+<span id="more"></span>
+
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
+<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
+<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
+<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
+<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
+<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
+<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
+<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
+
+<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
+<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
+<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
+<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
+<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
+<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
+
+<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
+<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
+<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
+
+<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
+
+<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
+<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>scikit-learn</tag>
+        <tag>文本分类</tag>
       </tags>
   </entry>
   <entry>
@@ -2710,6 +2747,68 @@
       </tags>
   </entry>
   <entry>
+    <title>MultiheadAttention 使用方法</title>
+    <url>//posts/2024/01/22/multiheadattention/</url>
+    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
+<blockquote>
+<ul>
+<li><code>embed_dim</code> – Total dimension of the model.</li>
+<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
+<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
+<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
+</ul>
+</blockquote>
+<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
+<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
+</div>
+
+<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
+<ul>
+<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
+<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
+</ul>
+<p>下一步则是计算注意力, 也就是经典公式:</p>
+<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
+<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
+<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
+<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
+<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
+<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
+<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
+<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
+<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
+<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
+<ul>
+<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
+<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
+<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
+<li>参数 <code>num_heads</code> 对应 $h$.</li>
+<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
+<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
+<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
+</ul>
+<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>PyTorch</tag>
+        <tag>MultiheadAttention</tag>
+        <tag>NLP</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Simpleperf 三部曲 (一)</title>
     <url>//posts/2024/07/07/simpleperf1/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -2960,68 +3059,6 @@
         <tag>Simpleperf</tag>
         <tag>Android</tag>
         <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MultiheadAttention 使用方法</title>
-    <url>//posts/2024/01/22/multiheadattention/</url>
-    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
-<blockquote>
-<ul>
-<li><code>embed_dim</code> – Total dimension of the model.</li>
-<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
-<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
-<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
-</ul>
-</blockquote>
-<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
-<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
-</div>
-
-<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
-<ul>
-<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
-<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
-</ul>
-<p>下一步则是计算注意力, 也就是经典公式:</p>
-<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
-<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
-<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
-<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
-<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
-<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
-<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
-<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
-<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
-<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
-<ul>
-<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
-<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
-<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
-<li>参数 <code>num_heads</code> 对应 $h$.</li>
-<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
-<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
-<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
-<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
-</ul>
-<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>PyTorch</tag>
-        <tag>MultiheadAttention</tag>
-        <tag>NLP</tag>
       </tags>
   </entry>
   <entry>
