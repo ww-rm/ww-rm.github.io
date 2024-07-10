@@ -11,6 +11,8 @@ date: 2024-07-09 23:17:28
 
 为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 `android:debuggable="true"` 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.
 
+本文参考[重新打包apk流程](https://crifan.github.io/android_re_repack_apk/website/repack_process/).
+
 <!-- more -->
 
 ## 步骤
