@@ -180,68 +180,6 @@
       </tags>
   </entry>
   <entry>
-    <title>国密算法的纯 Python 实现</title>
-    <url>//posts/2023/12/14/gmalg/</url>
-    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
-<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
-<span id="more"></span>
-
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
-
-<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
-<li>祖冲之序列密码算法</li>
-<li>SM2 椭圆曲线公钥密码算法<ul>
-<li>签名验签</li>
-<li>密钥交换</li>
-<li>加密解密</li>
-</ul>
-</li>
-<li>SM3 密码杂凑算法</li>
-<li>SM4 分组密码算法</li>
-<li>SM9 标识密码算法<ul>
-<li>签名验签</li>
-<li>密钥交换</li>
-<li>密钥封装</li>
-<li>加密解密</li>
-</ul>
-</li>
-</ul>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>国密</tag>
-        <tag>SM2</tag>
-        <tag>SM3</tag>
-        <tag>SM4</tag>
-        <tag>SM9</tag>
-        <tag>ZUC</tag>
-        <tag>gmalg</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用 C# 写一个哈希计算小工具</title>
     <url>//posts/2022/04/17/hashtool/</url>
     <content><![CDATA[<p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
@@ -313,6 +251,68 @@
         <tag>hashtool</tag>
         <tag>C#</tag>
         <tag>winforms</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>国密算法的纯 Python 实现</title>
+    <url>//posts/2023/12/14/gmalg/</url>
+    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
+<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
+<span id="more"></span>
+
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
+<li>祖冲之序列密码算法</li>
+<li>SM2 椭圆曲线公钥密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>加密解密</li>
+</ul>
+</li>
+<li>SM3 密码杂凑算法</li>
+<li>SM4 分组密码算法</li>
+<li>SM9 标识密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>密钥封装</li>
+<li>加密解密</li>
+</ul>
+</li>
+</ul>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>国密</tag>
+        <tag>SM2</tag>
+        <tag>SM3</tag>
+        <tag>SM4</tag>
+        <tag>SM9</tag>
+        <tag>ZUC</tag>
+        <tag>gmalg</tag>
       </tags>
   </entry>
   <entry>
@@ -1001,6 +1001,34 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 OpenCV 进行图像对比</title>
+    <url>//posts/2024/08/02/imgcmp/</url>
+    <content><![CDATA[<p>记录一下最近写的一个小工具模块, 用来比较两张图像之间的相似度, 并且输出直方图差异以及像素差异.</p>
+<span id="more"></span>
+
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>目标是比较两张相同 RGB 图像的相似度, 看它们之间是否存在色彩阴影亮度之类的区别.</p>
+<p>因此首先将图像读取后转换成 HLS 通道格式, 再依次求解每个通道上的直方图差异以及像素差分图.</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> namedtuple</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">HlsSimilarity = namedtuple(<span class="string">&quot;HlsSimilarity&quot;</span>, [<span class="string">&quot;H&quot;</span>, <span class="string">&quot;L&quot;</span>, <span class="string">&quot;S&quot;</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_image_as_hls</span>(<span class="params">path: <span class="built_in">str</span>, blur_ksize: <span class="built_in">int</span> = <span class="number">0</span></span>) -&gt; np.ndarray:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取图像并转换成 HLS 格式.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    由于对比的时候过于灵敏, 所以有必要加一定程度的模糊.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        image: 形状为 (H, W, 3)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img = cv2.imread(path, cv2.IMREAD_COLOR)</span><br><span class="line">    <span class="keyword">if</span> blur_ksize &gt; <span class="number">0</span>:</span><br><span class="line">        img = cv2.blur(img, (blur_ksize, blur_ksize))</span><br><span class="line">    img = cv2.cvtColor(img, cv2.COLOR_BGR2HLS_FULL)</span><br><span class="line">    <span class="keyword">return</span> img</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_image_hist_delta</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span></span>) -&gt; <span class="type">Tuple</span>[np.ndarray, np.ndarray, np.ndarray]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两张直方图差异</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        delta: (H, L, S) 三个分量的直方图差异</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1)</span><br><span class="line">    img2 = read_image_as_hls(img2)</span><br><span class="line"></span><br><span class="line">    hist_delta = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">        h1 = cv2.calcHist([img1], [i], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]).flatten()</span><br><span class="line">        h2 = cv2.calcHist([img2], [i], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]).flatten()</span><br><span class="line">        hist_delta.append(h1 - h2)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">tuple</span>(hist_delta)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_colors</span>(<span class="params">cname: <span class="built_in">str</span> = <span class="string">&quot;hsv&quot;</span>, size: <span class="built_in">int</span> = <span class="number">256</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;获得连续的调色板颜色序列&quot;&quot;&quot;</span></span><br><span class="line">    cmap = plt.get_cmap(cname, size)</span><br><span class="line">    <span class="keyword">return</span> [cmap(i)[:<span class="number">3</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(size)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_image_similarity</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, blur_ksize: <span class="built_in">int</span> = <span class="number">15</span></span>) -&gt; HlsSimilarity:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两张图像的相似度, 具体算法见 https://docs.opencv.org/4.5.5/d8/dc8/tutorial_histogram_comparison.html</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    此处使用 Bhattacharyya distance, 并且加了一定量的模糊处理.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        similarities: (H, L, S) 三个分量的相似度</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1, blur_ksize)</span><br><span class="line">    img2 = read_image_as_hls(img2, blur_ksize)</span><br><span class="line"></span><br><span class="line">    similarities = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">    similarities[<span class="number">0</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">0</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">0</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line">    similarities[<span class="number">1</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">1</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">1</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line">    similarities[<span class="number">2</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">2</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">2</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> HlsSimilarity(*similarities)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw_image_hist_delta</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, path: <span class="built_in">str</span>, title: <span class="built_in">str</span> = <span class="string">&quot;Hist Delta of HLS Image (First - Second)&quot;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;绘制差异直方图情况&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    delta_H, delta_L, delta_S = calc_image_hist_delta(img1, img2)</span><br><span class="line"></span><br><span class="line">    fig, axes = plt.subplots(<span class="number">3</span>, <span class="number">1</span>, squeeze=<span class="literal">True</span>, figsize=(<span class="number">12</span>, <span class="number">16</span>), dpi=<span class="number">300</span>)</span><br><span class="line">    fig.subplots_adjust(left=<span class="number">0.1</span>, right=<span class="number">0.9</span>, top=<span class="number">0.93</span>, bottom=<span class="number">0.07</span>)</span><br><span class="line">    fig.suptitle(title)</span><br><span class="line">    fig.supxlabel(<span class="string">&quot;Pixel Value&quot;</span>)</span><br><span class="line">    fig.supylabel(<span class="string">&quot;Pixel Count&quot;</span>)</span><br><span class="line"></span><br><span class="line">    axes: <span class="built_in">list</span>[plt.Axes]</span><br><span class="line">    ax_H, ax_L, ax_S = axes</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_H)</span><br><span class="line">    ax_H.bar(np.arange(x_len), delta_H, color=get_colors(<span class="string">&quot;hsv&quot;</span>, x_len))</span><br><span class="line">    ax_H.set_title(<span class="string">&quot;Delta of H Channel&quot;</span>)</span><br><span class="line">    ax_H.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_L)</span><br><span class="line">    ax_L.bar(np.arange(x_len), delta_L, color=get_colors(<span class="string">&quot;gray&quot;</span>, x_len))</span><br><span class="line">    ax_L.set_title(<span class="string">&quot;Delta of L Channel&quot;</span>)</span><br><span class="line">    ax_L.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_S)</span><br><span class="line">    ax_S.bar(np.arange(x_len), delta_S, color=get_colors(<span class="string">&quot;gray&quot;</span>, x_len))</span><br><span class="line">    ax_S.set_title(<span class="string">&quot;Delta of S Channel&quot;</span>)</span><br><span class="line">    ax_S.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    fig.savefig(path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">make_diff_image</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, path: <span class="built_in">str</span></span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;叠图查看差异, 如果尺寸不一样或者保存失败返回 False.&quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1)</span><br><span class="line">    img2 = read_image_as_hls(img2)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> img1.shape != img2.shape:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    img1_H, img1_L, img1_S = cv2.split(img1)</span><br><span class="line">    img2_H, img2_L, img2_S = cv2.split(img2)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 色相是 [0, 255] 的环形取值, 因此计算的时候要取环上短侧的距离</span></span><br><span class="line">    diff_H = np.<span class="built_in">min</span>([img1_H - img2_H, img2_H - img1_H], axis=<span class="number">0</span>)</span><br><span class="line">    diff_H = cv2.normalize(diff_H, <span class="literal">None</span>, <span class="number">0</span>, <span class="number">255</span>, cv2.NORM_MINMAX)</span><br><span class="line">    diff_L = cv2.absdiff(img1_L, img2_L)</span><br><span class="line">    diff_S = cv2.absdiff(img1_S, img2_S)</span><br><span class="line">    diff_img = np.concatenate([diff_H, diff_L, diff_S], axis=<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> cv2.imwrite(path, diff_img)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;img1&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;img2&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-hist&quot;</span>, default=<span class="string">&quot;hist.png&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-diff&quot;</span>, default=<span class="string">&quot;diff.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    sim = calc_image_similarity(args.img1, args.img2)</span><br><span class="line">    <span class="built_in">print</span>(sim)</span><br><span class="line">    draw_image_hist_delta(args.img1, args.img2, args.out_hist)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> make_diff_image(args.img1, args.img2, args.out_diff):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;尺寸不同, 无法计算差分&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行效果"><a href="#运行效果" class="headerlink" title="运行效果"></a>运行效果</h2><p>输入两张图片, 例如:</p>
+<div class="group-picture"><div class="group-picture-row"><div class="group-picture-column"><img data-src="https://ww-rm.github.io/static/image/imgcmp/lenna1.png" alt="lenna1.png"></div><div class="group-picture-column"><img data-src="https://ww-rm.github.io/static/image/imgcmp/lenna2.png" alt="lenna2.png"></div></div></div>
+
+<p>可以得到相似度: HlsSimilarity(H=0.32851660966060825, L=0.6765325641597513, S=0.6573630520719462)</p>
+<p>并且有差异图:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/imgcmp/hist.png" alt="hist.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/imgcmp/diff.png" alt="diff.png"></p>
+<p>可以看出来左图比右图多了很多红色部分, 并且少一一丢丢的蓝色.</p>
+<p>并且左图更亮, 且颜色饱和度更高.</p>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>OpenCV</tag>
+        <tag>图像比对</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>解决 Github SSH 连接超时</title>
     <url>//posts/2024/01/17/githubssh-timeout/</url>
     <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
@@ -1121,60 +1149,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
-    <url>//posts/2022/08/14/kxsw/</url>
-    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
-<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
-<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
-<span id="more"></span>
-
-<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
-<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
-<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
-<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>在这里只简单科普一下基本概念.</p>
-<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
-<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
-<p>不使用工具前:</p>
-<p><code>用户 --|--&gt; 目标网站</code></p>
-<p>使用工具后:</p>
-<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
-<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
-<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
-<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
-<ul>
-<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
-<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
-<li>不改变系统代理: 保持原有系统代理设置不变.</li>
-</ul>
-<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
-<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
-<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
-<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
-<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
-<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
-<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
-<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
-<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
-<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
-<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
-<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
-<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
-<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>科学上网</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>NJ 树算法原理与实现</title>
     <url>//posts/2023/03/08/njtree/</url>
     <content><![CDATA[<p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
@@ -1256,6 +1230,60 @@
         <tag>聚类算法</tag>
         <tag>生信</tag>
         <tag>NJ 树</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
+    <url>//posts/2022/08/14/kxsw/</url>
+    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
+<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
+<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
+<span id="more"></span>
+
+<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
+<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
+<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>在这里只简单科普一下基本概念.</p>
+<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
+<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
+<p>不使用工具前:</p>
+<p><code>用户 --|--&gt; 目标网站</code></p>
+<p>使用工具后:</p>
+<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
+<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
+<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
+<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
+<ul>
+<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
+<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
+<li>不改变系统代理: 保持原有系统代理设置不变.</li>
+</ul>
+<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
+<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
+<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
+<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
+<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
+<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
+<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
+<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
+<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
+<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
+<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
+<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
+<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
+<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>科学上网</tag>
       </tags>
   </entry>
   <entry>
@@ -1617,62 +1645,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用 transformers.Pipeline 迭代生成数据</title>
-    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
-    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
-<span id="more"></span>
-
-<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>然后这样子进行推理.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
-
-<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
-<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
-<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
-<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
-<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>其中提到了:</p>
-<blockquote>
-<p>For ease of use, a generator is also possible:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
-<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
-<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
-<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
-<ul>
-<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
-<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
-</ul>
-<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
-<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
-<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
-<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
-<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>transformers</tag>
-        <tag>Pipeline</tag>
-        <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>在 Windows 上编译安装 NUPACK</title>
     <url>//posts/2024/05/11/py-nupack/</url>
     <content><![CDATA[<p>之前项目里用到了 <span class="exturl" data-url="aHR0cHM6Ly9udXBhY2sub3JnLw==">NUPACK<i class="fa fa-external-link-alt"></i></span> 这个软件, 用来做引物二级结构预测, 但是就<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQv">官方文档<i class="fa fa-external-link-alt"></i></span>上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程.</p>
@@ -1891,6 +1863,62 @@
         <tag>MSYS2</tag>
         <tag>MinGW</tag>
         <tag>Clang</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 transformers.Pipeline 迭代生成数据</title>
+    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
+    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后这样子进行推理.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
+<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
+<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
+<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
+<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>其中提到了:</p>
+<blockquote>
+<p>For ease of use, a generator is also possible:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
+<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
+<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
+<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
+<ul>
+<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
+<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
+</ul>
+<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
+<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
+<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
+<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
+<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>transformers</tag>
+        <tag>Pipeline</tag>
+        <tag>Python</tag>
       </tags>
   </entry>
   <entry>
@@ -2328,77 +2356,6 @@
       </tags>
   </entry>
   <entry>
-    <title>基于 Requests 的爬虫入门</title>
-    <url>//posts/2022/08/16/wast-spider/</url>
-    <content><![CDATA[<p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
-<span id="more"></span>
-
-<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
-<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
-<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
-<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
-<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
-<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
-<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
-<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
-<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
-<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
-<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
-<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
-<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
-<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
-<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
-<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
-<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
-<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
-<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
-<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
-<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
-<p>定位完成后, 我们分析数据附近的结构.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
-<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
-<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
-<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
-<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
-<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
-<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
-<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
-<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
-<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
-<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
-<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
-<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
-<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
-<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
-<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
-<p>一些库的官方文档地址.</p>
-<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
-<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>爬虫</tag>
-        <tag>requests</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>打造一个舒适的 Python 编程环境</title>
     <url>//posts/2022/08/13/wast-pythonandvsc/</url>
     <content><![CDATA[<p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
@@ -2493,6 +2450,77 @@
       <tags>
         <tag>python</tag>
         <tag>VS Code</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于 Requests 的爬虫入门</title>
+    <url>//posts/2022/08/16/wast-spider/</url>
+    <content><![CDATA[<p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
+<span id="more"></span>
+
+<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
+<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
+<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
+<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
+<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
+<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
+<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
+<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
+<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
+<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
+<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
+<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
+<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
+<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
+<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
+<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
+<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
+<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
+<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
+<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
+<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
+<p>定位完成后, 我们分析数据附近的结构.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
+<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
+<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
+<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
+<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
+<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
+<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
+<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
+<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
+<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
+<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
+<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
+<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
+<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
+<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
+<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
+<p>一些库的官方文档地址.</p>
+<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
+<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>requests</tag>
       </tags>
   </entry>
   <entry>
@@ -2639,49 +2667,6 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Typora 破解版</title>
-    <url>//posts/2023/07/03/typora-cracked/</url>
-    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows 10 激活工具</title>
-    <url>//posts/2023/02/27/win10activation/</url>
-    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>激活工具</tag>
       </tags>
   </entry>
   <entry>
@@ -3422,6 +3407,49 @@
       <tags>
         <tag>NLP</tag>
         <tag>Transformer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Typora 破解版</title>
+    <url>//posts/2023/07/03/typora-cracked/</url>
+    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
       </tags>
   </entry>
 </search>
