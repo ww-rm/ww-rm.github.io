@@ -46,7 +46,7 @@ type: azurlane-spinepainting
 <div id="shipnames-container"></div>
 {% endraw %}
 
-## 预览界面
+## 预览界面 (可以进行拖放)
 
 {% raw %}
 <canvas id="canvas-spine"></canvas>

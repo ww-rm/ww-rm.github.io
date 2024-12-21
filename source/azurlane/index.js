@@ -468,6 +468,15 @@ var spineObjects = [];
 var lastFrameTime = Date.now() / 1000;
 var loadTask = null;
 
+var mvpScale = 1;
+var mvpTranslationX = 0;
+var mvpTranslationY = 0;
+var mvpX = 0;
+var mvpY = 0;
+var mvpW = CANVAS_SIZE;
+var mvpH = CANVAS_SIZE;
+
+var dragSrc = null;
 
 /** 计算骨骼包围盒 */
 function calculateBounds(skeleton) {
@@ -505,11 +514,27 @@ function resize() {
     var centerX = offsetX + sizeX / 2;
     var centerY = offsetY + sizeY / 2;
     var scale = Math.max(sizeX / canvas.width, sizeY / canvas.height);
-    var width = canvas.width * scale;
-    var height = canvas.height * scale;
 
-    mvp.ortho2d(centerX - width / 2, centerY - height / 2, width, height);
-    context.viewport(0, 0, canvas.width, canvas.height);
+    mvpW = canvas.width * scale;
+    mvpH = canvas.height * scale;
+    mvpX = centerX - mvpW / 2;
+    mvpY = centerY - mvpH / 2;
+
+    console.log("resize: ", mvpX, mvpY, mvpW, mvpH);
+    mvp.ortho2d(mvpX, mvpY, mvpW, mvpH);
+}
+
+function updateMvp() {
+    // 先平移再中心缩放
+    var centerX = mvpX + mvpW / 2 - mvpTranslationX;
+    var centerY = mvpY + mvpH / 2 - mvpTranslationY;
+    var w = mvpW / mvpScale;
+    var h = mvpH / mvpScale;
+    var x = centerX - w / 2;
+    var y = centerY - h / 2;
+
+    console.debug("updateMvp: ", x, y, w, h);
+    mvp.ortho2d(x, y, w, h);
 }
 
 /** 渲染循环 */
@@ -593,7 +618,42 @@ function loadSkin(skinName) {
 }
 
 /** 链接点击事件 */
-function changeSkin(event) { loadSkin(event.target.getAttribute('data-key')); }
+function changeSkinHandler(event) { loadSkin(event.target.getAttribute('data-key')); }
+
+/** canvas 缩放事件 */
+function canvasWheelHandler(event) {
+    event.preventDefault();
+    scale = mvpScale * (1 - event.deltaY / 500);
+    mvpScale = Math.max(Math.min(scale, 100), 0.1);
+    updateMvp();
+}
+
+/** canvas 按下事件 */
+function canvasMouseDown(event) {
+    dragSrc = { x: event.clientX, y: event.clientY };
+}
+
+/** canvas 移动事件 */
+function canvasMouseMove(event) {
+    if (!dragSrc) return;
+
+    var deltaX = event.clientX - dragSrc.x;
+    var deltaY = -(event.clientY - dragSrc.y);
+
+    var scaleX = (mvpW / canvas.clientWidth) / mvpScale;
+    var scaleY = (mvpH / canvas.clientHeight) / mvpScale;
+
+    mvpTranslationX += deltaX * scaleX;
+    mvpTranslationY += deltaY * scaleY;
+    updateMvp();
+
+    dragSrc = { x: event.clientX, y: event.clientY };
+}
+
+/** canvas 按下事件 */
+function canvasMouseUp(event) {
+    dragSrc = null;
+}
 
 function main() {
     canvas.height = canvas.width = CANVAS_SIZE;
@@ -604,7 +664,7 @@ function main() {
         link.href = "javascript:void(0)";
         link.textContent = value.chName;
         link.setAttribute("data-key", key);
-        link.onclick = changeSkin;
+        link.onclick = changeSkinHandler;
         container.appendChild(link);
     }
 
@@ -617,6 +677,7 @@ function main() {
         return;
     }
     context.clearColor(...BACKGROUND_COLOR);
+    context.viewport(0, 0, canvas.width, canvas.height);
 
     try {
         shader = spine.webgl.Shader.newTwoColoredTextured(context);
@@ -630,6 +691,12 @@ function main() {
     }
 
     renderer.premultipliedAlpha = true; // 碧蓝的东西默认是有 PMA 的
+
+    canvas.onwheel = canvasWheelHandler;
+    canvas.onmousedown = canvasMouseDown;
+    canvas.onmousemove = canvasMouseMove;
+    canvas.onmouseup = canvasMouseUp;
+    canvas.onmouseleave = canvasMouseUp;
 
     loadSkin(DEFAULT_SKIN);
     render();
