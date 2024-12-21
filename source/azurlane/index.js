@@ -524,6 +524,7 @@ function resize() {
     mvp.ortho2d(mvpX, mvpY, mvpW, mvpH);
 }
 
+/** 更新视图 */
 function updateMvp() {
     // 先平移再中心缩放
     var centerX = mvpX + mvpW / 2 - mvpTranslationX;
@@ -618,7 +619,9 @@ function loadSkin(skinName) {
 }
 
 /** 链接点击事件 */
-function changeSkinHandler(event) { loadSkin(event.target.getAttribute('data-key')); }
+function changeSkinHandler(event) { 
+    loadSkin(event.target.getAttribute('data-key')); 
+}
 
 /** canvas 缩放事件 */
 function canvasWheelHandler(event) {
@@ -628,14 +631,14 @@ function canvasWheelHandler(event) {
     updateMvp();
 }
 
-/** canvas 按下事件 */
+/** canvas 鼠标按下事件 */
 function canvasMouseDown(event) {
     dragSrc = { x: event.clientX, y: event.clientY };
 }
 
-/** canvas 移动事件 */
+/** canvas 鼠标移动事件 */
 function canvasMouseMove(event) {
-    if (!dragSrc) return;
+    if (!dragSrc || !(event.buttons & 1)) return;
 
     var deltaX = event.clientX - dragSrc.x;
     var deltaY = -(event.clientY - dragSrc.y);
@@ -650,7 +653,7 @@ function canvasMouseMove(event) {
     dragSrc = { x: event.clientX, y: event.clientY };
 }
 
-/** canvas 按下事件 */
+/** canvas 鼠标松开事件 */
 function canvasMouseUp(event) {
     dragSrc = null;
 }
