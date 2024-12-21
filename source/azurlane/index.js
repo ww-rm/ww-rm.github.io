@@ -674,6 +674,7 @@ function getDistance(touches) {
 
 /** canvas 触摸开始事件 */
 function canvasTouchStart(event) {
+    event.preventDefault();
     if (event.touches.length === 1) {
         // 单指拖动
         dragSrc = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -712,6 +713,7 @@ function canvasTouchMove(event) {
 
 /** canvas 触摸释放事件 */
 function canvasTouchEnd(event) {
+    event.preventDefault();
     if (event.touches.length < 2) {
         pinchDistance = null;
     }
