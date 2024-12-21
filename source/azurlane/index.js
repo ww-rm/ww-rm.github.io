@@ -523,6 +523,10 @@ function resize() {
 
     console.log("resize: ", mvpX, mvpY, mvpW, mvpH);
     mvp.ortho2d(mvpX, mvpY, mvpW, mvpH);
+
+    mvpScale = 1;
+    mvpTranslationX = 0;
+    mvpTranslationY = 0;
 }
 
 /** 更新视图 */
