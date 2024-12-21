@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>序</title>
-    <url>//posts/2021/05/21/prologue/</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-<p>孔子云：何陋之有？</p>
-
-</blockquote>
-]]></content>
-      <categories>
-        <category>序</category>
-      </categories>
-      <tags>
-        <tag>序</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 Spine 的碧蓝航线桌宠</title>
     <url>//posts/2023/08/30/desktopsprite/</url>
     <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
@@ -128,6 +113,21 @@
         <tag>桌宠</tag>
         <tag>碧蓝航线</tag>
         <tag>Spine</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>序</title>
+    <url>//posts/2021/05/21/prologue/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+<p>孔子云：何陋之有？</p>
+
+</blockquote>
+]]></content>
+      <categories>
+        <category>序</category>
+      </categories>
+      <tags>
+        <tag>序</tag>
       </tags>
   </entry>
   <entry>
@@ -475,6 +475,44 @@
       </tags>
   </entry>
   <entry>
+    <title>安卓 APK 重打包</title>
+    <url>//posts/2024/07/09/apkrepack/</url>
+    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
+<p>本文参考<span class="exturl" data-url="aHR0cHM6Ly9jcmlmYW4uZ2l0aHViLmlvL2FuZHJvaWRfcmVfcmVwYWNrX2Fway93ZWJzaXRlL3JlcGFja19wcm9jZXNzLw==">重新打包apk流程<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
+<ol>
+<li>解包</li>
+<li>修改包体</li>
+<li>重打包</li>
+<li>对齐</li>
+<li>重签名</li>
+</ol>
+<p>顺序很重要, 签名的步骤一定是最后完成.</p>
+<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
+<p>修改包体可以自己按需手动或者脚本修改.</p>
+<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
+<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
+<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
+
+<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
+<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>安卓</tag>
+        <tag>APK</tag>
+        <tag>重打包</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>碧蓝航线立绘提取与批量还原</title>
     <url>//posts/2023/04/11/blhx-painting/</url>
     <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
@@ -560,44 +598,6 @@
         <tag>碧蓝航线</tag>
         <tag>工具</tag>
         <tag>立绘还原</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>安卓 APK 重打包</title>
-    <url>//posts/2024/07/09/apkrepack/</url>
-    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
-<p>本文参考<span class="exturl" data-url="aHR0cHM6Ly9jcmlmYW4uZ2l0aHViLmlvL2FuZHJvaWRfcmVfcmVwYWNrX2Fway93ZWJzaXRlL3JlcGFja19wcm9jZXNzLw==">重新打包apk流程<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
-<ol>
-<li>解包</li>
-<li>修改包体</li>
-<li>重打包</li>
-<li>对齐</li>
-<li>重签名</li>
-</ol>
-<p>顺序很重要, 签名的步骤一定是最后完成.</p>
-<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
-<p>修改包体可以自己按需手动或者脚本修改.</p>
-<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
-<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
-<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
-
-<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
-<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
-
-<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>安卓</tag>
-        <tag>APK</tag>
-        <tag>重打包</tag>
       </tags>
   </entry>
   <entry>
@@ -2524,6 +2524,20 @@
       </tags>
   </entry>
   <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>给新生的编程工具推荐与基本使用方法</title>
     <url>//posts/2022/08/11/wast-vscandvs/</url>
     <content><![CDATA[<p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
@@ -2667,20 +2681,6 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
@@ -3238,77 +3238,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SM9 文档阅读笔记</title>
-    <url>//posts/2023/12/15/sm9/</url>
-    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
-<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
-<span id="more"></span>
-
-<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
-<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
-<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
-<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
-<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
-<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
-<p>因此有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
-<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
-<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
-<p>幂次与系数转换关系如下:</p>
-<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
-<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
-<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
-<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
-<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
-<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
-<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
-<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
-<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
-<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
-<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
-<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
-<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
-<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
-<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
-<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
-<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
-<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
-<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
-<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
-<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
-<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
-<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
-<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
-<p>因此困难部分的指数可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
-<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
-<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
-<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
-<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>双线性对</tag>
-        <tag>R-ate</tag>
-        <tag>Frobenius</tag>
-        <tag>FinalExp</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Simpleperf 三部曲 (三)</title>
     <url>//posts/2024/07/07/simpleperf3/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3415,6 +3344,77 @@
         <tag>Simpleperf</tag>
         <tag>Android</tag>
         <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SM9 文档阅读笔记</title>
+    <url>//posts/2023/12/15/sm9/</url>
+    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
+<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
+<span id="more"></span>
+
+<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
+<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
+<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
+<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
+<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
+<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
+<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
+<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
+<p>幂次与系数转换关系如下:</p>
+<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
+<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
+<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
+<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
+<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
+<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
+<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
+<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
+<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
+<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
+<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
+<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
+<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
+<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
+<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
+<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
+<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
+<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
+<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
+<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
+<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
+<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
+<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
+<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
+<p>因此困难部分的指数可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
+<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
+<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
+<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
+<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>双线性对</tag>
+        <tag>R-ate</tag>
+        <tag>Frobenius</tag>
+        <tag>FinalExp</tag>
       </tags>
   </entry>
   <entry>

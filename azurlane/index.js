@@ -476,7 +476,8 @@ var mvpY = 0;
 var mvpW = CANVAS_SIZE;
 var mvpH = CANVAS_SIZE;
 
-var dragSrc = null;
+var dragSrc = null; // 记录拖放源点
+var pinchDistance = null; // 记录双指缩放距离
 
 /** 计算骨骼包围盒 */
 function calculateBounds(skeleton) {
@@ -524,6 +525,7 @@ function resize() {
     mvp.ortho2d(mvpX, mvpY, mvpW, mvpH);
 }
 
+/** 更新视图 */
 function updateMvp() {
     // 先平移再中心缩放
     var centerX = mvpX + mvpW / 2 - mvpTranslationX;
@@ -618,24 +620,27 @@ function loadSkin(skinName) {
 }
 
 /** 链接点击事件 */
-function changeSkinHandler(event) { loadSkin(event.target.getAttribute('data-key')); }
+function changeSkinHandler(event) {
+    loadSkin(event.target.getAttribute('data-key'));
+}
 
 /** canvas 缩放事件 */
 function canvasWheelHandler(event) {
     event.preventDefault();
-    scale = mvpScale * (1 - event.deltaY / 500);
+    var scale = mvpScale * (1 - event.deltaY / 500);
     mvpScale = Math.max(Math.min(scale, 100), 0.1);
     updateMvp();
 }
 
-/** canvas 按下事件 */
+/** canvas 鼠标按下事件 */
 function canvasMouseDown(event) {
+    if (!(event.buttons & 1)) return;
     dragSrc = { x: event.clientX, y: event.clientY };
 }
 
-/** canvas 移动事件 */
+/** canvas 鼠标移动事件 */
 function canvasMouseMove(event) {
-    if (!dragSrc) return;
+    if (!(event.buttons & 1) || !dragSrc) return;
 
     var deltaX = event.clientX - dragSrc.x;
     var deltaY = -(event.clientY - dragSrc.y);
@@ -650,9 +655,65 @@ function canvasMouseMove(event) {
     dragSrc = { x: event.clientX, y: event.clientY };
 }
 
-/** canvas 按下事件 */
+/** canvas 鼠标释放事件 */
 function canvasMouseUp(event) {
+    if (!(event.buttons & 1)) return;
     dragSrc = null;
+}
+
+/** 获取两点之间的距离 */
+function getDistance(touches) {
+    var dx = touches[0].clientX - touches[1].clientX;
+    var dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+/** canvas 触摸开始事件 */
+function canvasTouchStart(event) {
+    if (event.touches.length === 1) {
+        // 单指拖动
+        dragSrc = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    } else if (event.touches.length === 2) {
+        // 双指缩放
+        pinchDistance = getDistance(event.touches);
+    }
+}
+
+/** canvas 触摸移动事件 */
+function canvasTouchMove(event) {
+    event.preventDefault(); // 防止默认行为（如页面滚动）
+
+    if (event.touches.length === 2 && pinchDistance) {
+        // 处理双指缩放
+        var newDistance = getDistance(event.touches);
+        var scale = mvpScale * (newDistance / pinchDistance);
+        mvpScale = Math.max(Math.min(scale, 100), 0.1);
+        updateMvp();
+        pinchDistance = newDistance; // 更新初始距离
+    } else if (event.touches.length === 1 && dragSrc) {
+        // 处理单指拖动
+        var deltaX = event.touches[0].clientX - dragSrc.x;
+        var deltaY = -(event.touches[0].clientY - dragSrc.y);
+
+        var scaleX = (mvpW / canvas.clientWidth) / mvpScale;
+        var scaleY = (mvpH / canvas.clientHeight) / mvpScale;
+
+        mvpTranslationX += deltaX * scaleX;
+        mvpTranslationY += deltaY * scaleY;
+        updateMvp();
+
+        dragSrc = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    }
+}
+
+/** canvas 触摸释放事件 */
+function canvasTouchEnd(event) {
+    if (event.touches.length < 2) {
+        pinchDistance = null;
+    }
+    if (event.touches.length < 1) {
+        dragSrc = null;
+    }
 }
 
 function main() {
@@ -697,6 +758,9 @@ function main() {
     canvas.onmousemove = canvasMouseMove;
     canvas.onmouseup = canvasMouseUp;
     canvas.onmouseleave = canvasMouseUp;
+    canvas.ontouchstart = canvasTouchStart;
+    canvas.ontouchmove = canvasMouseMove;
+    canvas.ontouchend = canvasTouchEnd;
 
     loadSkin(DEFAULT_SKIN);
     render();
