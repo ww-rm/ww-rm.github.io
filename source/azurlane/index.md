@@ -56,3 +56,11 @@ type: azurlane-spinepainting
 <script src="/js/third-party/spine38/spine-webgl.js"></script>
 <script src="index.js"></script>
 {% endraw %}
+
+## 本地辅助工具
+
+~~推销一下自己的项目~~
+
+所有资源均可在仓库 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting) 内进行查看和下载.
+
+开源项目 [DeskSpine](https://github.com/ww-rm/DeskSpine), 是一个 Windows 平台下的 Spine 桌宠软件, 可以设置动态桌面壁纸, 并支持逐帧画面导出, 详情可以阅读项目介绍, 欢迎下载体验.
