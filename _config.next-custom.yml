@@ -102,6 +102,7 @@ menu:
   #commonweal: /404/ || fa fa-heartbeat
   # festival: /festival/ || fa fa-gift
   pixiv: /pixivdaily/ || fa fa-p
+  Azur Lane: /azurlane/ || fa fa-b
 
 # Enable / Disable menu icons / item badges.
 menu_settings:
