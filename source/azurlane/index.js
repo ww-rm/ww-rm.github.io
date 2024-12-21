@@ -765,7 +765,7 @@ function main() {
     canvas.onmouseup = canvasMouseUp;
     canvas.onmouseleave = canvasMouseUp;
     canvas.ontouchstart = canvasTouchStart;
-    canvas.ontouchmove = canvasMouseMove;
+    canvas.ontouchmove = canvasTouchMove;
     canvas.ontouchend = canvasTouchEnd;
 
     loadSkin(DEFAULT_SKIN);
