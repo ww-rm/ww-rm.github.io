@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="简介 可以在该页面预览碧蓝航线中的动态立绘效果, 目前仅支持简单预览, 属于是个 demo. 可以通过 Ctrl-F 来直接查找对应舰娘名以及皮肤名, 点击链接稍等片刻即可完成加载.   已知问题  目前使用 3.8.x 版本的 spine-canvas 库进行显示, 但是写完了才发现 canvas 库不支持 premultipliedAlpha, 因此大部分图像缝隙处存在色差. 再就是 canv">
+<meta property="og:type" content="website">
+<meta property="og:title" content="碧蓝航线动态立绘在线预览 (持续更新)">
+<meta property="og:url" content="https://ww-rm.github.io/azurlane/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="简介 可以在该页面预览碧蓝航线中的动态立绘效果, 目前仅支持简单预览, 属于是个 demo. 可以通过 Ctrl-F 来直接查找对应舰娘名以及皮肤名, 点击链接稍等片刻即可完成加载.   已知问题  目前使用 3.8.x 版本的 spine-canvas 库进行显示, 但是写完了才发现 canvas 库不支持 premultipliedAlpha, 因此大部分图像缝隙处存在色差. 再就是 canv">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-12-21T08:59:05.366Z">
+<meta property="article:modified_time" content="2024-12-21T08:59:05.366Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="ww-rm">
+<meta property="article:tag" content="编程">
+<meta property="article:tag" content="技术分享">
+<meta property="article:tag" content="经验分享">
+<meta property="article:tag" content="踩坑记录">
+<meta property="article:tag" content="个人博客">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/azurlane/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/azurlane/","path":"azurlane/index.html","title":"碧蓝航线动态立绘在线预览 (持续更新)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>碧蓝航线动态立绘在线预览 (持续更新) | 暗香画楼
+</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.jpg); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9A%AE%E8%82%A4%E5%88%97%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">皮肤列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E8%A7%88%E7%94%BB%E9%9D%A2"><span class="nav-number">2.</span> <span class="nav-text">预览画面</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">44</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">102</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner page posts-expand">
+
+
+    
+    
+    
+    <div class="post-block" lang="zh-CN"><header class="post-header">
+
+<h1 class="post-title" itemprop="name headline">碧蓝航线动态立绘在线预览 (持续更新)
+</h1>
+
+<div class="post-meta-container">
+</div>
+
+</header>
+
+      
+      
+      <div class="post-body">
+          <div class="note success"><p><strong>简介</strong></p>
+<p>可以在该页面预览碧蓝航线中的动态立绘效果, 目前仅支持简单预览, 属于是个 demo.</p>
+<p>可以通过 <code>Ctrl-F</code> 来直接查找对应舰娘名以及皮肤名, 点击链接稍等片刻即可完成加载.</p>
+</div>
+
+<div class="note danger"><p><strong>已知问题</strong></p>
+<ul>
+<li>目前使用 3.8.x 版本的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHMvY2FudmFz">spine-canvas<i class="fa fa-external-link-alt"></i></span> 库进行显示, 但是写完了才发现 canvas 库<strong>不支持</strong> premultipliedAlpha, 因此大部分图像缝隙处存在色差.</li>
+<li>再就是 canvas 库<strong>未实现</strong> clipping, 因此存在少数立绘显示问题.</li>
+</ul>
+</div>
+
+<div class="note warning"><p><strong>后续计划</strong></p>
+<ul>
+<li>换成 webgl 的库, 既实现了 premultipliedAlpha 又实现了 clipping, 巴适的很<del>来个大能帮我改改代码吧, 孩子是真看不懂 webgl</del></li>
+<li>给画面增加鼠标交互, 包括拖动和缩放等基础操作.</li>
+</ul>
+</div>
+
+<hr>
+
+<style>
+  #shipnames-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
+    max-width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  #canvas-spine {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+</style>
+
+
+<h2 id="皮肤列表"><a href="#皮肤列表" class="headerlink" title="皮肤列表"></a>皮肤列表</h2>
+<div id="shipnames-container"></div>
+
+
+<h2 id="预览画面"><a href="#预览画面" class="headerlink" title="预览画面"></a>预览画面</h2>
+<canvas id="canvas-spine"></canvas>
+
+
+
+
+<script src="/js/third-party/spine-canvas-38.js"></script>
+
+<script>
+  const ASSET_MAPPING = {
+    "aerhangeersike_3": {
+      "chName": "阿尔汉格尔斯克_与魔女同行",
+      "skelNames": ["aerhangeersike_3"],
+      "pages": ["aerhangeersike_3.png", "aerhangeersike_32.png", "aerhangeersike_33.png"]
+    },
+    "aersasi": {
+      "chName": "阿尔萨斯",
+      "skelNames": ["aersasi"],
+      "pages": ["aersasi.png", "aersasi2.png", "aersasi3.png"]
+    },
+    "aidang_6": {
+      "chName": "爱宕_满月之夜的狼",
+      "skelNames": ["aidang_6"],
+      "pages": ["aidang_6.png"]
+    },
+    "aierdeliqi_g": {
+      "chName": "埃尔德里奇_改",
+      "skelNames": ["aierdeliqi_g"],
+      "pages": ["aierdeliqi_g.png", "aierdeliqi_g2.png"]
+    },
+    "aijier": {
+      "chName": "埃吉尔",
+      "skelNames": ["aijierT", "aijierM", "aijierB"],
+      "pages": ["aijierT.png", "aijierM.png", "aijierB.png"]
+    },
+    "aimudeng_4": {
+      "chName": "埃姆登_引路的双轨极星",
+      "skelNames": ["aimudeng_4T", "aimudeng_4M", "aimudeng_4B"],
+      "pages": ["aimudeng_4T.png", "aimudeng_4M.png", "aimudeng_4B.png"]
+    },
+    "aisaikesi_7": {
+      "chName": "埃塞克斯_碧海之梦",
+      "skelNames": ["aisaikesi_7T", "aisaikesi_7B"],
+      "pages": ["aisaikesi_7T.png", "aisaikesi_7B.png"]
+    },
+    "aogusite_3": {
+      "chName": "奥古斯特_被阳光照亮之时",
+      "skelNames": ["aogusite_3"],
+      "pages": ["aogusite_3.png"]
+    },
+    "bailong": {
+      "chName": "白龙",
+      "skelNames": ["bailongT", "bailongM", "bailongB"],
+      "pages": ["bailongT.png", "bailongM.png", "bailongB.png"]
+    },
+    "banerwei_2": {
+      "chName": "伴尔维_俩人的柔软体操",
+      "skelNames": ["banerwei_2"],
+      "pages": ["banerwei_2.png"]
+    },
+    "beierfasite_9": {
+      "chName": "贝尔法斯特_至福的侍奉",
+      "skelNames": ["beierfasite_9"],
+      "pages": ["beierfasite_9.png"]
+    },
+    "bisimaiz": {
+      "chName": "俾斯麦Zwei",
+      "skelNames": ["bisimaiZT", "bisimaiZM", "bisimaiZB"],
+      "pages": ["bisimaiZT.png", "bisimaiZM.png", "bisimaiZB.png"]
+    },
+    "bisimaiz_2": {
+      "chName": "俾斯麦Zwei_清澈假日",
+      "skelNames": ["bisimaiZ_2T", "bisimaiZ_2M", "bisimaiZ_2B"],
+      "pages": ["bisimaiZ_2T.png", "bisimaiZ_2M.png", "bisimaiZ_2B.png"]
+    },
+    "bulaimodun_6": {
+      "chName": "布莱默顿_特别的治愈时间",
+      "skelNames": ["bulaimodun_6"],
+      "pages": ["bulaimodun_6.png"]
+    },
+    "buleisite": {
+      "chName": "布雷斯特",
+      "skelNames": ["buleisite_T", "buleisite_B"],
+      "pages": ["buleisite_T.png", "buleisite_B.png"]
+    },
+    "buli_super": {
+      "chName": "特装型布里MKIII",
+      "skelNames": ["buli_super"],
+      "pages": ["buli_super.png"]
+    },
+    "dahuangfengii_2": {
+      "chName": "大黄蜂II_驰骋于大海之上",
+      "skelNames": ["dahuangfengII_2_T", "dahuangfengII_2_B"],
+      "pages": ["dahuangfengII_2_T.png", "dahuangfengII_2_B.png"]
+    },
+    "daofeng": {
+      "chName": "岛风",
+      "skelNames": ["daofengT", "daofengB"],
+      "pages": ["daofengT.png", "daofengB.png"]
+    },
+    "deleike": {
+      "chName": "德雷克",
+      "skelNames": ["deleike"],
+      "pages": ["deleike.png"]
+    },
+    "diliyasite_3": {
+      "chName": "的里雅斯特_热气蒸腾温泉夜",
+      "skelNames": ["diliyasite_3T", "diliyasite_3M", "diliyasite_3B"],
+      "pages": ["diliyasite_3T.png", "diliyasite_3M.png", "diliyasite_3B.png"]
+    },
+    "duyisibao_2": {
+      "chName": "杜伊斯堡_两人的秘密特训",
+      "skelNames": ["duyisibao_2"],
+      "pages": ["duyisibao_2.png"]
+    },
+    "fage_2": {
+      "chName": "法戈_纯白热潮",
+      "skelNames": ["fage_2"],
+      "pages": ["fage_2.png"]
+    },
+    "feiteliedadi": {
+      "chName": "腓特烈大帝",
+      "skelNames": ["feiteliedadi"],
+      "pages": ["feiteliedadi.png"]
+    },
+    "fengyun_2": {
+      "chName": "风云_烟火之夜、静谧之海",
+      "skelNames": ["fengyun_2_T", "fengyun_2_B"],
+      "pages": ["fengyun_2_T.png", "fengyun_2_B.png"]
+    },
+    "fulici": {
+      "chName": "弗里茨",
+      "skelNames": ["fulici"],
+      "pages": ["fulici.png", "fulici2.png", "fulici3.png"]
+    },
+    "fuluoxiluofu_2": {
+      "chName": "伏罗希洛夫_山间暖雪",
+      "skelNames": ["fuluoxiluofu_2"],
+      "pages": ["fuluoxiluofu_2.png"]
+    },
+    "gangyishawa_2": {
+      "chName": "冈依沙瓦号_被封印的美人鱼",
+      "skelNames": ["gangyishawa_2"],
+      "pages": ["gangyishawa_2.png", "gangyishawa_22.png"]
+    },
+    "gaoxiong_6": {
+      "chName": "高雄_破魔舰术-神护",
+      "skelNames": ["gaoxiong_6T", "gaoxiong_6B"],
+      "pages": ["gaoxiong_6T.png", "gaoxiong_6T2.png", "gaoxiong_6B.png"]
+    },
+    "geluosite_3": {
+      "chName": "格罗斯特_魅紫旋舞",
+      "skelNames": ["geluosite_3"],
+      "pages": ["geluosite_3.png"]
+    },
+    "guandao": {
+      "chName": "关岛",
+      "skelNames": ["guandaoT", "guandaoB"],
+      "pages": ["guandaoT.png", "guandaoB.png"]
+    },
+    "haerbin_3": {
+      "chName": "哈尔滨_奢享于盛夏之滨",
+      "skelNames": ["haerbin_3"],
+      "pages": ["haerbin_3.png"]
+    },
+    "hemuhao_2": {
+      "chName": "和睦号_友好的弗兰肯",
+      "skelNames": ["hemuhao_2"],
+      "pages": ["hemuhao_2.png", "hemuhao_22.png"]
+    },
+    "huajia_2": {
+      "chName": "华甲_欢乐喜庆僵尸夜",
+      "skelNames": ["huajia_2T", "huajia_2M", "huajia_2B"],
+      "pages": ["huajia_2T.png", "huajia_2M.png", "huajia_2B.png"]
+    },
+    "huanchang_2": {
+      "chName": "寰昌_月下蹁跹",
+      "skelNames": ["huanchang_2T", "huanchang_2B"],
+      "pages": ["huanchang_2T.png", "huanchang_2T2.png", "huanchang_2B.png", "huanchang_2B2.png"]
+    },
+    "huangjiacaifu_3": {
+      "chName": "皇家财富号_海边的约定",
+      "skelNames": ["huangjiacaifu_3T", "huangjiacaifu_3B"],
+      "pages": ["huangjiacaifu_3T.png", "huangjiacaifu_3B.png"]
+    },
+    "huben_2": {
+      "chName": "虎贲_舞虎迎春",
+      "skelNames": ["huben_2"],
+      "pages": ["huben_2.png", "huben_22.png", "huben_23.png"]
+    },
+    "jianye_5": {
+      "chName": "樫野_新鲜与甜蜜",
+      "skelNames": ["jianye_5"],
+      "pages": ["jianye_5.png"]
+    },
+    "jingang_5": {
+      "chName": "金刚_海浪之下的意外",
+      "skelNames": ["jingang_5"],
+      "pages": ["jingang_5.png", "jingang_52.png"]
+    },
+    "kaiersheng_2": {
+      "chName": "凯尔圣_阳光下的跑者",
+      "skelNames": ["kaiersheng_2"],
+      "pages": ["kaiersheng_2.png"]
+    },
+    "kaiersheng_3": {
+      "chName": "凯尔圣_神圣的怜悯并非恶事",
+      "skelNames": ["kaiersheng_3"],
+      "pages": ["kaiersheng_3.png", "kaiersheng_32.png"]
+    },
+    "kalangshitade": {
+      "chName": "喀琅施塔得",
+      "skelNames": ["kalangshitade"],
+      "pages": ["kalangshitade.png"]
+    },
+    "kewei_5": {
+      "chName": "可畏_凌乱的秘密加演",
+      "skelNames": ["kewei_5T", "kewei_5"],
+      "pages": ["kewei_5T.png", "kewei_5.png", "kewei_52.png"]
+    },
+    "lafeiii": {
+      "chName": "拉菲II",
+      "skelNames": ["lafeiII"],
+      "pages": ["lafeiII.png", "lafeiII2.png"]
+    },
+    "lafei_12": {
+      "chName": "拉菲_白日慵懒",
+      "skelNames": ["lafei_12T", "lafei_12B"],
+      "pages": ["lafei_12T.png", "lafei_12B.png"]
+    },
+    "linglai_2": {
+      "chName": "绫濑_兔子小姐的更衣时间",
+      "skelNames": ["linglai_2"],
+      "pages": ["linglai_2.png", "linglai_22.png"]
+    },
+    "luna_2_doa": {
+      "chName": "露娜_沙滩上的女神",
+      "skelNames": ["luna_2_doa"],
+      "pages": ["luna_2_doa.png"]
+    },
+    "lundun_3": {
+      "chName": "伦敦_高效工作时间",
+      "skelNames": ["lundun_3"],
+      "pages": ["lundun_3.png"]
+    },
+    "luyisiweier_2": {
+      "chName": "路易斯维尔_梦幻推荐",
+      "skelNames": ["luyisiweier_2"],
+      "pages": ["luyisiweier_2.png"]
+    },
+    "mabuerheide_5": {
+      "chName": "马布尔黑德_雨天的非偶然相遇",
+      "skelNames": ["mabuerheide_5T", "mabuerheide_5B"],
+      "pages": ["mabuerheide_5T.png", "mabuerheide_5B.png"]
+    },
+    "masaiqu_2": {
+      "chName": "马赛曲_战斗天使的健身训练",
+      "skelNames": ["masaiqu_2"],
+      "pages": ["masaiqu_2.png"]
+    },
+    "mojiaduoer": {
+      "chName": "莫加多尔",
+      "skelNames": ["mojiaduoer"],
+      "pages": ["mojiaduoer.png", "mojiaduoer2.png"]
+    },
+    "nabulesi": {
+      "chName": "那不勒斯",
+      "skelNames": ["nabulesi"],
+      "pages": ["nabulesi.png", "nabulesi2.png"]
+    },
+    "naximofu": {
+      "chName": "纳希莫夫海军上将",
+      "skelNames": ["naximofu"],
+      "pages": ["naximofu.png", "naximofu2.png"]
+    },
+    "ougen_7": {
+      "chName": "欧根亲王_闪耀达阵",
+      "skelNames": ["ougen_7"],
+      "pages": ["ougen_7.png", "ougen_72.png"]
+    },
+    "pulimaosi": {
+      "chName": "普利茅斯",
+      "skelNames": ["pulimaosi_T", "pulimaosi_M", "pulimaosi_B"],
+      "pages": ["pulimaosi_T.png", "pulimaosi_M.png", "pulimaosi_B.png"]
+    },
+    "qianwei": {
+      "chName": "前卫",
+      "skelNames": ["qianweiT", "qianweiB"],
+      "pages": ["qianweiT.png", "qianweiB.png"]
+    },
+    "qiershazhi": {
+      "chName": "奇尔沙治",
+      "skelNames": ["qiershazhi"],
+      "pages": ["qiershazhi.png", "qiershazhi2.png"]
+    },
+    "shengdiyage_g": {
+      "chName": "圣地亚哥_改",
+      "skelNames": ["shengdiyage_g"],
+      "pages": ["shengdiyage_g.png"]
+    },
+    "suweiaitongmengnew": {
+      "chName": "苏维埃同盟",
+      "skelNames": ["suweiaitongmengNew"],
+      "pages": ["suweiaitongmengNew.png", "suweiaitongmengNew2.png", "suweiaitongmengNew3.png", "suweiaitongmengNew4.png", "suweiaitongmengNew5.png"]
+    },
+    "tashigan_4": {
+      "chName": "塔什干_独属于你的邀约",
+      "skelNames": ["tashigan_4"],
+      "pages": ["tashigan_4.png", "tashigan_42.png", "tashigan_43.png"]
+    },
+    "tiancheng_cv": {
+      "chName": "天城（航母）",
+      "skelNames": ["tiancheng_cv"],
+      "pages": ["tiancheng_cv.png", "tiancheng_cv2.png", "tiancheng_cv3.png"]
+    },
+    "tuzuo_3": {
+      "chName": "土佐_水色间的游曳",
+      "skelNames": ["tuzuo_3"],
+      "pages": ["tuzuo_3.png", "tuzuo_32.png"]
+    },
+    "u96_4": {
+      "chName": "U-96_WOLFEN DOLLY",
+      "skelNames": ["u96_4"],
+      "pages": ["u96_4.png", "u96_42.png"]
+    },
+    "weida_2": {
+      "chName": "维达号_慵懒的黑天使",
+      "skelNames": ["weida_2"],
+      "pages": ["weida_2.png", "weida_22.png", "weida_23.png"]
+    },
+    "weizhang_2": {
+      "chName": "尾张_波光潋滟",
+      "skelNames": ["weizhang_2T", "weizhang_2B"],
+      "pages": ["weizhang_2T.png", "weizhang_2B.png"]
+    },
+    "wuerlixi": {
+      "chName": "乌尔里希",
+      "skelNames": ["wuerlixi"],
+      "pages": ["wuerlixi.png"]
+    },
+    "wuerlixi_4": {
+      "chName": "乌尔里希_在教室中等待",
+      "skelNames": ["wuerlixi_4"],
+      "pages": ["wuerlixi_4.png", "wuerlixi_42.png"]
+    },
+    "wuqi": {
+      "chName": "吾妻",
+      "skelNames": ["wuqi"],
+      "pages": ["wuqi.png"]
+    },
+    "wuzang": {
+      "chName": "武藏",
+      "skelNames": ["wuzang1", "wuzang2", "wuzang3", "wuzang4", "wuzang5", "wuzang6", "wuzang7"],
+      "pages": ["wuzang1.png", "wuzang2.png", "wuzang3.png", "wuzang4.png", "wuzang5.png", "wuzang6.png", "wuzang7.png"]
+    },
+    "xiafei_3": {
+      "chName": "霞飞_至高乐园",
+      "skelNames": ["xiafei_3T", "xiafei_3B"],
+      "pages": ["xiafei_3T.png", "xiafei_3B.png"]
+    },
+    "xili_g": {
+      "chName": "夕立_改",
+      "skelNames": ["xili_g"],
+      "pages": ["xili_g.png"]
+    },
+    "xingdengbao": {
+      "chName": "兴登堡",
+      "skelNames": ["xingdengbao"],
+      "pages": ["xingdengbao.png", "xingdengbao2.png", "xingdengbao3.png", "xingdengbao4.png"]
+    },
+    "xingzuo_2": {
+      "chName": "星座_星选之夜",
+      "skelNames": ["xingzuo_2"],
+      "pages": ["xingzuo_2.png"]
+    },
+    "xinnong": {
+      "chName": "信浓",
+      "skelNames": ["xinnongT", "xinnongB"],
+      "pages": ["xinnongT.png", "xinnongB.png"]
+    },
+    "xinzexi": {
+      "chName": "新泽西",
+      "skelNames": ["xinzexi"],
+      "pages": ["xinzexi.png"]
+    },
+    "yaerweite_2": {
+      "chName": "亚尔薇特_灼热中的秘密",
+      "skelNames": ["yaerweite_2"],
+      "pages": ["yaerweite_2.png"]
+    },
+    "yanusi_4": {
+      "chName": "雅努斯_踌躇的换衣时间",
+      "skelNames": ["yanusi_4"],
+      "pages": ["yanusi_4.png"]
+    },
+    "yanzhan_g": {
+      "chName": "厌战_改",
+      "skelNames": ["yanzhan_g"],
+      "pages": ["yanzhan_g.png"]
+    },
+    "yindianna_2": {
+      "chName": "印第安纳_酒馆大劫案",
+      "skelNames": ["yindianna_2"],
+      "pages": ["yindianna_2.png"]
+    },
+    "yixian_2": {
+      "chName": "逸仙_膏发凝脂",
+      "skelNames": ["yixian_2T", "yixian_2M", "yixian_2B"],
+      "pages": ["yixian_2T.png", "yixian_2M.png", "yixian_2B.png"]
+    },
+    "yuanchou": {
+      "chName": "怨仇",
+      "skelNames": ["yuanchouT", "yuanchouB"],
+      "pages": ["yuanchouT.png", "yuanchouB.png"]
+    },
+    "yuanchou_2": {
+      "chName": "怨仇_办公室的“意外”",
+      "skelNames": ["yuanchou_2"],
+      "pages": ["yuanchou_2.png"]
+    },
+    "yuekechengii": {
+      "chName": "约克城II",
+      "skelNames": ["yukechengIIT", "yukechengIIM", "yukechengIIB"],
+      "pages": ["yukechengIIT.png", "yukechengIIM.png", "yukechengIIB.png"]
+    },
+    "yuekechengii_2": {
+      "chName": "约克城II_白昼美人鱼",
+      "skelNames": ["yuekechengII_2T", "yuekechengII_2B"],
+      "pages": ["yuekechengII_2T.png", "yuekechengII_2B.png"]
+    },
+    "yuekegongjue_4": {
+      "chName": "约克公爵_渊智的指路人",
+      "skelNames": ["yuekegongjue_4"],
+      "pages": ["yuekegongjue_4.png"]
+    },
+    "yueke_ger_3": {
+      "chName": "约克（铁血）_相伴于泳池之夜",
+      "skelNames": ["yueke_ger_3"],
+      "pages": ["yueke_ger_3.png", "yueke_ger_32.png"]
+    },
+    "yunxian": {
+      "chName": "云仙",
+      "skelNames": ["yunxian"],
+      "pages": ["yunxian.png", "yunxian2.png"]
+    },
+    "z52": {
+      "chName": "Z52",
+      "skelNames": ["z52"],
+      "pages": ["z52.png"]
+    },
+    "z52_2": {
+      "chName": "Z52_疾驰而来的兔小姐",
+      "skelNames": ["z52_2"],
+      "pages": ["z52_2.png"]
+    }
+  }
+</script>
+
+<script>
+  const ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
+  const CANVAS_SIZE = 4096
+  const BACKGROUND_COLOR = "#5c90b8";
+
+  /** @type {HTMLCanvasElement} */
+  var canvas = document.getElementById("canvas-spine");
+  var context = canvas.getContext("2d", { "alpha": false });
+  var renderer = new spine.canvas.SkeletonRenderer(context);
+  renderer.premultipliedAlpha = true;
+  var assetManager = new spine.canvas.AssetManager();
+  var spineObjects = [];
+  var lastFrameTime = Date.now() / 1000;
+  var loadTask = null;
+
+  /** 计算骨骼包围盒 */
+  function calculateBounds(skeleton) {
+    skeleton.setToSetupPose();
+    skeleton.updateWorldTransform();
+    var offset = new spine.Vector2();
+    var size = new spine.Vector2();
+    skeleton.getBounds(offset, size, []);
+    return { offset: offset, size: size };
+  }
+
+  /** 加载骨骼和动画状态 */
+  function loadSpineObject(assetPrefix, skelUrl, atlasUrl, initialAnimation) {
+    var atlas = new spine.TextureAtlas(
+      assetManager.get(atlasUrl),
+      (path) => assetManager.get(assetPrefix + path)
+    );
+    var skeletonBinary = new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(atlas));
+    var skeletonData = skeletonBinary.readSkeletonData(assetManager.get(skelUrl));
+
+    var skeleton = new spine.Skeleton(skeletonData);
+    skeleton.scaleY = -1;
+    var bounds = calculateBounds(skeleton);
+    var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
+    animationState.setAnimation(0, initialAnimation, true);
+
+    return { skeleton: skeleton, state: animationState, bounds: bounds };
+  }
+
+  /** 渲染循环 */
+  function render() {
+    var now = Date.now() / 1000;
+    var delta = now - lastFrameTime;
+    lastFrameTime = now;
+
+    context.save();
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.fillStyle = BACKGROUND_COLOR;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.restore();
+
+    // 倒序渲染所有骨骼动画
+    for (var i = spineObjects.length - 1; i >= 0; i--) {
+      var obj = spineObjects[i];
+      obj.state.update(delta);
+      obj.state.apply(obj.skeleton);
+      obj.skeleton.updateWorldTransform();
+      renderer.draw(obj.skeleton);
+    }
+    requestAnimationFrame(render);
+  }
+
+  /** 重置显示位置 */
+  function resize() {
+    var offsetX = spineObjects.length ? Math.min(...spineObjects.map(e => e.bounds.offset.x)) : 0;
+    var offsetY = spineObjects.length ? Math.min(...spineObjects.map(e => e.bounds.offset.y)) : 0;
+    var sizeX = spineObjects.length ? Math.max(...spineObjects.map(e => e.bounds.size.x)) : CANVAS_SIZE;
+    var sizeY = spineObjects.length ? Math.max(...spineObjects.map(e => e.bounds.size.y)) : CANVAS_SIZE;
+    var centerX = offsetX + sizeX / 2;
+    var centerY = offsetY + sizeY / 2;
+    var scale = Math.max(sizeX / canvas.width, sizeY / canvas.height);
+
+    // 复位到画布原点
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.translate(CANVAS_SIZE / 2, CANVAS_SIZE / 2);
+
+    // 调整显示完整的立绘
+    context.scale(1 / scale, 1 / scale);
+    context.translate(-centerX, -centerY);
+  }
+
+  function loadSkin(skinName) {
+    if (!ASSET_MAPPING[skinName]) {
+      console.error(skinName, "not found");
+      return;
+    }
+    var assetPrefix = ASSET_PREFIX + skinName + "/";
+    var _SKEL = (name) => assetPrefix + name + ".skel";
+    var _ATLAS = (name) => assetPrefix + name + ".atlas";
+
+    var skelNames = ASSET_MAPPING[skinName].skelNames;
+    var pages = ASSET_MAPPING[skinName].pages;
+
+    skelNames.forEach(e => {
+      assetManager.loadBinary(_SKEL(e));
+      assetManager.loadText(_ATLAS(e));
+    });
+    pages.forEach(e => {
+      assetManager.loadTexture(assetPrefix + e);
+    })
+
+    if (loadTask) {
+      console.log(loadTask);
+      console.log("remove last loadTask");
+      clearInterval(loadTask);
+      loadTask = null;
+      return;
+    }
+
+    loadTask = setInterval(function () {
+      if (assetManager.isLoadingComplete()) {
+        spineObjects = [];
+        skelNames.forEach(skelName => {
+          try {
+            var spObj = loadSpineObject(assetPrefix, _SKEL(skelName), _ATLAS(skelName), "normal");
+            spineObjects.push(spObj);
+          } catch (error) {
+            console.error(skinName, skelName, "load failed.");
+            console.error(error);
+          }
+        });
+        resize();
+        clearInterval(loadTask);
+        loadTask = null;
+      }
+    }, 100);
+  }
+
+  function changeSkin(event) { loadSkin(event.target.getAttribute('data-key')); }
+
+  function main() {
+    // 初始化各项参数
+    canvas.height = canvas.width = CANVAS_SIZE;
+    context.translate(CANVAS_SIZE / 2, CANVAS_SIZE / 2);
+    renderer.triangleRendering = true;
+    renderer.debugRendering = false;
+
+    // 添加所有按钮
+    var container = document.getElementById("shipnames-container");
+    for (var key in ASSET_MAPPING) {
+      value = ASSET_MAPPING[key];
+      var link = document.createElement("a");
+      link.href = "javascript:void(0)";
+      link.textContent = value.chName;
+      link.setAttribute("data-key", key);
+      link.onclick = changeSkin;
+      container.appendChild(link);
+    }
+
+    // 加载一个默认角色
+    loadSkin("buli_super");
+    render();
+  }
+
+  (function () { main(); }());
+</script>
+
+
+
+      </div>
+      
+      
+      
+    </div>
+
+    
+    
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">246k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:27</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+</body>
+</html>
