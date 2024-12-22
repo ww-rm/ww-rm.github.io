@@ -451,7 +451,7 @@ const ASSET_MAPPING = {
 const ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
 const CANVAS_SIZE = 4096
 const BGCOLOR_DARK = [0.17, 0.26, 0.44, 1];
-const BGCOLOR_LIGHT = [0.44, 0.62, 0.76, 1];
+const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
 const DEFAULT_SKIN = "buli_super";
 
 /** @type {HTMLCanvasElement} */
