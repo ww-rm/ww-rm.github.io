@@ -16,6 +16,465 @@
       </tags>
   </entry>
   <entry>
+    <title>基于 Spine 的碧蓝航线桌宠</title>
+    <url>//posts/2023/08/30/desktopsprite/</url>
+    <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
+<span id="more"></span>
+
+<h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">https://github.com/ww-rm/DesktopSprite<i class="fa fa-external-link-alt"></i></span></p>
+<p>这是一个适用于 <code>Windows</code> 系统下的桌面精灵, 目前已在 <code>Win10</code>, <code>Win11</code> 下基本测试通过.</p>
+<ul>
+<li>轻量的性能监视器: 可以显示电脑占用和网速监视浮窗</li>
+</ul>
+<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
+<ul>
+<li>可自定义桌宠: 支持基于 <code>spine v3.6.53</code> 导出的碧蓝航线全角色小人动画</li>
+</ul>
+<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
+<h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 下载 <code>Latest</code> 版本的 <code>zip</code> 压缩包, 解压后双击运行里面的 <code>DesktopSprite.msi</code> 安装文件进行安装, 可以自定义安装位置.</p>
+<p>安装完成后, 开始菜单和桌面都会出现程序启动图标. 双击运行, 通知栏会有程序图标, 首次运行桌面默认会显示自带的碧蓝小人角色, 且有一个性能浮窗.</p>
+<h3 id="更换角色"><a href="#更换角色" class="headerlink" title="更换角色"></a>更换角色</h3><p>右键通知区域程序图标, 可以进入设置界面, 设置对应的 <code>atlas</code> 和 <code>skel/json</code> 文件, 然后应用/确定设置即可完成更换.</p>
+<p>需要注意 <code>*.atlas</code>, <code>*.png</code>, <code>*.skel/*.json</code> 三份文件需要互相匹配, 且 <code>*.atlas</code> 和 <code>*.png</code> 文件名必须相同 (选择 <code>atlas</code> 的时候会自动填入 <code>png</code> 文件).</p>
+<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
+<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/config.png" alt="config.png"></p>
+<h5 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h5><ul>
+<li>开机启动: 程序是否开机启动</li>
+<li>整点报时: 一个小功能, 可以在整点时间弹出通知提醒</li>
+<li>提示声音: 整点报时是否有声音</li>
+<li>气泡图标路径: 整点报时气泡通知使用的图标</li>
+</ul>
+<h5 id="显示设置"><a href="#显示设置" class="headerlink" title="显示设置"></a>显示设置</h5><p>这部分的设置是针对性能浮窗的.</p>
+<ul>
+<li>显示浮窗: 是在桌面显示浮窗还是隐藏到通知区域图标使用鼠标悬停显示</li>
+<li>显示占用: 是否在浮窗上显示处理器和内存占用百分比</li>
+<li>显示网速: 是否在浮窗上显示上传和下载速度</li>
+<li>深色主题: 设置浮窗主题颜色</li>
+<li>透明度: 设置浮窗透明度百分比, 0 为完全透明, 100 为完全不透明</li>
+</ul>
+<h5 id="精灵设置"><a href="#精灵设置" class="headerlink" title="精灵设置"></a>精灵设置</h5><p>这部分的设置是针对桌宠的</p>
+<ul>
+<li>atlas, png, skel 路径: 选择要使用的 SD 小人模型, 三个文件要互相匹配</li>
+<li>显示精灵: 是否在桌面上显示桌宠, 不显示的情况下不会有桌宠的资源占用</li>
+<li>鼠标穿透: 是否让桌宠鼠标穿透, 穿透情况下桌宠无视鼠标和键盘输入</li>
+<li>最大帧率: 设置桌宠的渲染帧率, 对电脑性能有较高影响</li>
+<li>透明度: 设置桌宠透明度, 配合鼠标穿透可以设置挂件效果</li>
+<li>缩放: 设置桌宠的大小</li>
+</ul>
+<h5 id="Spine-设置"><a href="#Spine-设置" class="headerlink" title="Spine 设置"></a>Spine 设置</h5><p>该部分设置桌宠动画小人不同事件和动画的映射关系, 可选内容由加载的 spine 模型决定.</p>
+<ul>
+<li>待机: 无操作的普通情况</li>
+<li>拖动: 鼠标拖动桌宠时触发</li>
+<li>任务中: 没想好</li>
+<li>睡觉: 电脑无输入闲置一段时间后触发</li>
+<li>闲置: 电脑低负载时随机触发</li>
+<li>触摸: 单击桌宠触发</li>
+<li>摸头: 鼠标中键下滚</li>
+<li>任务完成: 任务结束后, 和任务中是连着的</li>
+<li>跳舞: 鼠标中键上滚</li>
+<li>过载: 电脑高负载时随机触发</li>
+</ul>
+<h5 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h5><ul>
+<li>打开数据文件夹: 打开程序数据文件所在的文件夹</li>
+</ul>
+<h4 id="快捷操作"><a href="#快捷操作" class="headerlink" title="快捷操作"></a>快捷操作</h4><ul>
+<li>右键菜单: 有两个, 一个是浮窗/通知区域图标的, 另一个是桌宠的, 大部分选项都是设置面板里有的, 是快捷操作</li>
+<li>精灵复位: 用来预防一些未知的特殊情况, 如一些不可知的显示器分辨率问题导致的精灵错位消失, 点击之后精灵会回到原点, 屏幕的正下方</li>
+<li>双击桌宠: 让角色转向</li>
+</ul>
+<h4 id="通知区域图标"><a href="#通知区域图标" class="headerlink" title="通知区域图标"></a>通知区域图标</h4><ul>
+<li>右键单击: 显示右键菜单</li>
+<li>左键双击: 显示桌宠</li>
+</ul>
+<h2 id="一些开发细节"><a href="#一些开发细节" class="headerlink" title="一些开发细节"></a>一些开发细节</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ul>
+<li><code>Win10+</code></li>
+<li><code>Visual Studio 2022</code></li>
+<li><code>C++14</code></li>
+<li><a href="https://github.com/EsotericSoftware/spine-runtimes/tree/3.6"><code>spine-runtime</code></a></li>
+<li><a href="https://github.com/open-source-parsers/jsoncpp"><code>jsoncpp</code></a></li>
+</ul>
+<p>其中 <code>spine-runtime</code> 和 <code>jsoncpp</code> 均是以源码方式引入并编译的, 内部有一些相应的适配性修改.</p>
+<p><code>spine-runtime</code> 版本固定了是 <code>v3.6.53</code>, 所以几乎只支持碧蓝航线导出的小人资源.</p>
+<h3 id="动画渲染"><a href="#动画渲染" class="headerlink" title="动画渲染"></a>动画渲染</h3><p>桌宠使用 2D 图形库绘制, 具体实现原理参考 <span class="exturl" data-url="aHR0cDovL3poLmVzb3Rlcmljc29mdHdhcmUuY29tL3NwaW5lLWM=">spine-c 运行时文档<i class="fa fa-external-link-alt"></i></span>, 标准实现需要使用纹理映射等计算机图形学操作<del>但是我不会</del>, 所以纹理映射是通过 2D 库的纹理笔刷来实现的.</p>
+<p>创建纹理笔刷之后, 在绘制顶点三角形时, 需要自己手动计算纹理到模型的仿射矩阵, 然后设置笔刷的变换矩阵, 就能完成纹理映射. 关键函数是这个 <code>GetAffineMatrix</code>:</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">GetAffineMatrix</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> x1, <span class="type">float</span> y1, <span class="type">float</span> x2, <span class="type">float</span> y2, <span class="type">float</span> x3, <span class="type">float</span> y3, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> u1, <span class="type">float</span> v1, <span class="type">float</span> u2, <span class="type">float</span> v2, <span class="type">float</span> u3, <span class="type">float</span> v3, </span></span></span><br><span class="line"><span class="params"><span class="function">    Matrix* m</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>能够计算两个平面三角形 <code>UV</code> 到 <code>XY</code> 的仿射矩阵. 与渲染有关的详细实现见 <a href="https://github.com/ww-rm/DesktopSprite/blob/main/DesktopSprite/src/ds/spinechar.cpp"><code>spinechar.cpp</code></a>.</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="关于配置文件"><a href="#关于配置文件" class="headerlink" title="关于配置文件"></a>关于配置文件</h3><p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>点击 &quot;打开数据文件夹&quot; 后, 可以看到数据文件夹里有一份 <code>config.json</code>, 里面以 <code>json</code> 格式存储了所有的设置面板可见的配置信息.</p>
+<h3 id="使用上的问题"><a href="#使用上的问题" class="headerlink" title="使用上的问题"></a>使用上的问题</h3><ul>
+<li>不建议帧率调太高, 会使电脑耗电显著增加, 或者风扇抽风</li>
+<li>如果不慎出了一些和配置有关的问题, 比如设置了错误的内容导致程序崩了/打不开, 直接打开数据文件夹, 关闭程序并删除 <code>config.json</code> 后重启程序, 即可让程序使用默认配置运行</li>
+</ul>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>如果无法下载则可以试一下下面的链接:</p>
+<ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXRTYUJ6WlRXQ3l2Y3JnYkdoX21ncmc/cHdkPWJsaHg=">单角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXFwWm5KUkI0UGFDOUViM3RrWmRBQ3c/cHdkPWJsaHg=">全角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+</ul>
+<p>如果 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 界面进不去 (可能需要魔法才能访问), 这里贴一下程序的网盘链接.</p>
+<ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXZERnIwS1lSa25EakdESDFIYUVYNmc/cHdkPWJsaHg=">安装包 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMVR4c3ZIYmsyVFZqbHZ2OUx2LUM3eWc/cHdkPWJsaHg=">免安装 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9peUtXZTE3NGNycmU=">安装包 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pRlVNTDE3NGNybGk=">免安装 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
+</ul>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>桌宠</tag>
+        <tag>碧蓝航线</tag>
+        <tag>Spine</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>国密算法的纯 Python 实现</title>
+    <url>//posts/2023/12/14/gmalg/</url>
+    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
+<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
+<span id="more"></span>
+
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
+<li>祖冲之序列密码算法</li>
+<li>SM2 椭圆曲线公钥密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>加密解密</li>
+</ul>
+</li>
+<li>SM3 密码杂凑算法</li>
+<li>SM4 分组密码算法</li>
+<li>SM9 标识密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>密钥封装</li>
+<li>加密解密</li>
+</ul>
+</li>
+</ul>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>国密</tag>
+        <tag>SM2</tag>
+        <tag>SM3</tag>
+        <tag>SM4</tag>
+        <tag>SM9</tag>
+        <tag>ZUC</tag>
+        <tag>gmalg</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 C# 写一个哈希计算小工具</title>
+    <url>//posts/2022/04/17/hashtool/</url>
+    <content><![CDATA[<p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
+<p>文末附有 Github 项目地址.</p>
+<span id="more"></span>
+
+<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>环境选了 <code>.NET Framework 4.6</code> 及以上, 估计绝大部分 Windows 系统都已经自带了, 能直接运行软件.</p>
+<h2 id="软件功能"><a href="#软件功能" class="headerlink" title="软件功能"></a>软件功能</h2><p>界面大概长这样:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/hashtool/hashtool.png" alt="hashtool.png"></p>
+<p>支持下列算法:</p>
+<ul>
+<li>MD5</li>
+<li>SHA1</li>
+<li>SHA2-256</li>
+<li>SHA2-512</li>
+<li>SHA3-256</li>
+<li>SHA3-512</li>
+<li>SM3</li>
+<li>CRC32</li>
+</ul>
+<p>支持以下功能:</p>
+<ul>
+<li>拖动或者使用打开按钮对多个文件进行指定的哈希值计算</li>
+<li>实时显示当前文件计算进度与总任务计算进度</li>
+<li>可以指定计算文件哈希时是否对每个算法使用单独的线程进行加速</li>
+</ul>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><h3 id="窗口界面"><a href="#窗口界面" class="headerlink" title="窗口界面"></a>窗口界面</h3><p>这是我第一次用 <code>C#</code> 写窗口程序, 学习了一下决定用 <code>WinForms</code> 这个框架, 因为作为入门程序来说, 它足够简单, 容易上手.</p>
+<p>VS 新建一个 WinForms 项目, 项目结构不复杂, 有一个主程序文件和基本的窗口文件, 我们的主要任务就是补充窗口文件的代码.</p>
+<p>思路也很简单, VS 提供了简单的窗口设计界面, 能够用键鼠直接设计窗口元素和窗口显示的内容, 然后我们自己写对应的事件响应函数, 并把对应的函数和响应事件在设计窗口里绑定即可.</p>
+<p>这里将主窗口 <code>MainWnd</code> 的代码分作了两份:</p>
+<ul>
+<li><code>MainWnd.cs</code>: 实现事件响应函数.</li>
+<li><code>MainWnd.Func.cs</code>: 实现主窗口真正要用到的计算功能函数.</li>
+</ul>
+<p>两份文件用 <code>partial</code> 类将功能组合到一起.</p>
+<p>最后额外补充了一个 <code>About</code> 窗口, 在 VS 菜单里添加窗口就能直接生成需要的模板文件.</p>
+<h3 id="多线程与进度条"><a href="#多线程与进度条" class="headerlink" title="多线程与进度条"></a>多线程与进度条</h3><p>作为一个窗口程序, 为了避免窗口响应卡死, 所有耗时的计算过程都必须用多线程的方式放到后台执行. 再就是程序支持用多线程并行多个算法之间的计算, 因此多线程的使用和同步问题是第一个麻烦之处.</p>
+<p>第二个有点麻烦的地方就是显示进度条, 由于可以一次性计算多个文件, 所以分了当前文件进度和总进度, 在多线程时也是需要考虑同步问题的.</p>
+<p>首先多线程用的 <code>System.Threading.Tasks.Task</code> 类, 这是自带封装好的多线程 API, 如果勾选了多线程选项, 那么就将每个算法的计算都分配一个 <code>Task</code>, 最后将结果汇总到一起.</p>
+<p>有关的几个方法实现如下:</p>
+<ul>
+<li><code>TaskCompHash</code>: 对指定文件计算指定哈希算法的结果, 并累加计算进度值.</li>
+<li><code>ComputeWithOneTask</code> 和 <code>ComputeWithMultiTask</code>: 每个文件的不同哈希算法计算任务. 两个方法都会创建子任务, 区别是前者每次只对 1 个算法创建 1 个任务计算, 后者根据算法数量创建多个同时计算. 然后轮询任务是否计算完成, 并更新进度条.</li>
+<li><code>TaskCompute</code>: 对每个文件计算每一种哈希算法的值.</li>
+<li><code>BeginCompute</code>: 创建后台计算任务, 创建完后立即返回, 不会使窗口假死.</li>
+</ul>
+<p>调用关系为:</p>
+<p><code>BeginCompute</code> -&gt; <code>TaskCompute</code> -&gt; <code>ComputeWithOneTask | ComputeWithMultiTask</code> -&gt; <code>TaskCompHash</code></p>
+<p>其中 <code>Task</code> 开头的是要被 <code>Task</code> 类创建以多线程方式在后台执行的方法. 如此一来便完成了对每个文件的每种哈希值的计算过程.</p>
+<p>而进度条的实现, 则是靠 <code>pbValueSingle</code> 和 <code>pbValueTotal</code> 两个成员来记录. 每次使用哈希算法计算时, 累加计算量相对于文件大小的百分比值, 这样对于一个文件的一种算法就有一个完整的单位 1, 所以总计算量就是文件数乘以算法数.</p>
+<h3 id="哈希算法实现"><a href="#哈希算法实现" class="headerlink" title="哈希算法实现"></a>哈希算法实现</h3><p><code>C#</code> 的系统库里已经提供了大部分常见的哈希算法, 都在 <code>System.Security.Cryptography</code> 命名空间中, 我们需要额外实现一下SM3 和 SHA3 等算法.</p>
+<p>具体的算法原理另写一篇记录, 这里主要看看实现思路.</p>
+<p>查阅一下 API 文档, 可以看到 <code>System.Security.Cryptography</code> 提供了一个哈希算法的基类 <code>HashAlgorithm</code> 给我们用来继承, 并且需要重写下列方法:</p>
+<ul>
+<li><code>Initialize</code>: 初始化方法, 也就是计算一个哈希的初始准备工作, 例如一些缓冲区的初始值可以在这里设置.</li>
+<li><code>HashCore</code>: 核心计算过程, 有三个参数, 接收任意长度的字节数组输入, 并完成这一部分内容的计算. 这个方法可以完成对大文件的分块哈希值计算.</li>
+<li><code>HashFinal</code>: 结束计算方法, 比如一些尾部填充操作可以在这里进行.</li>
+</ul>
+<p>继承并重写后, 我们的哈希算法就有统一的基类和接口, 这也方便我们后续的方法调用.</p>
+<h3 id="编译与发布"><a href="#编译与发布" class="headerlink" title="编译与发布"></a>编译与发布</h3><p>编译的方式和普通项目一样, 在菜单的 &quot;生成&quot; 项里进行生成即可.</p>
+<p>值得关注的是生成时的配置, 右键查看项目属性, 里面可以设置目标框架, 如果考虑兼容性, 选低一点比较好, 这里我选了 4.6 的版本.</p>
+<p>再就是生成里可以设置目标平台, 尽量选成 <code>x64</code>, 速度上有一些小的优化.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0hhc2h0b29s">https://github.com/ww-rm/Hashtool<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>hashtool</tag>
+        <tag>C#</tag>
+        <tag>winforms</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
+    <url>//posts/2023/11/04/ncmdump/</url>
+    <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
+<p>本文包括以下内容, 首先整理一下网上已有的 <code>ncm</code> 格式转换代码, 然后增加补充专辑和封面信息的功能, 并实现批量转换和界面友好, 最后打包成二进制文件和 Python 库, 并上传到 PyPI 上.</p>
+<p>文末附有项目的 Github 地址, 以及使用 PyInstaller 打包的二进制文件下载地址和 PyPI 项目地址.</p>
+<span id="more"></span>
+
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>安装:</p>
+<p><code>pip install ncmdump-py</code></p>
+<p>命令行使用:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -m ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">usage: ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br><span class="line"></span><br><span class="line">Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;</span><br><span class="line"></span><br><span class="line">positional arguments:</span><br><span class="line">  files                 Files to dump, can follow multiple files.</span><br><span class="line"></span><br><span class="line">optional arguments:</span><br><span class="line">  -h, --help            show this help message and exit</span><br><span class="line">  --in-folder IN_FOLDER</span><br><span class="line">                        Input folder of files to dump.</span><br><span class="line">  --out-folder OUT_FOLDER</span><br><span class="line">                        Output folder of files dumped.</span><br><span class="line">  --dump-metadata       Whether dump metadata.</span><br><span class="line">  --dump-cover          Whether dump album cover.</span><br></pre></td></tr></table></figure>
+
+<p>导入代码使用:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line">ncmfile = NeteaseCloudMusicFile(<span class="string">&quot;filename.ncm&quot;</span>)</span><br><span class="line">ncmfile.decrypt()</span><br><span class="line"></span><br><span class="line">ncmfile.dump_music(<span class="string">&quot;filename.mp3&quot;</span>)  <span class="comment"># auto detect correct suffix</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Maybe you need metadata or cover image</span></span><br><span class="line"><span class="comment"># ncmfile.dump_metadata(&quot;filename.json&quot;)  </span></span><br><span class="line"><span class="comment"># ncmfile.dump_cover(&quot;filename.jpeg&quot;)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="NCM-格式分析"><a href="#NCM-格式分析" class="headerlink" title="NCM 格式分析"></a>NCM 格式分析</h2><p>Github 上搜 <code>ncmdump</code>, 有很多现成的项目, 通过源码和自己尝试后总结一下 <code>ncm</code> 格式如下表:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>MAGIC_HEADER</code></td>
+<td align="center">8 字节</td>
+<td align="center">ncm 文件的文件头标识, 内容为 <code>b&quot;CTENFDAM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>gap1</code></td>
+<td align="center">2 字节</td>
+<td align="center">不确定, 据观察所有的文件都相同, 为 <code>b&quot;\x01\x61&quot;</code>, 猜测也是文件头一部分</td>
+</tr>
+<tr>
+<td align="center"><code>rc4_key_enc_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>rc4_key_enc</code></td>
+<td align="center"><code>rc4_key_enc_size</code></td>
+<td align="center">加密后的 RC4 算法密钥</td>
+</tr>
+<tr>
+<td align="center"><code>metadata_enc_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>metadata_enc</code></td>
+<td align="center"><code>metadata_enc_size</code></td>
+<td align="center">加密后的 <code>metadata</code>, 包含音乐的专辑和封面信息</td>
+</tr>
+<tr>
+<td align="center"><code>crc32</code></td>
+<td align="center">4 字节</td>
+<td align="center">不确定, 据网上流传为 CRC32 校验码, 但是没找到是算哪个值的</td>
+</tr>
+<tr>
+<td align="center"><code>gap2</code></td>
+<td align="center">5 字节</td>
+<td align="center">不确定, 据观察都为 <code>b&quot;\x01&quot;</code> 开头, <code>b&quot;\x00&quot;</code> 结尾</td>
+</tr>
+<tr>
+<td align="center"><code>cover_data_size</code></td>
+<td align="center">4 字节</td>
+<td align="center"><code>int</code> 整数</td>
+</tr>
+<tr>
+<td align="center"><code>cover_data</code></td>
+<td align="center"><code>cover_data_size</code></td>
+<td align="center">专辑封面图片二进制数据</td>
+</tr>
+<tr>
+<td align="center"><code>music_data_enc</code></td>
+<td align="center">任意长度</td>
+<td align="center">加密后的音乐二进制数据, 处于 <code>ncm</code> 文件的最末尾</td>
+</tr>
+</tbody></table>
+<p>格式很清晰, 虽然有一些未知项, 但是不影响核心内容. 其中 <code>rc4_key_enc</code>, <code>metadata_enc</code>, <code>music_data_enc</code> 是加密过的, 只要全部解密就能还原出原本完整的音乐文件.</p>
+<h2 id="NCM-文件解密"><a href="#NCM-文件解密" class="headerlink" title="NCM 文件解密"></a>NCM 文件解密</h2><p>这部分内容也是总结已有的源码.</p>
+<p><code>ncm</code> 文件中使用了两种密码算法:</p>
+<ul>
+<li>一种是经过魔改的 <code>RC4</code> 算法, 后文称它为 <code>NCMRC4</code></li>
+<li>另一种是标准的 <code>AES</code> 算法, 分组长度 <code>128</code> 比特, 工作模式 <code>ECB</code>, 填充算法为 <code>PKCS7</code>, 后文称它为 <code>NCMAES</code></li>
+</ul>
+<p><code>ncm</code> 文件的加密方式如下:</p>
+<ul>
+<li><code>music_data_enc = NCMRC4.encrypt(music_data, rc4_key)</code></li>
+<li><code>metadata_enc = NCMAES.encrypt(metadata_enc, AES_KEY_METADATA)</code></li>
+<li><code>rc4_key_enc = NCMAES.encrypt(rc4_key, AES_KEY_RC4_KEY)</code></li>
+</ul>
+<p>较大的 <code>music_data</code> 用魔改后的流密码加密, 节省时间; 较短的 <code>metadata</code> 和 <code>rc4_key</code> 用对称密码加密, 提高安全性.</p>
+<p>这里 <code>AES_KEY_RC4_KEY</code> 和 <code>AES_KEY_METADATA</code> 是两个关键的对称密码密钥, 前人已经通过逆向等手段挖出来了, 这里就不放出来了, 可以去看看别人的分析或者看本文的源码, 里面都有.</p>
+<p>除了使用加密手段, 还有一些简单的混淆操作, 以及去除解密后内容多余的头部字段等, 这里也不详细写了, 源码里面写的很清楚, 可以直接看源码.</p>
+<h2 id="添加专辑和封面信息"><a href="#添加专辑和封面信息" class="headerlink" title="添加专辑和封面信息"></a>添加专辑和封面信息</h2><p>来到本文的重点部分, 前面对 <code>ncm</code> 格式和加密方式的分析都是已有的, 我们主要想扩展功能, 自动添加专辑和封面信息到解密后的文件里, 这里主要用到 <code>mutagen</code> 这个库, 支持向 <code>mp3</code> 和 <code>flac</code> 文件内加入专辑等信息.</p>
+<p>解密后的 <code>metadata</code> 是一份 <code>json</code> 数据, 格式如下:</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;format&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flac&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">431259256</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;カタオモイ&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">[</span><span class="string">&quot;Aimer&quot;</span><span class="punctuation">,</span> <span class="number">16152</span><span class="punctuation">]</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;daydream&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">34826361</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951165052089697</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/2QRYxUqXfW0zQpm2_DVYRA==/109951165052089697.jpg&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">876923</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">207866</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;单相思&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<details class="note info"><summary><p>v1.1.0 中的改动</p>
+</summary>
+<p><code>metadata</code> 可能存在多种类型, 上面是最简单的 <code>music</code> 类型, 新增了 <code>dj</code> 类型, 格式如下:</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;programId&quot;</span><span class="punctuation">:</span> <span class="number">2506516081</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;mainMusic&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">1957438579</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;[DJ节目]北方文艺出版社的DJ节目 第8期&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951167551086981</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://p1.music.126.net/M48NPuT591tIqqUdQyKZlg==/109951167551086981.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">320000</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">1222948</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djId&quot;</span><span class="punctuation">:</span> <span class="number">7891086863</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北方文艺出版社&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djAvatarUrl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/DQr2q_S23tYY8vU_C-kAYw==/109951167535553901.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;createTime&quot;</span><span class="punctuation">:</span> <span class="number">1655691020376</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;brand&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;serial&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programFeeType&quot;</span><span class="punctuation">:</span> <span class="number">15</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioId&quot;</span><span class="punctuation">:</span> <span class="number">977264730</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategory&quot;</span><span class="punctuation">:</span> <span class="string">&quot;文学出版&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategoryId&quot;</span><span class="punctuation">:</span> <span class="number">3148096</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeType&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeScope&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPrice&quot;</span><span class="punctuation">:</span> <span class="number">30</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPurchaseCount&quot;</span><span class="punctuation">:</span> <span class="number">0</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</details>
+
+<p>我们需要把 <code>musicName</code>, <code>artist</code>, <code>album</code> 这三个字段的内容保留, 同时把 <code>ncm</code> 中附带的封面图片也保留.</p>
+<p>我们导入一下要用到的库:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> mutagen <span class="keyword">import</span> flac, id3, mp3</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
+
+<p>对于 <code>mp3</code>, 如下操作:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_mp3</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for mp3 format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = mp3.MP3(path)</span><br><span class="line"></span><br><span class="line">    audio[<span class="string">&quot;TIT2&quot;</span>] = id3.TIT2(text=self.name, encoding=id3.Encoding.UTF8)  <span class="comment"># title</span></span><br><span class="line">    audio[<span class="string">&quot;TALB&quot;</span>] = id3.TALB(text=self.album, encoding=id3.Encoding.UTF8)  <span class="comment"># album</span></span><br><span class="line">    audio[<span class="string">&quot;TPE1&quot;</span>] = id3.TPE1(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># artists</span></span><br><span class="line">    audio[<span class="string">&quot;TPE2&quot;</span>] = id3.TPE2(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># album artists</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        audio[<span class="string">&quot;APIC&quot;</span>] = id3.APIC(<span class="built_in">type</span>=id3.PictureType.COVER_FRONT, mime=self.cover_mime, data=self._cover_data)  <span class="comment"># cover</span></span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>cover_mime</code> 就是图像的内容类型, 例如 <code>image/jpeg</code> 这种, 可以通过 <code>mimetypes</code> 库获取.</p>
+<p>而对于 <code>flac</code>, 如下操作:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_flac</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for flac format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = flac.FLAC(path)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add music info</span></span><br><span class="line">    audio[<span class="string">&quot;title&quot;</span>] = self.name</span><br><span class="line">    audio[<span class="string">&quot;artist&quot;</span>] = self.artists</span><br><span class="line">    audio[<span class="string">&quot;album&quot;</span>] = self.album</span><br><span class="line">    audio[<span class="string">&quot;albumartist&quot;</span>] = <span class="string">&quot;/&quot;</span>.join(self.artists)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add cover</span></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        cover = flac.Picture()</span><br><span class="line">        cover.<span class="built_in">type</span> = id3.PictureType.COVER_FRONT</span><br><span class="line">        cover.data = self._cover_data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> BytesIO(self._cover_data) <span class="keyword">as</span> data:</span><br><span class="line">            <span class="keyword">with</span> Image.<span class="built_in">open</span>(data) <span class="keyword">as</span> f:</span><br><span class="line">                cover.mime = self.cover_mime</span><br><span class="line">                cover.width = f.width</span><br><span class="line">                cover.height = f.height</span><br><span class="line">                cover.depth = <span class="built_in">len</span>(f.getbands()) * <span class="number">8</span></span><br><span class="line"></span><br><span class="line">        audio.add_picture(cover)</span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
+
+<p>添加专辑封面图片的时候稍微复杂一点, 需要使用 <code>Pillow</code> 库读取一下图像的基本信息, 然后填进去.</p>
+<p>值得注意的是, <code>ncm</code> 文件里可能没有存放专辑封面图片, 这种时候可以借助 <code>metadata</code> 里的 <code>albumPic</code> 字段, 它代表专辑封面图片的一个 url, 我们可以用 <code>urllib</code> 尝试联网获取内容, 代码片段如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># if no cover data, try get cover data by url in metadata</span></span><br><span class="line"><span class="keyword">if</span> self._cover_data_size &lt;= <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> request.urlopen(self._metadata.get(<span class="string">&quot;albumPic&quot;</span>, <span class="string">&quot;&quot;</span>)) <span class="keyword">as</span> res:</span><br><span class="line">            <span class="keyword">if</span> res.status &lt; <span class="number">400</span>:</span><br><span class="line">                self._cover_data = res.read()</span><br><span class="line">                self._cover_data_size = <span class="built_in">len</span>(self._cover_data)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是, 代码里需要判断, 如果最终就是没有办法获得图片数据, 那么就放弃添加图片信息, 避免报错.</p>
+<h2 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h2><p>到这里, 我们的包目录结构长这样:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ncmdump</span><br><span class="line">  ├── core.py</span><br><span class="line">  ├── crypto.py</span><br><span class="line">  ├── __init__.py</span><br><span class="line">  └── __main__.py</span><br></pre></td></tr></table></figure>
+
+<p>共有四份文件, 为了能够在命令行里运行这个包, 我们需要在 <code>__main__.py</code> 里添加一些内容.</p>
+<p>这里我们使用 <code>ArgumentParser</code> 解析命令行输入, <code>rich</code> 库显示进度条和日志输出, 完整代码如下.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> rich.progress <span class="keyword">import</span> Progress, SpinnerColumn, TimeElapsedColumn</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser(<span class="string">&quot;ncmdump&quot;</span>, description=<span class="string">&quot;Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;files&quot;</span>, nargs=<span class="string">&quot;*&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Files to dump, can follow multiple files.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--in-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Input folder of files to dump.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Output folder of files dumped.&quot;</span>, default=<span class="string">&quot;.&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-metadata&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump metadata.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-cover&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump album cover.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    out_folder = Path(args.out_folder)</span><br><span class="line">    out_folder.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    dump_metadata = args.dump_metadata</span><br><span class="line">    dump_cover = args.dump_cover</span><br><span class="line"></span><br><span class="line">    files = args.files</span><br><span class="line">    <span class="keyword">if</span> args.in_folder:</span><br><span class="line">        files.extend(Path(args.in_folder).iterdir())</span><br><span class="line">    files = <span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.suffix == <span class="string">&quot;.ncm&quot;</span>, <span class="built_in">map</span>(Path, files)))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> files:</span><br><span class="line">        parser.print_help()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">with</span> Progress(SpinnerColumn(), *Progress.get_default_columns(), TimeElapsedColumn()) <span class="keyword">as</span> progress:</span><br><span class="line">            task = progress.add_task(<span class="string">&quot;[#d75f00]Dumping files&quot;</span>, total=<span class="built_in">len</span>(files))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> ncm_path <span class="keyword">in</span> files:</span><br><span class="line">                output_path = out_folder.joinpath(ncm_path.stem)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    ncmfile = NeteaseCloudMusicFile(ncm_path).decrypt()</span><br><span class="line">                    music_path = ncmfile.dump_music(output_path)</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> dump_metadata:</span><br><span class="line">                        ncmfile.dump_metadata(output_path)</span><br><span class="line">                    <span class="keyword">if</span> dump_cover:</span><br><span class="line">                        ncmfile.dump_cover(output_path)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                    progress.log(<span class="string">f&quot;[red]ERROR[/red]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.metadata:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no metadata found&quot;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.cover_data:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no cover data found&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    progress.advance(task)</span><br></pre></td></tr></table></figure>
+
+<p>该命令行可以接收若干数量的 <code>.ncm</code> 文件作为输入, 可以用 <code>--in-folder</code> 指定一整个文件夹, 会和输入的单个文件合并一起处理, 比如有下面几种使用示例.</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定某些文件</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
+
+<p>输出文件的文件名和原本的 <code>.ncm</code> 文件名相同, 但是后缀会自动替换成对应格式的后缀 (<code>.mp3</code> 或者 <code>.flac</code>).</p>
+<h2 id="打包到-PyPI"><a href="#打包到-PyPI" class="headerlink" title="打包到 PyPI"></a>打包到 PyPI</h2><p>最后就是打包上传<del>造福大众的时间</del>, 这也是我第一次在 PyPI 上上传自己的包, 之后会单独写一篇文章说说中途遇到的一些问题.</p>
+<p>上传完成之后, 就可以通过命令 <code>pip install ncmdump-py</code> 安装使用了~</p>
+<p>PS: 虽然库名字叫 <code>ncmdump-py</code>, 但是导入的时候还是 <code>import ncmdump</code>, 因为 <code>ncmdump</code> 这个项目名字在 PyPI 上已经被前人注册了, 只好加点东西区分一下.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL25jbWR1bXAtcHk=">https://github.com/ww-rm/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyPI 项目页: <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy9wcm9qZWN0L25jbWR1bXAtcHkv">https://pypi.org/project/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
+<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pdEdRcjFlemE1YWI=">ncmdump v1.1.0.zip<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>ncm</tag>
+        <tag>格式转换</tag>
+        <tag>ncmdump</tag>
+        <tag>python 库</tag>
+        <tag>PyPI</tag>
+        <tag>网易云音乐</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>安卓 APK 重打包</title>
     <url>//posts/2024/07/09/apkrepack/</url>
     <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
@@ -136,8 +595,8 @@
         <category>代码块</category>
       </categories>
       <tags>
-        <tag>工具</tag>
         <tag>碧蓝航线</tag>
+        <tag>工具</tag>
         <tag>立绘还原</tag>
       </tags>
   </entry>
@@ -567,465 +1026,6 @@
       <tags>
         <tag>OpenCV</tag>
         <tag>图像比对</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于 Spine 的碧蓝航线桌宠</title>
-    <url>//posts/2023/08/30/desktopsprite/</url>
-    <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
-<span id="more"></span>
-
-<h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">https://github.com/ww-rm/DesktopSprite<i class="fa fa-external-link-alt"></i></span></p>
-<p>这是一个适用于 <code>Windows</code> 系统下的桌面精灵, 目前已在 <code>Win10</code>, <code>Win11</code> 下基本测试通过.</p>
-<ul>
-<li>轻量的性能监视器: 可以显示电脑占用和网速监视浮窗</li>
-</ul>
-<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
-<ul>
-<li>可自定义桌宠: 支持基于 <code>spine v3.6.53</code> 导出的碧蓝航线全角色小人动画</li>
-</ul>
-<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="https://ww-rm.github.io/static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
-<h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 下载 <code>Latest</code> 版本的 <code>zip</code> 压缩包, 解压后双击运行里面的 <code>DesktopSprite.msi</code> 安装文件进行安装, 可以自定义安装位置.</p>
-<p>安装完成后, 开始菜单和桌面都会出现程序启动图标. 双击运行, 通知栏会有程序图标, 首次运行桌面默认会显示自带的碧蓝小人角色, 且有一个性能浮窗.</p>
-<h3 id="更换角色"><a href="#更换角色" class="headerlink" title="更换角色"></a>更换角色</h3><p>右键通知区域程序图标, 可以进入设置界面, 设置对应的 <code>atlas</code> 和 <code>skel/json</code> 文件, 然后应用/确定设置即可完成更换.</p>
-<p>需要注意 <code>*.atlas</code>, <code>*.png</code>, <code>*.skel/*.json</code> 三份文件需要互相匹配, 且 <code>*.atlas</code> 和 <code>*.png</code> 文件名必须相同 (选择 <code>atlas</code> 的时候会自动填入 <code>png</code> 文件).</p>
-<p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
-<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="https://ww-rm.github.io/static/image/desktopsprite/config.png" alt="config.png"></p>
-<h5 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h5><ul>
-<li>开机启动: 程序是否开机启动</li>
-<li>整点报时: 一个小功能, 可以在整点时间弹出通知提醒</li>
-<li>提示声音: 整点报时是否有声音</li>
-<li>气泡图标路径: 整点报时气泡通知使用的图标</li>
-</ul>
-<h5 id="显示设置"><a href="#显示设置" class="headerlink" title="显示设置"></a>显示设置</h5><p>这部分的设置是针对性能浮窗的.</p>
-<ul>
-<li>显示浮窗: 是在桌面显示浮窗还是隐藏到通知区域图标使用鼠标悬停显示</li>
-<li>显示占用: 是否在浮窗上显示处理器和内存占用百分比</li>
-<li>显示网速: 是否在浮窗上显示上传和下载速度</li>
-<li>深色主题: 设置浮窗主题颜色</li>
-<li>透明度: 设置浮窗透明度百分比, 0 为完全透明, 100 为完全不透明</li>
-</ul>
-<h5 id="精灵设置"><a href="#精灵设置" class="headerlink" title="精灵设置"></a>精灵设置</h5><p>这部分的设置是针对桌宠的</p>
-<ul>
-<li>atlas, png, skel 路径: 选择要使用的 SD 小人模型, 三个文件要互相匹配</li>
-<li>显示精灵: 是否在桌面上显示桌宠, 不显示的情况下不会有桌宠的资源占用</li>
-<li>鼠标穿透: 是否让桌宠鼠标穿透, 穿透情况下桌宠无视鼠标和键盘输入</li>
-<li>最大帧率: 设置桌宠的渲染帧率, 对电脑性能有较高影响</li>
-<li>透明度: 设置桌宠透明度, 配合鼠标穿透可以设置挂件效果</li>
-<li>缩放: 设置桌宠的大小</li>
-</ul>
-<h5 id="Spine-设置"><a href="#Spine-设置" class="headerlink" title="Spine 设置"></a>Spine 设置</h5><p>该部分设置桌宠动画小人不同事件和动画的映射关系, 可选内容由加载的 spine 模型决定.</p>
-<ul>
-<li>待机: 无操作的普通情况</li>
-<li>拖动: 鼠标拖动桌宠时触发</li>
-<li>任务中: 没想好</li>
-<li>睡觉: 电脑无输入闲置一段时间后触发</li>
-<li>闲置: 电脑低负载时随机触发</li>
-<li>触摸: 单击桌宠触发</li>
-<li>摸头: 鼠标中键下滚</li>
-<li>任务完成: 任务结束后, 和任务中是连着的</li>
-<li>跳舞: 鼠标中键上滚</li>
-<li>过载: 电脑高负载时随机触发</li>
-</ul>
-<h5 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h5><ul>
-<li>打开数据文件夹: 打开程序数据文件所在的文件夹</li>
-</ul>
-<h4 id="快捷操作"><a href="#快捷操作" class="headerlink" title="快捷操作"></a>快捷操作</h4><ul>
-<li>右键菜单: 有两个, 一个是浮窗/通知区域图标的, 另一个是桌宠的, 大部分选项都是设置面板里有的, 是快捷操作</li>
-<li>精灵复位: 用来预防一些未知的特殊情况, 如一些不可知的显示器分辨率问题导致的精灵错位消失, 点击之后精灵会回到原点, 屏幕的正下方</li>
-<li>双击桌宠: 让角色转向</li>
-</ul>
-<h4 id="通知区域图标"><a href="#通知区域图标" class="headerlink" title="通知区域图标"></a>通知区域图标</h4><ul>
-<li>右键单击: 显示右键菜单</li>
-<li>左键双击: 显示桌宠</li>
-</ul>
-<h2 id="一些开发细节"><a href="#一些开发细节" class="headerlink" title="一些开发细节"></a>一些开发细节</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ul>
-<li><code>Win10+</code></li>
-<li><code>Visual Studio 2022</code></li>
-<li><code>C++14</code></li>
-<li><a href="https://github.com/EsotericSoftware/spine-runtimes/tree/3.6"><code>spine-runtime</code></a></li>
-<li><a href="https://github.com/open-source-parsers/jsoncpp"><code>jsoncpp</code></a></li>
-</ul>
-<p>其中 <code>spine-runtime</code> 和 <code>jsoncpp</code> 均是以源码方式引入并编译的, 内部有一些相应的适配性修改.</p>
-<p><code>spine-runtime</code> 版本固定了是 <code>v3.6.53</code>, 所以几乎只支持碧蓝航线导出的小人资源.</p>
-<h3 id="动画渲染"><a href="#动画渲染" class="headerlink" title="动画渲染"></a>动画渲染</h3><p>桌宠使用 2D 图形库绘制, 具体实现原理参考 <span class="exturl" data-url="aHR0cDovL3poLmVzb3Rlcmljc29mdHdhcmUuY29tL3NwaW5lLWM=">spine-c 运行时文档<i class="fa fa-external-link-alt"></i></span>, 标准实现需要使用纹理映射等计算机图形学操作<del>但是我不会</del>, 所以纹理映射是通过 2D 库的纹理笔刷来实现的.</p>
-<p>创建纹理笔刷之后, 在绘制顶点三角形时, 需要自己手动计算纹理到模型的仿射矩阵, 然后设置笔刷的变换矩阵, 就能完成纹理映射. 关键函数是这个 <code>GetAffineMatrix</code>:</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">GetAffineMatrix</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> x1, <span class="type">float</span> y1, <span class="type">float</span> x2, <span class="type">float</span> y2, <span class="type">float</span> x3, <span class="type">float</span> y3, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> u1, <span class="type">float</span> v1, <span class="type">float</span> u2, <span class="type">float</span> v2, <span class="type">float</span> u3, <span class="type">float</span> v3, </span></span></span><br><span class="line"><span class="params"><span class="function">    Matrix* m</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>能够计算两个平面三角形 <code>UV</code> 到 <code>XY</code> 的仿射矩阵. 与渲染有关的详细实现见 <a href="https://github.com/ww-rm/DesktopSprite/blob/main/DesktopSprite/src/ds/spinechar.cpp"><code>spinechar.cpp</code></a>.</p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="关于配置文件"><a href="#关于配置文件" class="headerlink" title="关于配置文件"></a>关于配置文件</h3><p>⚠️不建议直接操作配置文件! ⚠️</p>
-<p>⚠️不建议直接操作配置文件! ⚠️</p>
-<p>⚠️不建议直接操作配置文件! ⚠️</p>
-<p>点击 &quot;打开数据文件夹&quot; 后, 可以看到数据文件夹里有一份 <code>config.json</code>, 里面以 <code>json</code> 格式存储了所有的设置面板可见的配置信息.</p>
-<h3 id="使用上的问题"><a href="#使用上的问题" class="headerlink" title="使用上的问题"></a>使用上的问题</h3><ul>
-<li>不建议帧率调太高, 会使电脑耗电显著增加, 或者风扇抽风</li>
-<li>如果不慎出了一些和配置有关的问题, 比如设置了错误的内容导致程序崩了/打不开, 直接打开数据文件夹, 关闭程序并删除 <code>config.json</code> 后重启程序, 即可让程序使用默认配置运行</li>
-</ul>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>如果无法下载则可以试一下下面的链接:</p>
-<ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXRTYUJ6WlRXQ3l2Y3JnYkdoX21ncmc/cHdkPWJsaHg=">单角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXFwWm5KUkI0UGFDOUViM3RrWmRBQ3c/cHdkPWJsaHg=">全角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-</ul>
-<p>如果 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 界面进不去 (可能需要魔法才能访问), 这里贴一下程序的网盘链接.</p>
-<ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXZERnIwS1lSa25EakdESDFIYUVYNmc/cHdkPWJsaHg=">安装包 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMVR4c3ZIYmsyVFZqbHZ2OUx2LUM3eWc/cHdkPWJsaHg=">免安装 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9peUtXZTE3NGNycmU=">安装包 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pRlVNTDE3NGNybGk=">免安装 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
-</ul>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>桌宠</tag>
-        <tag>Spine</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>国密算法的纯 Python 实现</title>
-    <url>//posts/2023/12/14/gmalg/</url>
-    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
-<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
-<span id="more"></span>
-
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
-
-<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
-<li>祖冲之序列密码算法</li>
-<li>SM2 椭圆曲线公钥密码算法<ul>
-<li>签名验签</li>
-<li>密钥交换</li>
-<li>加密解密</li>
-</ul>
-</li>
-<li>SM3 密码杂凑算法</li>
-<li>SM4 分组密码算法</li>
-<li>SM9 标识密码算法<ul>
-<li>签名验签</li>
-<li>密钥交换</li>
-<li>密钥封装</li>
-<li>加密解密</li>
-</ul>
-</li>
-</ul>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>国密</tag>
-        <tag>SM2</tag>
-        <tag>SM3</tag>
-        <tag>SM4</tag>
-        <tag>SM9</tag>
-        <tag>ZUC</tag>
-        <tag>gmalg</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 C# 写一个哈希计算小工具</title>
-    <url>//posts/2022/04/17/hashtool/</url>
-    <content><![CDATA[<p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
-<p>文末附有 Github 项目地址.</p>
-<span id="more"></span>
-
-<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>环境选了 <code>.NET Framework 4.6</code> 及以上, 估计绝大部分 Windows 系统都已经自带了, 能直接运行软件.</p>
-<h2 id="软件功能"><a href="#软件功能" class="headerlink" title="软件功能"></a>软件功能</h2><p>界面大概长这样:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/hashtool/hashtool.png" alt="hashtool.png"></p>
-<p>支持下列算法:</p>
-<ul>
-<li>MD5</li>
-<li>SHA1</li>
-<li>SHA2-256</li>
-<li>SHA2-512</li>
-<li>SHA3-256</li>
-<li>SHA3-512</li>
-<li>SM3</li>
-<li>CRC32</li>
-</ul>
-<p>支持以下功能:</p>
-<ul>
-<li>拖动或者使用打开按钮对多个文件进行指定的哈希值计算</li>
-<li>实时显示当前文件计算进度与总任务计算进度</li>
-<li>可以指定计算文件哈希时是否对每个算法使用单独的线程进行加速</li>
-</ul>
-<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><h3 id="窗口界面"><a href="#窗口界面" class="headerlink" title="窗口界面"></a>窗口界面</h3><p>这是我第一次用 <code>C#</code> 写窗口程序, 学习了一下决定用 <code>WinForms</code> 这个框架, 因为作为入门程序来说, 它足够简单, 容易上手.</p>
-<p>VS 新建一个 WinForms 项目, 项目结构不复杂, 有一个主程序文件和基本的窗口文件, 我们的主要任务就是补充窗口文件的代码.</p>
-<p>思路也很简单, VS 提供了简单的窗口设计界面, 能够用键鼠直接设计窗口元素和窗口显示的内容, 然后我们自己写对应的事件响应函数, 并把对应的函数和响应事件在设计窗口里绑定即可.</p>
-<p>这里将主窗口 <code>MainWnd</code> 的代码分作了两份:</p>
-<ul>
-<li><code>MainWnd.cs</code>: 实现事件响应函数.</li>
-<li><code>MainWnd.Func.cs</code>: 实现主窗口真正要用到的计算功能函数.</li>
-</ul>
-<p>两份文件用 <code>partial</code> 类将功能组合到一起.</p>
-<p>最后额外补充了一个 <code>About</code> 窗口, 在 VS 菜单里添加窗口就能直接生成需要的模板文件.</p>
-<h3 id="多线程与进度条"><a href="#多线程与进度条" class="headerlink" title="多线程与进度条"></a>多线程与进度条</h3><p>作为一个窗口程序, 为了避免窗口响应卡死, 所有耗时的计算过程都必须用多线程的方式放到后台执行. 再就是程序支持用多线程并行多个算法之间的计算, 因此多线程的使用和同步问题是第一个麻烦之处.</p>
-<p>第二个有点麻烦的地方就是显示进度条, 由于可以一次性计算多个文件, 所以分了当前文件进度和总进度, 在多线程时也是需要考虑同步问题的.</p>
-<p>首先多线程用的 <code>System.Threading.Tasks.Task</code> 类, 这是自带封装好的多线程 API, 如果勾选了多线程选项, 那么就将每个算法的计算都分配一个 <code>Task</code>, 最后将结果汇总到一起.</p>
-<p>有关的几个方法实现如下:</p>
-<ul>
-<li><code>TaskCompHash</code>: 对指定文件计算指定哈希算法的结果, 并累加计算进度值.</li>
-<li><code>ComputeWithOneTask</code> 和 <code>ComputeWithMultiTask</code>: 每个文件的不同哈希算法计算任务. 两个方法都会创建子任务, 区别是前者每次只对 1 个算法创建 1 个任务计算, 后者根据算法数量创建多个同时计算. 然后轮询任务是否计算完成, 并更新进度条.</li>
-<li><code>TaskCompute</code>: 对每个文件计算每一种哈希算法的值.</li>
-<li><code>BeginCompute</code>: 创建后台计算任务, 创建完后立即返回, 不会使窗口假死.</li>
-</ul>
-<p>调用关系为:</p>
-<p><code>BeginCompute</code> -&gt; <code>TaskCompute</code> -&gt; <code>ComputeWithOneTask | ComputeWithMultiTask</code> -&gt; <code>TaskCompHash</code></p>
-<p>其中 <code>Task</code> 开头的是要被 <code>Task</code> 类创建以多线程方式在后台执行的方法. 如此一来便完成了对每个文件的每种哈希值的计算过程.</p>
-<p>而进度条的实现, 则是靠 <code>pbValueSingle</code> 和 <code>pbValueTotal</code> 两个成员来记录. 每次使用哈希算法计算时, 累加计算量相对于文件大小的百分比值, 这样对于一个文件的一种算法就有一个完整的单位 1, 所以总计算量就是文件数乘以算法数.</p>
-<h3 id="哈希算法实现"><a href="#哈希算法实现" class="headerlink" title="哈希算法实现"></a>哈希算法实现</h3><p><code>C#</code> 的系统库里已经提供了大部分常见的哈希算法, 都在 <code>System.Security.Cryptography</code> 命名空间中, 我们需要额外实现一下SM3 和 SHA3 等算法.</p>
-<p>具体的算法原理另写一篇记录, 这里主要看看实现思路.</p>
-<p>查阅一下 API 文档, 可以看到 <code>System.Security.Cryptography</code> 提供了一个哈希算法的基类 <code>HashAlgorithm</code> 给我们用来继承, 并且需要重写下列方法:</p>
-<ul>
-<li><code>Initialize</code>: 初始化方法, 也就是计算一个哈希的初始准备工作, 例如一些缓冲区的初始值可以在这里设置.</li>
-<li><code>HashCore</code>: 核心计算过程, 有三个参数, 接收任意长度的字节数组输入, 并完成这一部分内容的计算. 这个方法可以完成对大文件的分块哈希值计算.</li>
-<li><code>HashFinal</code>: 结束计算方法, 比如一些尾部填充操作可以在这里进行.</li>
-</ul>
-<p>继承并重写后, 我们的哈希算法就有统一的基类和接口, 这也方便我们后续的方法调用.</p>
-<h3 id="编译与发布"><a href="#编译与发布" class="headerlink" title="编译与发布"></a>编译与发布</h3><p>编译的方式和普通项目一样, 在菜单的 &quot;生成&quot; 项里进行生成即可.</p>
-<p>值得关注的是生成时的配置, 右键查看项目属性, 里面可以设置目标框架, 如果考虑兼容性, 选低一点比较好, 这里我选了 4.6 的版本.</p>
-<p>再就是生成里可以设置目标平台, 尽量选成 <code>x64</code>, 速度上有一些小的优化.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0hhc2h0b29s">https://github.com/ww-rm/Hashtool<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>hashtool</tag>
-        <tag>C#</tag>
-        <tag>winforms</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
-    <url>//posts/2023/11/04/ncmdump/</url>
-    <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
-<p>本文包括以下内容, 首先整理一下网上已有的 <code>ncm</code> 格式转换代码, 然后增加补充专辑和封面信息的功能, 并实现批量转换和界面友好, 最后打包成二进制文件和 Python 库, 并上传到 PyPI 上.</p>
-<p>文末附有项目的 Github 地址, 以及使用 PyInstaller 打包的二进制文件下载地址和 PyPI 项目地址.</p>
-<span id="more"></span>
-
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>安装:</p>
-<p><code>pip install ncmdump-py</code></p>
-<p>命令行使用:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -m ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">usage: ncmdump [-h] [--in-folder IN_FOLDER] [--out-folder OUT_FOLDER] [--dump-metadata] [--dump-cover] [files ...]</span><br><span class="line"></span><br><span class="line">Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;</span><br><span class="line"></span><br><span class="line">positional arguments:</span><br><span class="line">  files                 Files to dump, can follow multiple files.</span><br><span class="line"></span><br><span class="line">optional arguments:</span><br><span class="line">  -h, --help            show this help message and exit</span><br><span class="line">  --in-folder IN_FOLDER</span><br><span class="line">                        Input folder of files to dump.</span><br><span class="line">  --out-folder OUT_FOLDER</span><br><span class="line">                        Output folder of files dumped.</span><br><span class="line">  --dump-metadata       Whether dump metadata.</span><br><span class="line">  --dump-cover          Whether dump album cover.</span><br></pre></td></tr></table></figure>
-
-<p>导入代码使用:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line">ncmfile = NeteaseCloudMusicFile(<span class="string">&quot;filename.ncm&quot;</span>)</span><br><span class="line">ncmfile.decrypt()</span><br><span class="line"></span><br><span class="line">ncmfile.dump_music(<span class="string">&quot;filename.mp3&quot;</span>)  <span class="comment"># auto detect correct suffix</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Maybe you need metadata or cover image</span></span><br><span class="line"><span class="comment"># ncmfile.dump_metadata(&quot;filename.json&quot;)  </span></span><br><span class="line"><span class="comment"># ncmfile.dump_cover(&quot;filename.jpeg&quot;)</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="NCM-格式分析"><a href="#NCM-格式分析" class="headerlink" title="NCM 格式分析"></a>NCM 格式分析</h2><p>Github 上搜 <code>ncmdump</code>, 有很多现成的项目, 通过源码和自己尝试后总结一下 <code>ncm</code> 格式如下表:</p>
-<table>
-<thead>
-<tr>
-<th align="center">字段</th>
-<th align="center">长度</th>
-<th align="center">含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center"><code>MAGIC_HEADER</code></td>
-<td align="center">8 字节</td>
-<td align="center">ncm 文件的文件头标识, 内容为 <code>b&quot;CTENFDAM&quot;</code></td>
-</tr>
-<tr>
-<td align="center"><code>gap1</code></td>
-<td align="center">2 字节</td>
-<td align="center">不确定, 据观察所有的文件都相同, 为 <code>b&quot;\x01\x61&quot;</code>, 猜测也是文件头一部分</td>
-</tr>
-<tr>
-<td align="center"><code>rc4_key_enc_size</code></td>
-<td align="center">4 字节</td>
-<td align="center"><code>int</code> 整数</td>
-</tr>
-<tr>
-<td align="center"><code>rc4_key_enc</code></td>
-<td align="center"><code>rc4_key_enc_size</code></td>
-<td align="center">加密后的 RC4 算法密钥</td>
-</tr>
-<tr>
-<td align="center"><code>metadata_enc_size</code></td>
-<td align="center">4 字节</td>
-<td align="center"><code>int</code> 整数</td>
-</tr>
-<tr>
-<td align="center"><code>metadata_enc</code></td>
-<td align="center"><code>metadata_enc_size</code></td>
-<td align="center">加密后的 <code>metadata</code>, 包含音乐的专辑和封面信息</td>
-</tr>
-<tr>
-<td align="center"><code>crc32</code></td>
-<td align="center">4 字节</td>
-<td align="center">不确定, 据网上流传为 CRC32 校验码, 但是没找到是算哪个值的</td>
-</tr>
-<tr>
-<td align="center"><code>gap2</code></td>
-<td align="center">5 字节</td>
-<td align="center">不确定, 据观察都为 <code>b&quot;\x01&quot;</code> 开头, <code>b&quot;\x00&quot;</code> 结尾</td>
-</tr>
-<tr>
-<td align="center"><code>cover_data_size</code></td>
-<td align="center">4 字节</td>
-<td align="center"><code>int</code> 整数</td>
-</tr>
-<tr>
-<td align="center"><code>cover_data</code></td>
-<td align="center"><code>cover_data_size</code></td>
-<td align="center">专辑封面图片二进制数据</td>
-</tr>
-<tr>
-<td align="center"><code>music_data_enc</code></td>
-<td align="center">任意长度</td>
-<td align="center">加密后的音乐二进制数据, 处于 <code>ncm</code> 文件的最末尾</td>
-</tr>
-</tbody></table>
-<p>格式很清晰, 虽然有一些未知项, 但是不影响核心内容. 其中 <code>rc4_key_enc</code>, <code>metadata_enc</code>, <code>music_data_enc</code> 是加密过的, 只要全部解密就能还原出原本完整的音乐文件.</p>
-<h2 id="NCM-文件解密"><a href="#NCM-文件解密" class="headerlink" title="NCM 文件解密"></a>NCM 文件解密</h2><p>这部分内容也是总结已有的源码.</p>
-<p><code>ncm</code> 文件中使用了两种密码算法:</p>
-<ul>
-<li>一种是经过魔改的 <code>RC4</code> 算法, 后文称它为 <code>NCMRC4</code></li>
-<li>另一种是标准的 <code>AES</code> 算法, 分组长度 <code>128</code> 比特, 工作模式 <code>ECB</code>, 填充算法为 <code>PKCS7</code>, 后文称它为 <code>NCMAES</code></li>
-</ul>
-<p><code>ncm</code> 文件的加密方式如下:</p>
-<ul>
-<li><code>music_data_enc = NCMRC4.encrypt(music_data, rc4_key)</code></li>
-<li><code>metadata_enc = NCMAES.encrypt(metadata_enc, AES_KEY_METADATA)</code></li>
-<li><code>rc4_key_enc = NCMAES.encrypt(rc4_key, AES_KEY_RC4_KEY)</code></li>
-</ul>
-<p>较大的 <code>music_data</code> 用魔改后的流密码加密, 节省时间; 较短的 <code>metadata</code> 和 <code>rc4_key</code> 用对称密码加密, 提高安全性.</p>
-<p>这里 <code>AES_KEY_RC4_KEY</code> 和 <code>AES_KEY_METADATA</code> 是两个关键的对称密码密钥, 前人已经通过逆向等手段挖出来了, 这里就不放出来了, 可以去看看别人的分析或者看本文的源码, 里面都有.</p>
-<p>除了使用加密手段, 还有一些简单的混淆操作, 以及去除解密后内容多余的头部字段等, 这里也不详细写了, 源码里面写的很清楚, 可以直接看源码.</p>
-<h2 id="添加专辑和封面信息"><a href="#添加专辑和封面信息" class="headerlink" title="添加专辑和封面信息"></a>添加专辑和封面信息</h2><p>来到本文的重点部分, 前面对 <code>ncm</code> 格式和加密方式的分析都是已有的, 我们主要想扩展功能, 自动添加专辑和封面信息到解密后的文件里, 这里主要用到 <code>mutagen</code> 这个库, 支持向 <code>mp3</code> 和 <code>flac</code> 文件内加入专辑等信息.</p>
-<p>解密后的 <code>metadata</code> 是一份 <code>json</code> 数据, 格式如下:</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;format&quot;</span><span class="punctuation">:</span> <span class="string">&quot;flac&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">431259256</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;カタオモイ&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">[</span><span class="string">&quot;Aimer&quot;</span><span class="punctuation">,</span> <span class="number">16152</span><span class="punctuation">]</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;daydream&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">34826361</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951165052089697</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/2QRYxUqXfW0zQpm2_DVYRA==/109951165052089697.jpg&quot;</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">876923</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">207866</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">    <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;单相思&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<details class="note info"><summary><p>v1.1.0 中的改动</p>
-</summary>
-<p><code>metadata</code> 可能存在多种类型, 上面是最简单的 <code>music</code> 类型, 新增了 <code>dj</code> 类型, 格式如下:</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;programId&quot;</span><span class="punctuation">:</span> <span class="number">2506516081</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;mainMusic&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;musicId&quot;</span><span class="punctuation">:</span> <span class="number">1957438579</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;musicName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;03 踏遍万水千山&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;artist&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;album&quot;</span><span class="punctuation">:</span> <span class="string">&quot;[DJ节目]北方文艺出版社的DJ节目 第8期&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPicDocId&quot;</span><span class="punctuation">:</span> <span class="number">109951167551086981</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;albumPic&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://p1.music.126.net/M48NPuT591tIqqUdQyKZlg==/109951167551086981.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;mvId&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;flag&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;bitrate&quot;</span><span class="punctuation">:</span> <span class="number">320000</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;duration&quot;</span><span class="punctuation">:</span> <span class="number">1222948</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;alias&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;transNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djId&quot;</span><span class="punctuation">:</span> <span class="number">7891086863</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;北方文艺出版社&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;djAvatarUrl&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://p1.music.126.net/DQr2q_S23tYY8vU_C-kAYw==/109951167535553901.jpg&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;createTime&quot;</span><span class="punctuation">:</span> <span class="number">1655691020376</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;brand&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;serial&quot;</span><span class="punctuation">:</span> <span class="number">3</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programFeeType&quot;</span><span class="punctuation">:</span> <span class="number">15</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;programBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioId&quot;</span><span class="punctuation">:</span> <span class="number">977264730</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioName&quot;</span><span class="punctuation">:</span> <span class="string">&quot;林徽因传：倾我所能去坚强&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategory&quot;</span><span class="punctuation">:</span> <span class="string">&quot;文学出版&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioCategoryId&quot;</span><span class="punctuation">:</span> <span class="number">3148096</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioDesc&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一本有温度、有态度的传记，记录了真正意义上的民国女神——林徽因，从容坚强、传奇丰沛的一生。&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeType&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioFeeScope&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioBuyed&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPrice&quot;</span><span class="punctuation">:</span> <span class="number">30</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;radioPurchaseCount&quot;</span><span class="punctuation">:</span> <span class="number">0</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-</details>
-
-<p>我们需要把 <code>musicName</code>, <code>artist</code>, <code>album</code> 这三个字段的内容保留, 同时把 <code>ncm</code> 中附带的封面图片也保留.</p>
-<p>我们导入一下要用到的库:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> mutagen <span class="keyword">import</span> flac, id3, mp3</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
-
-<p>对于 <code>mp3</code>, 如下操作:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_mp3</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for mp3 format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = mp3.MP3(path)</span><br><span class="line"></span><br><span class="line">    audio[<span class="string">&quot;TIT2&quot;</span>] = id3.TIT2(text=self.name, encoding=id3.Encoding.UTF8)  <span class="comment"># title</span></span><br><span class="line">    audio[<span class="string">&quot;TALB&quot;</span>] = id3.TALB(text=self.album, encoding=id3.Encoding.UTF8)  <span class="comment"># album</span></span><br><span class="line">    audio[<span class="string">&quot;TPE1&quot;</span>] = id3.TPE1(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># artists</span></span><br><span class="line">    audio[<span class="string">&quot;TPE2&quot;</span>] = id3.TPE2(text=<span class="string">&quot;/&quot;</span>.join(self.artists), encoding=id3.Encoding.UTF8)  <span class="comment"># album artists</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        audio[<span class="string">&quot;APIC&quot;</span>] = id3.APIC(<span class="built_in">type</span>=id3.PictureType.COVER_FRONT, mime=self.cover_mime, data=self._cover_data)  <span class="comment"># cover</span></span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
-
-<p>这里 <code>cover_mime</code> 就是图像的内容类型, 例如 <code>image/jpeg</code> 这种, 可以通过 <code>mimetypes</code> 库获取.</p>
-<p>而对于 <code>flac</code>, 如下操作:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_addinfo_flac</span>(<span class="params">self, path: <span class="type">Union</span>[<span class="built_in">str</span>, PathLike]</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Add info for flac format.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    audio = flac.FLAC(path)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add music info</span></span><br><span class="line">    audio[<span class="string">&quot;title&quot;</span>] = self.name</span><br><span class="line">    audio[<span class="string">&quot;artist&quot;</span>] = self.artists</span><br><span class="line">    audio[<span class="string">&quot;album&quot;</span>] = self.album</span><br><span class="line">    audio[<span class="string">&quot;albumartist&quot;</span>] = <span class="string">&quot;/&quot;</span>.join(self.artists)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># add cover</span></span><br><span class="line">    <span class="keyword">if</span> self._cover_data_size &gt; <span class="number">0</span>:</span><br><span class="line">        cover = flac.Picture()</span><br><span class="line">        cover.<span class="built_in">type</span> = id3.PictureType.COVER_FRONT</span><br><span class="line">        cover.data = self._cover_data</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> BytesIO(self._cover_data) <span class="keyword">as</span> data:</span><br><span class="line">            <span class="keyword">with</span> Image.<span class="built_in">open</span>(data) <span class="keyword">as</span> f:</span><br><span class="line">                cover.mime = self.cover_mime</span><br><span class="line">                cover.width = f.width</span><br><span class="line">                cover.height = f.height</span><br><span class="line">                cover.depth = <span class="built_in">len</span>(f.getbands()) * <span class="number">8</span></span><br><span class="line"></span><br><span class="line">        audio.add_picture(cover)</span><br><span class="line"></span><br><span class="line">    audio.save()</span><br></pre></td></tr></table></figure>
-
-<p>添加专辑封面图片的时候稍微复杂一点, 需要使用 <code>Pillow</code> 库读取一下图像的基本信息, 然后填进去.</p>
-<p>值得注意的是, <code>ncm</code> 文件里可能没有存放专辑封面图片, 这种时候可以借助 <code>metadata</code> 里的 <code>albumPic</code> 字段, 它代表专辑封面图片的一个 url, 我们可以用 <code>urllib</code> 尝试联网获取内容, 代码片段如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># if no cover data, try get cover data by url in metadata</span></span><br><span class="line"><span class="keyword">if</span> self._cover_data_size &lt;= <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">with</span> request.urlopen(self._metadata.get(<span class="string">&quot;albumPic&quot;</span>, <span class="string">&quot;&quot;</span>)) <span class="keyword">as</span> res:</span><br><span class="line">            <span class="keyword">if</span> res.status &lt; <span class="number">400</span>:</span><br><span class="line">                self._cover_data = res.read()</span><br><span class="line">                self._cover_data_size = <span class="built_in">len</span>(self._cover_data)</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<p>值得注意的是, 代码里需要判断, 如果最终就是没有办法获得图片数据, 那么就放弃添加图片信息, 避免报错.</p>
-<h2 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h2><p>到这里, 我们的包目录结构长这样:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ncmdump</span><br><span class="line">  ├── core.py</span><br><span class="line">  ├── crypto.py</span><br><span class="line">  ├── __init__.py</span><br><span class="line">  └── __main__.py</span><br></pre></td></tr></table></figure>
-
-<p>共有四份文件, 为了能够在命令行里运行这个包, 我们需要在 <code>__main__.py</code> 里添加一些内容.</p>
-<p>这里我们使用 <code>ArgumentParser</code> 解析命令行输入, <code>rich</code> 库显示进度条和日志输出, 完整代码如下.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> rich.progress <span class="keyword">import</span> Progress, SpinnerColumn, TimeElapsedColumn</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> ncmdump <span class="keyword">import</span> NeteaseCloudMusicFile</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser(<span class="string">&quot;ncmdump&quot;</span>, description=<span class="string">&quot;Dump ncm files with progress bar and logging info, only process files with suffix &#x27;.ncm&#x27;&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;files&quot;</span>, nargs=<span class="string">&quot;*&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Files to dump, can follow multiple files.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--in-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Input folder of files to dump.&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-folder&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Output folder of files dumped.&quot;</span>, default=<span class="string">&quot;.&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-metadata&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump metadata.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--dump-cover&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;Whether dump album cover.&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    out_folder = Path(args.out_folder)</span><br><span class="line">    out_folder.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    dump_metadata = args.dump_metadata</span><br><span class="line">    dump_cover = args.dump_cover</span><br><span class="line"></span><br><span class="line">    files = args.files</span><br><span class="line">    <span class="keyword">if</span> args.in_folder:</span><br><span class="line">        files.extend(Path(args.in_folder).iterdir())</span><br><span class="line">    files = <span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> p: p.suffix == <span class="string">&quot;.ncm&quot;</span>, <span class="built_in">map</span>(Path, files)))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> files:</span><br><span class="line">        parser.print_help()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">with</span> Progress(SpinnerColumn(), *Progress.get_default_columns(), TimeElapsedColumn()) <span class="keyword">as</span> progress:</span><br><span class="line">            task = progress.add_task(<span class="string">&quot;[#d75f00]Dumping files&quot;</span>, total=<span class="built_in">len</span>(files))</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> ncm_path <span class="keyword">in</span> files:</span><br><span class="line">                output_path = out_folder.joinpath(ncm_path.stem)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    ncmfile = NeteaseCloudMusicFile(ncm_path).decrypt()</span><br><span class="line">                    music_path = ncmfile.dump_music(output_path)</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">if</span> dump_metadata:</span><br><span class="line">                        ncmfile.dump_metadata(output_path)</span><br><span class="line">                    <span class="keyword">if</span> dump_cover:</span><br><span class="line">                        ncmfile.dump_cover(output_path)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">                    progress.log(<span class="string">f&quot;[red]ERROR[/red]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.metadata:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no metadata found&quot;</span>)</span><br><span class="line">                    <span class="keyword">if</span> <span class="keyword">not</span> ncmfile.cover_data:</span><br><span class="line">                        progress.log(<span class="string">f&quot;[yellow]WARNING[/yellow]: <span class="subst">&#123;ncm_path&#125;</span> -&gt; <span class="subst">&#123;music_path&#125;</span>, no cover data found&quot;</span>)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">finally</span>:</span><br><span class="line">                    progress.advance(task)</span><br></pre></td></tr></table></figure>
-
-<p>该命令行可以接收若干数量的 <code>.ncm</code> 文件作为输入, 可以用 <code>--in-folder</code> 指定一整个文件夹, 会和输入的单个文件合并一起处理, 比如有下面几种使用示例.</p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定某些文件</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 指定一整个文件夹, 同时指定输出目录</span></span><br><span class="line">python -m ncmdump --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="comment">REM 同时指定</span></span><br><span class="line">python -m ncmdump file1.ncm file2.ncm --<span class="keyword">in</span>-folder ncmfiles --out-folder musicfolder</span><br></pre></td></tr></table></figure>
-
-<p>输出文件的文件名和原本的 <code>.ncm</code> 文件名相同, 但是后缀会自动替换成对应格式的后缀 (<code>.mp3</code> 或者 <code>.flac</code>).</p>
-<h2 id="打包到-PyPI"><a href="#打包到-PyPI" class="headerlink" title="打包到 PyPI"></a>打包到 PyPI</h2><p>最后就是打包上传<del>造福大众的时间</del>, 这也是我第一次在 PyPI 上上传自己的包, 之后会单独写一篇文章说说中途遇到的一些问题.</p>
-<p>上传完成之后, 就可以通过命令 <code>pip install ncmdump-py</code> 安装使用了~</p>
-<p>PS: 虽然库名字叫 <code>ncmdump-py</code>, 但是导入的时候还是 <code>import ncmdump</code>, 因为 <code>ncmdump</code> 这个项目名字在 PyPI 上已经被前人注册了, 只好加点东西区分一下.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL25jbWR1bXAtcHk=">https://github.com/ww-rm/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
-<p>PyPI 项目页: <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy9wcm9qZWN0L25jbWR1bXAtcHkv">https://pypi.org/project/ncmdump-py/<i class="fa fa-external-link-alt"></i></span></p>
-<p>PyInstaller 打包的命令行工具: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pdEdRcjFlemE1YWI=">ncmdump v1.1.0.zip<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>ncm</tag>
-        <tag>格式转换</tag>
-        <tag>ncmdump</tag>
-        <tag>python 库</tag>
-        <tag>PyPI</tag>
-        <tag>网易云音乐</tag>
       </tags>
   </entry>
   <entry>
@@ -2390,9 +2390,9 @@
         <category>必备技能</category>
       </categories>
       <tags>
+        <tag>nlp</tag>
         <tag>深度学习</tag>
         <tag>pytorch</tag>
-        <tag>nlp</tag>
         <tag>文本分类</tag>
       </tags>
   </entry>
@@ -3279,112 +3279,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SM9 文档阅读笔记</title>
-    <url>//posts/2023/12/15/sm9/</url>
-    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
-<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
-<span id="more"></span>
-
-<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
-<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
-<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
-<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
-<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
-<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
-<p>因此有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
-<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
-<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
-<p>幂次与系数转换关系如下:</p>
-<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
-<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
-<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
-<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
-<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
-<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
-<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
-<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
-<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
-<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
-<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
-<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
-<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
-<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
-<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
-<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
-<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
-<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
-<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
-<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
-<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
-<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
-<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
-<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
-<p>因此困难部分的指数可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
-<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
-<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
-<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
-<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>双线性对</tag>
-        <tag>R-ate</tag>
-        <tag>Frobenius</tag>
-        <tag>FinalExp</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Transformer 的训练与推理</title>
-    <url>//posts/2023/08/29/transformer/</url>
-    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
-<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
-<span id="more"></span>
-
-<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
-<p>这张图是一个简略的 Transformer 整体框架图.</p>
-<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
-<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
-<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
-<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
-<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
-<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
-<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
-<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
-<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
-<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
-<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
-<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
-<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
-<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>NLP</tag>
-        <tag>Transformer</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Simpleperf 三部曲 (三)</title>
     <url>//posts/2024/07/07/simpleperf3/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3491,6 +3385,112 @@
         <tag>Simpleperf</tag>
         <tag>Android</tag>
         <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SM9 文档阅读笔记</title>
+    <url>//posts/2023/12/15/sm9/</url>
+    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
+<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
+<span id="more"></span>
+
+<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
+<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
+<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
+<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
+<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
+<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
+<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
+<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
+<p>幂次与系数转换关系如下:</p>
+<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
+<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
+<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
+<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
+<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
+<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
+<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
+<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
+<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
+<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
+<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
+<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
+<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
+<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
+<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
+<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
+<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
+<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
+<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
+<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
+<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
+<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
+<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
+<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
+<p>因此困难部分的指数可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
+<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
+<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
+<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
+<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>双线性对</tag>
+        <tag>R-ate</tag>
+        <tag>Frobenius</tag>
+        <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Transformer 的训练与推理</title>
+    <url>//posts/2023/08/29/transformer/</url>
+    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
+<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
+<span id="more"></span>
+
+<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
+<p>这张图是一个简略的 Transformer 整体框架图.</p>
+<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
+<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
+<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
+<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
+<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
+<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
+<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
+<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
+<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
+<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
+<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
+<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
+<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
+<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>Transformer</tag>
       </tags>
   </entry>
 </search>
