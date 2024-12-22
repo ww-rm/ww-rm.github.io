@@ -448,7 +448,15 @@ const ASSET_MAPPING = {
     }
 }
 
-const ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
+var params = new URLSearchParams(window.location.search);
+var ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
+if (params.get("p")) {
+    var altPrefix = params.get("p");
+    if (!altPrefix.endsWith("/")) altPrefix += "/";
+    console.log("Use another asset prefix:", altPrefix);
+    ASSET_PREFIX = altPrefix;
+}
+
 const CANVAS_SIZE = 4096
 const BGCOLOR_DARK = [0.17, 0.26, 0.44, 1];
 const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
