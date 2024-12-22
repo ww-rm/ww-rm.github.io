@@ -242,6 +242,80 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 C# 写一个哈希计算小工具</title>
+    <url>//posts/2022/04/17/hashtool/</url>
+    <content><![CDATA[<p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
+<p>文末附有 Github 项目地址.</p>
+<span id="more"></span>
+
+<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>环境选了 <code>.NET Framework 4.6</code> 及以上, 估计绝大部分 Windows 系统都已经自带了, 能直接运行软件.</p>
+<h2 id="软件功能"><a href="#软件功能" class="headerlink" title="软件功能"></a>软件功能</h2><p>界面大概长这样:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/hashtool/hashtool.png" alt="hashtool.png"></p>
+<p>支持下列算法:</p>
+<ul>
+<li>MD5</li>
+<li>SHA1</li>
+<li>SHA2-256</li>
+<li>SHA2-512</li>
+<li>SHA3-256</li>
+<li>SHA3-512</li>
+<li>SM3</li>
+<li>CRC32</li>
+</ul>
+<p>支持以下功能:</p>
+<ul>
+<li>拖动或者使用打开按钮对多个文件进行指定的哈希值计算</li>
+<li>实时显示当前文件计算进度与总任务计算进度</li>
+<li>可以指定计算文件哈希时是否对每个算法使用单独的线程进行加速</li>
+</ul>
+<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><h3 id="窗口界面"><a href="#窗口界面" class="headerlink" title="窗口界面"></a>窗口界面</h3><p>这是我第一次用 <code>C#</code> 写窗口程序, 学习了一下决定用 <code>WinForms</code> 这个框架, 因为作为入门程序来说, 它足够简单, 容易上手.</p>
+<p>VS 新建一个 WinForms 项目, 项目结构不复杂, 有一个主程序文件和基本的窗口文件, 我们的主要任务就是补充窗口文件的代码.</p>
+<p>思路也很简单, VS 提供了简单的窗口设计界面, 能够用键鼠直接设计窗口元素和窗口显示的内容, 然后我们自己写对应的事件响应函数, 并把对应的函数和响应事件在设计窗口里绑定即可.</p>
+<p>这里将主窗口 <code>MainWnd</code> 的代码分作了两份:</p>
+<ul>
+<li><code>MainWnd.cs</code>: 实现事件响应函数.</li>
+<li><code>MainWnd.Func.cs</code>: 实现主窗口真正要用到的计算功能函数.</li>
+</ul>
+<p>两份文件用 <code>partial</code> 类将功能组合到一起.</p>
+<p>最后额外补充了一个 <code>About</code> 窗口, 在 VS 菜单里添加窗口就能直接生成需要的模板文件.</p>
+<h3 id="多线程与进度条"><a href="#多线程与进度条" class="headerlink" title="多线程与进度条"></a>多线程与进度条</h3><p>作为一个窗口程序, 为了避免窗口响应卡死, 所有耗时的计算过程都必须用多线程的方式放到后台执行. 再就是程序支持用多线程并行多个算法之间的计算, 因此多线程的使用和同步问题是第一个麻烦之处.</p>
+<p>第二个有点麻烦的地方就是显示进度条, 由于可以一次性计算多个文件, 所以分了当前文件进度和总进度, 在多线程时也是需要考虑同步问题的.</p>
+<p>首先多线程用的 <code>System.Threading.Tasks.Task</code> 类, 这是自带封装好的多线程 API, 如果勾选了多线程选项, 那么就将每个算法的计算都分配一个 <code>Task</code>, 最后将结果汇总到一起.</p>
+<p>有关的几个方法实现如下:</p>
+<ul>
+<li><code>TaskCompHash</code>: 对指定文件计算指定哈希算法的结果, 并累加计算进度值.</li>
+<li><code>ComputeWithOneTask</code> 和 <code>ComputeWithMultiTask</code>: 每个文件的不同哈希算法计算任务. 两个方法都会创建子任务, 区别是前者每次只对 1 个算法创建 1 个任务计算, 后者根据算法数量创建多个同时计算. 然后轮询任务是否计算完成, 并更新进度条.</li>
+<li><code>TaskCompute</code>: 对每个文件计算每一种哈希算法的值.</li>
+<li><code>BeginCompute</code>: 创建后台计算任务, 创建完后立即返回, 不会使窗口假死.</li>
+</ul>
+<p>调用关系为:</p>
+<p><code>BeginCompute</code> -&gt; <code>TaskCompute</code> -&gt; <code>ComputeWithOneTask | ComputeWithMultiTask</code> -&gt; <code>TaskCompHash</code></p>
+<p>其中 <code>Task</code> 开头的是要被 <code>Task</code> 类创建以多线程方式在后台执行的方法. 如此一来便完成了对每个文件的每种哈希值的计算过程.</p>
+<p>而进度条的实现, 则是靠 <code>pbValueSingle</code> 和 <code>pbValueTotal</code> 两个成员来记录. 每次使用哈希算法计算时, 累加计算量相对于文件大小的百分比值, 这样对于一个文件的一种算法就有一个完整的单位 1, 所以总计算量就是文件数乘以算法数.</p>
+<h3 id="哈希算法实现"><a href="#哈希算法实现" class="headerlink" title="哈希算法实现"></a>哈希算法实现</h3><p><code>C#</code> 的系统库里已经提供了大部分常见的哈希算法, 都在 <code>System.Security.Cryptography</code> 命名空间中, 我们需要额外实现一下SM3 和 SHA3 等算法.</p>
+<p>具体的算法原理另写一篇记录, 这里主要看看实现思路.</p>
+<p>查阅一下 API 文档, 可以看到 <code>System.Security.Cryptography</code> 提供了一个哈希算法的基类 <code>HashAlgorithm</code> 给我们用来继承, 并且需要重写下列方法:</p>
+<ul>
+<li><code>Initialize</code>: 初始化方法, 也就是计算一个哈希的初始准备工作, 例如一些缓冲区的初始值可以在这里设置.</li>
+<li><code>HashCore</code>: 核心计算过程, 有三个参数, 接收任意长度的字节数组输入, 并完成这一部分内容的计算. 这个方法可以完成对大文件的分块哈希值计算.</li>
+<li><code>HashFinal</code>: 结束计算方法, 比如一些尾部填充操作可以在这里进行.</li>
+</ul>
+<p>继承并重写后, 我们的哈希算法就有统一的基类和接口, 这也方便我们后续的方法调用.</p>
+<h3 id="编译与发布"><a href="#编译与发布" class="headerlink" title="编译与发布"></a>编译与发布</h3><p>编译的方式和普通项目一样, 在菜单的 &quot;生成&quot; 项里进行生成即可.</p>
+<p>值得关注的是生成时的配置, 右键查看项目属性, 里面可以设置目标框架, 如果考虑兼容性, 选低一点比较好, 这里我选了 4.6 的版本.</p>
+<p>再就是生成里可以设置目标平台, 尽量选成 <code>x64</code>, 速度上有一些小的优化.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0hhc2h0b29s">https://github.com/ww-rm/Hashtool<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>hashtool</tag>
+        <tag>C#</tag>
+        <tag>winforms</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
     <url>//posts/2023/11/04/ncmdump/</url>
     <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
@@ -401,80 +475,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用 C# 写一个哈希计算小工具</title>
-    <url>//posts/2022/04/17/hashtool/</url>
-    <content><![CDATA[<p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
-<p>文末附有 Github 项目地址.</p>
-<span id="more"></span>
-
-<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>环境选了 <code>.NET Framework 4.6</code> 及以上, 估计绝大部分 Windows 系统都已经自带了, 能直接运行软件.</p>
-<h2 id="软件功能"><a href="#软件功能" class="headerlink" title="软件功能"></a>软件功能</h2><p>界面大概长这样:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/hashtool/hashtool.png" alt="hashtool.png"></p>
-<p>支持下列算法:</p>
-<ul>
-<li>MD5</li>
-<li>SHA1</li>
-<li>SHA2-256</li>
-<li>SHA2-512</li>
-<li>SHA3-256</li>
-<li>SHA3-512</li>
-<li>SM3</li>
-<li>CRC32</li>
-</ul>
-<p>支持以下功能:</p>
-<ul>
-<li>拖动或者使用打开按钮对多个文件进行指定的哈希值计算</li>
-<li>实时显示当前文件计算进度与总任务计算进度</li>
-<li>可以指定计算文件哈希时是否对每个算法使用单独的线程进行加速</li>
-</ul>
-<h2 id="实现思路"><a href="#实现思路" class="headerlink" title="实现思路"></a>实现思路</h2><h3 id="窗口界面"><a href="#窗口界面" class="headerlink" title="窗口界面"></a>窗口界面</h3><p>这是我第一次用 <code>C#</code> 写窗口程序, 学习了一下决定用 <code>WinForms</code> 这个框架, 因为作为入门程序来说, 它足够简单, 容易上手.</p>
-<p>VS 新建一个 WinForms 项目, 项目结构不复杂, 有一个主程序文件和基本的窗口文件, 我们的主要任务就是补充窗口文件的代码.</p>
-<p>思路也很简单, VS 提供了简单的窗口设计界面, 能够用键鼠直接设计窗口元素和窗口显示的内容, 然后我们自己写对应的事件响应函数, 并把对应的函数和响应事件在设计窗口里绑定即可.</p>
-<p>这里将主窗口 <code>MainWnd</code> 的代码分作了两份:</p>
-<ul>
-<li><code>MainWnd.cs</code>: 实现事件响应函数.</li>
-<li><code>MainWnd.Func.cs</code>: 实现主窗口真正要用到的计算功能函数.</li>
-</ul>
-<p>两份文件用 <code>partial</code> 类将功能组合到一起.</p>
-<p>最后额外补充了一个 <code>About</code> 窗口, 在 VS 菜单里添加窗口就能直接生成需要的模板文件.</p>
-<h3 id="多线程与进度条"><a href="#多线程与进度条" class="headerlink" title="多线程与进度条"></a>多线程与进度条</h3><p>作为一个窗口程序, 为了避免窗口响应卡死, 所有耗时的计算过程都必须用多线程的方式放到后台执行. 再就是程序支持用多线程并行多个算法之间的计算, 因此多线程的使用和同步问题是第一个麻烦之处.</p>
-<p>第二个有点麻烦的地方就是显示进度条, 由于可以一次性计算多个文件, 所以分了当前文件进度和总进度, 在多线程时也是需要考虑同步问题的.</p>
-<p>首先多线程用的 <code>System.Threading.Tasks.Task</code> 类, 这是自带封装好的多线程 API, 如果勾选了多线程选项, 那么就将每个算法的计算都分配一个 <code>Task</code>, 最后将结果汇总到一起.</p>
-<p>有关的几个方法实现如下:</p>
-<ul>
-<li><code>TaskCompHash</code>: 对指定文件计算指定哈希算法的结果, 并累加计算进度值.</li>
-<li><code>ComputeWithOneTask</code> 和 <code>ComputeWithMultiTask</code>: 每个文件的不同哈希算法计算任务. 两个方法都会创建子任务, 区别是前者每次只对 1 个算法创建 1 个任务计算, 后者根据算法数量创建多个同时计算. 然后轮询任务是否计算完成, 并更新进度条.</li>
-<li><code>TaskCompute</code>: 对每个文件计算每一种哈希算法的值.</li>
-<li><code>BeginCompute</code>: 创建后台计算任务, 创建完后立即返回, 不会使窗口假死.</li>
-</ul>
-<p>调用关系为:</p>
-<p><code>BeginCompute</code> -&gt; <code>TaskCompute</code> -&gt; <code>ComputeWithOneTask | ComputeWithMultiTask</code> -&gt; <code>TaskCompHash</code></p>
-<p>其中 <code>Task</code> 开头的是要被 <code>Task</code> 类创建以多线程方式在后台执行的方法. 如此一来便完成了对每个文件的每种哈希值的计算过程.</p>
-<p>而进度条的实现, 则是靠 <code>pbValueSingle</code> 和 <code>pbValueTotal</code> 两个成员来记录. 每次使用哈希算法计算时, 累加计算量相对于文件大小的百分比值, 这样对于一个文件的一种算法就有一个完整的单位 1, 所以总计算量就是文件数乘以算法数.</p>
-<h3 id="哈希算法实现"><a href="#哈希算法实现" class="headerlink" title="哈希算法实现"></a>哈希算法实现</h3><p><code>C#</code> 的系统库里已经提供了大部分常见的哈希算法, 都在 <code>System.Security.Cryptography</code> 命名空间中, 我们需要额外实现一下SM3 和 SHA3 等算法.</p>
-<p>具体的算法原理另写一篇记录, 这里主要看看实现思路.</p>
-<p>查阅一下 API 文档, 可以看到 <code>System.Security.Cryptography</code> 提供了一个哈希算法的基类 <code>HashAlgorithm</code> 给我们用来继承, 并且需要重写下列方法:</p>
-<ul>
-<li><code>Initialize</code>: 初始化方法, 也就是计算一个哈希的初始准备工作, 例如一些缓冲区的初始值可以在这里设置.</li>
-<li><code>HashCore</code>: 核心计算过程, 有三个参数, 接收任意长度的字节数组输入, 并完成这一部分内容的计算. 这个方法可以完成对大文件的分块哈希值计算.</li>
-<li><code>HashFinal</code>: 结束计算方法, 比如一些尾部填充操作可以在这里进行.</li>
-</ul>
-<p>继承并重写后, 我们的哈希算法就有统一的基类和接口, 这也方便我们后续的方法调用.</p>
-<h3 id="编译与发布"><a href="#编译与发布" class="headerlink" title="编译与发布"></a>编译与发布</h3><p>编译的方式和普通项目一样, 在菜单的 &quot;生成&quot; 项里进行生成即可.</p>
-<p>值得关注的是生成时的配置, 右键查看项目属性, 里面可以设置目标框架, 如果考虑兼容性, 选低一点比较好, 这里我选了 4.6 的版本.</p>
-<p>再就是生成里可以设置目标平台, 尽量选成 <code>x64</code>, 速度上有一些小的优化.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>Github 项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0hhc2h0b29s">https://github.com/ww-rm/Hashtool<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>hashtool</tag>
-        <tag>C#</tag>
-        <tag>winforms</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>安卓 APK 重打包</title>
     <url>//posts/2024/07/09/apkrepack/</url>
     <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
@@ -510,94 +510,6 @@
         <tag>安卓</tag>
         <tag>APK</tag>
         <tag>重打包</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>碧蓝航线立绘提取与批量还原</title>
-    <url>//posts/2023/04/11/blhx-painting/</url>
-    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
-<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
-<span id="more"></span>
-
-<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
-<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
-<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
-<ul>
-<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
-<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
-<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
-<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
-</ul>
-<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
-<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
-<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
-<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
-<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
-<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
-<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
-</ul>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
-<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
-<details class="note danger"><summary><p>guanghui_h.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
-<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
-</details>
-
-<details class="note info"><summary><p>guanghui.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_2.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_3.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_4.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_5.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol_n.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
-
-</details>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>工具</tag>
-        <tag>立绘还原</tag>
       </tags>
   </entry>
   <entry>
@@ -695,6 +607,94 @@
         <tag>手写数字识别</tag>
         <tag>卷积神经网络</tag>
         <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>碧蓝航线立绘提取与批量还原</title>
+    <url>//posts/2023/04/11/blhx-painting/</url>
+    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
+<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
+<span id="more"></span>
+
+<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
+<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
+<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
+<ul>
+<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
+<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
+<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
+<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
+</ul>
+<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
+<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
+<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
+<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
+<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
+<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
+</ul>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
+<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
+<details class="note danger"><summary><p>guanghui_h.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
+<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
+</details>
+
+<details class="note info"><summary><p>guanghui.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_2.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_3.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_4.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_5.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol_n.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
+
+</details>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>工具</tag>
+        <tag>立绘还原</tag>
       </tags>
   </entry>
   <entry>
@@ -1503,6 +1503,73 @@
       </tags>
   </entry>
   <entry>
+    <title>SM9 算法中的塔式扩张公式推导</title>
+    <url>//posts/2023/12/04/sm9fpex/</url>
+    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
+<span id="more"></span>
+
+<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
+<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
+<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
+<p>即解二元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
+<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
+<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
+<p>同理可得模逆运算为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
+<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
+<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
+<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
+<p>即解三元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line">Fp2Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp4Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp12Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">FpExEle = <span class="type">Tuple</span>[<span class="built_in">int</span>, ...]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>塔式扩张</tag>
+        <tag>扩域运算</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
     <url>//posts/2024/06/16/sm9gfn/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
@@ -1575,73 +1642,6 @@
       <tags>
         <tag>SSH</tag>
         <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SM9 算法中的塔式扩张公式推导</title>
-    <url>//posts/2023/12/04/sm9fpex/</url>
-    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
-<span id="more"></span>
-
-<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
-<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
-<p>则 $Z$ 可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
-<p>所以:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
-<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
-<p>即解二元一次方程组:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>解得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
-<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
-<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
-<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
-<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
-<p>同理可得模逆运算为:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
-<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
-<p>则 $Z$ 可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
-<p>所以:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
-<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
-<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
-<p>即解三元一次方程组:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>解得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line">Fp2Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp4Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp12Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">FpExEle = <span class="type">Tuple</span>[<span class="built_in">int</span>, ...]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>塔式扩张</tag>
-        <tag>扩域运算</tag>
       </tags>
   </entry>
   <entry>
@@ -2278,6 +2278,61 @@
       </tags>
   </entry>
   <entry>
+    <title>经典问题之文本分类</title>
+    <url>//posts/2022/08/17/wast-ml/</url>
+    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
+<span id="more"></span>
+
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
+<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
+<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
+<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
+<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
+<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
+<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
+<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
+
+<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
+<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
+<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
+<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
+<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
+<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
+
+<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
+<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
+<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
+
+<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
+
+<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
+<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>scikit-learn</tag>
+        <tag>文本分类</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>再遇文本分类</title>
     <url>//posts/2022/08/19/wast-nlp/</url>
     <content><![CDATA[<p>这是<a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">网安本科速通</a>系列的最后一篇了, 主题还是 <code>pytorch</code>, 但是问题换成了 <code>NLP</code>, 并且还是以经典的文本分类作为示例, 数据集使用与前面<a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>相同的一份小数据集, 方便进行比较.</p>
@@ -2339,61 +2394,6 @@
         <tag>深度学习</tag>
         <tag>pytorch</tag>
         <tag>文本分类</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>经典问题之文本分类</title>
-    <url>//posts/2022/08/17/wast-ml/</url>
-    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
-<span id="more"></span>
-
-<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
-<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
-<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
-<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
-
-<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
-<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
-<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
-<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
-<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
-<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
-
-<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
-<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
-<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
-<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
-<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
-<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
-
-<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
-<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
-<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
-
-<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
-
-<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
-<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>文本分类</tag>
-        <tag>机器学习</tag>
-        <tag>scikit-learn</tag>
       </tags>
   </entry>
   <entry>
@@ -2565,20 +2565,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>给新生的编程工具推荐与基本使用方法</title>
     <url>//posts/2022/08/11/wast-vscandvs/</url>
     <content><![CDATA[<p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
@@ -2725,6 +2711,20 @@
       </tags>
   </entry>
   <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Typora 破解版</title>
     <url>//posts/2023/07/03/typora-cracked/</url>
     <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
@@ -2737,20 +2737,6 @@
       </categories>
       <tags>
         <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows 10 激活工具</title>
-    <url>//posts/2023/02/27/win10activation/</url>
-    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>激活工具</tag>
       </tags>
   </entry>
   <entry>
@@ -2814,6 +2800,20 @@
         <tag>图像生成</tag>
         <tag>扩散模型</tag>
         <tag>Diffusion Model</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
       </tags>
   </entry>
   <entry>
