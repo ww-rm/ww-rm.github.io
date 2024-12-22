@@ -13,7 +13,7 @@ type: azurlane-spinepainting
 
 **注意事项**
 
-- 游戏内资源体积较大, 建议科学上网进行加载
+- 游戏内资源体积较大, 建议科学上网进行加载, 否则可能点击链接之后需要**非常长的加载时间**
 - 所有资源均可在仓库 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting) 内进行查看和下载
 - 网页功能性能有限, 推荐使用本地工具 [DeskSpine](https://github.com/ww-rm/DeskSpine), 可以设置动态桌面壁纸, 并支持画面导出
 
