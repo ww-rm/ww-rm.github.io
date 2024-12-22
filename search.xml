@@ -131,55 +131,6 @@
       </tags>
   </entry>
   <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>国密算法的纯 Python 实现</title>
     <url>//posts/2023/12/14/gmalg/</url>
     <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
@@ -239,6 +190,55 @@
         <tag>SM9</tag>
         <tag>ZUC</tag>
         <tag>gmalg</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
       </tags>
   </entry>
   <entry>
@@ -907,71 +907,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用 OpenCV 进行图像对比</title>
-    <url>//posts/2024/08/02/imgcmp/</url>
-    <content><![CDATA[<p>记录一下最近写的一个小工具模块, 用来比较两张图像之间的相似度, 并且输出直方图差异以及像素差异.</p>
-<span id="more"></span>
-
-<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>目标是比较两张相同 RGB 图像的相似度, 看它们之间是否存在色彩阴影亮度之类的区别.</p>
-<p>因此首先将图像读取后转换成 HLS 通道格式, 再依次求解每个通道上的直方图差异以及像素差分图.</p>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> namedtuple</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">HlsSimilarity = namedtuple(<span class="string">&quot;HlsSimilarity&quot;</span>, [<span class="string">&quot;H&quot;</span>, <span class="string">&quot;L&quot;</span>, <span class="string">&quot;S&quot;</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_image_as_hls</span>(<span class="params">path: <span class="built_in">str</span>, blur_ksize: <span class="built_in">int</span> = <span class="number">0</span></span>) -&gt; np.ndarray:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取图像并转换成 HLS 格式.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    由于对比的时候过于灵敏, 所以有必要加一定程度的模糊.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        image: 形状为 (H, W, 3)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img = cv2.imread(path, cv2.IMREAD_COLOR)</span><br><span class="line">    <span class="keyword">if</span> blur_ksize &gt; <span class="number">0</span>:</span><br><span class="line">        img = cv2.blur(img, (blur_ksize, blur_ksize))</span><br><span class="line">    img = cv2.cvtColor(img, cv2.COLOR_BGR2HLS_FULL)</span><br><span class="line">    <span class="keyword">return</span> img</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_image_hist_delta</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span></span>) -&gt; <span class="type">Tuple</span>[np.ndarray, np.ndarray, np.ndarray]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两张直方图差异</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        delta: (H, L, S) 三个分量的直方图差异</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1)</span><br><span class="line">    img2 = read_image_as_hls(img2)</span><br><span class="line"></span><br><span class="line">    hist_delta = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">        h1 = cv2.calcHist([img1], [i], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]).flatten()</span><br><span class="line">        h2 = cv2.calcHist([img2], [i], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]).flatten()</span><br><span class="line">        hist_delta.append(h1 - h2)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">tuple</span>(hist_delta)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_colors</span>(<span class="params">cname: <span class="built_in">str</span> = <span class="string">&quot;hsv&quot;</span>, size: <span class="built_in">int</span> = <span class="number">256</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;获得连续的调色板颜色序列&quot;&quot;&quot;</span></span><br><span class="line">    cmap = plt.get_cmap(cname, size)</span><br><span class="line">    <span class="keyword">return</span> [cmap(i)[:<span class="number">3</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(size)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_image_similarity</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, blur_ksize: <span class="built_in">int</span> = <span class="number">15</span></span>) -&gt; HlsSimilarity:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两张图像的相似度, 具体算法见 https://docs.opencv.org/4.5.5/d8/dc8/tutorial_histogram_comparison.html</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    此处使用 Bhattacharyya distance, 并且加了一定量的模糊处理.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        similarities: (H, L, S) 三个分量的相似度</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1, blur_ksize)</span><br><span class="line">    img2 = read_image_as_hls(img2, blur_ksize)</span><br><span class="line"></span><br><span class="line">    similarities = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">    similarities[<span class="number">0</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">0</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">0</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line">    similarities[<span class="number">1</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">1</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">1</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line">    similarities[<span class="number">2</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">2</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">2</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> HlsSimilarity(*similarities)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw_image_hist_delta</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, path: <span class="built_in">str</span>, title: <span class="built_in">str</span> = <span class="string">&quot;Hist Delta of HLS Image (First - Second)&quot;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;绘制差异直方图情况&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    delta_H, delta_L, delta_S = calc_image_hist_delta(img1, img2)</span><br><span class="line"></span><br><span class="line">    fig, axes = plt.subplots(<span class="number">3</span>, <span class="number">1</span>, squeeze=<span class="literal">True</span>, figsize=(<span class="number">12</span>, <span class="number">16</span>), dpi=<span class="number">300</span>)</span><br><span class="line">    fig.subplots_adjust(left=<span class="number">0.1</span>, right=<span class="number">0.9</span>, top=<span class="number">0.93</span>, bottom=<span class="number">0.07</span>)</span><br><span class="line">    fig.suptitle(title)</span><br><span class="line">    fig.supxlabel(<span class="string">&quot;Pixel Value&quot;</span>)</span><br><span class="line">    fig.supylabel(<span class="string">&quot;Pixel Count&quot;</span>)</span><br><span class="line"></span><br><span class="line">    axes: <span class="built_in">list</span>[plt.Axes]</span><br><span class="line">    ax_H, ax_L, ax_S = axes</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_H)</span><br><span class="line">    ax_H.bar(np.arange(x_len), delta_H, color=get_colors(<span class="string">&quot;hsv&quot;</span>, x_len))</span><br><span class="line">    ax_H.set_title(<span class="string">&quot;Delta of H Channel&quot;</span>)</span><br><span class="line">    ax_H.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_L)</span><br><span class="line">    ax_L.bar(np.arange(x_len), delta_L, color=get_colors(<span class="string">&quot;gray&quot;</span>, x_len))</span><br><span class="line">    ax_L.set_title(<span class="string">&quot;Delta of L Channel&quot;</span>)</span><br><span class="line">    ax_L.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_S)</span><br><span class="line">    ax_S.bar(np.arange(x_len), delta_S, color=get_colors(<span class="string">&quot;gray&quot;</span>, x_len))</span><br><span class="line">    ax_S.set_title(<span class="string">&quot;Delta of S Channel&quot;</span>)</span><br><span class="line">    ax_S.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    fig.savefig(path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">make_diff_image</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, path: <span class="built_in">str</span></span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;叠图查看差异, 如果尺寸不一样或者保存失败返回 False.&quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1)</span><br><span class="line">    img2 = read_image_as_hls(img2)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> img1.shape != img2.shape:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    img1_H, img1_L, img1_S = cv2.split(img1)</span><br><span class="line">    img2_H, img2_L, img2_S = cv2.split(img2)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 色相是 [0, 255] 的环形取值, 因此计算的时候要取环上短侧的距离</span></span><br><span class="line">    diff_H = np.<span class="built_in">min</span>([img1_H - img2_H, img2_H - img1_H], axis=<span class="number">0</span>)</span><br><span class="line">    diff_H = cv2.normalize(diff_H, <span class="literal">None</span>, <span class="number">0</span>, <span class="number">255</span>, cv2.NORM_MINMAX)</span><br><span class="line">    diff_L = cv2.absdiff(img1_L, img2_L)</span><br><span class="line">    diff_S = cv2.absdiff(img1_S, img2_S)</span><br><span class="line">    diff_img = np.concatenate([diff_H, diff_L, diff_S], axis=<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> cv2.imwrite(path, diff_img)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;img1&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;img2&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-hist&quot;</span>, default=<span class="string">&quot;hist.png&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-diff&quot;</span>, default=<span class="string">&quot;diff.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    sim = calc_image_similarity(args.img1, args.img2)</span><br><span class="line">    <span class="built_in">print</span>(sim)</span><br><span class="line">    draw_image_hist_delta(args.img1, args.img2, args.out_hist)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> make_diff_image(args.img1, args.img2, args.out_diff):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;尺寸不同, 无法计算差分&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="运行效果"><a href="#运行效果" class="headerlink" title="运行效果"></a>运行效果</h2><p>输入两张图片, 例如:</p>
-<div class="group-picture"><div class="group-picture-row"><div class="group-picture-column"><img data-src="https://ww-rm.github.io/static/image/imgcmp/lenna1.png" alt="lenna1.png"></div><div class="group-picture-column"><img data-src="https://ww-rm.github.io/static/image/imgcmp/lenna2.png" alt="lenna2.png"></div></div></div>
-
-<p>可以得到相似度: HlsSimilarity(H=0.32851660966060825, L=0.6765325641597513, S=0.6573630520719462)</p>
-<p>并且有差异图:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/imgcmp/hist.png" alt="hist.png"></p>
-<p><img data-src="https://ww-rm.github.io/static/image/imgcmp/diff.png" alt="diff.png"></p>
-<p>可以看出来左图比右图多了很多红色部分, 并且少一一丢丢的蓝色.</p>
-<p>并且左图更亮, 且颜色饱和度更高.</p>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>OpenCV</tag>
-        <tag>图像比对</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>解决 Github SSH 连接超时</title>
-    <url>//posts/2024/01/17/githubssh-timeout/</url>
-    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
-<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
-<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
-
-<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
-<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
-<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
-<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
-<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
-
-<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
-<p>因此, 解决方案就是添加下面的配置:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
-
-<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
-<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
-<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>从零开始的 DDPM 动漫头像生成</title>
     <url>//posts/2024/02/16/ddpm/</url>
     <content><![CDATA[<p>Stable Diffusion 已经火了很久了, 在此之前也是在自己电脑上部署过 Github 上那个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0FVVE9NQVRJQzExMTEvc3RhYmxlLWRpZmZ1c2lvbi13ZWJ1aQ==">stable-diffusion-webui<i class="fa fa-external-link-alt"></i></span>. 作为一个折腾分子, 本着更深入了解一下概率扩散模型的想法, 决定在参考其他教程的基础上从零开始炼制一个基于 DDPM 的动漫头像生成模型.</p>
@@ -1063,6 +998,71 @@
         <tag>DDPM</tag>
         <tag>动漫头像生成</tag>
         <tag>概率扩散模型</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 OpenCV 进行图像对比</title>
+    <url>//posts/2024/08/02/imgcmp/</url>
+    <content><![CDATA[<p>记录一下最近写的一个小工具模块, 用来比较两张图像之间的相似度, 并且输出直方图差异以及像素差异.</p>
+<span id="more"></span>
+
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>目标是比较两张相同 RGB 图像的相似度, 看它们之间是否存在色彩阴影亮度之类的区别.</p>
+<p>因此首先将图像读取后转换成 HLS 通道格式, 再依次求解每个通道上的直方图差异以及像素差分图.</p>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> namedtuple</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">HlsSimilarity = namedtuple(<span class="string">&quot;HlsSimilarity&quot;</span>, [<span class="string">&quot;H&quot;</span>, <span class="string">&quot;L&quot;</span>, <span class="string">&quot;S&quot;</span>])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_image_as_hls</span>(<span class="params">path: <span class="built_in">str</span>, blur_ksize: <span class="built_in">int</span> = <span class="number">0</span></span>) -&gt; np.ndarray:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取图像并转换成 HLS 格式.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    由于对比的时候过于灵敏, 所以有必要加一定程度的模糊.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        image: 形状为 (H, W, 3)</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img = cv2.imread(path, cv2.IMREAD_COLOR)</span><br><span class="line">    <span class="keyword">if</span> blur_ksize &gt; <span class="number">0</span>:</span><br><span class="line">        img = cv2.blur(img, (blur_ksize, blur_ksize))</span><br><span class="line">    img = cv2.cvtColor(img, cv2.COLOR_BGR2HLS_FULL)</span><br><span class="line">    <span class="keyword">return</span> img</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_image_hist_delta</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span></span>) -&gt; <span class="type">Tuple</span>[np.ndarray, np.ndarray, np.ndarray]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两张直方图差异</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        delta: (H, L, S) 三个分量的直方图差异</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1)</span><br><span class="line">    img2 = read_image_as_hls(img2)</span><br><span class="line"></span><br><span class="line">    hist_delta = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">3</span>):</span><br><span class="line">        h1 = cv2.calcHist([img1], [i], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]).flatten()</span><br><span class="line">        h2 = cv2.calcHist([img2], [i], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]).flatten()</span><br><span class="line">        hist_delta.append(h1 - h2)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">tuple</span>(hist_delta)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_colors</span>(<span class="params">cname: <span class="built_in">str</span> = <span class="string">&quot;hsv&quot;</span>, size: <span class="built_in">int</span> = <span class="number">256</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;获得连续的调色板颜色序列&quot;&quot;&quot;</span></span><br><span class="line">    cmap = plt.get_cmap(cname, size)</span><br><span class="line">    <span class="keyword">return</span> [cmap(i)[:<span class="number">3</span>] <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(size)]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_image_similarity</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, blur_ksize: <span class="built_in">int</span> = <span class="number">15</span></span>) -&gt; HlsSimilarity:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;计算两张图像的相似度, 具体算法见 https://docs.opencv.org/4.5.5/d8/dc8/tutorial_histogram_comparison.html</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    此处使用 Bhattacharyya distance, 并且加了一定量的模糊处理.</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        similarities: (H, L, S) 三个分量的相似度</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1, blur_ksize)</span><br><span class="line">    img2 = read_image_as_hls(img2, blur_ksize)</span><br><span class="line"></span><br><span class="line">    similarities = [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]</span><br><span class="line">    similarities[<span class="number">0</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">0</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">0</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line">    similarities[<span class="number">1</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">1</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">1</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line">    similarities[<span class="number">2</span>] = <span class="number">1</span> - cv2.compareHist(</span><br><span class="line">        cv2.calcHist([img1], [<span class="number">2</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), cv2.calcHist([img2], [<span class="number">2</span>], <span class="literal">None</span>, [<span class="number">256</span>], [<span class="number">0</span>, <span class="number">255</span>]), <span class="number">3</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> HlsSimilarity(*similarities)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw_image_hist_delta</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, path: <span class="built_in">str</span>, title: <span class="built_in">str</span> = <span class="string">&quot;Hist Delta of HLS Image (First - Second)&quot;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;绘制差异直方图情况&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    delta_H, delta_L, delta_S = calc_image_hist_delta(img1, img2)</span><br><span class="line"></span><br><span class="line">    fig, axes = plt.subplots(<span class="number">3</span>, <span class="number">1</span>, squeeze=<span class="literal">True</span>, figsize=(<span class="number">12</span>, <span class="number">16</span>), dpi=<span class="number">300</span>)</span><br><span class="line">    fig.subplots_adjust(left=<span class="number">0.1</span>, right=<span class="number">0.9</span>, top=<span class="number">0.93</span>, bottom=<span class="number">0.07</span>)</span><br><span class="line">    fig.suptitle(title)</span><br><span class="line">    fig.supxlabel(<span class="string">&quot;Pixel Value&quot;</span>)</span><br><span class="line">    fig.supylabel(<span class="string">&quot;Pixel Count&quot;</span>)</span><br><span class="line"></span><br><span class="line">    axes: <span class="built_in">list</span>[plt.Axes]</span><br><span class="line">    ax_H, ax_L, ax_S = axes</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_H)</span><br><span class="line">    ax_H.bar(np.arange(x_len), delta_H, color=get_colors(<span class="string">&quot;hsv&quot;</span>, x_len))</span><br><span class="line">    ax_H.set_title(<span class="string">&quot;Delta of H Channel&quot;</span>)</span><br><span class="line">    ax_H.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_L)</span><br><span class="line">    ax_L.bar(np.arange(x_len), delta_L, color=get_colors(<span class="string">&quot;gray&quot;</span>, x_len))</span><br><span class="line">    ax_L.set_title(<span class="string">&quot;Delta of L Channel&quot;</span>)</span><br><span class="line">    ax_L.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    x_len = <span class="built_in">len</span>(delta_S)</span><br><span class="line">    ax_S.bar(np.arange(x_len), delta_S, color=get_colors(<span class="string">&quot;gray&quot;</span>, x_len))</span><br><span class="line">    ax_S.set_title(<span class="string">&quot;Delta of S Channel&quot;</span>)</span><br><span class="line">    ax_S.set_xticks(np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), np.arange(<span class="number">0</span>, x_len, <span class="number">10</span>), rotation=-<span class="number">45</span>)</span><br><span class="line"></span><br><span class="line">    fig.savefig(path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">make_diff_image</span>(<span class="params">img1: <span class="built_in">str</span>, img2: <span class="built_in">str</span>, path: <span class="built_in">str</span></span>) -&gt; <span class="built_in">bool</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;叠图查看差异, 如果尺寸不一样或者保存失败返回 False.&quot;&quot;&quot;</span></span><br><span class="line">    img1 = read_image_as_hls(img1)</span><br><span class="line">    img2 = read_image_as_hls(img2)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> img1.shape != img2.shape:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    img1_H, img1_L, img1_S = cv2.split(img1)</span><br><span class="line">    img2_H, img2_L, img2_S = cv2.split(img2)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 色相是 [0, 255] 的环形取值, 因此计算的时候要取环上短侧的距离</span></span><br><span class="line">    diff_H = np.<span class="built_in">min</span>([img1_H - img2_H, img2_H - img1_H], axis=<span class="number">0</span>)</span><br><span class="line">    diff_H = cv2.normalize(diff_H, <span class="literal">None</span>, <span class="number">0</span>, <span class="number">255</span>, cv2.NORM_MINMAX)</span><br><span class="line">    diff_L = cv2.absdiff(img1_L, img2_L)</span><br><span class="line">    diff_S = cv2.absdiff(img1_S, img2_S)</span><br><span class="line">    diff_img = np.concatenate([diff_H, diff_L, diff_S], axis=<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> cv2.imwrite(path, diff_img)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;img1&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;img2&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-hist&quot;</span>, default=<span class="string">&quot;hist.png&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--out-diff&quot;</span>, default=<span class="string">&quot;diff.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    sim = calc_image_similarity(args.img1, args.img2)</span><br><span class="line">    <span class="built_in">print</span>(sim)</span><br><span class="line">    draw_image_hist_delta(args.img1, args.img2, args.out_hist)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> make_diff_image(args.img1, args.img2, args.out_diff):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;尺寸不同, 无法计算差分&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行效果"><a href="#运行效果" class="headerlink" title="运行效果"></a>运行效果</h2><p>输入两张图片, 例如:</p>
+<div class="group-picture"><div class="group-picture-row"><div class="group-picture-column"><img data-src="https://ww-rm.github.io/static/image/imgcmp/lenna1.png" alt="lenna1.png"></div><div class="group-picture-column"><img data-src="https://ww-rm.github.io/static/image/imgcmp/lenna2.png" alt="lenna2.png"></div></div></div>
+
+<p>可以得到相似度: HlsSimilarity(H=0.32851660966060825, L=0.6765325641597513, S=0.6573630520719462)</p>
+<p>并且有差异图:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/imgcmp/hist.png" alt="hist.png"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/imgcmp/diff.png" alt="diff.png"></p>
+<p>可以看出来左图比右图多了很多红色部分, 并且少一一丢丢的蓝色.</p>
+<p>并且左图更亮, 且颜色饱和度更高.</p>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>OpenCV</tag>
+        <tag>图像比对</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决 Github SSH 连接超时</title>
+    <url>//posts/2024/01/17/githubssh-timeout/</url>
+    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
+<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
+<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
+
+<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
+<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
+<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
+<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
+<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
+
+<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
+<p>因此, 解决方案就是添加下面的配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
+
+<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
+<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
@@ -2061,6 +2061,24 @@
       </tags>
   </entry>
   <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>基于 PyTorch 的手写数字分类</title>
     <url>//posts/2022/08/18/wast-dl/</url>
     <content><![CDATA[<p>本篇算是对 <code>pytorch</code> 这一 <code>python</code> 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 <code>pytorch</code> 来搭建一个自定义的网络结构, 并加以训练.</p>
@@ -2160,24 +2178,6 @@
         <tag>深度学习</tag>
         <tag>pytorch</tag>
         <tag>手写数字分类</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
-      </categories>
-      <tags>
-        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>

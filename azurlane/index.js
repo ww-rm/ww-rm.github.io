@@ -649,7 +649,7 @@ function loadSkin(skinName) {
 
 /** 链接点击事件 */
 function changeSkinHandler(event) {
-    loadSkin(event.target.getAttribute('data-key'));
+    loadSkin(event.target.getAttribute("data-key"));
 }
 
 /** canvas 缩放事件 */
@@ -802,6 +802,27 @@ function backgroundColorChange(event) {
     setBackgroundColor(value);
 }
 
+/** 皮肤列表筛选事件 */
+function filterSkinInputChange(event) {
+    var text = event.target.value;
+    console.log(text);
+    var links = document.getElementById("shipnames-container").querySelectorAll("a");
+    if (!text) {
+        links.forEach(link => { link.style.backgroundColor = ""; });
+    } else {
+        text = text.trim();
+        console.log(text);
+        links.forEach(link => {
+            console.log(link.textContent);
+            if (link.textContent.includes(text)) {
+                link.style.backgroundColor = "yellow";
+            } else {
+                link.style.backgroundColor = "";
+            }
+        });
+    }
+}
+
 function main() {
     // 生成皮肤列表
     var container = document.getElementById("shipnames-container");
@@ -814,6 +835,9 @@ function main() {
         link.onclick = changeSkinHandler;
         container.appendChild(link);
     }
+
+    // 添加筛选高亮
+    document.getElementById("filter-skin-input").oninput = filterSkinInputChange;
 
     // 创建绘图资源
     var config = { alpha: false };
@@ -840,7 +864,7 @@ function main() {
     context.viewport(0, 0, canvas.width, canvas.height);
     renderer.premultipliedAlpha = true; // 碧蓝的东西默认是有 PMA 的
 
-    // 事件绑定
+    // 交互事件绑定
     canvas.onwheel = canvasWheelHandler;
     canvas.onmousedown = canvasMouseDown;
     canvas.onmousemove = canvasMouseMove;
@@ -849,6 +873,8 @@ function main() {
     canvas.ontouchstart = canvasTouchStart;
     canvas.ontouchmove = canvasTouchMove;
     canvas.ontouchend = canvasTouchEnd;
+
+    // 控制面板事件绑定
     animationSelect.onchange = animationSelectChange;
     document.getElementsByName("bgcolor").forEach((radio) => {
         radio.onchange = backgroundColorChange;
