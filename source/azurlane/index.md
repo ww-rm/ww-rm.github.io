@@ -26,13 +26,18 @@ type: azurlane-spinepainting
 ## 皮肤列表 (点击名称切换预览)
 
 {% raw %}
+<div class="filter-skin">
+    <!-- 对shipnames-container里的内容进行筛选，被筛选到的元素会被高亮，元素是a标签，如果文本包含给定的筛选内容就是命中 -->
+    <label>筛选:</label>
+    <input type="text" id="filter-skin-input" placeholder="输入关键字进行筛选">
+</div>
 <div id="shipnames-container"></div>
 {% endraw %}
 
 ## 预览界面 (可以进行拖放)
 
 {% raw %}
-<div id="control-panel">
+<div class="control-panel">
     <div class="control-item">
         <label>当前预览:</label>
         <span id="current-shipname">无</span>
