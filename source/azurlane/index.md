@@ -39,17 +39,18 @@ type: azurlane-spinepainting
   }
 
   #control-panel {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
     box-sizing: border-box;
     width: 100%;
-    display: flex;
     padding: 5px;
     background-color: #f8f8f8;
   }
 
   .control-item {
     margin: 5px;
-    display: flex;
-    align-items: center;
   }
 
   .control-item label {
