@@ -1413,73 +1413,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SM9 算法中的塔式扩张公式推导</title>
-    <url>//posts/2023/12/04/sm9fpex/</url>
-    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
-<span id="more"></span>
-
-<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
-<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
-<p>则 $Z$ 可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
-<p>所以:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
-<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
-<p>即解二元一次方程组:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>解得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
-<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
-<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
-<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
-<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
-<p>同理可得模逆运算为:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
-<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
-<p>则 $Z$ 可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
-<p>所以:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
-<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
-<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
-<p>即解三元一次方程组:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>解得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line">Fp2Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp4Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp12Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">FpExEle = <span class="type">Tuple</span>[<span class="built_in">int</span>, ...]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>塔式扩张</tag>
-        <tag>扩域运算</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>ECC 算法原理简介与实现</title>
     <url>//posts/2022/12/07/simple-ecc/</url>
     <content><![CDATA[<p>本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.</p>
@@ -1570,6 +1503,73 @@
       </tags>
   </entry>
   <entry>
+    <title>SM9 算法中的塔式扩张公式推导</title>
+    <url>//posts/2023/12/04/sm9fpex/</url>
+    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
+<span id="more"></span>
+
+<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
+<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
+<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
+<p>即解二元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
+<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
+<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
+<p>同理可得模逆运算为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
+<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
+<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
+<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
+<p>即解三元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line">Fp2Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp4Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp12Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">FpExEle = <span class="type">Tuple</span>[<span class="built_in">int</span>, ...]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>塔式扩张</tag>
+        <tag>扩域运算</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
     <url>//posts/2024/06/16/sm9gfn/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
@@ -1602,6 +1602,46 @@
         <tag>SM9</tag>
         <tag>SM9优化</tag>
         <tag>稀疏乘法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一次意外的 Github SSH 连接失败</title>
+    <url>//posts/2024/01/15/ssh-github/</url>
+    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
+<p>但是 clone 仓库时, 出现了如下报错:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
+
+<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
+<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
+<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
+<p>然后 Windows 给了一个愉快的输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+
+<p>但是 Ubuntu 还是失败:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
+<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
+
+<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
+<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
+<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
@@ -1823,46 +1863,6 @@
         <tag>MSYS2</tag>
         <tag>MinGW</tag>
         <tag>Clang</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>一次意外的 Github SSH 连接失败</title>
-    <url>//posts/2024/01/15/ssh-github/</url>
-    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
-<p>但是 clone 仓库时, 出现了如下报错:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
-
-<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
-<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
-<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
-<p>然后 Windows 给了一个愉快的输出:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
-
-<p>但是 Ubuntu 还是失败:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
-<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
-
-<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
-<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
-<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-
-<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
