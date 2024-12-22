@@ -674,7 +674,6 @@ function getDistance(touches) {
 
 /** canvas 触摸开始事件 */
 function canvasTouchStart(event) {
-    event.preventDefault();
     if (event.touches.length === 1) {
         // 单指拖动
         dragSrc = { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -686,7 +685,7 @@ function canvasTouchStart(event) {
 
 /** canvas 触摸移动事件 */
 function canvasTouchMove(event) {
-    event.preventDefault(); // 防止默认行为（如页面滚动）
+    event.preventDefault();
 
     if (event.touches.length === 2 && pinchDistance) {
         // 处理双指缩放
@@ -713,7 +712,6 @@ function canvasTouchMove(event) {
 
 /** canvas 触摸释放事件 */
 function canvasTouchEnd(event) {
-    event.preventDefault();
     if (event.touches.length < 2) {
         pinchDistance = null;
     }
