@@ -131,6 +131,55 @@
       </tags>
   </entry>
   <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>国密算法的纯 Python 实现</title>
     <url>//posts/2023/12/14/gmalg/</url>
     <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
@@ -190,55 +239,6 @@
         <tag>SM9</tag>
         <tag>ZUC</tag>
         <tag>gmalg</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
       </tags>
   </entry>
   <entry>
@@ -313,44 +313,6 @@
         <tag>hashtool</tag>
         <tag>C#</tag>
         <tag>winforms</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>安卓 APK 重打包</title>
-    <url>//posts/2024/07/09/apkrepack/</url>
-    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
-<p>本文参考<span class="exturl" data-url="aHR0cHM6Ly9jcmlmYW4uZ2l0aHViLmlvL2FuZHJvaWRfcmVfcmVwYWNrX2Fway93ZWJzaXRlL3JlcGFja19wcm9jZXNzLw==">重新打包apk流程<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
-<ol>
-<li>解包</li>
-<li>修改包体</li>
-<li>重打包</li>
-<li>对齐</li>
-<li>重签名</li>
-</ol>
-<p>顺序很重要, 签名的步骤一定是最后完成.</p>
-<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
-<p>修改包体可以自己按需手动或者脚本修改.</p>
-<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
-<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
-<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
-
-<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
-<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
-
-<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>安卓</tag>
-        <tag>APK</tag>
-        <tag>重打包</tag>
       </tags>
   </entry>
   <entry>
@@ -510,6 +472,44 @@
         <tag>python 库</tag>
         <tag>PyPI</tag>
         <tag>网易云音乐</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>安卓 APK 重打包</title>
+    <url>//posts/2024/07/09/apkrepack/</url>
+    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
+<p>本文参考<span class="exturl" data-url="aHR0cHM6Ly9jcmlmYW4uZ2l0aHViLmlvL2FuZHJvaWRfcmVfcmVwYWNrX2Fway93ZWJzaXRlL3JlcGFja19wcm9jZXNzLw==">重新打包apk流程<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
+<ol>
+<li>解包</li>
+<li>修改包体</li>
+<li>重打包</li>
+<li>对齐</li>
+<li>重签名</li>
+</ol>
+<p>顺序很重要, 签名的步骤一定是最后完成.</p>
+<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
+<p>修改包体可以自己按需手动或者脚本修改.</p>
+<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
+<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
+<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
+
+<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
+<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>安卓</tag>
+        <tag>APK</tag>
+        <tag>重打包</tag>
       </tags>
   </entry>
   <entry>
@@ -1605,200 +1605,6 @@
       </tags>
   </entry>
   <entry>
-    <title>一次意外的 Github SSH 连接失败</title>
-    <url>//posts/2024/01/15/ssh-github/</url>
-    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
-<p>但是 clone 仓库时, 出现了如下报错:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
-
-<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
-<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
-<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
-<p>然后 Windows 给了一个愉快的输出:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
-
-<p>但是 Ubuntu 还是失败:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
-
-<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
-<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
-
-<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
-<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
-<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
-
-<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 transformers.Pipeline 迭代生成数据</title>
-    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
-    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
-<span id="more"></span>
-
-<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>然后这样子进行推理.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
-
-<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
-<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
-<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
-<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
-<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>其中提到了:</p>
-<blockquote>
-<p>For ease of use, a generator is also possible:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
-<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
-<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
-<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
-<ul>
-<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
-<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
-</ul>
-<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
-<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
-<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
-<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
-<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>transformers</tag>
-        <tag>Pipeline</tag>
-        <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>腾讯测试开发实习面试经验分享</title>
-    <url>//posts/2024/03/19/tencent-intership-interview/</url>
-    <content><![CDATA[<p>腾讯 IEG 25 届测试开发实习生面试经验分享.</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>寒假前发了一个腾讯的专项实习通知, 时间很早, 2月底就开始投了.</p>
-<p>然而寒假还是摸了一个月的鱼, 不过抱着试一试的心态, 月底还是投了一下测试开发, 毕竟力扣才刚开始刷, 八股一行没看, 心里着实慌得很, 而且还是第一次面试. 虽然在此之前偶尔刷到过一些面经, 但是真的轮到自己的时候, 还是很紧张的.</p>
-<p>投了简历之后, 要先做一个测评, 必须要做了才能进下一个流程.</p>
-<p>测评分三部分:</p>
-<ol>
-<li>第一部分是一大堆选择题加一道简答题, 就是一些职场场景题, 按自己想法慢慢做就行了.</li>
-<li>第二部分和第一部分差不多, 但是只有选择题.</li>
-<li>第三部分是智力题, 和公务员的行测差不多, 说实话我几乎都是蒙的, 但是问题不大.</li>
-</ol>
-<p>三部分可以分开做, 不过确实要一点耐心和时间, 总共做了 30 + 30 + 30 = 90 分钟的时间.</p>
-<p>做完之后就可以等着面试邀请函了, 邮箱和短信都会有通知.</p>
-<p>2 月底做的测评, 3 月初收到的面试邀请函, 中间隔了 5 天左右, 所以还是要稍微等一等.</p>
-<p>下面进正文. 信息发布群里的相关负责人说这一次投递相当于是实习的提前批, 因此可能面试流程看上去比秋招紧凑很多, 总共 3 轮:</p>
-<ol>
-<li>初试 (程序面). 其实就是技术面.</li>
-<li>复试 (初试). 也是技术面.</li>
-<li>HR 面试 (复试). 和 HR 聊天环节.</li>
-</ol>
-<h2 id="初试"><a href="#初试" class="headerlink" title="初试"></a>初试</h2><p>收到邀请函后一天进行一面.</p>
-<h3 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h3><p>开始面试之后, 面试官简单问了一下平常用什么语言居多, 电脑上是不是装了对应的 IDE, 然后发了两道题说先做一下, 给了 1 个小时的时间.</p>
-<p>题目可以在自己电脑写并且调试, 这一点相当友好, 有熟悉的环境和工具确实写起来压力小很多.</p>
-<p>但是腾讯会议远程面试, 这一面我全程都是共享桌面和开着视频的, 因此大伙也不要有什么侥幸心理, 冷静下来认真写代码就行了.</p>
-<p>题目不难, 就是选的力扣两道中等题, 一道是很经典的动态规划, 虽然之前没写过但是很熟悉解法, 很快就解决了.</p>
-<p>另外一道是一个双指针题, 好消息是, 它在我仅有的刷了的几十道题目里. 不过坏消息是, 当时刷的时候是临时想出来的奇怪方法, 面试的时候已经完全忘记当时咋写的了.<del>好在最后凭借模糊的记忆又临时想出来一个方法, 以至于面试官专门要我讲了一下这题思路.</del></p>
-<p>总共花了大概半个小时吧, 把两道题写完之后, 面试官会自己阅读代码, 并不需要提交然后测试样例或者讲解思路啥的, 主要是看你的代码书写习惯, 以及你算法思路的正确性, 当然你自己肯定得把题面里给的几个简单例子验证一下.<del>测开不测试这合理吗</del>.</p>
-<p>建议大家养成良好的代码风格, 平常多注重代码的可阅读性, 能让人比较容易的看清你的代码思路. 共享屏幕让面试官看着写代码还是有点压力的<del>相当于有人看着你写数学题</del>, 代码写的清楚点就算最后没做出来也能和面试官交流自己的思路, 不至于啥好印象都没有.</p>
-<h3 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h3><p>写完代码之后开始问八股了, 总结为: 真叫人摸不着头脑.jpg</p>
-<p>其实问的问题都不难, 真不难, 但是无奈我也是真没准备, 一丁点都没准备的那种.</p>
-<p>上来就是几个操作系统相关的问题, 我最近一次学操作系统还是大二的时候, 咱就是说, 真不记得啥了.</p>
-<p>问了进程怎么管理的, 进程和线程区别, 虚拟内存怎么管理的, 堆和栈的区别, 线程同步的方法.</p>
-<p>我只能凭着记忆勉强答一下, 也就一些基本概念吧.<del>甚至虚拟内存连概念都不记得了.</del></p>
-<p>然后还问了一些其他的, 比如快速排序怎么实现的, 负数是如何表示的, 先进先出和后进先出的区别, 甚至还问了一下知不知道关系数据库的范式是什么.<del>八百年前学的东西了, 我仅存的记忆告诉我似乎是用在表设计的时候减少冗余提高效率的.</del></p>
-<p>不过这一面是技术面, 面试官也是懂的, 也不会对着标准答案死抠定义, 你清楚这个知识点的话, 面试官听了自然明白, 尽量把自己会的内容清楚的表述出来就行, 不会的也就说自己对这方面应用的少, 不是很了解.</p>
-<h3 id="项目经历"><a href="#项目经历" class="headerlink" title="项目经历"></a>项目经历</h3><p>由于我没有实习经历, 所以接下来就直接问简历上的项目.<del>害, 之前看群里说一面可能就是撕几道题, 结果自己完全没看一下项目内容, 都忘得差不多了.</del></p>
-<p>我写了 4 个上去, 2 个个人项目, 2 个团队合作项目.</p>
-<p>面试官首先问觉得这几个项目里难度最高的是哪个, 能否介绍一下项目内容.</p>
-<p>我说了一个个人项目, <a href="https://ww-rm.github.io/posts/2023/08/30/desktopsprite/">基于 Spine 的碧蓝航线桌宠</a>, 这个是当时自己感兴趣做的, 虽然是基于学习的心态做的自娱自乐程序, 但是确实对我来说挺难的, 因为专业从未接触过计算机图形学相关的内容, 而且也自学了一下原生的 win32 开发, 期间还遇到一些数学问题, 都折腾了挺久的.</p>
-<p>介绍了一下为什么做这个项目, 项目实现了些啥, 觉得最难的地方在哪, 怎么解决的诸如此类的.</p>
-<p>主要还是要熟悉自己的项目, 向面试官充分展示自己的能力水平, 不要让面试官觉得就是照着网上的教程随便做做了事, 要能体现自己在做这个项目途中解决问题的能力, 以及对自己的提升收获.</p>
-<p>不过运气比较好的是, 由于这一面远程面试我一开始是共享屏幕的, 加之这个项目是个桌宠, 很适合展示, 自己电脑上也一直在用, 源码也都还在, 所以就直接给面试官展示项目效果了. 顺带连源码都一起被看了一下, 问了一些具体逻辑的实现方法和类的设计.</p>
-<p>这个项目问完之后还问了其他的项目, 这个看具体情况吧, 认真答就好了.<del>也看自己的吹牛能力.</del></p>
-<h3 id="初试尾声"><a href="#初试尾声" class="headerlink" title="初试尾声"></a>初试尾声</h3><p>最后有一些经典的反问环节, 不过我当时太紧张了, 也没问啥, 反倒是面试官引导我是不是要了解点什么.</p>
-<p>其实事后想想以后可以提前准备一下的, 毕竟你投了简历, 肯定有一些想要了解的基本情况对吧.</p>
-<h2 id="复试"><a href="#复试" class="headerlink" title="复试"></a>复试</h2><p>结果出的很快, 刚面完晚上就收到复试邀请函了, 于是直接约的后一天继续二面.</p>
-<h3 id="自我介绍"><a href="#自我介绍" class="headerlink" title="自我介绍"></a>自我介绍</h3><p>简单介绍一下自己, 学校, 专业, 研究方向, 个人能力, 实习经历, 项目经历 (其实就是把自己简历上的内容过一遍, 只是我没经验, 结果被动的等着面试官问经历了, 没把话题聊开).</p>
-<p>经历简单描述一下就好, 可以等待面试官后续提问, 也可以自己主动介绍详细一点, 突出自己的技术栈.</p>
-<h3 id="自由交流"><a href="#自由交流" class="headerlink" title="自由交流"></a>自由交流</h3><p>如果说一面注重你的表面能力, 比如具体的代码能力, 项目经历, 量化的指标啥的, 那么这一面侧重于你的综合能力.</p>
-<p>从自我介绍开始, 最好的方式是你有所侧重的介绍自己, 然后让面试官能够自然而然的切入到一个你熟悉的话题里, 比如你介绍到某个项目经历时, 可以先发制人说说自己印象很深的点, 采用了什么技术, 掌握了什么技能, 之后面试官就会以此为话题继续深入了解你的能力.<del>别像我一样傻不拉几的.</del></p>
-<p>不同于一面, 这一面问题都比较发散并深入, 其实也更加注重于将来的工作内容, 例如我投的是测试开发, 除了问我项目的技术问题外, 还会着重问我项目的性能优化, 如何减少资源占用, 如何让整个项目结果更好, 而不仅仅是实现功能.</p>
-<p>同时问题也更偏向实际工程应用, 并不只是单纯实现一个算法片段, 而是要对项目的整体结构有清晰的认知, 知道项目的瓶颈在哪, 自己又是如何考虑解决的.</p>
-<p>拿我前面那个桌宠项目来说, 面试官除了问基本的项目逻辑外, 着重问了是否关注过程序的性能优化, 如何优化渲染过程中 CPU, 内存, GPU 的占用问题, 如何提高渲染的性能. 不过我没有系统性学习过, 对这些内容只能尽量答一些, 并且有些方面我也确实从没考虑过 (例如内存占用, 桌宠占用太小完全没考虑过).</p>
-<p>感觉还是挺注重程序性能的, 可能是游戏测开的原因?</p>
-<p>这部分内容太自由了, 都是思想上的交流, 可参考性很低, 比较看面试官, 认真回答自己的思考结果就好了.</p>
-<h3 id="场景题"><a href="#场景题" class="headerlink" title="场景题"></a>场景题</h3><p>聊完简历上的内容之后, 还是来了道场景题.</p>
-<p>具体的场景就不说了, 抽象一下就是, 有一群人, 他们之间存在好友关系, 假设这群人一定可以被划分成两个集合, 并且每个集合内的人互相不存在好友关系, 要如何实现这个划分过程.</p>
-<p>害, 说实话我一开始毫无头绪, 然后想了半天给了一个时间和空间复杂度都很高的方法, 显然是不太行的. 之后就是和面试官继续交流, 怎么优化算法. 这期间我乱扯了很多, 但是估计都没找到正道. 最后时间快到了, 我说我感觉暂时想不出来更好的方案了, 面试官也就结束这部分了.</p>
-<p>感觉这部分拉了, 自己平时确实也没怎么关注一些这样的算法问题. 不过就算不知道也要积极的说出自己的想法, 和面试官交流, 让面试官看到你解决问题的过程.</p>
-<p>(事后了解了一下这玩意叫二分图, 所有的顶点可以被划分为两个独立的集合, 使得每条边的两个顶点分别属于不同的集合. 其实挺简单的, 但是没办法, 面试的时候还完全没看图论相关内容.)</p>
-<h3 id="复试尾声"><a href="#复试尾声" class="headerlink" title="复试尾声"></a>复试尾声</h3><p>最后也是有经典的反问过程, 不过这次总结了一面的经验, 提前想好了要问些啥, 倒是得到了一些自己想要了解的内容. 比如开发语言和用的技术, 项目管理制度啥的. 提前准备一下就能趁着这个机会向面试官了解一下自己意向工作的地方如何.</p>
-<h2 id="HR-面试"><a href="#HR-面试" class="headerlink" title="HR 面试"></a>HR 面试</h2><p>大概隔了一周时间, 终于收到三面邀请, 差点以为要挂了<del>二面太拉了</del>.</p>
-<p>这一面是非技术面, 上来自我介绍一下, 然后主要是人事和你聊聊天, 问问你的个人情况, 现在在做的内容, 看看你对工作的态度, 面对问题的解决思路, 确认一下你的个人信息和工作意向, 比较轻松的氛围, 注意一下言谈举止就好.</p>
-<p>时间也不长, 不到半小时就结束了, 这一面基本就是走走流程, 不出意外面完等后续就好.</p>
-<p><del>个人认为, 只要不和面试官打起来这一面都不至于挂.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>三面之后大概一周就能收到人事发来的 Offer 了, 需要在系统或者邮件里确认接受即可, 具体的入职事项可以和跟自己对接的 HR 进行沟通了解.</p>
-<p>总结一下整个面试的话, 确实是投的早加运气好吧, 感觉有这么一些比较令面试官满意的地方:</p>
-<ul>
-<li>一面两道手撕很顺畅<del>甚至面试官说我写挺快的?</del></li>
-<li>然后简历里有一个面试官刚好比较感兴趣的项目. 感觉这个是最重要的, 有一个对口的项目真的很加分.</li>
-</ul>
-<p>当然由于准备不充分, 也存在很多问题, 包括但不限于:</p>
-<ul>
-<li>八股完全没看, 全凭记忆回答.</li>
-<li>也没好好复习自己的项目内容, 问的时候很多东西自己也记不起来当时咋写的了.</li>
-<li>场景题也答的一塌糊涂, 刚开始一点思路都无, 也是自己平常这方面接触太少.</li>
-<li>没准备一个良好的自我介绍, 老是等着面试官被动提问.</li>
-<li>等等等等...</li>
-</ul>
-<p>通过面试才能知道自己有很多需要提升的地方, 应该朝着哪些方面提升自己, 也只有不断面试才能消除自己对面试的紧张感, 让自己能够在面试中充分的展现自己最好的状态.</p>
-<p>最后, 祝各位同学都能顺利通过面试, 收到自己心仪的 Offer~</p>
-<p><img data-src="https://ww-rm.github.io/static/image/tencent-intership-interview/sign_img.png" alt="tencent_offer"></p>
-]]></content>
-      <categories>
-        <category>经验分享</category>
-      </categories>
-      <tags>
-        <tag>腾讯</tag>
-        <tag>面经</tag>
-        <tag>实习</tag>
-        <tag>测试开发</tag>
-        <tag>IEG</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>在 Windows 上编译安装 NUPACK</title>
     <url>//posts/2024/05/11/py-nupack/</url>
     <content><![CDATA[<p>之前项目里用到了 <span class="exturl" data-url="aHR0cHM6Ly9udXBhY2sub3JnLw==">NUPACK<i class="fa fa-external-link-alt"></i></span> 这个软件, 用来做引物二级结构预测, 但是就<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQv">官方文档<i class="fa fa-external-link-alt"></i></span>上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程.</p>
@@ -2017,6 +1823,200 @@
         <tag>MSYS2</tag>
         <tag>MinGW</tag>
         <tag>Clang</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一次意外的 Github SSH 连接失败</title>
+    <url>//posts/2024/01/15/ssh-github/</url>
+    <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>自己 Windows 系统上很早生成了一对 ssh 密钥用于 Github 仓库访问, 然后想在 Ubuntu 的虚拟机里也用同样的密钥去访问 Github, 于是乎直接用 Xftp 连接虚拟机传了上去, 放到 <code>~/.ssh/</code> 目录下.</p>
+<p>但是 clone 仓库时, 出现了如下报错:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">git clone git@github.com:ww-rm/&lt;repo&gt;.git</span><br><span class="line">正克隆到 &#x27;&lt;repo&gt;&#x27;...</span><br><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br><span class="line">fatal: 无法读取远程仓库。</span><br><span class="line"></span><br><span class="line">请确认您有正确的访问权限并且仓库存在。</span><br></pre></td></tr></table></figure>
+
+<h2 id="上下求索"><a href="#上下求索" class="headerlink" title="上下求索"></a>上下求索</h2><p>很迷茫, 自己 Windows 上一直都是用的这个密钥, 复制过去咋就不认了?</p>
+<p>于是搜索一波, 找到了 Github Docs 的 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC9lcnJvci1wZXJtaXNzaW9uLWRlbmllZC1wdWJsaWNrZXk=">Error: Permission denied (publickey)<i class="fa fa-external-link-alt"></i></span> 页面.</p>
+<p>按照上面说的, 用命令 <code>ssh -T git@github.com</code> 分别在 Windows 上和 Ubuntu 上都测试一遍.</p>
+<p>然后 Windows 给了一个愉快的输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hi ww-rm! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+
+<p>但是 Ubuntu 还是失败:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sign_and_send_pubkey: signing failed for RSA &quot;/home/&lt;username&gt;/.ssh/id_rsa&quot; from agent: agent refused operation</span><br><span class="line">git@github.com: Permission denied (publickey).</span><br></pre></td></tr></table></figure>
+
+<p>我把目光落在 <code>agent refused operation</code> 这个提示上.</p>
+<p>一番搜索之后, 得到的结论大部分都是说 key 没有添加, 要使用 <code>ssh-add</code> 命令. 于是再次尝试.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh-add ~/.ssh/id_rsa</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><br><span class="line">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><br><span class="line">Permissions 0644 <span class="keyword">for</span> <span class="string">&#x27;/home/&lt;username&gt;/.ssh/id_rsa&#x27;</span> are too open.</span><br><span class="line">It is required that your private key files are NOT accessible by others.</span><br><span class="line">This private key will be ignored.</span><br></pre></td></tr></table></figure>
+
+<p>这下子报错很明白了, 它告诉我们由于私钥权限太开放了, 所以忽略了这个密钥. 用 <code>ll</code> 看一眼也能发现文件权限是 <code>-rw-r--r--</code>.</p>
+<h2 id="真相"><a href="#真相" class="headerlink" title="真相"></a>真相</h2><p>Xftp 在上传文件的时候, 文件权限自动给了 <code>644</code>, 然后 <code>ssh</code> 忽略了这种高权限的不安全密钥文件.</p>
+<p>所以解决方案就是用 <code>chmod</code> 修改私钥的文件权限, 把组权限去掉, 也就是将原本 <code>644</code> 的权限改成 <code>600</code>.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 600 ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p>修改完之后再次使用 <code>ssh -T git@github.com</code> 在 Ubuntu, 就能成功连接了.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 transformers.Pipeline 迭代生成数据</title>
+    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
+    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后这样子进行推理.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
+<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
+<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
+<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
+<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>其中提到了:</p>
+<blockquote>
+<p>For ease of use, a generator is also possible:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
+<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
+<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
+<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
+<ul>
+<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
+<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
+</ul>
+<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
+<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
+<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
+<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
+<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>transformers</tag>
+        <tag>Pipeline</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>腾讯测试开发实习面试经验分享</title>
+    <url>//posts/2024/03/19/tencent-intership-interview/</url>
+    <content><![CDATA[<p>腾讯 IEG 25 届测试开发实习生面试经验分享.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>寒假前发了一个腾讯的专项实习通知, 时间很早, 2月底就开始投了.</p>
+<p>然而寒假还是摸了一个月的鱼, 不过抱着试一试的心态, 月底还是投了一下测试开发, 毕竟力扣才刚开始刷, 八股一行没看, 心里着实慌得很, 而且还是第一次面试. 虽然在此之前偶尔刷到过一些面经, 但是真的轮到自己的时候, 还是很紧张的.</p>
+<p>投了简历之后, 要先做一个测评, 必须要做了才能进下一个流程.</p>
+<p>测评分三部分:</p>
+<ol>
+<li>第一部分是一大堆选择题加一道简答题, 就是一些职场场景题, 按自己想法慢慢做就行了.</li>
+<li>第二部分和第一部分差不多, 但是只有选择题.</li>
+<li>第三部分是智力题, 和公务员的行测差不多, 说实话我几乎都是蒙的, 但是问题不大.</li>
+</ol>
+<p>三部分可以分开做, 不过确实要一点耐心和时间, 总共做了 30 + 30 + 30 = 90 分钟的时间.</p>
+<p>做完之后就可以等着面试邀请函了, 邮箱和短信都会有通知.</p>
+<p>2 月底做的测评, 3 月初收到的面试邀请函, 中间隔了 5 天左右, 所以还是要稍微等一等.</p>
+<p>下面进正文. 信息发布群里的相关负责人说这一次投递相当于是实习的提前批, 因此可能面试流程看上去比秋招紧凑很多, 总共 3 轮:</p>
+<ol>
+<li>初试 (程序面). 其实就是技术面.</li>
+<li>复试 (初试). 也是技术面.</li>
+<li>HR 面试 (复试). 和 HR 聊天环节.</li>
+</ol>
+<h2 id="初试"><a href="#初试" class="headerlink" title="初试"></a>初试</h2><p>收到邀请函后一天进行一面.</p>
+<h3 id="算法题"><a href="#算法题" class="headerlink" title="算法题"></a>算法题</h3><p>开始面试之后, 面试官简单问了一下平常用什么语言居多, 电脑上是不是装了对应的 IDE, 然后发了两道题说先做一下, 给了 1 个小时的时间.</p>
+<p>题目可以在自己电脑写并且调试, 这一点相当友好, 有熟悉的环境和工具确实写起来压力小很多.</p>
+<p>但是腾讯会议远程面试, 这一面我全程都是共享桌面和开着视频的, 因此大伙也不要有什么侥幸心理, 冷静下来认真写代码就行了.</p>
+<p>题目不难, 就是选的力扣两道中等题, 一道是很经典的动态规划, 虽然之前没写过但是很熟悉解法, 很快就解决了.</p>
+<p>另外一道是一个双指针题, 好消息是, 它在我仅有的刷了的几十道题目里. 不过坏消息是, 当时刷的时候是临时想出来的奇怪方法, 面试的时候已经完全忘记当时咋写的了.<del>好在最后凭借模糊的记忆又临时想出来一个方法, 以至于面试官专门要我讲了一下这题思路.</del></p>
+<p>总共花了大概半个小时吧, 把两道题写完之后, 面试官会自己阅读代码, 并不需要提交然后测试样例或者讲解思路啥的, 主要是看你的代码书写习惯, 以及你算法思路的正确性, 当然你自己肯定得把题面里给的几个简单例子验证一下.<del>测开不测试这合理吗</del>.</p>
+<p>建议大家养成良好的代码风格, 平常多注重代码的可阅读性, 能让人比较容易的看清你的代码思路. 共享屏幕让面试官看着写代码还是有点压力的<del>相当于有人看着你写数学题</del>, 代码写的清楚点就算最后没做出来也能和面试官交流自己的思路, 不至于啥好印象都没有.</p>
+<h3 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h3><p>写完代码之后开始问八股了, 总结为: 真叫人摸不着头脑.jpg</p>
+<p>其实问的问题都不难, 真不难, 但是无奈我也是真没准备, 一丁点都没准备的那种.</p>
+<p>上来就是几个操作系统相关的问题, 我最近一次学操作系统还是大二的时候, 咱就是说, 真不记得啥了.</p>
+<p>问了进程怎么管理的, 进程和线程区别, 虚拟内存怎么管理的, 堆和栈的区别, 线程同步的方法.</p>
+<p>我只能凭着记忆勉强答一下, 也就一些基本概念吧.<del>甚至虚拟内存连概念都不记得了.</del></p>
+<p>然后还问了一些其他的, 比如快速排序怎么实现的, 负数是如何表示的, 先进先出和后进先出的区别, 甚至还问了一下知不知道关系数据库的范式是什么.<del>八百年前学的东西了, 我仅存的记忆告诉我似乎是用在表设计的时候减少冗余提高效率的.</del></p>
+<p>不过这一面是技术面, 面试官也是懂的, 也不会对着标准答案死抠定义, 你清楚这个知识点的话, 面试官听了自然明白, 尽量把自己会的内容清楚的表述出来就行, 不会的也就说自己对这方面应用的少, 不是很了解.</p>
+<h3 id="项目经历"><a href="#项目经历" class="headerlink" title="项目经历"></a>项目经历</h3><p>由于我没有实习经历, 所以接下来就直接问简历上的项目.<del>害, 之前看群里说一面可能就是撕几道题, 结果自己完全没看一下项目内容, 都忘得差不多了.</del></p>
+<p>我写了 4 个上去, 2 个个人项目, 2 个团队合作项目.</p>
+<p>面试官首先问觉得这几个项目里难度最高的是哪个, 能否介绍一下项目内容.</p>
+<p>我说了一个个人项目, <a href="https://ww-rm.github.io/posts/2023/08/30/desktopsprite/">基于 Spine 的碧蓝航线桌宠</a>, 这个是当时自己感兴趣做的, 虽然是基于学习的心态做的自娱自乐程序, 但是确实对我来说挺难的, 因为专业从未接触过计算机图形学相关的内容, 而且也自学了一下原生的 win32 开发, 期间还遇到一些数学问题, 都折腾了挺久的.</p>
+<p>介绍了一下为什么做这个项目, 项目实现了些啥, 觉得最难的地方在哪, 怎么解决的诸如此类的.</p>
+<p>主要还是要熟悉自己的项目, 向面试官充分展示自己的能力水平, 不要让面试官觉得就是照着网上的教程随便做做了事, 要能体现自己在做这个项目途中解决问题的能力, 以及对自己的提升收获.</p>
+<p>不过运气比较好的是, 由于这一面远程面试我一开始是共享屏幕的, 加之这个项目是个桌宠, 很适合展示, 自己电脑上也一直在用, 源码也都还在, 所以就直接给面试官展示项目效果了. 顺带连源码都一起被看了一下, 问了一些具体逻辑的实现方法和类的设计.</p>
+<p>这个项目问完之后还问了其他的项目, 这个看具体情况吧, 认真答就好了.<del>也看自己的吹牛能力.</del></p>
+<h3 id="初试尾声"><a href="#初试尾声" class="headerlink" title="初试尾声"></a>初试尾声</h3><p>最后有一些经典的反问环节, 不过我当时太紧张了, 也没问啥, 反倒是面试官引导我是不是要了解点什么.</p>
+<p>其实事后想想以后可以提前准备一下的, 毕竟你投了简历, 肯定有一些想要了解的基本情况对吧.</p>
+<h2 id="复试"><a href="#复试" class="headerlink" title="复试"></a>复试</h2><p>结果出的很快, 刚面完晚上就收到复试邀请函了, 于是直接约的后一天继续二面.</p>
+<h3 id="自我介绍"><a href="#自我介绍" class="headerlink" title="自我介绍"></a>自我介绍</h3><p>简单介绍一下自己, 学校, 专业, 研究方向, 个人能力, 实习经历, 项目经历 (其实就是把自己简历上的内容过一遍, 只是我没经验, 结果被动的等着面试官问经历了, 没把话题聊开).</p>
+<p>经历简单描述一下就好, 可以等待面试官后续提问, 也可以自己主动介绍详细一点, 突出自己的技术栈.</p>
+<h3 id="自由交流"><a href="#自由交流" class="headerlink" title="自由交流"></a>自由交流</h3><p>如果说一面注重你的表面能力, 比如具体的代码能力, 项目经历, 量化的指标啥的, 那么这一面侧重于你的综合能力.</p>
+<p>从自我介绍开始, 最好的方式是你有所侧重的介绍自己, 然后让面试官能够自然而然的切入到一个你熟悉的话题里, 比如你介绍到某个项目经历时, 可以先发制人说说自己印象很深的点, 采用了什么技术, 掌握了什么技能, 之后面试官就会以此为话题继续深入了解你的能力.<del>别像我一样傻不拉几的.</del></p>
+<p>不同于一面, 这一面问题都比较发散并深入, 其实也更加注重于将来的工作内容, 例如我投的是测试开发, 除了问我项目的技术问题外, 还会着重问我项目的性能优化, 如何减少资源占用, 如何让整个项目结果更好, 而不仅仅是实现功能.</p>
+<p>同时问题也更偏向实际工程应用, 并不只是单纯实现一个算法片段, 而是要对项目的整体结构有清晰的认知, 知道项目的瓶颈在哪, 自己又是如何考虑解决的.</p>
+<p>拿我前面那个桌宠项目来说, 面试官除了问基本的项目逻辑外, 着重问了是否关注过程序的性能优化, 如何优化渲染过程中 CPU, 内存, GPU 的占用问题, 如何提高渲染的性能. 不过我没有系统性学习过, 对这些内容只能尽量答一些, 并且有些方面我也确实从没考虑过 (例如内存占用, 桌宠占用太小完全没考虑过).</p>
+<p>感觉还是挺注重程序性能的, 可能是游戏测开的原因?</p>
+<p>这部分内容太自由了, 都是思想上的交流, 可参考性很低, 比较看面试官, 认真回答自己的思考结果就好了.</p>
+<h3 id="场景题"><a href="#场景题" class="headerlink" title="场景题"></a>场景题</h3><p>聊完简历上的内容之后, 还是来了道场景题.</p>
+<p>具体的场景就不说了, 抽象一下就是, 有一群人, 他们之间存在好友关系, 假设这群人一定可以被划分成两个集合, 并且每个集合内的人互相不存在好友关系, 要如何实现这个划分过程.</p>
+<p>害, 说实话我一开始毫无头绪, 然后想了半天给了一个时间和空间复杂度都很高的方法, 显然是不太行的. 之后就是和面试官继续交流, 怎么优化算法. 这期间我乱扯了很多, 但是估计都没找到正道. 最后时间快到了, 我说我感觉暂时想不出来更好的方案了, 面试官也就结束这部分了.</p>
+<p>感觉这部分拉了, 自己平时确实也没怎么关注一些这样的算法问题. 不过就算不知道也要积极的说出自己的想法, 和面试官交流, 让面试官看到你解决问题的过程.</p>
+<p>(事后了解了一下这玩意叫二分图, 所有的顶点可以被划分为两个独立的集合, 使得每条边的两个顶点分别属于不同的集合. 其实挺简单的, 但是没办法, 面试的时候还完全没看图论相关内容.)</p>
+<h3 id="复试尾声"><a href="#复试尾声" class="headerlink" title="复试尾声"></a>复试尾声</h3><p>最后也是有经典的反问过程, 不过这次总结了一面的经验, 提前想好了要问些啥, 倒是得到了一些自己想要了解的内容. 比如开发语言和用的技术, 项目管理制度啥的. 提前准备一下就能趁着这个机会向面试官了解一下自己意向工作的地方如何.</p>
+<h2 id="HR-面试"><a href="#HR-面试" class="headerlink" title="HR 面试"></a>HR 面试</h2><p>大概隔了一周时间, 终于收到三面邀请, 差点以为要挂了<del>二面太拉了</del>.</p>
+<p>这一面是非技术面, 上来自我介绍一下, 然后主要是人事和你聊聊天, 问问你的个人情况, 现在在做的内容, 看看你对工作的态度, 面对问题的解决思路, 确认一下你的个人信息和工作意向, 比较轻松的氛围, 注意一下言谈举止就好.</p>
+<p>时间也不长, 不到半小时就结束了, 这一面基本就是走走流程, 不出意外面完等后续就好.</p>
+<p><del>个人认为, 只要不和面试官打起来这一面都不至于挂.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>三面之后大概一周就能收到人事发来的 Offer 了, 需要在系统或者邮件里确认接受即可, 具体的入职事项可以和跟自己对接的 HR 进行沟通了解.</p>
+<p>总结一下整个面试的话, 确实是投的早加运气好吧, 感觉有这么一些比较令面试官满意的地方:</p>
+<ul>
+<li>一面两道手撕很顺畅<del>甚至面试官说我写挺快的?</del></li>
+<li>然后简历里有一个面试官刚好比较感兴趣的项目. 感觉这个是最重要的, 有一个对口的项目真的很加分.</li>
+</ul>
+<p>当然由于准备不充分, 也存在很多问题, 包括但不限于:</p>
+<ul>
+<li>八股完全没看, 全凭记忆回答.</li>
+<li>也没好好复习自己的项目内容, 问的时候很多东西自己也记不起来当时咋写的了.</li>
+<li>场景题也答的一塌糊涂, 刚开始一点思路都无, 也是自己平常这方面接触太少.</li>
+<li>没准备一个良好的自我介绍, 老是等着面试官被动提问.</li>
+<li>等等等等...</li>
+</ul>
+<p>通过面试才能知道自己有很多需要提升的地方, 应该朝着哪些方面提升自己, 也只有不断面试才能消除自己对面试的紧张感, 让自己能够在面试中充分的展现自己最好的状态.</p>
+<p>最后, 祝各位同学都能顺利通过面试, 收到自己心仪的 Offer~</p>
+<p><img data-src="https://ww-rm.github.io/static/image/tencent-intership-interview/sign_img.png" alt="tencent_offer"></p>
+]]></content>
+      <categories>
+        <category>经验分享</category>
+      </categories>
+      <tags>
+        <tag>腾讯</tag>
+        <tag>面经</tag>
+        <tag>实习</tag>
+        <tag>测试开发</tag>
+        <tag>IEG</tag>
       </tags>
   </entry>
   <entry>
@@ -2292,6 +2292,70 @@
       </tags>
   </entry>
   <entry>
+    <title>再遇文本分类</title>
+    <url>//posts/2022/08/19/wast-nlp/</url>
+    <content><![CDATA[<p>这是<a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">网安本科速通</a>系列的最后一篇了, 主题还是 <code>pytorch</code>, 但是问题换成了 <code>NLP</code>, 并且还是以经典的文本分类作为示例, 数据集使用与前面<a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>相同的一份小数据集, 方便进行比较.</p>
+<p>阅读本篇前需要先看前两篇, <a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>与<a href="/posts/2022/08/18/wast-dl/">基于 PyTorch 的手写数字分类</a>. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.</p>
+<span id="more"></span>
+
+<h2 id="环境准备与项目结构"><a href="#环境准备与项目结构" class="headerlink" title="环境准备与项目结构"></a>环境准备与项目结构</h2><p>环境使用 <code>pytorch</code> 环境.</p>
+<p>项目结构与文本分类项目结构一致, 并且使用相同的数据集.</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入库"><a href="#导入库" class="headerlink" title="导入库"></a>导入库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report, f1_score, precision_score, recall_score</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_sequence</span><br><span class="line"></span><br><span class="line">DEVICE = <span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>前两个项目的结合, 都是些常规库.</p>
+<h3 id="构建数据集"><a href="#构建数据集" class="headerlink" title="构建数据集"></a>构建数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Vocabulary</span>:</span><br><span class="line">    PAD = <span class="string">&quot;&lt;PAD&gt;&quot;</span></span><br><span class="line">    UNK = <span class="string">&quot;&lt;UNK&gt;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.token2id = &#123;self.PAD: <span class="number">0</span>, self.UNK: <span class="number">1</span>&#125;</span><br><span class="line">        self.id2token = [self.PAD, self.UNK]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.token2id)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_token</span>(<span class="params">self, token</span>):</span><br><span class="line">        <span class="keyword">if</span> token <span class="keyword">not</span> <span class="keyword">in</span> self.token2id:</span><br><span class="line">            self.token2id[token] = <span class="built_in">len</span>(self.token2id)</span><br><span class="line">            self.id2token.append(token)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">encode</span>(<span class="params">self, text</span>):</span><br><span class="line">        <span class="keyword">return</span> [self.token2id.get(x, self.token2id[self.UNK]) <span class="keyword">for</span> x <span class="keyword">in</span> text]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">decode</span>(<span class="params">self, ids</span>):</span><br><span class="line">        <span class="keyword">return</span> [self.id2token[x] <span class="keyword">for</span> x <span class="keyword">in</span> ids]</span><br></pre></td></tr></table></figure>
+
+<p>先写一个词表类, 这个词表可以按需求添加生词, 并且将分词后的文本进行词与序号之间的编解码操作, 核心目的是提供文本向量化的能力.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_raw_data</span>(<span class="params">path</span>):</span><br><span class="line">    raw_data = load_files(path, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">    data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">    data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">    index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">    label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (data_x, data_y), (index2label, label2index)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">preprocess</span>(<span class="params">data_x, data_y</span>):</span><br><span class="line">    data_x = [jieba.lcut(s) <span class="keyword">for</span> s <span class="keyword">in</span> data_x]</span><br><span class="line">    train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">        data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">        shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    vocab = Vocabulary()</span><br><span class="line">    <span class="keyword">for</span> text <span class="keyword">in</span> train_x:</span><br><span class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> text:</span><br><span class="line">            vocab.add_token(word)</span><br><span class="line"></span><br><span class="line">    train_x = [vocab.encode(x) <span class="keyword">for</span> x <span class="keyword">in</span> train_x]</span><br><span class="line">    test_x = [vocab.encode(x) <span class="keyword">for</span> x <span class="keyword">in</span> test_x]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (train_x, test_x, train_y, test_y), vocab</span><br></pre></td></tr></table></figure>
+
+<p>然后封装一下之前文本分类项目里的数据集加载操作, 手动使用 <code>jieba.lcut</code> 进行分词并构建词表, 最后返回划分好的训练集与测试集.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        self.inputs = x</span><br><span class="line">        self.targets = y</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.inputs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, item</span>):</span><br><span class="line">        input_ = torch.tensor(self.inputs[item]).long().to(DEVICE)</span><br><span class="line">        target = torch.tensor([self.targets[item]]).long().to(DEVICE)</span><br><span class="line">        <span class="keyword">return</span> (input_, target)</span><br></pre></td></tr></table></figure>
+
+<p>自定义数据集类, 与数字分类项目里的定义方式类似, 但是输入参数换成直接获取前面预处理好的数据集.</p>
+<h3 id="定义神经网络结构"><a href="#定义神经网络结构" class="headerlink" title="定义神经网络结构"></a>定义神经网络结构</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyNetwork</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, output_size=<span class="number">7</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        _embedding_size = <span class="number">128</span></span><br><span class="line">        _hidden_size = <span class="number">128</span></span><br><span class="line">        _filter_sizes = (<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">        self.embedding = nn.Embedding(vocab_size, _embedding_size)</span><br><span class="line">        self.dropout = nn.Dropout()</span><br><span class="line">        self.convs = nn.ModuleList([nn.Conv1d(_embedding_size, _hidden_size, k) <span class="keyword">for</span> k <span class="keyword">in</span> _filter_sizes])</span><br><span class="line">        self.fc = nn.Linear(_hidden_size * <span class="built_in">len</span>(_filter_sizes), output_size)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_convpool</span>(<span class="params">self, x</span>):</span><br><span class="line">        outputs = []</span><br><span class="line">        <span class="keyword">for</span> conv <span class="keyword">in</span> self.convs:</span><br><span class="line">            output = torch.relu(conv(x))                                <span class="comment"># (128, L) -&gt; (128, L-k+1)</span></span><br><span class="line">            output = torch.max_pool1d(output, output.size(<span class="number">2</span>)).squeeze() <span class="comment"># (128, L-k+1) -&gt; (128,)</span></span><br><span class="line">            outputs.append(output)</span><br><span class="line">        <span class="keyword">return</span> torch.cat(outputs, -<span class="number">1</span>)                                   <span class="comment"># (128,) -&gt; (384,)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        outputs = self.embedding(inputs)                                <span class="comment"># (L,) -&gt; (L, 128)</span></span><br><span class="line">        outputs = self.dropout(outputs)                                 <span class="comment"># </span></span><br><span class="line">        outputs = outputs.transpose(<span class="number">1</span>, <span class="number">2</span>)                               <span class="comment"># (L, 128) -&gt; (128, L)</span></span><br><span class="line">        outputs = self._convpool(outputs)                               <span class="comment"># (128, L) -&gt; (384,)</span></span><br><span class="line">        outputs = self.fc(outputs)                                      <span class="comment"># (384,) -&gt; (7,)</span></span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+
+<p>继续使用与数字分类中相同的卷积结构, 也就是 <code>TextCNN</code>, 卷积核选择经典的三个值. 各个步骤的维度变化在注释里有标注.</p>
+<h3 id="定义指标评价函数"><a href="#定义指标评价函数" class="headerlink" title="定义指标评价函数"></a>定义指标评价函数</h3><p>见<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87%E5%87%BD%E6%95%B0">定义评价指标函数</a>.</p>
+<h3 id="训练与评估函数"><a href="#训练与评估函数" class="headerlink" title="训练与评估函数"></a>训练与评估函数</h3><p>见<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0">定义训练函数</a>与<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BC%B0%E5%87%BD%E6%95%B0">定义评估函数</a></p>
+<h3 id="校对函数-collate-fn"><a href="#校对函数-collate-fn" class="headerlink" title="校对函数 (collate_fn)"></a>校对函数 (collate_fn)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">data: <span class="built_in">list</span></span>):</span><br><span class="line">    inputs, targets = <span class="built_in">map</span>(<span class="built_in">list</span>, <span class="built_in">zip</span>(*data))</span><br><span class="line">    inputs = pad_sequence(inputs, batch_first=<span class="literal">True</span>)</span><br><span class="line">    targets = torch.stack(targets)</span><br><span class="line">    <span class="keyword">return</span> inputs, targets</span><br></pre></td></tr></table></figure>
+
+<p>这个东西可能第一次见, 并且用了一些很奇怪的操作, 比如那个 <code>map</code>, 但是首先要明白这个函数用于干什么.</p>
+<p>回忆我们在数字分类项目里使用 <code>DataLoader</code> 时, 它可以给我们提供一个 loader 来迭代我们自定义的 <code>Dataset</code>. <code>Dataset</code> 每次取出来的东西是一个二元组, 里面包含样本与标签两部分, 而 <code>Dataloader</code> 又能够按 <code>batch_size</code> 的大小批量获取这些二元组, 形成一个 <code>list</code>. 这个长度为 <code>batch_size</code>, 内容为二元组的 <code>list</code> 就是 <code>collate_fn</code> 的输入参数.</p>
+<p>再看 <code>map</code> 那一行操作, 涉及了几个 <code>python</code> 函数用法, 这里直接说结论, 它将 <code>data</code> 里的样本与标签拆分成了两个单独的 <code>list</code>.</p>
+<p>然后再说 <code>pad_sequence</code> 操作, 对于神经网络来说, 所有的计算过程都是矩阵计算, 但是对于文本任务, 每个样本句子长度几乎都不是相同的, 因此需要进行对齐操作, 对短句进行填充. 需要注意的是, 默认参数里的填充值是 <code>0</code>, 这与我们前面词表里的定义是一致的, 如果不一致则需要手动填一下.</p>
+<p>最后是参数的返回值, 直接对应了我们从 loader 里迭代数据时获取的变量形式, 此处就是和之前一样, 分别返回样本列表与标签列表.</p>
+<h3 id="定义训练超参数"><a href="#定义训练超参数" class="headerlink" title="定义训练超参数"></a>定义训练超参数</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">seed = <span class="number">1</span></span><br><span class="line">learning_rate = <span class="number">1e-3</span></span><br><span class="line">batch_size = <span class="number">16</span></span><br><span class="line">epochs = <span class="number">25</span></span><br><span class="line"></span><br><span class="line">torch.manual_seed(seed)</span><br><span class="line">torch.cuda.manual_seed(seed)</span><br></pre></td></tr></table></figure>
+
+<p>与前面的项目类似, 但是 <code>batch_size</code> 设的稍小一些, 因为对于文本处理, 按批次训练时, 进行了填充操作, 越大的 <code>batch_size</code> 能够得到越快的训练速度, 但是在一个 <code>batch</code> 内会引入更多不必要的 <code>0</code> 填充值, 可以酌情尝试调整.</p>
+<h3 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(data_x, data_y), (index2label, label2index) = load_raw_data(<span class="string">&quot;./data/&quot;</span>)</span><br><span class="line">(train_x, test_x, train_y, test_y), vocab = preprocess(data_x, data_y)</span><br><span class="line"></span><br><span class="line">train_dataset = MyDataset(train_x, train_y)</span><br><span class="line">test_dataset = MyDataset(test_x, test_y)</span><br><span class="line">train_dataloader = DataLoader(train_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size, collate_fn=collate_fn)</span><br><span class="line">test_dataloader = DataLoader(test_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size, collate_fn=collate_fn)</span><br></pre></td></tr></table></figure>
+
+<p>最大的不同就是添加了 <code>collate_fn</code> 参数, 其余的都是之前涉及过的操作.</p>
+<h3 id="实例化模型训练需要的对象"><a href="#实例化模型训练需要的对象" class="headerlink" title="实例化模型训练需要的对象"></a>实例化模型训练需要的对象</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MyNetwork(<span class="built_in">len</span>(vocab)).to(DEVICE)</span><br><span class="line">loss_fn = nn.CrossEntropyLoss().to(DEVICE)</span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
+
+<p>与之前的定义也是几乎一致的, 唯一的不同就是 <code>MyNetwork</code> 多了一个 <code>vocab_size</code> 的参数需要传进去, 其他参数都用的默认值.</p>
+<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><p>代码见<a href="/posts/2022/08/18/wast-dl/#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B">训练模型</a>, 这里只贴一下后 5 轮的训练结果.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">===============================</span><br><span class="line">Epoch 21</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0071 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1102 Acc: 0.9667 F1: 0.9669(0.9669/0.9667)</span><br><span class="line">===============================</span><br><span class="line">Epoch 22</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0055 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1099 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br><span class="line">Epoch 23</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0056 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1062 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br><span class="line">Epoch 24</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0048 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1019 Acc: 0.9667 F1: 0.9669(0.9669/0.9667)</span><br><span class="line">===============================</span><br><span class="line">Epoch 25</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0042 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1051 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在训练集上已经完全拟合了, 并且测试集上 F1 得分也高达 0.9645.</p>
+<h3 id="输出最终的测试结果"><a href="#输出最终的测试结果" class="headerlink" title="输出最终的测试结果"></a>输出最终的测试结果</h3><p>代码见<a href="/posts/2022/08/18/wast-dl/#%E8%BE%93%E5%87%BA%E6%9C%80%E7%BB%88%E7%9A%84%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C">输出最终的测试结果</a>, 这里只贴一下输出结果.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9524    1.0000    0.9756        60</span><br><span class="line">           1     0.9667    0.9667    0.9667        60</span><br><span class="line">           2     1.0000    1.0000    1.0000        60</span><br><span class="line">           3     0.9649    0.9167    0.9402        60</span><br><span class="line">           4     0.9833    0.9833    0.9833        60</span><br><span class="line">           5     0.9333    0.9180    0.9256        61</span><br><span class="line">           6     0.9508    0.9667    0.9587        60</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9644       421</span><br><span class="line">   macro avg     0.9645    0.9645    0.9643       421</span><br><span class="line">weighted avg     0.9644    0.9644    0.9642       421</span><br></pre></td></tr></table></figure>
+
+<p>可以和之前使用朴素贝叶斯的文本分类做个比较, 可以看到还是有明显提升的, <code>2</code> 号类别甚至已经完全正确了. 当然这个对比不是很科学, 毕竟这是一个很小的数据集, 而且两者都还有大量的可调整空间. 朴素贝叶斯里有很多超参数, 而且样本的特征提取也有待进一步升级; <code>TextCNN</code> 网络里也有很多超参数可调, 比如词向量的长度等等.</p>
+<p>不过神经网络的强处正是在于能够自动提取深层次特征, 避免了人工构造特征的麻烦, 也就是非常擅长 &quot;找规律&quot;, 只要数据集充足, 选择合适的网络结构, 然后经过一番超参数调整之后, 效果都不会很差. <del>就是玄学炼丹.</del></p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>各个模块的使用方法可以去看 <code>pytorch</code> 的<span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">官方网站<i class="fa fa-external-link-alt"></i></span>, 项目中使用的数据集在前面的文章里也有, 这里再贴一下, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>nlp</tag>
+        <tag>深度学习</tag>
+        <tag>pytorch</tag>
+        <tag>文本分类</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>打造一个舒适的 Python 编程环境</title>
     <url>//posts/2022/08/13/wast-pythonandvsc/</url>
     <content><![CDATA[<p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
@@ -2386,70 +2450,6 @@
       <tags>
         <tag>python</tag>
         <tag>VS Code</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>再遇文本分类</title>
-    <url>//posts/2022/08/19/wast-nlp/</url>
-    <content><![CDATA[<p>这是<a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">网安本科速通</a>系列的最后一篇了, 主题还是 <code>pytorch</code>, 但是问题换成了 <code>NLP</code>, 并且还是以经典的文本分类作为示例, 数据集使用与前面<a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>相同的一份小数据集, 方便进行比较.</p>
-<p>阅读本篇前需要先看前两篇, <a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>与<a href="/posts/2022/08/18/wast-dl/">基于 PyTorch 的手写数字分类</a>. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.</p>
-<span id="more"></span>
-
-<h2 id="环境准备与项目结构"><a href="#环境准备与项目结构" class="headerlink" title="环境准备与项目结构"></a>环境准备与项目结构</h2><p>环境使用 <code>pytorch</code> 环境.</p>
-<p>项目结构与文本分类项目结构一致, 并且使用相同的数据集.</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入库"><a href="#导入库" class="headerlink" title="导入库"></a>导入库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> accuracy_score, classification_report, f1_score, precision_score, recall_score</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn, optim</span><br><span class="line"><span class="keyword">from</span> torch.utils.data <span class="keyword">import</span> DataLoader, Dataset</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pad_sequence</span><br><span class="line"></span><br><span class="line">DEVICE = <span class="string">&quot;cuda&quot;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&quot;cpu&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>前两个项目的结合, 都是些常规库.</p>
-<h3 id="构建数据集"><a href="#构建数据集" class="headerlink" title="构建数据集"></a>构建数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Vocabulary</span>:</span><br><span class="line">    PAD = <span class="string">&quot;&lt;PAD&gt;&quot;</span></span><br><span class="line">    UNK = <span class="string">&quot;&lt;UNK&gt;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.token2id = &#123;self.PAD: <span class="number">0</span>, self.UNK: <span class="number">1</span>&#125;</span><br><span class="line">        self.id2token = [self.PAD, self.UNK]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.token2id)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_token</span>(<span class="params">self, token</span>):</span><br><span class="line">        <span class="keyword">if</span> token <span class="keyword">not</span> <span class="keyword">in</span> self.token2id:</span><br><span class="line">            self.token2id[token] = <span class="built_in">len</span>(self.token2id)</span><br><span class="line">            self.id2token.append(token)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">encode</span>(<span class="params">self, text</span>):</span><br><span class="line">        <span class="keyword">return</span> [self.token2id.get(x, self.token2id[self.UNK]) <span class="keyword">for</span> x <span class="keyword">in</span> text]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">decode</span>(<span class="params">self, ids</span>):</span><br><span class="line">        <span class="keyword">return</span> [self.id2token[x] <span class="keyword">for</span> x <span class="keyword">in</span> ids]</span><br></pre></td></tr></table></figure>
-
-<p>先写一个词表类, 这个词表可以按需求添加生词, 并且将分词后的文本进行词与序号之间的编解码操作, 核心目的是提供文本向量化的能力.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">load_raw_data</span>(<span class="params">path</span>):</span><br><span class="line">    raw_data = load_files(path, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">    data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">    data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">    index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">    label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (data_x, data_y), (index2label, label2index)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">preprocess</span>(<span class="params">data_x, data_y</span>):</span><br><span class="line">    data_x = [jieba.lcut(s) <span class="keyword">for</span> s <span class="keyword">in</span> data_x]</span><br><span class="line">    train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">        data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">        shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    vocab = Vocabulary()</span><br><span class="line">    <span class="keyword">for</span> text <span class="keyword">in</span> train_x:</span><br><span class="line">        <span class="keyword">for</span> word <span class="keyword">in</span> text:</span><br><span class="line">            vocab.add_token(word)</span><br><span class="line"></span><br><span class="line">    train_x = [vocab.encode(x) <span class="keyword">for</span> x <span class="keyword">in</span> train_x]</span><br><span class="line">    test_x = [vocab.encode(x) <span class="keyword">for</span> x <span class="keyword">in</span> test_x]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (train_x, test_x, train_y, test_y), vocab</span><br></pre></td></tr></table></figure>
-
-<p>然后封装一下之前文本分类项目里的数据集加载操作, 手动使用 <code>jieba.lcut</code> 进行分词并构建词表, 最后返回划分好的训练集与测试集.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyDataset</span>(<span class="title class_ inherited__">Dataset</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, x, y</span>):</span><br><span class="line">        self.inputs = x</span><br><span class="line">        self.targets = y</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.inputs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, item</span>):</span><br><span class="line">        input_ = torch.tensor(self.inputs[item]).long().to(DEVICE)</span><br><span class="line">        target = torch.tensor([self.targets[item]]).long().to(DEVICE)</span><br><span class="line">        <span class="keyword">return</span> (input_, target)</span><br></pre></td></tr></table></figure>
-
-<p>自定义数据集类, 与数字分类项目里的定义方式类似, 但是输入参数换成直接获取前面预处理好的数据集.</p>
-<h3 id="定义神经网络结构"><a href="#定义神经网络结构" class="headerlink" title="定义神经网络结构"></a>定义神经网络结构</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">MyNetwork</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, vocab_size, output_size=<span class="number">7</span></span>):</span><br><span class="line">        <span class="built_in">super</span>().__init__()</span><br><span class="line">        _embedding_size = <span class="number">128</span></span><br><span class="line">        _hidden_size = <span class="number">128</span></span><br><span class="line">        _filter_sizes = (<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)</span><br><span class="line">        self.embedding = nn.Embedding(vocab_size, _embedding_size)</span><br><span class="line">        self.dropout = nn.Dropout()</span><br><span class="line">        self.convs = nn.ModuleList([nn.Conv1d(_embedding_size, _hidden_size, k) <span class="keyword">for</span> k <span class="keyword">in</span> _filter_sizes])</span><br><span class="line">        self.fc = nn.Linear(_hidden_size * <span class="built_in">len</span>(_filter_sizes), output_size)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_convpool</span>(<span class="params">self, x</span>):</span><br><span class="line">        outputs = []</span><br><span class="line">        <span class="keyword">for</span> conv <span class="keyword">in</span> self.convs:</span><br><span class="line">            output = torch.relu(conv(x))                                <span class="comment"># (128, L) -&gt; (128, L-k+1)</span></span><br><span class="line">            output = torch.max_pool1d(output, output.size(<span class="number">2</span>)).squeeze() <span class="comment"># (128, L-k+1) -&gt; (128,)</span></span><br><span class="line">            outputs.append(output)</span><br><span class="line">        <span class="keyword">return</span> torch.cat(outputs, -<span class="number">1</span>)                                   <span class="comment"># (128,) -&gt; (384,)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, inputs</span>):</span><br><span class="line">        outputs = self.embedding(inputs)                                <span class="comment"># (L,) -&gt; (L, 128)</span></span><br><span class="line">        outputs = self.dropout(outputs)                                 <span class="comment"># </span></span><br><span class="line">        outputs = outputs.transpose(<span class="number">1</span>, <span class="number">2</span>)                               <span class="comment"># (L, 128) -&gt; (128, L)</span></span><br><span class="line">        outputs = self._convpool(outputs)                               <span class="comment"># (128, L) -&gt; (384,)</span></span><br><span class="line">        outputs = self.fc(outputs)                                      <span class="comment"># (384,) -&gt; (7,)</span></span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
-
-<p>继续使用与数字分类中相同的卷积结构, 也就是 <code>TextCNN</code>, 卷积核选择经典的三个值. 各个步骤的维度变化在注释里有标注.</p>
-<h3 id="定义指标评价函数"><a href="#定义指标评价函数" class="headerlink" title="定义指标评价函数"></a>定义指标评价函数</h3><p>见<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87%E5%87%BD%E6%95%B0">定义评价指标函数</a>.</p>
-<h3 id="训练与评估函数"><a href="#训练与评估函数" class="headerlink" title="训练与评估函数"></a>训练与评估函数</h3><p>见<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AE%AD%E7%BB%83%E5%87%BD%E6%95%B0">定义训练函数</a>与<a href="/posts/2022/08/18/wast-dl/#%E5%AE%9A%E4%B9%89%E8%AF%84%E4%BC%B0%E5%87%BD%E6%95%B0">定义评估函数</a></p>
-<h3 id="校对函数-collate-fn"><a href="#校对函数-collate-fn" class="headerlink" title="校对函数 (collate_fn)"></a>校对函数 (collate_fn)</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">data: <span class="built_in">list</span></span>):</span><br><span class="line">    inputs, targets = <span class="built_in">map</span>(<span class="built_in">list</span>, <span class="built_in">zip</span>(*data))</span><br><span class="line">    inputs = pad_sequence(inputs, batch_first=<span class="literal">True</span>)</span><br><span class="line">    targets = torch.stack(targets)</span><br><span class="line">    <span class="keyword">return</span> inputs, targets</span><br></pre></td></tr></table></figure>
-
-<p>这个东西可能第一次见, 并且用了一些很奇怪的操作, 比如那个 <code>map</code>, 但是首先要明白这个函数用于干什么.</p>
-<p>回忆我们在数字分类项目里使用 <code>DataLoader</code> 时, 它可以给我们提供一个 loader 来迭代我们自定义的 <code>Dataset</code>. <code>Dataset</code> 每次取出来的东西是一个二元组, 里面包含样本与标签两部分, 而 <code>Dataloader</code> 又能够按 <code>batch_size</code> 的大小批量获取这些二元组, 形成一个 <code>list</code>. 这个长度为 <code>batch_size</code>, 内容为二元组的 <code>list</code> 就是 <code>collate_fn</code> 的输入参数.</p>
-<p>再看 <code>map</code> 那一行操作, 涉及了几个 <code>python</code> 函数用法, 这里直接说结论, 它将 <code>data</code> 里的样本与标签拆分成了两个单独的 <code>list</code>.</p>
-<p>然后再说 <code>pad_sequence</code> 操作, 对于神经网络来说, 所有的计算过程都是矩阵计算, 但是对于文本任务, 每个样本句子长度几乎都不是相同的, 因此需要进行对齐操作, 对短句进行填充. 需要注意的是, 默认参数里的填充值是 <code>0</code>, 这与我们前面词表里的定义是一致的, 如果不一致则需要手动填一下.</p>
-<p>最后是参数的返回值, 直接对应了我们从 loader 里迭代数据时获取的变量形式, 此处就是和之前一样, 分别返回样本列表与标签列表.</p>
-<h3 id="定义训练超参数"><a href="#定义训练超参数" class="headerlink" title="定义训练超参数"></a>定义训练超参数</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">seed = <span class="number">1</span></span><br><span class="line">learning_rate = <span class="number">1e-3</span></span><br><span class="line">batch_size = <span class="number">16</span></span><br><span class="line">epochs = <span class="number">25</span></span><br><span class="line"></span><br><span class="line">torch.manual_seed(seed)</span><br><span class="line">torch.cuda.manual_seed(seed)</span><br></pre></td></tr></table></figure>
-
-<p>与前面的项目类似, 但是 <code>batch_size</code> 设的稍小一些, 因为对于文本处理, 按批次训练时, 进行了填充操作, 越大的 <code>batch_size</code> 能够得到越快的训练速度, 但是在一个 <code>batch</code> 内会引入更多不必要的 <code>0</code> 填充值, 可以酌情尝试调整.</p>
-<h3 id="加载数据集"><a href="#加载数据集" class="headerlink" title="加载数据集"></a>加载数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">(data_x, data_y), (index2label, label2index) = load_raw_data(<span class="string">&quot;./data/&quot;</span>)</span><br><span class="line">(train_x, test_x, train_y, test_y), vocab = preprocess(data_x, data_y)</span><br><span class="line"></span><br><span class="line">train_dataset = MyDataset(train_x, train_y)</span><br><span class="line">test_dataset = MyDataset(test_x, test_y)</span><br><span class="line">train_dataloader = DataLoader(train_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size, collate_fn=collate_fn)</span><br><span class="line">test_dataloader = DataLoader(test_dataset, shuffle=<span class="literal">True</span>, batch_size=batch_size, collate_fn=collate_fn)</span><br></pre></td></tr></table></figure>
-
-<p>最大的不同就是添加了 <code>collate_fn</code> 参数, 其余的都是之前涉及过的操作.</p>
-<h3 id="实例化模型训练需要的对象"><a href="#实例化模型训练需要的对象" class="headerlink" title="实例化模型训练需要的对象"></a>实例化模型训练需要的对象</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MyNetwork(<span class="built_in">len</span>(vocab)).to(DEVICE)</span><br><span class="line">loss_fn = nn.CrossEntropyLoss().to(DEVICE)</span><br><span class="line">optimizer = optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
-
-<p>与之前的定义也是几乎一致的, 唯一的不同就是 <code>MyNetwork</code> 多了一个 <code>vocab_size</code> 的参数需要传进去, 其他参数都用的默认值.</p>
-<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><p>代码见<a href="/posts/2022/08/18/wast-dl/#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B">训练模型</a>, 这里只贴一下后 5 轮的训练结果.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">===============================</span><br><span class="line">Epoch 21</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0071 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1102 Acc: 0.9667 F1: 0.9669(0.9669/0.9667)</span><br><span class="line">===============================</span><br><span class="line">Epoch 22</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0055 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1099 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br><span class="line">Epoch 23</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0056 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1062 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br><span class="line">Epoch 24</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0048 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1019 Acc: 0.9667 F1: 0.9669(0.9669/0.9667)</span><br><span class="line">===============================</span><br><span class="line">Epoch 25</span><br><span class="line">-------------------------------</span><br><span class="line">Train Loss: 0.0042 Acc: 1.0000 F1: 1.0000(1.0000/1.0000)</span><br><span class="line">Eval  Loss: 0.1051 Acc: 0.9644 F1: 0.9645(0.9645/0.9643)</span><br><span class="line">===============================</span><br></pre></td></tr></table></figure>
-
-<p>可以看到在训练集上已经完全拟合了, 并且测试集上 F1 得分也高达 0.9645.</p>
-<h3 id="输出最终的测试结果"><a href="#输出最终的测试结果" class="headerlink" title="输出最终的测试结果"></a>输出最终的测试结果</h3><p>代码见<a href="/posts/2022/08/18/wast-dl/#%E8%BE%93%E5%87%BA%E6%9C%80%E7%BB%88%E7%9A%84%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C">输出最终的测试结果</a>, 这里只贴一下输出结果.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9524    1.0000    0.9756        60</span><br><span class="line">           1     0.9667    0.9667    0.9667        60</span><br><span class="line">           2     1.0000    1.0000    1.0000        60</span><br><span class="line">           3     0.9649    0.9167    0.9402        60</span><br><span class="line">           4     0.9833    0.9833    0.9833        60</span><br><span class="line">           5     0.9333    0.9180    0.9256        61</span><br><span class="line">           6     0.9508    0.9667    0.9587        60</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9644       421</span><br><span class="line">   macro avg     0.9645    0.9645    0.9643       421</span><br><span class="line">weighted avg     0.9644    0.9644    0.9642       421</span><br></pre></td></tr></table></figure>
-
-<p>可以和之前使用朴素贝叶斯的文本分类做个比较, 可以看到还是有明显提升的, <code>2</code> 号类别甚至已经完全正确了. 当然这个对比不是很科学, 毕竟这是一个很小的数据集, 而且两者都还有大量的可调整空间. 朴素贝叶斯里有很多超参数, 而且样本的特征提取也有待进一步升级; <code>TextCNN</code> 网络里也有很多超参数可调, 比如词向量的长度等等.</p>
-<p>不过神经网络的强处正是在于能够自动提取深层次特征, 避免了人工构造特征的麻烦, 也就是非常擅长 &quot;找规律&quot;, 只要数据集充足, 选择合适的网络结构, 然后经过一番超参数调整之后, 效果都不会很差. <del>就是玄学炼丹.</del></p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>各个模块的使用方法可以去看 <code>pytorch</code> 的<span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">官方网站<i class="fa fa-external-link-alt"></i></span>, 项目中使用的数据集在前面的文章里也有, 这里再贴一下, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>nlp</tag>
-        <tag>深度学习</tag>
-        <tag>pytorch</tag>
-        <tag>文本分类</tag>
       </tags>
   </entry>
   <entry>
@@ -2699,6 +2699,20 @@
       </tags>
   </entry>
   <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>扩散模型阅读笔记</title>
     <url>//posts/2022/10/29/diffusion-model/</url>
     <content><![CDATA[<p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
@@ -2759,20 +2773,6 @@
         <tag>图像生成</tag>
         <tag>扩散模型</tag>
         <tag>Diffusion Model</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows 10 激活工具</title>
-    <url>//posts/2023/02/27/win10activation/</url>
-    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>激活工具</tag>
       </tags>
   </entry>
   <entry>
