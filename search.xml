@@ -513,6 +513,94 @@
       </tags>
   </entry>
   <entry>
+    <title>碧蓝航线立绘提取与批量还原</title>
+    <url>//posts/2023/04/11/blhx-painting/</url>
+    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
+<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
+<span id="more"></span>
+
+<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
+<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
+<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
+<ul>
+<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
+<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
+<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
+<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
+</ul>
+<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
+<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
+<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
+<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
+<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
+<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
+</ul>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
+<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
+<details class="note danger"><summary><p>guanghui_h.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
+<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
+</details>
+
+<details class="note info"><summary><p>guanghui.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_2.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_3.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_4.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_5.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol_n.png</p>
+</summary>
+<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
+
+</details>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>工具</tag>
+        <tag>立绘还原</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>基于 NumPy 的手写数字识别 (卷积神经网络) (一)</title>
     <url>//posts/2023/10/13/cnn-numpy-1/</url>
     <content><![CDATA[<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
@@ -607,94 +695,6 @@
         <tag>手写数字识别</tag>
         <tag>卷积神经网络</tag>
         <tag>深度学习</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>碧蓝航线立绘提取与批量还原</title>
-    <url>//posts/2023/04/11/blhx-painting/</url>
-    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
-<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
-<span id="more"></span>
-
-<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
-<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
-<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
-<ul>
-<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
-<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
-<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
-<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
-</ul>
-<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
-<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
-<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
-<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
-<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
-<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
-<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
-</ul>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
-<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
-<details class="note danger"><summary><p>guanghui_h.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
-<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
-</details>
-
-<details class="note info"><summary><p>guanghui.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_2.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_3.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_4.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_5.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol_n.png</p>
-</summary>
-<p><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
-
-</details>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>工具</tag>
-        <tag>立绘还原</tag>
       </tags>
   </entry>
   <entry>
@@ -1570,41 +1570,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
-    <url>//posts/2024/06/16/sm9gfn/</url>
-    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
-<span id="more"></span>
-
-<h2 id="十二次扩域上的稀疏乘法"><a href="#十二次扩域上的稀疏乘法" class="headerlink" title="十二次扩域上的稀疏乘法"></a>十二次扩域上的稀疏乘法</h2><p>$$<br>\begin{align*}<br>     U &amp;= (x_U, y_U, z_U) \rightarrow (x_1, y_1) \\<br>     V &amp;= (x_V, y_V, z_V) \rightarrow (x_2, y_2) \\<br>     Q &amp;= (x_Q, y_Q, z_Q) \rightarrow (x_3, y_3) \\<br>     U&#39; &amp;= (x&#39;_U, y&#39;_U, z&#39;_U) \rightarrow (x&#39;_1, y&#39;_1) \\<br>     V&#39; &amp;= (x&#39;_V, y&#39;_V, z&#39;_V) \rightarrow (x&#39;_2, y&#39;_2)<br>\end{align*}<br>$$</p>
-<p>$U, V, Q$ 是 $E(F_{q^{12}})$ 上的点, $U&#39;, V&#39;$ 是扭曲线上的点, 也是函数的直接输入值.</p>
-<p>$Q$ 输入时在 $E(F_{q})$ 上, 但是可以直接通过塔式扩张转换到 $E(F_{q^{12}})$ 上.</p>
-<p>根据雅各比加重坐标系转换公式和扭曲线转换公式可得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_1 &amp;= \frac{x_U}{z_U^2} = \frac{x_U&#39;}{\omega^2} = \frac{x_U&#39;}{\omega^2 z_U&#39;^2} \\<br>    y_1 &amp;= \frac{y_U}{z_U^3} = \frac{y_U&#39;}{\omega^3} = \frac{y_U&#39;}{\omega^3 z_U&#39;^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>可以看到根据 $z$ 的次数, 分母会乘上同次数的 $\omega$, 这在 $F_{q^{12}}$ 上相当于是把这个 $F_{q^{2}}$ 元素次数加一, 也就是改变这个元素的位置.</p>
-<p>同理有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_2 &amp;= \frac{x_V}{z_V^2} \\<br>    y_2 &amp;= \frac{y_V}{z_V^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_3 &amp;= \frac{x_Q}{z_Q^2} \\<br>    y_3 &amp;= \frac{y_Q}{z_Q^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>根据公式有:</p>
-<p>$$<br>\begin{align*}<br>     \lambda_1 &amp;= \frac{3x_2^2}{2y_2} \\<br>     \lambda_2 &amp;= \frac{y_1 - y_2}{x_1 - x_2}<br>\end{align*}<br>$$</p>
-<p>则:</p>
-<p>$$<br>\begin{align*}<br>g_{V, V}(Q) &amp;= \lambda_1(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{3x_2^2(x_3-x_2)}{2y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{3x_3}{2}\frac{x_2^2}{y_2} - \frac{3}{2}\frac{x_2^3}{y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_3 x_V^2}{y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_Q x_V^2}{z_Q^2 y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V} {z_V^3} - \frac{y_Q} {z_Q^3} \\<br>~ &amp;= \frac{\frac{3}{2} x_Q z_Q x_V^2 z_V^2 + z_Q^3(y_V^2 - \frac{3}{2}x_V^3) - y_Q y_V z_V^3}{z_Q^3 y_V z_V^3}<br>\end{align*}<br>$$</p>
-<p>$$<br>\begin{align*}<br>g_{U, V}(Q) &amp;= \lambda_2(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{y_1 - y_2}{x_1 - x_2}(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{y_U}{z_U^3} - \frac{y_V}{z_V^3}}{\frac{x_U}{z_U^2} - \frac{x_V}{z_V^2}}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3}{z_Uz_V(x_U z_V^2 - x_V z_U^2)}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3} {z_Uz_V(x_U z_V^2 - x_V z_U^2)}\frac{x_3 z_V^2 - x_V}{z_V^2} + \frac{y_V - y_3 z_V^3}{z_V^3} \\<br>~ &amp;= \frac{z_V(y_U z_V^3 - y_V z_U^3)(x_3 z_V^2 - x_V) + z_Uz_V(x_U z_V^2 - x_V z_U^2)(y_V - y_3 z_V^3)}{z_Uz_V(x_U z_V^2 - x_V z_U^2)z_V^3} \\<br>~ &amp;= \frac{t_2 x_3 z_V^2 + t_1 y_V - t_2 x_V - t_1 y_3 z_V^3}{t_1 z_V^3} \\<br>~ &amp;= \frac{t_2 \frac{x_Q}{z_Q^2} z_V^2 + t_1 y_V - t_2 x_V - t_1 \frac{y_Q}{z_Q^3} z_V^3} {t_1 z_V^3} \\<br>~ &amp;= \frac{x_Q z_Q t_2 z_V^2 + z_Q^3(t_1 y_V - t_2 x_V) - y_Q t_1 z_V^3} {z_Q^3 t_1 z_V^3}<br>\end{align*}<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    t_1 &amp;= z_Uz_V(x_U z_V^2 - x_V z_U^2) \\<br>    t_2 &amp;= z_V(y_U z_V^3 - y_V z_U^3)<br>\end{align*}<br>\right.<br>$$</p>
-<p>当 $U, V$ 为相反点, 即 $x_1 = x_2, y_1 + y_2 = 0$ 时:</p>
-<p>$$<br>\begin{align*}<br>g_{V, -V}(Q) &amp;= x_3 - x_2 \\<br>~ &amp;= \frac{x_Q}{z_Q^2} - \frac{x_V}{z_V^2} \\<br>~ &amp;= \frac{x_Q z_V^2 - z_Q^2 x_V}{z_Q^2 z_V^2}<br>\end{align*}<br>$$</p>
-<p>在代码实现时, 通过展开, 可以将计算控制在 $F_{q^{2}}$ 上, 且分开算分子分母, 可以有效避免求逆, 延迟到在最后计算 $FinalExp$ 时对总的分母计算一次逆.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>SM9优化</tag>
-        <tag>稀疏乘法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>一次意外的 Github SSH 连接失败</title>
     <url>//posts/2024/01/15/ssh-github/</url>
     <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
@@ -1642,6 +1607,41 @@
       <tags>
         <tag>SSH</tag>
         <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
+    <url>//posts/2024/06/16/sm9gfn/</url>
+    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
+<span id="more"></span>
+
+<h2 id="十二次扩域上的稀疏乘法"><a href="#十二次扩域上的稀疏乘法" class="headerlink" title="十二次扩域上的稀疏乘法"></a>十二次扩域上的稀疏乘法</h2><p>$$<br>\begin{align*}<br>     U &amp;= (x_U, y_U, z_U) \rightarrow (x_1, y_1) \\<br>     V &amp;= (x_V, y_V, z_V) \rightarrow (x_2, y_2) \\<br>     Q &amp;= (x_Q, y_Q, z_Q) \rightarrow (x_3, y_3) \\<br>     U&#39; &amp;= (x&#39;_U, y&#39;_U, z&#39;_U) \rightarrow (x&#39;_1, y&#39;_1) \\<br>     V&#39; &amp;= (x&#39;_V, y&#39;_V, z&#39;_V) \rightarrow (x&#39;_2, y&#39;_2)<br>\end{align*}<br>$$</p>
+<p>$U, V, Q$ 是 $E(F_{q^{12}})$ 上的点, $U&#39;, V&#39;$ 是扭曲线上的点, 也是函数的直接输入值.</p>
+<p>$Q$ 输入时在 $E(F_{q})$ 上, 但是可以直接通过塔式扩张转换到 $E(F_{q^{12}})$ 上.</p>
+<p>根据雅各比加重坐标系转换公式和扭曲线转换公式可得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_1 &amp;= \frac{x_U}{z_U^2} = \frac{x_U&#39;}{\omega^2} = \frac{x_U&#39;}{\omega^2 z_U&#39;^2} \\<br>    y_1 &amp;= \frac{y_U}{z_U^3} = \frac{y_U&#39;}{\omega^3} = \frac{y_U&#39;}{\omega^3 z_U&#39;^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>可以看到根据 $z$ 的次数, 分母会乘上同次数的 $\omega$, 这在 $F_{q^{12}}$ 上相当于是把这个 $F_{q^{2}}$ 元素次数加一, 也就是改变这个元素的位置.</p>
+<p>同理有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_2 &amp;= \frac{x_V}{z_V^2} \\<br>    y_2 &amp;= \frac{y_V}{z_V^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_3 &amp;= \frac{x_Q}{z_Q^2} \\<br>    y_3 &amp;= \frac{y_Q}{z_Q^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>根据公式有:</p>
+<p>$$<br>\begin{align*}<br>     \lambda_1 &amp;= \frac{3x_2^2}{2y_2} \\<br>     \lambda_2 &amp;= \frac{y_1 - y_2}{x_1 - x_2}<br>\end{align*}<br>$$</p>
+<p>则:</p>
+<p>$$<br>\begin{align*}<br>g_{V, V}(Q) &amp;= \lambda_1(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{3x_2^2(x_3-x_2)}{2y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{3x_3}{2}\frac{x_2^2}{y_2} - \frac{3}{2}\frac{x_2^3}{y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_3 x_V^2}{y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_Q x_V^2}{z_Q^2 y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V} {z_V^3} - \frac{y_Q} {z_Q^3} \\<br>~ &amp;= \frac{\frac{3}{2} x_Q z_Q x_V^2 z_V^2 + z_Q^3(y_V^2 - \frac{3}{2}x_V^3) - y_Q y_V z_V^3}{z_Q^3 y_V z_V^3}<br>\end{align*}<br>$$</p>
+<p>$$<br>\begin{align*}<br>g_{U, V}(Q) &amp;= \lambda_2(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{y_1 - y_2}{x_1 - x_2}(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{y_U}{z_U^3} - \frac{y_V}{z_V^3}}{\frac{x_U}{z_U^2} - \frac{x_V}{z_V^2}}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3}{z_Uz_V(x_U z_V^2 - x_V z_U^2)}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3} {z_Uz_V(x_U z_V^2 - x_V z_U^2)}\frac{x_3 z_V^2 - x_V}{z_V^2} + \frac{y_V - y_3 z_V^3}{z_V^3} \\<br>~ &amp;= \frac{z_V(y_U z_V^3 - y_V z_U^3)(x_3 z_V^2 - x_V) + z_Uz_V(x_U z_V^2 - x_V z_U^2)(y_V - y_3 z_V^3)}{z_Uz_V(x_U z_V^2 - x_V z_U^2)z_V^3} \\<br>~ &amp;= \frac{t_2 x_3 z_V^2 + t_1 y_V - t_2 x_V - t_1 y_3 z_V^3}{t_1 z_V^3} \\<br>~ &amp;= \frac{t_2 \frac{x_Q}{z_Q^2} z_V^2 + t_1 y_V - t_2 x_V - t_1 \frac{y_Q}{z_Q^3} z_V^3} {t_1 z_V^3} \\<br>~ &amp;= \frac{x_Q z_Q t_2 z_V^2 + z_Q^3(t_1 y_V - t_2 x_V) - y_Q t_1 z_V^3} {z_Q^3 t_1 z_V^3}<br>\end{align*}<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    t_1 &amp;= z_Uz_V(x_U z_V^2 - x_V z_U^2) \\<br>    t_2 &amp;= z_V(y_U z_V^3 - y_V z_U^3)<br>\end{align*}<br>\right.<br>$$</p>
+<p>当 $U, V$ 为相反点, 即 $x_1 = x_2, y_1 + y_2 = 0$ 时:</p>
+<p>$$<br>\begin{align*}<br>g_{V, -V}(Q) &amp;= x_3 - x_2 \\<br>~ &amp;= \frac{x_Q}{z_Q^2} - \frac{x_V}{z_V^2} \\<br>~ &amp;= \frac{x_Q z_V^2 - z_Q^2 x_V}{z_Q^2 z_V^2}<br>\end{align*}<br>$$</p>
+<p>在代码实现时, 通过展开, 可以将计算控制在 $F_{q^{2}}$ 上, 且分开算分子分母, 可以有效避免求逆, 延迟到在最后计算 $FinalExp$ 时对总的分母计算一次逆.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>SM9优化</tag>
+        <tag>稀疏乘法</tag>
       </tags>
   </entry>
   <entry>
@@ -1922,21 +1922,44 @@
       </tags>
   </entry>
   <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+    <title>网页预览碧蓝航线 Spine 动画</title>
+    <url>//posts/2024/12/22/spinejs-azurlane/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="https://ww-rm.github.io/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>https://ww-rm.github.io/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="https://ww-rm.github.io/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
 ]]></content>
       <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
+        <category>码记</category>
       </categories>
       <tags>
-        <tag>杂谈</tag>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -2035,6 +2058,121 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git 与 Github 入门</title>
+    <url>//posts/2022/08/15/wast-gitandgithub/</url>
+    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
+<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
+<span id="more"></span>
+
+<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
+<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
+<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
+<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
+<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
+<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
+<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
+<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
+<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
+<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
+<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
+<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
+<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
+<p><code>git init</code>: 初始化一个本地仓库.</p>
+<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
+<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
+<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
+<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
+<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
+<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
+<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
+<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
+<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
+
+<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
+<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
+<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
+<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
+<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
+<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
+<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
+<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
+<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
+<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
+<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
+<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
+<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
+<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
+<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
+<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
+</div>
+
+<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
+<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
+<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
+<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
+<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
+<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
+<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
+<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
+<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
+<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
+<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
+<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
+<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
+<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
+<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
+<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
+<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
+<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
+<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
+<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
+<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
+<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+        <tag>github</tag>
       </tags>
   </entry>
   <entry>
@@ -2137,103 +2275,6 @@
         <tag>深度学习</tag>
         <tag>pytorch</tag>
         <tag>手写数字分类</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Git 与 Github 入门</title>
-    <url>//posts/2022/08/15/wast-gitandgithub/</url>
-    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
-<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
-<span id="more"></span>
-
-<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
-<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
-<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
-<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
-<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
-<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
-<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
-<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
-<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
-<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
-<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
-<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
-<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
-<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
-<p><code>git init</code>: 初始化一个本地仓库.</p>
-<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
-<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
-<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
-<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
-<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
-<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
-<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
-<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
-<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
-
-<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
-<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
-<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
-<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
-<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
-<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
-<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
-<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
-<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
-<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
-<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
-<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
-<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
-<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
-<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
-<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
-<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
-</div>
-
-<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
-<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
-<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
-<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
-<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
-<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
-<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
-<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
-<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
-<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
-<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
-<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
-<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
-<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
-<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
-<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
-<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
-<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
-<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
-<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
-<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
-<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
-        <tag>github</tag>
       </tags>
   </entry>
   <entry>
@@ -3238,6 +3279,77 @@
       </tags>
   </entry>
   <entry>
+    <title>SM9 文档阅读笔记</title>
+    <url>//posts/2023/12/15/sm9/</url>
+    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
+<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
+<span id="more"></span>
+
+<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
+<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
+<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
+<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
+<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
+<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
+<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
+<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
+<p>幂次与系数转换关系如下:</p>
+<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
+<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
+<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
+<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
+<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
+<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
+<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
+<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
+<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
+<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
+<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
+<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
+<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
+<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
+<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
+<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
+<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
+<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
+<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
+<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
+<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
+<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
+<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
+<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
+<p>因此困难部分的指数可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
+<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
+<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
+<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
+<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>双线性对</tag>
+        <tag>R-ate</tag>
+        <tag>Frobenius</tag>
+        <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Simpleperf 三部曲 (三)</title>
     <url>//posts/2024/07/07/simpleperf3/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3344,77 +3456,6 @@
         <tag>Simpleperf</tag>
         <tag>Android</tag>
         <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SM9 文档阅读笔记</title>
-    <url>//posts/2023/12/15/sm9/</url>
-    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
-<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
-<span id="more"></span>
-
-<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
-<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
-<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
-<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
-<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
-<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
-<p>因此有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
-<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
-<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
-<p>幂次与系数转换关系如下:</p>
-<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
-<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
-<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
-<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
-<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
-<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
-<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
-<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
-<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
-<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
-<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
-<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
-<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
-<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
-<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
-<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
-<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
-<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
-<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
-<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
-<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
-<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
-<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
-<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
-<p>因此困难部分的指数可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
-<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
-<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
-<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
-<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>双线性对</tag>
-        <tag>R-ate</tag>
-        <tag>Frobenius</tag>
-        <tag>FinalExp</tag>
       </tags>
   </entry>
   <entry>
