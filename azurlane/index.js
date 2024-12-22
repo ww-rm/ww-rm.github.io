@@ -613,7 +613,6 @@ function loadSkin(skinName) {
         console.log("remove last loadTask");
         clearInterval(loadTask);
         loadTask = null;
-        return;
     }
 
     loadTask = setInterval(function () {

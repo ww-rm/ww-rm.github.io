@@ -20,60 +20,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2024/07/07/simpleperf1/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2024/07/07/simpleperf2/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2024/07/07/simpleperf3/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/12/15/sm9/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/08/29/transformer/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/about/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/azurlane/</loc>
     
     <lastmod>2024-12-22</lastmod>
@@ -84,78 +30,6 @@
   
   <url>
     <loc>https://ww-rm.github.io/categories/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2024/03/19/tencent-intership-interview/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/18/wast-dl/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/19/wast-afterword/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/17/wast-ml/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/19/wast-nlp/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2022/08/16/wast-spider/</loc>
     
     <lastmod>2024-12-22</lastmod>
     
@@ -210,6 +84,177 @@
   
   <url>
     <loc>https://ww-rm.github.io/posts/2024/01/22/multiheadattention/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/07/07/simpleperf1/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/07/07/simpleperf2/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/07/07/simpleperf3/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/12/15/sm9/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/08/29/transformer/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/about/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/05/11/py-nupack/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/05/07/py-transformers-genexpr/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/19/wast-afterword/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/03/19/tencent-intership-interview/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/18/wast-dl/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/15/wast-gitandgithub/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/17/wast-ml/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/19/wast-nlp/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/13/wast-pythonandvsc/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2022/08/16/wast-spider/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/02/16/ddpm/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/posts/2024/08/02/imgcmp/</loc>
     
     <lastmod>2024-12-22</lastmod>
     
@@ -308,16 +353,7 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2024/05/11/py-nupack/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2024/05/07/py-transformers-genexpr/</loc>
+    <loc>https://ww-rm.github.io/posts/2021/05/21/prologue/</loc>
     
     <lastmod>2024-12-22</lastmod>
     
@@ -380,15 +416,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/posts/2023/04/11/blhx-painting/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/posts/2023/10/13/cnn-numpy-1/</loc>
     
     <lastmod>2024-12-22</lastmod>
@@ -398,43 +425,16 @@
   </url>
   
   <url>
+    <loc>https://ww-rm.github.io/posts/2023/04/11/blhx-painting/</loc>
+    
+    <lastmod>2024-12-22</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://ww-rm.github.io/posts/2023/10/14/cnn-numpy-2/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2024/02/16/ddpm/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2024/08/02/imgcmp/</loc>
-    
-    <lastmod>2024-12-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/posts/2021/05/21/prologue/</loc>
     
     <lastmod>2024-12-22</lastmod>
     
@@ -643,20 +643,6 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/tags/%E5%B7%A5%E5%85%B7/</loc>
-    <lastmod>2024-12-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/tags/%E7%AB%8B%E7%BB%98%E8%BF%98%E5%8E%9F/</loc>
-    <lastmod>2024-12-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://ww-rm.github.io/tags/numpy/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -679,6 +665,20 @@
   
   <url>
     <loc>https://ww-rm.github.io/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/</loc>
+    <lastmod>2024-12-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/tags/%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2024-12-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://ww-rm.github.io/tags/%E7%AB%8B%E7%BB%98%E8%BF%98%E5%8E%9F/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -937,6 +937,13 @@
   </url>
   
   <url>
+    <loc>https://ww-rm.github.io/tags/%E6%9D%82%E8%B0%88/</loc>
+    <lastmod>2024-12-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://ww-rm.github.io/tags/%E8%85%BE%E8%AE%AF/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -973,13 +980,6 @@
   
   <url>
     <loc>https://ww-rm.github.io/tags/%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E5%88%86%E7%B1%BB/</loc>
-    <lastmod>2024-12-22</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://ww-rm.github.io/tags/%E6%9D%82%E8%B0%88/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1212,14 +1212,14 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/categories/%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/</loc>
+    <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/</loc>
+    <loc>https://ww-rm.github.io/categories/%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -1240,14 +1240,14 @@
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/</loc>
+    <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%90%8E%E8%AE%B0/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%90%8E%E8%AE%B0/</loc>
+    <loc>https://ww-rm.github.io/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/%E5%BF%85%E5%A4%87%E6%8A%80%E8%83%BD/</loc>
     <lastmod>2024-12-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
