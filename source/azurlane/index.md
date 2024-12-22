@@ -20,43 +20,7 @@ type: azurlane-spinepainting
 {% endnote %}
 
 {% raw %}
-<style>
-  #shipnames-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 10px;
-    max-width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
-    padding: 10px;
-  }
-
-  #canvas-spine {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 1;
-  }
-
-  #control-panel {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 5px;
-    background-color: #f8f8f8;
-  }
-
-  .control-item {
-    margin: 5px;
-  }
-
-  .control-item label {
-    margin-right: 10px;
-  }
-</style>
+<link rel="stylesheet" href="index.css">
 {% endraw %}
 
 ## 皮肤列表 (点击名称切换预览)
