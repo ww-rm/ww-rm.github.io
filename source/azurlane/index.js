@@ -808,16 +808,21 @@ function filterSkinInputChange(event) {
     console.log(text);
     var links = document.getElementById("shipnames-container").querySelectorAll("a");
     if (!text) {
-        links.forEach(link => { link.style.backgroundColor = ""; });
+        links.forEach(link => {
+            link.style.backgroundColor = "";
+            link.style.display = "";
+        });
     } else {
         text = text.trim();
         console.log(text);
         links.forEach(link => {
             console.log(link.textContent);
             if (link.textContent.includes(text)) {
-                link.style.backgroundColor = "yellow";
+                link.style.backgroundColor = "lightyellow";
+                link.style.display = "";
             } else {
                 link.style.backgroundColor = "";
+                link.style.display = "none";
             }
         });
     }
