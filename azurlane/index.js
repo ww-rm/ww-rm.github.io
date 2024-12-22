@@ -450,11 +450,15 @@ const ASSET_MAPPING = {
 
 const ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
 const CANVAS_SIZE = 4096
-const BACKGROUND_COLOR = [0.53, 0.61, 0.78, 1];
+const BGCOLOR_DARK = [0.17, 0.26, 0.44, 1];
+const BGCOLOR_LIGHT = [0.44, 0.62, 0.76, 1];
 const DEFAULT_SKIN = "buli_super";
 
 /** @type {HTMLCanvasElement} */
 var canvas = document.getElementById("canvas-spine");
+
+/** @type {HTMLSelectElement} */
+var animationSelect = document.getElementById("animation-select");
 
 /** @type {RenderingContext} */
 var context = null;
@@ -490,20 +494,20 @@ function calculateBounds(skeleton) {
 }
 
 /** 加载骨骼和动画状态 */
-function loadSpineObject(assetPrefix, skelUrl, atlasUrl, initialAnimation) {
+function loadSpineObject(assetPrefix, skelUrl, atlasUrl) {
     var atlas = new spine.TextureAtlas(
         assetManager.get(atlasUrl),
         (path) => assetManager.get(assetPrefix + path)
     );
     var skeletonBinary = new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(atlas));
     var skeletonData = skeletonBinary.readSkeletonData(assetManager.get(skelUrl));
+    var animationNames = skeletonData.animations.map(e => e.name);
 
     var skeleton = new spine.Skeleton(skeletonData);
     var bounds = calculateBounds(skeleton);
     var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
-    animationState.setAnimation(0, initialAnimation, true);
 
-    return { skeleton: skeleton, state: animationState, bounds: bounds };
+    return { skeleton: skeleton, state: animationState, bounds: bounds, animations: animationNames };
 }
 
 /** 重置显示位置 */
@@ -609,14 +613,17 @@ function loadSkin(skinName) {
             spineObjects = [];
             skelNames.forEach(skelName => {
                 try {
-                    var spObj = loadSpineObject(assetPrefix, _SKEL(skelName), _ATLAS(skelName), "normal");
+                    var spObj = loadSpineObject(assetPrefix, _SKEL(skelName), _ATLAS(skelName));
                     spineObjects.push(spObj);
                 } catch (error) {
                     console.error(skinName, skelName, "load failed.");
                     console.error(error);
                 }
             });
+
+            // 资源加载完毕
             resize();
+            setAnimationList();
             clearInterval(loadTask);
             loadTask = null;
         }
@@ -720,8 +727,66 @@ function canvasTouchEnd(event) {
     }
 }
 
+/** 设置播放动画 */
+function setAnimation(name) {
+    spineObjects.forEach(e => {
+        if (e.animations.includes(name)) {
+            e.state.setAnimation(0, name, true);
+        } else {
+            console.log("Animation not found", name, e);
+        }
+    })
+}
+
+/** 设置动画列表 */
+function setAnimationList() {
+    if (spineObjects.length <= 0)
+        return;
+
+    var animationNames = spineObjects[0].animations;
+
+    animationSelect.innerHTML = "";
+    animationNames.forEach(name => {
+        var option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        animationSelect.appendChild(option);
+    });
+
+    var initAnimation = animationNames[animationNames.length - 1];
+    if (animationNames.includes("normal")) {
+        initAnimation = "normal";
+    } else if (animationNames.includes("idle")) {
+        initAnimation = "idle";
+    }
+    setAnimation(initAnimation);
+    animationSelect.value = initAnimation;
+}
+
+/** 选择动画事件 */
+function animationSelectChange(event) {
+    setAnimation(event.target.value);
+}
+
+/** 设置画布背景色 */
+function setBackgroundColor(color) {
+    if (color == "dark") {
+        context.clearColor(...BGCOLOR_DARK);
+        document.querySelector('input[name="bgcolor"][value="dark"]').checked = true;
+    } else {
+        context.clearColor(...BGCOLOR_LIGHT);
+        document.querySelector('input[name="bgcolor"][value="light"]').checked = true;
+    }
+}
+
+/** 背景色设置事件 */
+function backgroundColorChange(event) {
+    var value = document.querySelector('input[name="bgcolor"]:checked').value;
+    setBackgroundColor(value);
+}
+
 function main() {
-    canvas.height = canvas.width = CANVAS_SIZE;
+    // 生成皮肤列表
     var container = document.getElementById("shipnames-container");
     for (var key in ASSET_MAPPING) {
         value = ASSET_MAPPING[key];
@@ -741,9 +806,6 @@ function main() {
         alert("WebGL 加载失败");
         return;
     }
-    context.clearColor(...BACKGROUND_COLOR);
-    context.viewport(0, 0, canvas.width, canvas.height);
-
     try {
         shader = spine.webgl.Shader.newTwoColoredTextured(context);
         batcher = new spine.webgl.PolygonBatcher(context);
@@ -755,8 +817,13 @@ function main() {
         return;
     }
 
+    // 设置绘图基本参数
+    canvas.height = canvas.width = CANVAS_SIZE;
+    setBackgroundColor("light");
+    context.viewport(0, 0, canvas.width, canvas.height);
     renderer.premultipliedAlpha = true; // 碧蓝的东西默认是有 PMA 的
 
+    // 事件绑定
     canvas.onwheel = canvasWheelHandler;
     canvas.onmousedown = canvasMouseDown;
     canvas.onmousemove = canvasMouseMove;
@@ -765,7 +832,12 @@ function main() {
     canvas.ontouchstart = canvasTouchStart;
     canvas.ontouchmove = canvasTouchMove;
     canvas.ontouchend = canvasTouchEnd;
+    animationSelect.onchange = animationSelectChange;
+    document.getElementsByName("bgcolor").forEach((radio) => {
+        radio.onchange = backgroundColorChange;
+    })
 
+    // 加载一个默认皮肤
     loadSkin(DEFAULT_SKIN);
     render();
 }

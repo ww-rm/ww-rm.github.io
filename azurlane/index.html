@@ -27,8 +27,8 @@
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="点击展开使用说明  使用方法  页面分两部分, 第一部分是皮肤列表, 第二部分是预览界面 在下方皮肤列表中点击想要预览的动态皮肤, 等待资源加载完毕后即可查看预览 可以配合 Ctrl-F 来直接查找对应舰娘名以及皮肤名  注意事项  游戏内资源体积较大, 建议科学上网进行加载, 否则可能点击链接之后需要非常长的加载时间 所有资源均可在仓库 azurlane_spinepainting 内进行查看和">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2024-12-22T04:00:35.856Z">
-<meta property="article:modified_time" content="2024-12-22T04:00:35.856Z">
+<meta property="article:published_time" content="2024-12-22T07:01:22.576Z">
+<meta property="article:modified_time" content="2024-12-22T07:01:22.576Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="ww-rm">
 <meta property="article:tag" content="编程">
@@ -267,6 +267,24 @@
     height: auto;
     aspect-ratio: 1;
   }
+
+  #control-panel {
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    padding: 5px;
+    background-color: #f8f8f8;
+  }
+
+  .control-item {
+    margin: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .control-item label {
+    margin-right: 10px;
+  }
 </style>
 
 
@@ -275,6 +293,19 @@
 
 
 <h2 id="预览界面-可以进行拖放"><a href="#预览界面-可以进行拖放" class="headerlink" title="预览界面 (可以进行拖放)"></a>预览界面 (可以进行拖放)</h2>
+<div id="control-panel">
+    <div class="control-item">
+        <label>动画设置:</label>
+        <select id="animation-select"></select>
+    </div>
+    <div class="control-item">
+        <label>背景设置:</label>
+        <input type="radio" id="bgcolor-light" name="bgcolor" value="light">
+        <label for="bgcolor-light">浅色</label>
+        <input type="radio" id="bgcolor-dark" name="bgcolor" value="dark">
+        <label for="bgcolor-dark">深色</label>
+    </div>
+</div>
 <canvas id="canvas-spine"></canvas>
 
 
