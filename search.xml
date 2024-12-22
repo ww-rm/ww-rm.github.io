@@ -131,6 +131,55 @@
       </tags>
   </entry>
   <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>国密算法的纯 Python 实现</title>
     <url>//posts/2023/12/14/gmalg/</url>
     <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
@@ -190,55 +239,6 @@
         <tag>SM9</tag>
         <tag>ZUC</tag>
         <tag>gmalg</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
       </tags>
   </entry>
   <entry>
@@ -1570,41 +1570,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
-    <url>//posts/2024/06/16/sm9gfn/</url>
-    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
-<span id="more"></span>
-
-<h2 id="十二次扩域上的稀疏乘法"><a href="#十二次扩域上的稀疏乘法" class="headerlink" title="十二次扩域上的稀疏乘法"></a>十二次扩域上的稀疏乘法</h2><p>$$<br>\begin{align*}<br>     U &amp;= (x_U, y_U, z_U) \rightarrow (x_1, y_1) \\<br>     V &amp;= (x_V, y_V, z_V) \rightarrow (x_2, y_2) \\<br>     Q &amp;= (x_Q, y_Q, z_Q) \rightarrow (x_3, y_3) \\<br>     U&#39; &amp;= (x&#39;_U, y&#39;_U, z&#39;_U) \rightarrow (x&#39;_1, y&#39;_1) \\<br>     V&#39; &amp;= (x&#39;_V, y&#39;_V, z&#39;_V) \rightarrow (x&#39;_2, y&#39;_2)<br>\end{align*}<br>$$</p>
-<p>$U, V, Q$ 是 $E(F_{q^{12}})$ 上的点, $U&#39;, V&#39;$ 是扭曲线上的点, 也是函数的直接输入值.</p>
-<p>$Q$ 输入时在 $E(F_{q})$ 上, 但是可以直接通过塔式扩张转换到 $E(F_{q^{12}})$ 上.</p>
-<p>根据雅各比加重坐标系转换公式和扭曲线转换公式可得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_1 &amp;= \frac{x_U}{z_U^2} = \frac{x_U&#39;}{\omega^2} = \frac{x_U&#39;}{\omega^2 z_U&#39;^2} \\<br>    y_1 &amp;= \frac{y_U}{z_U^3} = \frac{y_U&#39;}{\omega^3} = \frac{y_U&#39;}{\omega^3 z_U&#39;^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>可以看到根据 $z$ 的次数, 分母会乘上同次数的 $\omega$, 这在 $F_{q^{12}}$ 上相当于是把这个 $F_{q^{2}}$ 元素次数加一, 也就是改变这个元素的位置.</p>
-<p>同理有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_2 &amp;= \frac{x_V}{z_V^2} \\<br>    y_2 &amp;= \frac{y_V}{z_V^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_3 &amp;= \frac{x_Q}{z_Q^2} \\<br>    y_3 &amp;= \frac{y_Q}{z_Q^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>根据公式有:</p>
-<p>$$<br>\begin{align*}<br>     \lambda_1 &amp;= \frac{3x_2^2}{2y_2} \\<br>     \lambda_2 &amp;= \frac{y_1 - y_2}{x_1 - x_2}<br>\end{align*}<br>$$</p>
-<p>则:</p>
-<p>$$<br>\begin{align*}<br>g_{V, V}(Q) &amp;= \lambda_1(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{3x_2^2(x_3-x_2)}{2y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{3x_3}{2}\frac{x_2^2}{y_2} - \frac{3}{2}\frac{x_2^3}{y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_3 x_V^2}{y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_Q x_V^2}{z_Q^2 y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V} {z_V^3} - \frac{y_Q} {z_Q^3} \\<br>~ &amp;= \frac{\frac{3}{2} x_Q z_Q x_V^2 z_V^2 + z_Q^3(y_V^2 - \frac{3}{2}x_V^3) - y_Q y_V z_V^3}{z_Q^3 y_V z_V^3}<br>\end{align*}<br>$$</p>
-<p>$$<br>\begin{align*}<br>g_{U, V}(Q) &amp;= \lambda_2(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{y_1 - y_2}{x_1 - x_2}(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{y_U}{z_U^3} - \frac{y_V}{z_V^3}}{\frac{x_U}{z_U^2} - \frac{x_V}{z_V^2}}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3}{z_Uz_V(x_U z_V^2 - x_V z_U^2)}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3} {z_Uz_V(x_U z_V^2 - x_V z_U^2)}\frac{x_3 z_V^2 - x_V}{z_V^2} + \frac{y_V - y_3 z_V^3}{z_V^3} \\<br>~ &amp;= \frac{z_V(y_U z_V^3 - y_V z_U^3)(x_3 z_V^2 - x_V) + z_Uz_V(x_U z_V^2 - x_V z_U^2)(y_V - y_3 z_V^3)}{z_Uz_V(x_U z_V^2 - x_V z_U^2)z_V^3} \\<br>~ &amp;= \frac{t_2 x_3 z_V^2 + t_1 y_V - t_2 x_V - t_1 y_3 z_V^3}{t_1 z_V^3} \\<br>~ &amp;= \frac{t_2 \frac{x_Q}{z_Q^2} z_V^2 + t_1 y_V - t_2 x_V - t_1 \frac{y_Q}{z_Q^3} z_V^3} {t_1 z_V^3} \\<br>~ &amp;= \frac{x_Q z_Q t_2 z_V^2 + z_Q^3(t_1 y_V - t_2 x_V) - y_Q t_1 z_V^3} {z_Q^3 t_1 z_V^3}<br>\end{align*}<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    t_1 &amp;= z_Uz_V(x_U z_V^2 - x_V z_U^2) \\<br>    t_2 &amp;= z_V(y_U z_V^3 - y_V z_U^3)<br>\end{align*}<br>\right.<br>$$</p>
-<p>当 $U, V$ 为相反点, 即 $x_1 = x_2, y_1 + y_2 = 0$ 时:</p>
-<p>$$<br>\begin{align*}<br>g_{V, -V}(Q) &amp;= x_3 - x_2 \\<br>~ &amp;= \frac{x_Q}{z_Q^2} - \frac{x_V}{z_V^2} \\<br>~ &amp;= \frac{x_Q z_V^2 - z_Q^2 x_V}{z_Q^2 z_V^2}<br>\end{align*}<br>$$</p>
-<p>在代码实现时, 通过展开, 可以将计算控制在 $F_{q^{2}}$ 上, 且分开算分子分母, 可以有效避免求逆, 延迟到在最后计算 $FinalExp$ 时对总的分母计算一次逆.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>SM9优化</tag>
-        <tag>稀疏乘法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>一次意外的 Github SSH 连接失败</title>
     <url>//posts/2024/01/15/ssh-github/</url>
     <content><![CDATA[<p>记录一次失败的 Github SSH 连接问题排查过程.</p>
@@ -1642,6 +1607,41 @@
       <tags>
         <tag>SSH</tag>
         <tag>Github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
+    <url>//posts/2024/06/16/sm9gfn/</url>
+    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
+<span id="more"></span>
+
+<h2 id="十二次扩域上的稀疏乘法"><a href="#十二次扩域上的稀疏乘法" class="headerlink" title="十二次扩域上的稀疏乘法"></a>十二次扩域上的稀疏乘法</h2><p>$$<br>\begin{align*}<br>     U &amp;= (x_U, y_U, z_U) \rightarrow (x_1, y_1) \\<br>     V &amp;= (x_V, y_V, z_V) \rightarrow (x_2, y_2) \\<br>     Q &amp;= (x_Q, y_Q, z_Q) \rightarrow (x_3, y_3) \\<br>     U&#39; &amp;= (x&#39;_U, y&#39;_U, z&#39;_U) \rightarrow (x&#39;_1, y&#39;_1) \\<br>     V&#39; &amp;= (x&#39;_V, y&#39;_V, z&#39;_V) \rightarrow (x&#39;_2, y&#39;_2)<br>\end{align*}<br>$$</p>
+<p>$U, V, Q$ 是 $E(F_{q^{12}})$ 上的点, $U&#39;, V&#39;$ 是扭曲线上的点, 也是函数的直接输入值.</p>
+<p>$Q$ 输入时在 $E(F_{q})$ 上, 但是可以直接通过塔式扩张转换到 $E(F_{q^{12}})$ 上.</p>
+<p>根据雅各比加重坐标系转换公式和扭曲线转换公式可得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_1 &amp;= \frac{x_U}{z_U^2} = \frac{x_U&#39;}{\omega^2} = \frac{x_U&#39;}{\omega^2 z_U&#39;^2} \\<br>    y_1 &amp;= \frac{y_U}{z_U^3} = \frac{y_U&#39;}{\omega^3} = \frac{y_U&#39;}{\omega^3 z_U&#39;^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>可以看到根据 $z$ 的次数, 分母会乘上同次数的 $\omega$, 这在 $F_{q^{12}}$ 上相当于是把这个 $F_{q^{2}}$ 元素次数加一, 也就是改变这个元素的位置.</p>
+<p>同理有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_2 &amp;= \frac{x_V}{z_V^2} \\<br>    y_2 &amp;= \frac{y_V}{z_V^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_3 &amp;= \frac{x_Q}{z_Q^2} \\<br>    y_3 &amp;= \frac{y_Q}{z_Q^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>根据公式有:</p>
+<p>$$<br>\begin{align*}<br>     \lambda_1 &amp;= \frac{3x_2^2}{2y_2} \\<br>     \lambda_2 &amp;= \frac{y_1 - y_2}{x_1 - x_2}<br>\end{align*}<br>$$</p>
+<p>则:</p>
+<p>$$<br>\begin{align*}<br>g_{V, V}(Q) &amp;= \lambda_1(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{3x_2^2(x_3-x_2)}{2y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{3x_3}{2}\frac{x_2^2}{y_2} - \frac{3}{2}\frac{x_2^3}{y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_3 x_V^2}{y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_Q x_V^2}{z_Q^2 y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V} {z_V^3} - \frac{y_Q} {z_Q^3} \\<br>~ &amp;= \frac{\frac{3}{2} x_Q z_Q x_V^2 z_V^2 + z_Q^3(y_V^2 - \frac{3}{2}x_V^3) - y_Q y_V z_V^3}{z_Q^3 y_V z_V^3}<br>\end{align*}<br>$$</p>
+<p>$$<br>\begin{align*}<br>g_{U, V}(Q) &amp;= \lambda_2(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{y_1 - y_2}{x_1 - x_2}(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{y_U}{z_U^3} - \frac{y_V}{z_V^3}}{\frac{x_U}{z_U^2} - \frac{x_V}{z_V^2}}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3}{z_Uz_V(x_U z_V^2 - x_V z_U^2)}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3} {z_Uz_V(x_U z_V^2 - x_V z_U^2)}\frac{x_3 z_V^2 - x_V}{z_V^2} + \frac{y_V - y_3 z_V^3}{z_V^3} \\<br>~ &amp;= \frac{z_V(y_U z_V^3 - y_V z_U^3)(x_3 z_V^2 - x_V) + z_Uz_V(x_U z_V^2 - x_V z_U^2)(y_V - y_3 z_V^3)}{z_Uz_V(x_U z_V^2 - x_V z_U^2)z_V^3} \\<br>~ &amp;= \frac{t_2 x_3 z_V^2 + t_1 y_V - t_2 x_V - t_1 y_3 z_V^3}{t_1 z_V^3} \\<br>~ &amp;= \frac{t_2 \frac{x_Q}{z_Q^2} z_V^2 + t_1 y_V - t_2 x_V - t_1 \frac{y_Q}{z_Q^3} z_V^3} {t_1 z_V^3} \\<br>~ &amp;= \frac{x_Q z_Q t_2 z_V^2 + z_Q^3(t_1 y_V - t_2 x_V) - y_Q t_1 z_V^3} {z_Q^3 t_1 z_V^3}<br>\end{align*}<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    t_1 &amp;= z_Uz_V(x_U z_V^2 - x_V z_U^2) \\<br>    t_2 &amp;= z_V(y_U z_V^3 - y_V z_U^3)<br>\end{align*}<br>\right.<br>$$</p>
+<p>当 $U, V$ 为相反点, 即 $x_1 = x_2, y_1 + y_2 = 0$ 时:</p>
+<p>$$<br>\begin{align*}<br>g_{V, -V}(Q) &amp;= x_3 - x_2 \\<br>~ &amp;= \frac{x_Q}{z_Q^2} - \frac{x_V}{z_V^2} \\<br>~ &amp;= \frac{x_Q z_V^2 - z_Q^2 x_V}{z_Q^2 z_V^2}<br>\end{align*}<br>$$</p>
+<p>在代码实现时, 通过展开, 可以将计算控制在 $F_{q^{2}}$ 上, 且分开算分子分母, 可以有效避免求逆, 延迟到在最后计算 $FinalExp$ 时对总的分母计算一次逆.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>SM9优化</tag>
+        <tag>稀疏乘法</tag>
       </tags>
   </entry>
   <entry>
