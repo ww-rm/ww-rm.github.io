@@ -34,6 +34,10 @@ type: azurlane-spinepainting
 {% raw %}
 <div id="control-panel">
     <div class="control-item">
+        <label>当前预览:</label>
+        <span id="current-shipname">无</span>
+    </div>
+    <div class="control-item">
         <label>动画设置:</label>
         <select id="animation-select"></select>
     </div>
