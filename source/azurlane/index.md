@@ -29,7 +29,7 @@ type: azurlane-spinepainting
 <div class="filter-skin">
     <!-- 对shipnames-container里的内容进行筛选，被筛选到的元素会被高亮，元素是a标签，如果文本包含给定的筛选内容就是命中 -->
     <label>筛选:</label>
-    <input type="text" id="filter-skin-input" placeholder="输入关键字进行筛选">
+    <input type="text" id="filter-skin-input" placeholder="输入关键字高亮筛选">
 </div>
 <div id="shipnames-container"></div>
 {% endraw %}
