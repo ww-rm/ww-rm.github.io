@@ -448,19 +448,28 @@ const ASSET_MAPPING = {
     }
 }
 
-var params = new URLSearchParams(window.location.search);
+const CANVAS_SIZE = 4096
+const BGCOLOR_DARK = [0.17, 0.26, 0.44, 1];
+const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
+
 var ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
+var DEFAULT_SKIN = "buli_super";
+
+// 接收一些位于 url 上的传参
+var params = new URLSearchParams(window.location.search);
 if (params.get("p")) {
     var altPrefix = params.get("p");
     if (!altPrefix.endsWith("/")) altPrefix += "/";
     console.log("Use another asset prefix:", altPrefix);
     ASSET_PREFIX = altPrefix;
 }
-
-const CANVAS_SIZE = 4096
-const BGCOLOR_DARK = [0.17, 0.26, 0.44, 1];
-const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
-const DEFAULT_SKIN = "buli_super";
+if (params.get("s")) {
+    var altDefaultSkin = params.get("s");
+    if (ASSET_MAPPING[altDefaultSkin]) {
+        console.log("Use another default skin:", altDefaultSkin);
+        DEFAULT_SKIN = altDefaultSkin;
+    }
+}
 
 /** @type {HTMLCanvasElement} */
 var canvas = document.getElementById("canvas-spine");
