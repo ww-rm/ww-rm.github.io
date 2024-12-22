@@ -631,6 +631,7 @@ function loadSkin(skinName) {
             // 资源加载完毕
             resize();
             setAnimationList();
+            document.getElementById("current-shipname").textContent = ASSET_MAPPING[skinName].chName;
             clearInterval(loadTask);
             loadTask = null;
         }
