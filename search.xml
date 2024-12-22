@@ -1149,6 +1149,90 @@
       </tags>
   </entry>
   <entry>
+    <title>NJ 树算法原理与实现</title>
+    <url>//posts/2023/03/08/njtree/</url>
+    <content><![CDATA[<p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
+<p>本文简要介绍 NJ 树算法的基本流程与计算方法, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="邻居"><a href="#邻居" class="headerlink" title="邻居"></a>邻居</h3><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVbSaR.png" alt="ppVbSaR.png"></p>
+<p>首先是关于&quot;邻居&quot;的定义, 在 NJ 树中, 一对&quot;邻居&quot;指的是在一个无根分叉树中仅仅通过一个内部结点连接起来一对分类单元 (OTU).</p>
+<p>例如在上图中, $1$ 和 $2$ 可以视为一对邻居, 它们通过内部结点 $A$ 进行连结.</p>
+<p>进一步, 可以对分类单元进行组合, 形成新的更大的分类单元与邻居对, 例如, $&lt;1, 2&gt;$ 和 $3$ 可以作为一对邻居, 它们通过内部结点 $B$ 进行连结, $&lt;5, 6&gt;$ 和 $&lt;7, 8&gt;$ 可以作为一对邻居, 它们通过内部结点 $D$ 进行连结.</p>
+<h3 id="进化树构建流程"><a href="#进化树构建流程" class="headerlink" title="进化树构建流程"></a>进化树构建流程</h3><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
+<p>假设初始时没有任何分类单元聚集在一起, 算法起始于一个星状树, 如上图左侧所示. 算法的一步变换则是将左图变成了右图.</p>
+<p>在这些分类单元中, 分类单元之间有着不同的距离远近, 右侧的图将 $1$ 和 $2$ 聚合在了一起, 并形成了一个新结点 $Y$, 将 $1$, $2$ 视作一个整体, 则相比于左图, $&lt;1, 2&gt;$ 作为新分类单元整体替换了左图里的分类单元 $1$ 和 $2$, 整个星状树减少了 1 个分类单元, 增加了 1 条内部分支, 每次选择要聚合的邻居时, 都是使得聚合后的新树总枝长最短. 如此循环, 则可以一步一步减少星状树的分类单元, 直至分类单元只剩下 3 个, 内部分支增加至 $N - 3$ 个.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVX9mD.png" alt="ppVX9mD.png"></p>
+<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
+<h3 id="计算总枝长"><a href="#计算总枝长" class="headerlink" title="计算总枝长"></a>计算总枝长</h3><p>还是以这张图为例, 设初始时共有 $N$ 个分类单元, 设 $D_{ij}$ 指分类单元 $i$ 和 $j$ 之间的距离, $L_{ab}$ 指结点 $a$ 和 $b$ 之间的枝长. 整个树的总枝长为:</p>
+<p>$$<br>S_O = \sum_{i=1}^{N}L_{iX}=\frac{1}{N-1}\sum_{i&lt;j}^{N}D_{ij}<br>$$</p>
+<p>也就是每个结点到 $X$ 的枝长总和, 等价于分类单元两两之间距离求和后除以 $N-1$, 因为每个枝相当于数了 $N-1$ 次.</p>
+<details class="note info"><summary><p>为什么是 $N-1$ ?</p>
+</summary>
+<p>$1$ 到 $X$ 的距离通过 $D_{ij}$ 数了 $N-1$ 次; $2$ 到 $X$ 的距离通过 $D_{12}$ 数了 $1$ 次, 通过 $D_{2j}$ 数了 $N-2$ 次, 以此类推.</p>
+
+</details>
+
+<h3 id="计算新增枝长后的总枝长"><a href="#计算新增枝长后的总枝长" class="headerlink" title="计算新增枝长后的总枝长"></a>计算新增枝长后的总枝长</h3><p>另一方面, 右侧图中 $X$ 和 $Y$ 结点之间的枝长计算方法为:</p>
+<p>$$<br>\begin{aligned}<br>  L_{XY} &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}{(D_{1k}+D_{2k})} - {(N-2)(L_{1X}+L_{2X})} - {2\sum_{i=3}^{N}{L_{iY}}} \right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}{(D_{1k}+D_{2k})} - {(N-2)D_{12}} - {\frac{2}{N-3}\sum_{3 \leq i&lt;j}^{N}D_{ij}} \right]<br>\end{aligned}<br>$$</p>
+<p>第一项 $\sum_{k=3}^{N}{(D_{1k}+D_{2k})}$ 代表从结点 $1,2$ 到其余所有结点的距离, 包括 $L_{XY}$. 公式的后两项是为了减去多算的那部分距离, $(L_{1X}+L_{2X})$ 是 $1,2$ 到 $X$ 的距离, $\sum_{i=3}^{N}{L_{iY}}$ 是其余点到 $Y$ 的距离.</p>
+<details class="note info"><summary><p>前面的那些系数怎么来的 ?</p>
+</summary>
+<p>在第一项中, $\sum_{k=3}^{N}{(D_{1k}+D_{2k})}$ 将 $1,2$ 到 $X$ 的边各数了 $N-2$ 次, $X$ 到 $Y$ 的边数了 $2(N-2)$ 次, $Y$ 到其余结点各数了 $2$ 次, 因此减去对应的次数后再除以 $2(N-2)$ 就是 $L_{XY}$ 的距离.</p>
+
+</details>
+
+<p>得到 $L_{XY}$ 之后, 可以计算右侧新图的总枝长:</p>
+<p>$$<br>\begin{aligned}<br>  S_{12} &amp;= L_{XY} + (L_{1X} + L_{2X}) + \sum_{i=3}^{N}L_{iY} \\<br>  ~ &amp;= \frac{1}{2(N-2)}\sum_{k=3}^{N}(D_{1k} + D_{2k}) + \frac{1}{2}D_{12} + \frac{1}{N-2}\sum_{3 \leq i&lt;j}^{N}D_{ij}<br>\end{aligned}<br>$$</p>
+<h3 id="构造新图"><a href="#构造新图" class="headerlink" title="构造新图"></a>构造新图</h3><p>通常来说, 并不会知道右图中 $1,2$ 究竟选择哪一对分类单元作为邻居, 因此需要计算所有的 $S_{ij}$, 并选择最小的那一对作为这一轮的选择.</p>
+<p>假设 $1,2$ 就是这一轮选择出来的邻居, 则它们两个和 $X$ 会形成新的分类单元 $&lt;1,2&gt;$, 然后计算新分类单元与其余分类单元的距离:</p>
+<p>$$<br>D_{&lt;1,2&gt;j} = \frac{1}{2}(D_{1j} + D_{2j}) \quad (3 \leq j \leq N)<br>$$</p>
+<p>得到新距离之后, 还需要计算新分类单元 $&lt;1,2&gt;$ 内部的距离 $L_{1X}, L_{2X}$.</p>
+<p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  L_{2X} &amp;= \frac{1}{2}(D_{12} + D_{2Z} - D_{1Z})<br>\end{aligned}<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\begin{aligned}<br>  D_{1Z} &amp;= \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} \\<br>  D_{2Z} &amp;= \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}<br>\end{aligned}<br>$$</p>
+<p>在这一组公式里面, $Z$ 代表除去 $1,2$ 的所有结点形成的&quot;假想结点&quot;, 即 $1$ 通过 $Z$ 这个整体与 $2$ 相连. 则 $1,2$ 与 $Z$ 的距离分别为各自到 $Z$ 中其余结点距离的平均值.</p>
+<h3 id="循环步骤"><a href="#循环步骤" class="headerlink" title="循环步骤"></a>循环步骤</h3><p>每选择一对合适的邻居, 则图上的分类单元就会减少 1 个, 直到图上的分类单元数量变成 3, 算法结束.</p>
+<h2 id="公式化简"><a href="#公式化简" class="headerlink" title="公式化简"></a>公式化简</h2><p>在实际计算之前, 需要对原始公式进行一些化简变形.</p>
+<p>首先是对每一轮都需要计算的新图总枝长公式进行变形, 以前文的 $S_{12}$ 为例:</p>
+<p>$$<br>\begin{aligned}<br>  S_{12} &amp;= \frac{1}{2(N-2)}\sum_{k=3}^{N}(D_{1k} + D_{2k}) + \frac{1}{2}D_{12} + \frac{1}{N-2}\sum_{3 \leq i&lt;j}^{N}D_{ij} \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}D_{1k} + \sum_{k=3}^{N}D_{2k} + (N-2)D_{12} + \sum_{3 \leq i&lt;j}^{N}D_{ij} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \left(D_{12} + \sum_{k=3}^{N}D_{1k}\right) - \left(D_{21} + \sum_{k=3}^{N}D_{2k}\right) + \left(D_{12} + \sum_{k=3}^{N}D_{1k} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right) + \left(D_{21} + \sum_{k=3}^{N}D_{2k} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k} + 2\sum_{i&lt;j}^{N}D_{ij}\right] \\<br>  ~ &amp;= \frac{1}{2}\left[D_{12} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right] + \frac{1}{(N-2)}\sum_{i&lt;j}^{N}D_{ij} \\<br>  ~ &amp;= C_1\left[D_{12} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right] + C_2<br>\end{aligned}<br>$$</p>
+<p>经过化简之后, 可以看到, 只有方括号里的内容与要计算的邻居对 $1,2$ 有关, 其他量都可以看作这一轮的常量.</p>
+<p>因为最终 $S_{ij}$ 是用于比较最小值, 所以只需要保证 $S_{ij}$ 的相对大小不变, 又 $C_1, C_2$ 均大于 $0$, 于是可以在实际计算中忽略掉常数项, 从而简化计算, 从而有:</p>
+<p>$$<br>S_{ij} = D_{ij} - D_{iZ} - D_{jZ}<br>$$</p>
+<p>其中:</p>
+<p>$$<br>D_{iZ} = \frac{1}{(N-2)}\sum_{k \ne i}^{N}D_{ik}<br>$$</p>
+<p>仍以前文的图为例, 在选择出最合适的邻居 $1,2$ 后, 会合并成新的分类单元 $&lt;1,2&gt;$, 需要在新图里计算 $&lt;1,2&gt;$ 和其余点的距离值, 以及内部距离 $L_{1X}, L_{2X}$.</p>
+<p>新距离值就是 $D_{&lt;i,j&gt;k} = \frac{1}{2}(D_{ik} + D_{jk})$, 这里对 $L_{1X}, L_{2X}$ 进行变形化简.</p>
+<p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  ~ &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} - \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}\right) \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{i=3}^{N}D_{1i} - \sum_{i=3}^{N}D_{2i}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \left(D_{12} + \sum_{i=3}^{N}D_{1i}\right) - \left(D_{21} + \sum_{i=3}^{N}D_{2i}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] \\<br>  ~ &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right) \\<br>  L_{2X} &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} \right)<br>\end{aligned}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\begin{aligned}<br>  L_{iX} &amp;= \frac{1}{2}\left(D_{ij} + D_{iZ} - D_{jZ}\right) \\<br>  L_{jX} &amp;= \frac{1}{2}\left(D_{ij} + D_{jZ} - D_{iZ}\right)<br>\end{aligned}<br>$$</p>
+<p>变形成这样有个好处, 就是能够复用前面算 $S_{ij}$ 时计算的 $D_{iZ}$ 结果.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><ol>
+<li>依次计算当前轮次的 $M_i$ 值, 得到 $M$ 向量 $(M_1, M_2, \ldots, M_N)$.</li>
+<li>计算所有的 $S_{ij} ~ (1 \leq i &lt; j \leq N)$, 选择使 $S_{ij}$ 最小的 $i,j$ 作为这一轮的邻居.</li>
+<li>计算新分类单元 $&lt;i,j&gt;$ 对其余点的新距离 $D_{&lt;i,j&gt;k} ~ (1 \leq k \leq N, k \ne i, j)$.</li>
+<li>计算内部距离 $L_{iX}$ 和 $L_{jX}$.</li>
+<li>更新当前分类单元数 $N = N-1$, 如果 $N &gt; 3$, 则转步骤 1 继续, 否则结束计算.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> rich <span class="keyword">import</span> progress</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">neighbor_joining</span>(<span class="params">_otu: <span class="type">List</span>[<span class="built_in">str</span>], _dist: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">float</span>]]</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        _otu: names of otus</span></span><br><span class="line"><span class="string">        _dist: distances dict for otus, (i, j) -&gt; dist, i less than j</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># init</span></span><br><span class="line">    nodes = [&#123;<span class="string">&quot;name&quot;</span>: e, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>&#125; <span class="keyword">for</span> e <span class="keyword">in</span> _otu]</span><br><span class="line">    n = <span class="built_in">len</span>(nodes)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># otu_distances: used to record otu distances</span></span><br><span class="line">    otu_distances: np.ndarray = np.array(_dist, dtype=np.float_)</span><br><span class="line">    otu_distances = np.concatenate([otu_distances, np.zeros((n - <span class="number">2</span>, n))], axis=<span class="number">0</span>)</span><br><span class="line">    otu_distances = np.concatenate([otu_distances, np.zeros((<span class="number">2</span> * n - <span class="number">2</span>, n - <span class="number">2</span>))], axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># branch_lengths: used to record branch lengths</span></span><br><span class="line">    branch_lengths = np.zeros_like(otu_distances)</span><br><span class="line"></span><br><span class="line">    current_otus = <span class="built_in">list</span>(<span class="built_in">range</span>(n))</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> progress.track(<span class="built_in">range</span>(n - <span class="number">3</span>)):</span><br><span class="line">        n = <span class="built_in">len</span>(current_otus)</span><br><span class="line">        otu_dists = otu_distances[current_otus, ...][..., current_otus]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># calc D to Z</span></span><br><span class="line">        otu_dists_to_others: np.ndarray = np.<span class="built_in">sum</span>(otu_dists, axis=<span class="number">0</span>) / (n - <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># calc S</span></span><br><span class="line">        graph_branch_length = otu_dists - otu_dists_to_others.reshape(-<span class="number">1</span>, <span class="number">1</span>) - otu_dists_to_others.reshape(<span class="number">1</span>, -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># choose min (i, j)</span></span><br><span class="line">        otu1, otu2 = <span class="built_in">min</span>(((i, j) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n) <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i + <span class="number">1</span>, n)), key=<span class="keyword">lambda</span> x: graph_branch_length[x])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># make new otu and node</span></span><br><span class="line">        n1, n2, n3 = current_otus[otu1], current_otus[otu2], <span class="built_in">len</span>(nodes)</span><br><span class="line">        new_node = &#123;<span class="string">&quot;name&quot;</span>: <span class="string">f&quot;#<span class="subst">&#123;n3&#125;</span>&quot;</span>, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>, <span class="string">&quot;children&quot;</span>: (n1, n2)&#125;</span><br><span class="line">        nodes[n1][<span class="string">&quot;parent&quot;</span>] = n3</span><br><span class="line">        nodes[n2][<span class="string">&quot;parent&quot;</span>] = n3</span><br><span class="line"></span><br><span class="line">        <span class="comment"># update otu distances</span></span><br><span class="line">        otu_distances[n3, ...] = (otu_distances[n1, ...] + otu_distances[n2, ...]) / <span class="number">2</span></span><br><span class="line">        otu_distances[..., n3] = (otu_distances[..., n1] + otu_distances[..., n2]) / <span class="number">2</span></span><br><span class="line">        otu_distances[n3, [n1, n2, n3]] = <span class="number">0</span></span><br><span class="line">        otu_distances[[n1, n2, n3], n3] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># update branch lengths</span></span><br><span class="line">        branch_lengths[n1, n3] = branch_lengths[n3, n1] = (</span><br><span class="line">            otu_distances[n1, n2] + otu_dists_to_others[otu1] - otu_dists_to_others[otu2]</span><br><span class="line">            - otu_distances[nodes[n1].get(<span class="string">&quot;children&quot;</span>, (n1, n1))]</span><br><span class="line">        ) / <span class="number">2</span></span><br><span class="line">        branch_lengths[n2, n3] = branch_lengths[n3, n2] = (</span><br><span class="line">            otu_distances[n2, n1] + otu_dists_to_others[otu2] - otu_dists_to_others[otu1]</span><br><span class="line">            - otu_distances[nodes[n2].get(<span class="string">&quot;children&quot;</span>, (n2, n2))]</span><br><span class="line">        ) / <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># remove n1 &amp; n2</span></span><br><span class="line">        current_otus.remove(n1)</span><br><span class="line">        current_otus.remove(n2)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># add n3</span></span><br><span class="line">        nodes.append(new_node)</span><br><span class="line">        current_otus.append(n3)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># join rest three otus</span></span><br><span class="line">    n3 = current_otus.pop()</span><br><span class="line">    n2 = current_otus.pop()</span><br><span class="line">    n1 = current_otus.pop()</span><br><span class="line"></span><br><span class="line">    nr = <span class="built_in">len</span>(nodes)</span><br><span class="line">    root_node = &#123;<span class="string">&quot;name&quot;</span>: <span class="string">f&quot;#<span class="subst">&#123;nr&#125;</span>&quot;</span>, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>, <span class="string">&quot;children&quot;</span>: (n1, n2, n3)&#125;</span><br><span class="line">    nodes[n1][<span class="string">&quot;parent&quot;</span>] = nr</span><br><span class="line">    nodes[n2][<span class="string">&quot;parent&quot;</span>] = nr</span><br><span class="line">    nodes[n3][<span class="string">&quot;parent&quot;</span>] = nr</span><br><span class="line"></span><br><span class="line">    branch_lengths[n1, nr] = branch_lengths[nr, n1] = (</span><br><span class="line">        otu_distances[n1, n2] + otu_distances[n1, n3] - otu_distances[n2, n3]</span><br><span class="line">        - otu_distances[nodes[n1].get(<span class="string">&quot;children&quot;</span>, (n1, n1))]</span><br><span class="line">    ) / <span class="number">2</span></span><br><span class="line">    branch_lengths[n2, nr] = branch_lengths[nr, n2] = (</span><br><span class="line">        otu_distances[n2, n1] + otu_distances[n2, n3] - otu_distances[n1, n3]</span><br><span class="line">        - otu_distances[nodes[n2].get(<span class="string">&quot;children&quot;</span>, (n2, n2))]</span><br><span class="line">    ) / <span class="number">2</span></span><br><span class="line">    branch_lengths[n3, nr] = branch_lengths[nr, n3] = (</span><br><span class="line">        otu_distances[n3, n1] + otu_distances[n3, n2] - otu_distances[n1, n2]</span><br><span class="line">        - otu_distances[nodes[n3].get(<span class="string">&quot;children&quot;</span>, (n3, n3))]</span><br><span class="line">    ) / <span class="number">2</span></span><br><span class="line"></span><br><span class="line">    nodes.append(root_node)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> nodes, branch_lengths</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw_njtree</span>(<span class="params">nodes: <span class="type">List</span>[<span class="type">Dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>]], branch_lengths: np.ndarray</span>):</span><br><span class="line">    lines = []</span><br><span class="line"></span><br><span class="line">    stack = []</span><br><span class="line">    <span class="keyword">for</span> i, node <span class="keyword">in</span> <span class="built_in">enumerate</span>(nodes):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> node[<span class="string">&quot;parent&quot;</span>]:</span><br><span class="line">            stack.append((<span class="number">0</span>, <span class="number">0</span>, i, node))</span><br><span class="line">    <span class="keyword">while</span> stack:</span><br><span class="line">        level, count, idx, top = stack.pop()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> level &gt; <span class="number">0</span>:</span><br><span class="line">            level_branchs = []</span><br><span class="line">            pre_level = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> _level, _, _, _ <span class="keyword">in</span> stack[:<span class="built_in">len</span>(stack)-count]:</span><br><span class="line">                <span class="keyword">if</span> _level &gt; pre_level:</span><br><span class="line">                    level_branchs.append(<span class="string">&quot;    &quot;</span> * (_level - pre_level - <span class="number">1</span>) + <span class="string">&quot;│   &quot;</span>)</span><br><span class="line">                    pre_level = _level</span><br><span class="line">            level_branchs.append(<span class="string">&quot;    &quot;</span> * (level - pre_level - <span class="number">1</span>) + (<span class="string">&quot;├──&quot;</span> <span class="keyword">if</span> count &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="string">&quot;└──&quot;</span>))</span><br><span class="line">            edge_length = <span class="string">f&quot;(<span class="subst">&#123;branch_lengths[idx, top[<span class="string">&#x27;parent&#x27;</span>]]:<span class="number">.6</span>f&#125;</span>)&quot;</span></span><br><span class="line">            lines.append(<span class="string">&quot;&quot;</span>.join((*level_branchs, top[<span class="string">&quot;name&quot;</span>], edge_length)))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            lines.append(top[<span class="string">&quot;name&quot;</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i, child <span class="keyword">in</span> <span class="built_in">enumerate</span>(top.get(<span class="string">&quot;children&quot;</span>, [])):</span><br><span class="line">            stack.append((level + <span class="number">1</span>, i, child, nodes[child]))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(lines)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    r = neighbor_joining(</span><br><span class="line">        <span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">str</span>, <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">9</span>))),</span><br><span class="line">        [[<span class="number">0</span>,  <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">11</span>, <span class="number">13</span>, <span class="number">16</span>, <span class="number">13</span>, <span class="number">17</span>],</span><br><span class="line">         [<span class="number">7</span>,  <span class="number">0</span>,  <span class="number">5</span>,  <span class="number">8</span>,  <span class="number">10</span>, <span class="number">13</span>, <span class="number">10</span>, <span class="number">14</span>],</span><br><span class="line">         [<span class="number">8</span>,  <span class="number">5</span>,  <span class="number">0</span>,  <span class="number">5</span>,  <span class="number">7</span>,  <span class="number">10</span>, <span class="number">7</span>,  <span class="number">11</span>],</span><br><span class="line">         [<span class="number">11</span>, <span class="number">8</span>,  <span class="number">5</span>,  <span class="number">0</span>,  <span class="number">8</span>,  <span class="number">11</span>, <span class="number">8</span>,  <span class="number">12</span>],</span><br><span class="line">         [<span class="number">13</span>, <span class="number">10</span>, <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">0</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">10</span>],</span><br><span class="line">         [<span class="number">16</span>, <span class="number">13</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">5</span>,  <span class="number">0</span>,  <span class="number">9</span>,  <span class="number">13</span>],</span><br><span class="line">         [<span class="number">13</span>, <span class="number">10</span>, <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">6</span>,  <span class="number">9</span>,  <span class="number">0</span>,  <span class="number">8</span>],</span><br><span class="line">         [<span class="number">17</span>, <span class="number">14</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">10</span>, <span class="number">13</span>, <span class="number">8</span>,  <span class="number">0</span>]]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    tree = draw_njtree(r[<span class="number">0</span>], r[<span class="number">1</span>])</span><br><span class="line">    <span class="built_in">print</span>(tree)</span><br></pre></td></tr></table></figure>
+
+<p>输出内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#13</span><br><span class="line">├──#12(1.000000)</span><br><span class="line">│   ├──8(6.000000)</span><br><span class="line">│   └──7(2.000000)</span><br><span class="line">├──#11(2.000000)</span><br><span class="line">│   ├──#10(1.000000)</span><br><span class="line">│   │   ├──#8(2.000000)</span><br><span class="line">│   │   │   ├──2(2.000000)</span><br><span class="line">│   │   │   └──1(5.000000)</span><br><span class="line">│   │   └──3(1.000000)</span><br><span class="line">│   └──4(3.000000)</span><br><span class="line">└──#9(2.000000)</span><br><span class="line">    ├──6(4.000000)</span><br><span class="line">    └──5(1.000000)</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9hY2FkZW1pYy5vdXAuY29tL21iZS9hcnRpY2xlLzQvNC80MDYvMTAyOTY2NA==">The Neighbor-joining Method: A New Method for Reconstructing Phylogenetic Trees<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>聚类算法</tag>
+        <tag>生信</tag>
+        <tag>NJ 树</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
     <url>//posts/2022/08/14/kxsw/</url>
     <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
@@ -1261,90 +1345,6 @@
       </categories>
       <tags>
         <tag>数据降维</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>NJ 树算法原理与实现</title>
-    <url>//posts/2023/03/08/njtree/</url>
-    <content><![CDATA[<p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
-<p>本文简要介绍 NJ 树算法的基本流程与计算方法, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="基本定义"><a href="#基本定义" class="headerlink" title="基本定义"></a>基本定义</h2><h3 id="邻居"><a href="#邻居" class="headerlink" title="邻居"></a>邻居</h3><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVbSaR.png" alt="ppVbSaR.png"></p>
-<p>首先是关于&quot;邻居&quot;的定义, 在 NJ 树中, 一对&quot;邻居&quot;指的是在一个无根分叉树中仅仅通过一个内部结点连接起来一对分类单元 (OTU).</p>
-<p>例如在上图中, $1$ 和 $2$ 可以视为一对邻居, 它们通过内部结点 $A$ 进行连结.</p>
-<p>进一步, 可以对分类单元进行组合, 形成新的更大的分类单元与邻居对, 例如, $&lt;1, 2&gt;$ 和 $3$ 可以作为一对邻居, 它们通过内部结点 $B$ 进行连结, $&lt;5, 6&gt;$ 和 $&lt;7, 8&gt;$ 可以作为一对邻居, 它们通过内部结点 $D$ 进行连结.</p>
-<h3 id="进化树构建流程"><a href="#进化树构建流程" class="headerlink" title="进化树构建流程"></a>进化树构建流程</h3><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
-<p>假设初始时没有任何分类单元聚集在一起, 算法起始于一个星状树, 如上图左侧所示. 算法的一步变换则是将左图变成了右图.</p>
-<p>在这些分类单元中, 分类单元之间有着不同的距离远近, 右侧的图将 $1$ 和 $2$ 聚合在了一起, 并形成了一个新结点 $Y$, 将 $1$, $2$ 视作一个整体, 则相比于左图, $&lt;1, 2&gt;$ 作为新分类单元整体替换了左图里的分类单元 $1$ 和 $2$, 整个星状树减少了 1 个分类单元, 增加了 1 条内部分支, 每次选择要聚合的邻居时, 都是使得聚合后的新树总枝长最短. 如此循环, 则可以一步一步减少星状树的分类单元, 直至分类单元只剩下 3 个, 内部分支增加至 $N - 3$ 个.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVX9mD.png" alt="ppVX9mD.png"></p>
-<h2 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h2><p><img data-src="https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png" alt="ppVqOHJ.png"></p>
-<h3 id="计算总枝长"><a href="#计算总枝长" class="headerlink" title="计算总枝长"></a>计算总枝长</h3><p>还是以这张图为例, 设初始时共有 $N$ 个分类单元, 设 $D_{ij}$ 指分类单元 $i$ 和 $j$ 之间的距离, $L_{ab}$ 指结点 $a$ 和 $b$ 之间的枝长. 整个树的总枝长为:</p>
-<p>$$<br>S_O = \sum_{i=1}^{N}L_{iX}=\frac{1}{N-1}\sum_{i&lt;j}^{N}D_{ij}<br>$$</p>
-<p>也就是每个结点到 $X$ 的枝长总和, 等价于分类单元两两之间距离求和后除以 $N-1$, 因为每个枝相当于数了 $N-1$ 次.</p>
-<details class="note info"><summary><p>为什么是 $N-1$ ?</p>
-</summary>
-<p>$1$ 到 $X$ 的距离通过 $D_{ij}$ 数了 $N-1$ 次; $2$ 到 $X$ 的距离通过 $D_{12}$ 数了 $1$ 次, 通过 $D_{2j}$ 数了 $N-2$ 次, 以此类推.</p>
-
-</details>
-
-<h3 id="计算新增枝长后的总枝长"><a href="#计算新增枝长后的总枝长" class="headerlink" title="计算新增枝长后的总枝长"></a>计算新增枝长后的总枝长</h3><p>另一方面, 右侧图中 $X$ 和 $Y$ 结点之间的枝长计算方法为:</p>
-<p>$$<br>\begin{aligned}<br>  L_{XY} &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}{(D_{1k}+D_{2k})} - {(N-2)(L_{1X}+L_{2X})} - {2\sum_{i=3}^{N}{L_{iY}}} \right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}{(D_{1k}+D_{2k})} - {(N-2)D_{12}} - {\frac{2}{N-3}\sum_{3 \leq i&lt;j}^{N}D_{ij}} \right]<br>\end{aligned}<br>$$</p>
-<p>第一项 $\sum_{k=3}^{N}{(D_{1k}+D_{2k})}$ 代表从结点 $1,2$ 到其余所有结点的距离, 包括 $L_{XY}$. 公式的后两项是为了减去多算的那部分距离, $(L_{1X}+L_{2X})$ 是 $1,2$ 到 $X$ 的距离, $\sum_{i=3}^{N}{L_{iY}}$ 是其余点到 $Y$ 的距离.</p>
-<details class="note info"><summary><p>前面的那些系数怎么来的 ?</p>
-</summary>
-<p>在第一项中, $\sum_{k=3}^{N}{(D_{1k}+D_{2k})}$ 将 $1,2$ 到 $X$ 的边各数了 $N-2$ 次, $X$ 到 $Y$ 的边数了 $2(N-2)$ 次, $Y$ 到其余结点各数了 $2$ 次, 因此减去对应的次数后再除以 $2(N-2)$ 就是 $L_{XY}$ 的距离.</p>
-
-</details>
-
-<p>得到 $L_{XY}$ 之后, 可以计算右侧新图的总枝长:</p>
-<p>$$<br>\begin{aligned}<br>  S_{12} &amp;= L_{XY} + (L_{1X} + L_{2X}) + \sum_{i=3}^{N}L_{iY} \\<br>  ~ &amp;= \frac{1}{2(N-2)}\sum_{k=3}^{N}(D_{1k} + D_{2k}) + \frac{1}{2}D_{12} + \frac{1}{N-2}\sum_{3 \leq i&lt;j}^{N}D_{ij}<br>\end{aligned}<br>$$</p>
-<h3 id="构造新图"><a href="#构造新图" class="headerlink" title="构造新图"></a>构造新图</h3><p>通常来说, 并不会知道右图中 $1,2$ 究竟选择哪一对分类单元作为邻居, 因此需要计算所有的 $S_{ij}$, 并选择最小的那一对作为这一轮的选择.</p>
-<p>假设 $1,2$ 就是这一轮选择出来的邻居, 则它们两个和 $X$ 会形成新的分类单元 $&lt;1,2&gt;$, 然后计算新分类单元与其余分类单元的距离:</p>
-<p>$$<br>D_{&lt;1,2&gt;j} = \frac{1}{2}(D_{1j} + D_{2j}) \quad (3 \leq j \leq N)<br>$$</p>
-<p>得到新距离之后, 还需要计算新分类单元 $&lt;1,2&gt;$ 内部的距离 $L_{1X}, L_{2X}$.</p>
-<p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  L_{2X} &amp;= \frac{1}{2}(D_{12} + D_{2Z} - D_{1Z})<br>\end{aligned}<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\begin{aligned}<br>  D_{1Z} &amp;= \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} \\<br>  D_{2Z} &amp;= \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}<br>\end{aligned}<br>$$</p>
-<p>在这一组公式里面, $Z$ 代表除去 $1,2$ 的所有结点形成的&quot;假想结点&quot;, 即 $1$ 通过 $Z$ 这个整体与 $2$ 相连. 则 $1,2$ 与 $Z$ 的距离分别为各自到 $Z$ 中其余结点距离的平均值.</p>
-<h3 id="循环步骤"><a href="#循环步骤" class="headerlink" title="循环步骤"></a>循环步骤</h3><p>每选择一对合适的邻居, 则图上的分类单元就会减少 1 个, 直到图上的分类单元数量变成 3, 算法结束.</p>
-<h2 id="公式化简"><a href="#公式化简" class="headerlink" title="公式化简"></a>公式化简</h2><p>在实际计算之前, 需要对原始公式进行一些化简变形.</p>
-<p>首先是对每一轮都需要计算的新图总枝长公式进行变形, 以前文的 $S_{12}$ 为例:</p>
-<p>$$<br>\begin{aligned}<br>  S_{12} &amp;= \frac{1}{2(N-2)}\sum_{k=3}^{N}(D_{1k} + D_{2k}) + \frac{1}{2}D_{12} + \frac{1}{N-2}\sum_{3 \leq i&lt;j}^{N}D_{ij} \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[\sum_{k=3}^{N}D_{1k} + \sum_{k=3}^{N}D_{2k} + (N-2)D_{12} + \sum_{3 \leq i&lt;j}^{N}D_{ij} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \left(D_{12} + \sum_{k=3}^{N}D_{1k}\right) - \left(D_{21} + \sum_{k=3}^{N}D_{2k}\right) + \left(D_{12} + \sum_{k=3}^{N}D_{1k} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right) + \left(D_{21} + \sum_{k=3}^{N}D_{2k} + \sum_{3 \leq i&lt;j}^{N}D_{ij}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} - \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k} + 2\sum_{i&lt;j}^{N}D_{ij}\right] \\<br>  ~ &amp;= \frac{1}{2}\left[D_{12} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right] + \frac{1}{(N-2)}\sum_{i&lt;j}^{N}D_{ij} \\<br>  ~ &amp;= C_1\left[D_{12} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right] + C_2<br>\end{aligned}<br>$$</p>
-<p>经过化简之后, 可以看到, 只有方括号里的内容与要计算的邻居对 $1,2$ 有关, 其他量都可以看作这一轮的常量.</p>
-<p>因为最终 $S_{ij}$ 是用于比较最小值, 所以只需要保证 $S_{ij}$ 的相对大小不变, 又 $C_1, C_2$ 均大于 $0$, 于是可以在实际计算中忽略掉常数项, 从而简化计算, 从而有:</p>
-<p>$$<br>S_{ij} = D_{ij} - D_{iZ} - D_{jZ}<br>$$</p>
-<p>其中:</p>
-<p>$$<br>D_{iZ} = \frac{1}{(N-2)}\sum_{k \ne i}^{N}D_{ik}<br>$$</p>
-<p>仍以前文的图为例, 在选择出最合适的邻居 $1,2$ 后, 会合并成新的分类单元 $&lt;1,2&gt;$, 需要在新图里计算 $&lt;1,2&gt;$ 和其余点的距离值, 以及内部距离 $L_{1X}, L_{2X}$.</p>
-<p>新距离值就是 $D_{&lt;i,j&gt;k} = \frac{1}{2}(D_{ik} + D_{jk})$, 这里对 $L_{1X}, L_{2X}$ 进行变形化简.</p>
-<p>$$<br>\begin{aligned}<br>  L_{1X} &amp;= \frac{1}{2}(D_{12} + D_{1Z} - D_{2Z}) \\<br>  ~ &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{N-2}\sum_{i=3}^{N}D_{1i} - \frac{1}{N-2}\sum_{i=3}^{N}D_{2i}\right) \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{i=3}^{N}D_{1i} - \sum_{i=3}^{N}D_{2i}\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \left(D_{12} + \sum_{i=3}^{N}D_{1i}\right) - \left(D_{21} + \sum_{i=3}^{N}D_{2i}\right)\right] \\<br>  ~ &amp;= \frac{1}{2(N-2)}\left[(N-2)D_{12} + \sum_{k \ne 1}^{N}D_{1k} - \sum_{k \ne 2}^{N}D_{2k}\right] \\<br>  ~ &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} - \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k}\right) \\<br>  L_{2X} &amp;= \frac{1}{2}\left(D_{12} + \frac{1}{(N-2)}\sum_{k \ne 2}^{N}D_{2k} - \frac{1}{(N-2)}\sum_{k \ne 1}^{N}D_{1k} \right)<br>\end{aligned}<br>$$</p>
-<p>因此有:</p>
-<p>$$<br>\begin{aligned}<br>  L_{iX} &amp;= \frac{1}{2}\left(D_{ij} + D_{iZ} - D_{jZ}\right) \\<br>  L_{jX} &amp;= \frac{1}{2}\left(D_{ij} + D_{jZ} - D_{iZ}\right)<br>\end{aligned}<br>$$</p>
-<p>变形成这样有个好处, 就是能够复用前面算 $S_{ij}$ 时计算的 $D_{iZ}$ 结果.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><ol>
-<li>依次计算当前轮次的 $M_i$ 值, 得到 $M$ 向量 $(M_1, M_2, \ldots, M_N)$.</li>
-<li>计算所有的 $S_{ij} ~ (1 \leq i &lt; j \leq N)$, 选择使 $S_{ij}$ 最小的 $i,j$ 作为这一轮的邻居.</li>
-<li>计算新分类单元 $&lt;i,j&gt;$ 对其余点的新距离 $D_{&lt;i,j&gt;k} ~ (1 \leq k \leq N, k \ne i, j)$.</li>
-<li>计算内部距离 $L_{iX}$ 和 $L_{jX}$.</li>
-<li>更新当前分类单元数 $N = N-1$, 如果 $N &gt; 3$, 则转步骤 1 继续, 否则结束计算.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> rich <span class="keyword">import</span> progress</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">neighbor_joining</span>(<span class="params">_otu: <span class="type">List</span>[<span class="built_in">str</span>], _dist: <span class="type">List</span>[<span class="type">List</span>[<span class="built_in">float</span>]]</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        _otu: names of otus</span></span><br><span class="line"><span class="string">        _dist: distances dict for otus, (i, j) -&gt; dist, i less than j</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># init</span></span><br><span class="line">    nodes = [&#123;<span class="string">&quot;name&quot;</span>: e, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>&#125; <span class="keyword">for</span> e <span class="keyword">in</span> _otu]</span><br><span class="line">    n = <span class="built_in">len</span>(nodes)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># otu_distances: used to record otu distances</span></span><br><span class="line">    otu_distances: np.ndarray = np.array(_dist, dtype=np.float_)</span><br><span class="line">    otu_distances = np.concatenate([otu_distances, np.zeros((n - <span class="number">2</span>, n))], axis=<span class="number">0</span>)</span><br><span class="line">    otu_distances = np.concatenate([otu_distances, np.zeros((<span class="number">2</span> * n - <span class="number">2</span>, n - <span class="number">2</span>))], axis=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># branch_lengths: used to record branch lengths</span></span><br><span class="line">    branch_lengths = np.zeros_like(otu_distances)</span><br><span class="line"></span><br><span class="line">    current_otus = <span class="built_in">list</span>(<span class="built_in">range</span>(n))</span><br><span class="line">    <span class="keyword">for</span> _ <span class="keyword">in</span> progress.track(<span class="built_in">range</span>(n - <span class="number">3</span>)):</span><br><span class="line">        n = <span class="built_in">len</span>(current_otus)</span><br><span class="line">        otu_dists = otu_distances[current_otus, ...][..., current_otus]</span><br><span class="line"></span><br><span class="line">        <span class="comment"># calc D to Z</span></span><br><span class="line">        otu_dists_to_others: np.ndarray = np.<span class="built_in">sum</span>(otu_dists, axis=<span class="number">0</span>) / (n - <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># calc S</span></span><br><span class="line">        graph_branch_length = otu_dists - otu_dists_to_others.reshape(-<span class="number">1</span>, <span class="number">1</span>) - otu_dists_to_others.reshape(<span class="number">1</span>, -<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># choose min (i, j)</span></span><br><span class="line">        otu1, otu2 = <span class="built_in">min</span>(((i, j) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n) <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(i + <span class="number">1</span>, n)), key=<span class="keyword">lambda</span> x: graph_branch_length[x])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># make new otu and node</span></span><br><span class="line">        n1, n2, n3 = current_otus[otu1], current_otus[otu2], <span class="built_in">len</span>(nodes)</span><br><span class="line">        new_node = &#123;<span class="string">&quot;name&quot;</span>: <span class="string">f&quot;#<span class="subst">&#123;n3&#125;</span>&quot;</span>, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>, <span class="string">&quot;children&quot;</span>: (n1, n2)&#125;</span><br><span class="line">        nodes[n1][<span class="string">&quot;parent&quot;</span>] = n3</span><br><span class="line">        nodes[n2][<span class="string">&quot;parent&quot;</span>] = n3</span><br><span class="line"></span><br><span class="line">        <span class="comment"># update otu distances</span></span><br><span class="line">        otu_distances[n3, ...] = (otu_distances[n1, ...] + otu_distances[n2, ...]) / <span class="number">2</span></span><br><span class="line">        otu_distances[..., n3] = (otu_distances[..., n1] + otu_distances[..., n2]) / <span class="number">2</span></span><br><span class="line">        otu_distances[n3, [n1, n2, n3]] = <span class="number">0</span></span><br><span class="line">        otu_distances[[n1, n2, n3], n3] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># update branch lengths</span></span><br><span class="line">        branch_lengths[n1, n3] = branch_lengths[n3, n1] = (</span><br><span class="line">            otu_distances[n1, n2] + otu_dists_to_others[otu1] - otu_dists_to_others[otu2]</span><br><span class="line">            - otu_distances[nodes[n1].get(<span class="string">&quot;children&quot;</span>, (n1, n1))]</span><br><span class="line">        ) / <span class="number">2</span></span><br><span class="line">        branch_lengths[n2, n3] = branch_lengths[n3, n2] = (</span><br><span class="line">            otu_distances[n2, n1] + otu_dists_to_others[otu2] - otu_dists_to_others[otu1]</span><br><span class="line">            - otu_distances[nodes[n2].get(<span class="string">&quot;children&quot;</span>, (n2, n2))]</span><br><span class="line">        ) / <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># remove n1 &amp; n2</span></span><br><span class="line">        current_otus.remove(n1)</span><br><span class="line">        current_otus.remove(n2)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># add n3</span></span><br><span class="line">        nodes.append(new_node)</span><br><span class="line">        current_otus.append(n3)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># join rest three otus</span></span><br><span class="line">    n3 = current_otus.pop()</span><br><span class="line">    n2 = current_otus.pop()</span><br><span class="line">    n1 = current_otus.pop()</span><br><span class="line"></span><br><span class="line">    nr = <span class="built_in">len</span>(nodes)</span><br><span class="line">    root_node = &#123;<span class="string">&quot;name&quot;</span>: <span class="string">f&quot;#<span class="subst">&#123;nr&#125;</span>&quot;</span>, <span class="string">&quot;parent&quot;</span>: <span class="literal">None</span>, <span class="string">&quot;children&quot;</span>: (n1, n2, n3)&#125;</span><br><span class="line">    nodes[n1][<span class="string">&quot;parent&quot;</span>] = nr</span><br><span class="line">    nodes[n2][<span class="string">&quot;parent&quot;</span>] = nr</span><br><span class="line">    nodes[n3][<span class="string">&quot;parent&quot;</span>] = nr</span><br><span class="line"></span><br><span class="line">    branch_lengths[n1, nr] = branch_lengths[nr, n1] = (</span><br><span class="line">        otu_distances[n1, n2] + otu_distances[n1, n3] - otu_distances[n2, n3]</span><br><span class="line">        - otu_distances[nodes[n1].get(<span class="string">&quot;children&quot;</span>, (n1, n1))]</span><br><span class="line">    ) / <span class="number">2</span></span><br><span class="line">    branch_lengths[n2, nr] = branch_lengths[nr, n2] = (</span><br><span class="line">        otu_distances[n2, n1] + otu_distances[n2, n3] - otu_distances[n1, n3]</span><br><span class="line">        - otu_distances[nodes[n2].get(<span class="string">&quot;children&quot;</span>, (n2, n2))]</span><br><span class="line">    ) / <span class="number">2</span></span><br><span class="line">    branch_lengths[n3, nr] = branch_lengths[nr, n3] = (</span><br><span class="line">        otu_distances[n3, n1] + otu_distances[n3, n2] - otu_distances[n1, n2]</span><br><span class="line">        - otu_distances[nodes[n3].get(<span class="string">&quot;children&quot;</span>, (n3, n3))]</span><br><span class="line">    ) / <span class="number">2</span></span><br><span class="line"></span><br><span class="line">    nodes.append(root_node)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> nodes, branch_lengths</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">draw_njtree</span>(<span class="params">nodes: <span class="type">List</span>[<span class="type">Dict</span>[<span class="built_in">str</span>, <span class="type">Any</span>]], branch_lengths: np.ndarray</span>):</span><br><span class="line">    lines = []</span><br><span class="line"></span><br><span class="line">    stack = []</span><br><span class="line">    <span class="keyword">for</span> i, node <span class="keyword">in</span> <span class="built_in">enumerate</span>(nodes):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> node[<span class="string">&quot;parent&quot;</span>]:</span><br><span class="line">            stack.append((<span class="number">0</span>, <span class="number">0</span>, i, node))</span><br><span class="line">    <span class="keyword">while</span> stack:</span><br><span class="line">        level, count, idx, top = stack.pop()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> level &gt; <span class="number">0</span>:</span><br><span class="line">            level_branchs = []</span><br><span class="line">            pre_level = <span class="number">0</span></span><br><span class="line">            <span class="keyword">for</span> _level, _, _, _ <span class="keyword">in</span> stack[:<span class="built_in">len</span>(stack)-count]:</span><br><span class="line">                <span class="keyword">if</span> _level &gt; pre_level:</span><br><span class="line">                    level_branchs.append(<span class="string">&quot;    &quot;</span> * (_level - pre_level - <span class="number">1</span>) + <span class="string">&quot;│   &quot;</span>)</span><br><span class="line">                    pre_level = _level</span><br><span class="line">            level_branchs.append(<span class="string">&quot;    &quot;</span> * (level - pre_level - <span class="number">1</span>) + (<span class="string">&quot;├──&quot;</span> <span class="keyword">if</span> count &gt; <span class="number">0</span> <span class="keyword">else</span> <span class="string">&quot;└──&quot;</span>))</span><br><span class="line">            edge_length = <span class="string">f&quot;(<span class="subst">&#123;branch_lengths[idx, top[<span class="string">&#x27;parent&#x27;</span>]]:<span class="number">.6</span>f&#125;</span>)&quot;</span></span><br><span class="line">            lines.append(<span class="string">&quot;&quot;</span>.join((*level_branchs, top[<span class="string">&quot;name&quot;</span>], edge_length)))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            lines.append(top[<span class="string">&quot;name&quot;</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i, child <span class="keyword">in</span> <span class="built_in">enumerate</span>(top.get(<span class="string">&quot;children&quot;</span>, [])):</span><br><span class="line">            stack.append((level + <span class="number">1</span>, i, child, nodes[child]))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;\n&quot;</span>.join(lines)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    r = neighbor_joining(</span><br><span class="line">        <span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">str</span>, <span class="built_in">range</span>(<span class="number">1</span>, <span class="number">9</span>))),</span><br><span class="line">        [[<span class="number">0</span>,  <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">11</span>, <span class="number">13</span>, <span class="number">16</span>, <span class="number">13</span>, <span class="number">17</span>],</span><br><span class="line">         [<span class="number">7</span>,  <span class="number">0</span>,  <span class="number">5</span>,  <span class="number">8</span>,  <span class="number">10</span>, <span class="number">13</span>, <span class="number">10</span>, <span class="number">14</span>],</span><br><span class="line">         [<span class="number">8</span>,  <span class="number">5</span>,  <span class="number">0</span>,  <span class="number">5</span>,  <span class="number">7</span>,  <span class="number">10</span>, <span class="number">7</span>,  <span class="number">11</span>],</span><br><span class="line">         [<span class="number">11</span>, <span class="number">8</span>,  <span class="number">5</span>,  <span class="number">0</span>,  <span class="number">8</span>,  <span class="number">11</span>, <span class="number">8</span>,  <span class="number">12</span>],</span><br><span class="line">         [<span class="number">13</span>, <span class="number">10</span>, <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">0</span>,  <span class="number">5</span>,  <span class="number">6</span>,  <span class="number">10</span>],</span><br><span class="line">         [<span class="number">16</span>, <span class="number">13</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">5</span>,  <span class="number">0</span>,  <span class="number">9</span>,  <span class="number">13</span>],</span><br><span class="line">         [<span class="number">13</span>, <span class="number">10</span>, <span class="number">7</span>,  <span class="number">8</span>,  <span class="number">6</span>,  <span class="number">9</span>,  <span class="number">0</span>,  <span class="number">8</span>],</span><br><span class="line">         [<span class="number">17</span>, <span class="number">14</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">10</span>, <span class="number">13</span>, <span class="number">8</span>,  <span class="number">0</span>]]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line">    tree = draw_njtree(r[<span class="number">0</span>], r[<span class="number">1</span>])</span><br><span class="line">    <span class="built_in">print</span>(tree)</span><br></pre></td></tr></table></figure>
-
-<p>输出内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#13</span><br><span class="line">├──#12(1.000000)</span><br><span class="line">│   ├──8(6.000000)</span><br><span class="line">│   └──7(2.000000)</span><br><span class="line">├──#11(2.000000)</span><br><span class="line">│   ├──#10(1.000000)</span><br><span class="line">│   │   ├──#8(2.000000)</span><br><span class="line">│   │   │   ├──2(2.000000)</span><br><span class="line">│   │   │   └──1(5.000000)</span><br><span class="line">│   │   └──3(1.000000)</span><br><span class="line">│   └──4(3.000000)</span><br><span class="line">└──#9(2.000000)</span><br><span class="line">    ├──6(4.000000)</span><br><span class="line">    └──5(1.000000)</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9hY2FkZW1pYy5vdXAuY29tL21iZS9hcnRpY2xlLzQvNC80MDYvMTAyOTY2NA==">The Neighbor-joining Method: A New Method for Reconstructing Phylogenetic Trees<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>聚类算法</tag>
-        <tag>生信</tag>
-        <tag>NJ 树</tag>
       </tags>
   </entry>
   <entry>
@@ -1922,6 +1922,47 @@
       </tags>
   </entry>
   <entry>
+    <title>网页预览碧蓝航线 Spine 动画</title>
+    <url>//posts/2024/12/22/spinejs-azurlane/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="https://ww-rm.github.io/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>https://ww-rm.github.io/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="https://ww-rm.github.io/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>腾讯测试开发实习面试经验分享</title>
     <url>//posts/2024/03/19/tencent-intership-interview/</url>
     <content><![CDATA[<p>腾讯 IEG 25 届测试开发实习生面试经验分享.</p>
@@ -2017,47 +2058,6 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网页预览碧蓝航线 Spine 动画</title>
-    <url>//posts/2024/12/22/spinejs-azurlane/</url>
-    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
-<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
-<p>成品见<a href="https://ww-rm.github.io/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
-<span id="more"></span>
-
-<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
-<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
-<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
-<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
-<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>https://ww-rm.github.io/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
-<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
-<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
-<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
-<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
-<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
-<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
-<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
-<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
-<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
-<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
-<p><img data-src="https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
-<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="https://ww-rm.github.io/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>spine</tag>
-        <tag>spine-js</tag>
-        <tag>Azur Lane</tag>
-        <tag>动态立绘</tag>
-        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -2397,6 +2397,77 @@
       </tags>
   </entry>
   <entry>
+    <title>基于 Requests 的爬虫入门</title>
+    <url>//posts/2022/08/16/wast-spider/</url>
+    <content><![CDATA[<p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
+<span id="more"></span>
+
+<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
+<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
+<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
+<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
+<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
+<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
+<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
+<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
+<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
+<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
+<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
+<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
+<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
+<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
+<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
+<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
+<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
+<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
+<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
+<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
+<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
+<p>定位完成后, 我们分析数据附近的结构.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
+<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
+<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
+<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
+<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
+<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
+<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
+<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
+<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
+<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
+<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
+<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
+<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
+<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
+<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
+<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
+<p>一些库的官方文档地址.</p>
+<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
+<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>requests</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>打造一个舒适的 Python 编程环境</title>
     <url>//posts/2022/08/13/wast-pythonandvsc/</url>
     <content><![CDATA[<p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
@@ -2491,77 +2562,6 @@
       <tags>
         <tag>python</tag>
         <tag>VS Code</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于 Requests 的爬虫入门</title>
-    <url>//posts/2022/08/16/wast-spider/</url>
-    <content><![CDATA[<p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
-<span id="more"></span>
-
-<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
-<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
-<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
-<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
-<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
-<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
-<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
-<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
-<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
-<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
-<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
-<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
-<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
-<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
-<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
-<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
-<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
-<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
-<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
-<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
-<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
-<p>定位完成后, 我们分析数据附近的结构.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
-<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
-<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
-<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
-<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
-<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
-<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
-<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
-<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
-<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
-<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
-<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
-<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
-<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
-<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
-<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
-<p>一些库的官方文档地址.</p>
-<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
-<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>爬虫</tag>
-        <tag>requests</tag>
       </tags>
   </entry>
   <entry>
@@ -2725,6 +2725,20 @@
       </tags>
   </entry>
   <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Typora 破解版</title>
     <url>//posts/2023/07/03/typora-cracked/</url>
     <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
@@ -2737,20 +2751,6 @@
       </categories>
       <tags>
         <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows 10 激活工具</title>
-    <url>//posts/2023/02/27/win10activation/</url>
-    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>激活工具</tag>
       </tags>
   </entry>
   <entry>
@@ -3279,6 +3279,77 @@
       </tags>
   </entry>
   <entry>
+    <title>SM9 文档阅读笔记</title>
+    <url>//posts/2023/12/15/sm9/</url>
+    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
+<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
+<span id="more"></span>
+
+<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
+<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
+<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
+<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
+<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
+<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
+<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
+<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
+<p>幂次与系数转换关系如下:</p>
+<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
+<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
+<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
+<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
+<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
+<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
+<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
+<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
+<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
+<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
+<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
+<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
+<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
+<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
+<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
+<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
+<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
+<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
+<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
+<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
+<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
+<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
+<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
+<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
+<p>因此困难部分的指数可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
+<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
+<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
+<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
+<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>双线性对</tag>
+        <tag>R-ate</tag>
+        <tag>Frobenius</tag>
+        <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Simpleperf 三部曲 (三)</title>
     <url>//posts/2024/07/07/simpleperf3/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3385,77 +3456,6 @@
         <tag>Simpleperf</tag>
         <tag>Android</tag>
         <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SM9 文档阅读笔记</title>
-    <url>//posts/2023/12/15/sm9/</url>
-    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
-<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
-<span id="more"></span>
-
-<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
-<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
-<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
-<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
-<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
-<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
-<p>因此有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
-<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
-<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
-<p>幂次与系数转换关系如下:</p>
-<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
-<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
-<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
-<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
-<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
-<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
-<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
-<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
-<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
-<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
-<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
-<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
-<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
-<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
-<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
-<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
-<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
-<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
-<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
-<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
-<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
-<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
-<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
-<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
-<p>因此困难部分的指数可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
-<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
-<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
-<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
-<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>双线性对</tag>
-        <tag>R-ate</tag>
-        <tag>Frobenius</tag>
-        <tag>FinalExp</tag>
       </tags>
   </entry>
   <entry>
