@@ -37,6 +37,24 @@ type: azurlane-spinepainting
     height: auto;
     aspect-ratio: 1;
   }
+
+  #control-panel {
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    padding: 5px;
+    background-color: #f8f8f8;
+  }
+
+  .control-item {
+    margin: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .control-item label {
+    margin-right: 10px;
+  }
 </style>
 {% endraw %}
 
@@ -49,6 +67,19 @@ type: azurlane-spinepainting
 ## 预览界面 (可以进行拖放)
 
 {% raw %}
+<div id="control-panel">
+    <div class="control-item">
+        <label>动画设置:</label>
+        <select id="animation-select"></select>
+    </div>
+    <div class="control-item">
+        <label>背景设置:</label>
+        <input type="radio" id="bgcolor-light" name="bgcolor" value="light">
+        <label for="bgcolor-light">浅色</label>
+        <input type="radio" id="bgcolor-dark" name="bgcolor" value="dark">
+        <label for="bgcolor-dark">深色</label>
+    </div>
+</div>
 <canvas id="canvas-spine"></canvas>
 {% endraw %}
 
