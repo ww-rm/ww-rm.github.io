@@ -2186,6 +2186,7 @@ var spine;
 			this.rawDataUris = {};
 			this.textureLoader = textureLoader;
 			this.pathPrefix = pathPrefix;
+			this.loadProgress = {}
 		}
 		AssetManager.prototype.downloadText = function (url, success, error) {
 			var request = new XMLHttpRequest();
@@ -2193,16 +2194,24 @@ var spine;
 			if (this.rawDataUris[url])
 				url = this.rawDataUris[url];
 			request.open("GET", url, true);
+			var _this = this;
+			request.onprogress = function (event) {
+				if (event.lengthComputable) {
+					_this.loadProgress[url] = event.loaded / event.total;
+				}
+			};
 			request.onload = function () {
 				if (request.status == 200) {
 					success(request.responseText);
 				}
 				else {
 					error(request.status, request.responseText);
+					delete _this.loadProgress[url];
 				}
 			};
 			request.onerror = function () {
 				error(request.status, request.responseText);
+				delete _this.loadProgress[url];
 			};
 			request.send();
 		};
@@ -2212,18 +2221,65 @@ var spine;
 				url = this.rawDataUris[url];
 			request.open("GET", url, true);
 			request.responseType = "arraybuffer";
+			var _this = this;
+			request.onprogress = function (event) {
+				if (event.lengthComputable) {
+					_this.loadProgress[url] = event.loaded / event.total;
+				}
+			};
 			request.onload = function () {
 				if (request.status == 200) {
 					success(new Uint8Array(request.response));
 				}
 				else {
 					error(request.status, request.responseText);
+					delete _this.loadProgress[url];
 				}
 			};
 			request.onerror = function () {
 				error(request.status, request.responseText);
+				delete _this.loadProgress[url];
 			};
 			request.send();
+		};
+		AssetManager.prototype.downloadTexture = function (url, success, error) {
+			var request = new XMLHttpRequest();
+			if (this.rawDataUris[url])
+				url = this.rawDataUris[url];
+			request.open("GET", url, true);
+			request.responseType = "blob";
+			var _this = this;
+			request.onprogress = function (event) {
+				if (event.lengthComputable) {
+					_this.loadProgress[url] = event.loaded / event.total;
+				}
+			};
+			request.onload = function () {
+				if (request.status === 200) {
+					var blob = request.response;
+					var img = new Image();
+					img.crossOrigin = "anonymous";
+					img.onload = function () { URL.revokeObjectURL(img.src); success(img); };
+					img.onerror = function () { error(request.status, request.responseText); };
+					img.src = URL.createObjectURL(blob);
+				} else {
+					error(request.status, request.statusText);
+					delete _this.loadProgress[url];
+				}
+			};
+			request.onerror = function () {
+				error(request.status, request.statusText);
+				delete _this.loadProgress[url];
+			};
+			request.send();
+		};
+		AssetManager.prototype.getLoadProgress = function () {
+			var count = Object.keys(this.loadProgress).length;
+			if (count <= 0) {
+				return 0;
+			} else {
+				return Object.values(this.loadProgress).reduce((acc, cur) => acc + cur, 0) / count;
+			}
 		};
 		AssetManager.prototype.setRawDataURI = function (path, data) {
 			this.rawDataUris[this.pathPrefix + path] = data;
@@ -2240,7 +2296,7 @@ var spine;
 					success(path, data);
 				_this.toLoad--;
 				_this.loaded++;
-			}, function (state, responseText) {
+			}, function (status, responseText) {
 				_this.errors[path] = "Couldn't load binary " + path + ": status " + status + ", " + responseText;
 				if (error)
 					error(path, "Couldn't load binary " + path + ": status " + status + ", " + responseText);
@@ -2260,7 +2316,7 @@ var spine;
 					success(path, data);
 				_this.toLoad--;
 				_this.loaded++;
-			}, function (state, responseText) {
+			}, function (status, responseText) {
 				_this.errors[path] = "Couldn't load text " + path + ": status " + status + ", " + responseText;
 				if (error)
 					error(path, "Couldn't load text " + path + ": status " + status + ", " + responseText);
@@ -2273,28 +2329,21 @@ var spine;
 			if (success === void 0) { success = null; }
 			if (error === void 0) { error = null; }
 			path = this.pathPrefix + path;
-			var storagePath = path;
 			this.toLoad++;
-			var img = new Image();
-			img.crossOrigin = "anonymous";
-			img.onload = function (ev) {
-				var texture = _this.textureLoader(img);
-				_this.assets[storagePath] = texture;
-				_this.toLoad--;
-				_this.loaded++;
+			this.downloadTexture(path, function (data) {
+				var texture = _this.textureLoader(data);
+				_this.assets[path] = texture;
 				if (success)
-					success(path, img);
-			};
-			img.onerror = function (ev) {
-				_this.errors[path] = "Couldn't load image " + path;
+					success(path, data);
 				_this.toLoad--;
 				_this.loaded++;
+			}, function (status, responseText) {
+				_this.errors[path] = "Couldn't load image " + path + ": status " + status + ", " + responseText;
 				if (error)
-					error(path, "Couldn't load image " + path);
-			};
-			if (this.rawDataUris[path])
-				path = this.rawDataUris[path];
-			img.src = path;
+					error(path, "Couldn't load image " + path + ": status " + status + ", " + responseText);
+				_this.toLoad--;
+				_this.loaded++;
+			});
 		};
 		AssetManager.prototype.loadTextureAtlas = function (path, success, error) {
 			var _this = this;
@@ -3248,7 +3297,7 @@ var spine;
 						this.addAfterPosition(p - pathLength_1, world, 0, out, o);
 						continue;
 					}
-					for (;; curve++) {
+					for (; ; curve++) {
 						var length_5 = lengths[curve];
 						if (p > length_5)
 							continue;
@@ -3350,7 +3399,7 @@ var spine;
 					this.addAfterPosition(p - pathLength, world, verticesLength - 4, out, o);
 					continue;
 				}
-				for (;; curve++) {
+				for (; ; curve++) {
 					var length_6 = curves[curve];
 					if (p > length_6)
 						continue;
@@ -3402,7 +3451,7 @@ var spine;
 					segment = 0;
 				}
 				p *= curveLength;
-				for (;; segment++) {
+				for (; ; segment++) {
 					var length_7 = segments[segment];
 					if (p > length_7)
 						continue;
@@ -5310,7 +5359,7 @@ var spine;
 			output.length = 0;
 			var clippingVertices = clippingArea;
 			var clippingVerticesLast = clippingArea.length - 4;
-			for (var i = 0;; i += 2) {
+			for (var i = 0; ; i += 2) {
 				var edgeX = clippingVertices[i], edgeY = clippingVertices[i + 1];
 				var edgeX2 = clippingVertices[i + 2], edgeY2 = clippingVertices[i + 3];
 				var deltaX = edgeX - edgeX2, deltaY = edgeY - edgeY2;

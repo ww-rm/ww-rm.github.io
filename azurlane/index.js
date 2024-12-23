@@ -1,5 +1,6 @@
 /// <reference path="../../themes/next-custom/source/js/third-party/spine38/spine-webgl.d.ts" />
 
+/** @type {Object<string, {chName: string, skelNames: string[], pages: string[]}>} */
 const ASSET_MAPPING = {
     "aerhangeersike_3": {
         "chName": "阿尔汉格尔斯克_与魔女同行",
@@ -482,8 +483,10 @@ var context = null;
 var shader = null;
 var batcher = null;
 var renderer = null;
-var assetManager = null;
 var mvp = new spine.webgl.Matrix4();
+
+/** @type {Object<string, spine.webgl.AssetManager>} */
+var assetsCache = {}
 
 var spineObjects = [];
 var lastFrameTime = Date.now() / 1000;
@@ -510,14 +513,11 @@ function calculateBounds(skeleton) {
     return { offset: offset, size: size };
 }
 
-/** 加载骨骼和动画状态 */
-function loadSpineObject(assetPrefix, skelUrl, atlasUrl) {
-    var atlas = new spine.TextureAtlas(
-        assetManager.get(atlasUrl),
-        (path) => assetManager.get(assetPrefix + path)
-    );
+/** 创建 Spine 对象 */
+function createSpineObject(skelFileData, atlasFileData, textureLoader) {
+    var atlas = new spine.TextureAtlas(atlasFileData, textureLoader);
     var skeletonBinary = new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(atlas));
-    var skeletonData = skeletonBinary.readSkeletonData(assetManager.get(skelUrl));
+    var skeletonData = skeletonBinary.readSkeletonData(skelFileData);
     var animationNames = skeletonData.animations.map(e => e.name);
 
     var skeleton = new spine.Skeleton(skeletonData);
@@ -593,30 +593,47 @@ function render() {
     requestAnimationFrame(render);
 }
 
-/** 加载指定皮肤资源 */
-function loadSkin(skinName) {
-    if (!assetManager)
-        return;
-
+/** 获得立绘所有资源 url */
+function getSkinUrls(skinName) {
     if (!ASSET_MAPPING[skinName]) {
         console.error(skinName, "not found");
         return;
     }
-    var assetPrefix = ASSET_PREFIX + skinName + "/";
-    var _SKEL = (name) => assetPrefix + name + ".skel";
-    var _ATLAS = (name) => assetPrefix + name + ".atlas";
 
-    var skelNames = ASSET_MAPPING[skinName].skelNames;
-    var pages = ASSET_MAPPING[skinName].pages;
-
-    skelNames.forEach(e => {
-        assetManager.loadBinary(_SKEL(e));
-        assetManager.loadText(_ATLAS(e));
+    var prefix = ASSET_PREFIX + skinName + "/";
+    var skelUrls = [];
+    var atlasUrls = [];
+    var pageUrls = [];
+    ASSET_MAPPING[skinName].skelNames.forEach(name => {
+        skelUrls.push(prefix + name + ".skel");
+        atlasUrls.push(prefix + name + ".atlas");
     });
-    pages.forEach(e => {
-        assetManager.loadTexture(assetPrefix + e);
-    })
+    ASSET_MAPPING[skinName].pages.forEach(filename => {
+        pageUrls.push(prefix + filename);
+    });
+    return { prefix: prefix, skelUrls: skelUrls, atlasUrls: atlasUrls, pageUrls: pageUrls };
+}
 
+/** 加载指定皮肤资源 */
+function loadSkin(skinName) {
+    if (!context) return;
+    if (!ASSET_MAPPING[skinName]) {
+        console.error(skinName, "not found");
+        return;
+    }
+    var manager = assetsCache[skinName] || (assetsCache[skinName] = new spine.webgl.AssetManager(context));
+    if (!manager) {
+        delete assetsCache[skinName];
+        return;
+    }
+
+    // 开始下载资源 (如果浏览器有缓存就不会重复下载)
+    var urls = getSkinUrls(skinName);
+    urls.skelUrls.forEach(e => { manager.loadBinary(e); });
+    urls.atlasUrls.forEach(e => { manager.loadText(e); });
+    urls.pageUrls.forEach(e => { manager.loadTexture(e); })
+
+    // 移除上一个等待任务, 更改显示最新启动加载的皮肤, 但是曾经开始下载的资源依然会继续下载
     if (loadTask) {
         console.log(loadTask);
         console.log("remove last loadTask");
@@ -625,24 +642,32 @@ function loadSkin(skinName) {
     }
 
     loadTask = setInterval(function () {
-        if (assetManager.isLoadingComplete()) {
+        var chName = ASSET_MAPPING[skinName].chName;
+        if (manager.isLoadingComplete()) {
             spineObjects = [];
-            skelNames.forEach(skelName => {
+            for (var i = 0; i < urls.skelUrls.length; i++) {
+                var skelFileData = manager.get(urls.skelUrls[i]);
+                var atlasFileData = manager.get(urls.atlasUrls[i]);
+                var textureLoader = (path) => manager.get(urls.prefix + path);
                 try {
-                    var spObj = loadSpineObject(assetPrefix, _SKEL(skelName), _ATLAS(skelName));
+                    var spObj = createSpineObject(skelFileData, atlasFileData, textureLoader);
                     spineObjects.push(spObj);
                 } catch (error) {
-                    console.error(skinName, skelName, "load failed.");
+                    console.error(skinName, i, "load failed.");
                     console.error(error);
                 }
-            });
+            };
 
             // 资源加载完毕
             resize();
             setAnimationList();
-            document.getElementById("current-shipname").textContent = ASSET_MAPPING[skinName].chName;
+            document.getElementById("current-shipname").textContent = chName;
+            document.getElementById("current-loading").textContent = "";
             clearInterval(loadTask);
             loadTask = null;
+        } else {
+            var progress = manager.getLoadProgress();
+            document.getElementById("current-loading").textContent = `正在加载: ${chName}(${(progress * 100).toFixed(2)}%)`;
         }
     }, 100);
 }
@@ -856,7 +881,6 @@ function main() {
         shader = spine.webgl.Shader.newTwoColoredTextured(context);
         batcher = new spine.webgl.PolygonBatcher(context);
         renderer = new spine.webgl.SkeletonRenderer(context);
-        assetManager = new spine.webgl.AssetManager(context);
     }
     catch (error) {
         console.error(error);
