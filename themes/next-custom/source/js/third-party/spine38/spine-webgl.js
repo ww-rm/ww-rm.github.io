@@ -2206,11 +2206,12 @@ var spine;
 				}
 				else {
 					error(request.status, request.responseText);
+					delete _this.loadProgress[url];
 				}
-				delete _this.loadProgress[url];
 			};
 			request.onerror = function () {
 				error(request.status, request.responseText);
+				delete _this.loadProgress[url];
 			};
 			request.send();
 		};
@@ -2232,11 +2233,12 @@ var spine;
 				}
 				else {
 					error(request.status, request.responseText);
+					delete _this.loadProgress[url];
 				}
-				delete _this.loadProgress[url];
 			};
 			request.onerror = function () {
 				error(request.status, request.responseText);
+				delete _this.loadProgress[url];
 			};
 			request.send();
 		};
@@ -2262,19 +2264,21 @@ var spine;
 					img.src = URL.createObjectURL(blob);
 				} else {
 					error(request.status, request.statusText);
+					delete _this.loadProgress[url];
 				}
-				delete _this.loadProgress[url];
 			};
 			request.onerror = function () {
 				error(request.status, request.statusText);
+				delete _this.loadProgress[url];
 			};
 			request.send();
 		};
 		AssetManager.prototype.getLoadProgress = function () {
-			if (Object.keys(this.loadProgress).length <= 0) {
-				return 1;
+			var count = Object.keys(this.loadProgress).length;
+			if (count <= 0) {
+				return 0;
 			} else {
-				return Object.values(this.loadProgress).reduce((acc, cur) => acc + cur, 0);
+				return Object.values(this.loadProgress).reduce((acc, cur) => acc + cur, 0) / count;
 			}
 		};
 		AssetManager.prototype.setRawDataURI = function (path, data) {
