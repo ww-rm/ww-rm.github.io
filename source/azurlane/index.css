@@ -44,3 +44,7 @@
 .control-item label {
     margin-right: 3px;
 }
+
+#current-loading {
+    color: red;
+}
