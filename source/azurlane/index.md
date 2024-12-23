@@ -1,5 +1,5 @@
 ---
-title: 碧蓝航线动态立绘在线预览 (持续更新)
+title: 碧蓝航线动态立绘在线预览
 type: azurlane-spinepainting
 ---
 
