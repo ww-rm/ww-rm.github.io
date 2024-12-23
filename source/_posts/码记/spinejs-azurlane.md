@@ -1,5 +1,5 @@
 ---
-title: 网页预览碧蓝航线 Spine 动画
+title: 网页预览碧蓝航线动态立绘
 categories:
   - "码记"
 tags:
