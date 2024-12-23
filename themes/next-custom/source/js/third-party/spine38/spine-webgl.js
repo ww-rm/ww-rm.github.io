@@ -2186,6 +2186,7 @@ var spine;
 			this.rawDataUris = {};
 			this.textureLoader = textureLoader;
 			this.pathPrefix = pathPrefix;
+			this.loadProgress = {}
 		}
 		AssetManager.prototype.downloadText = function (url, success, error) {
 			var request = new XMLHttpRequest();
@@ -2193,6 +2194,12 @@ var spine;
 			if (this.rawDataUris[url])
 				url = this.rawDataUris[url];
 			request.open("GET", url, true);
+			var _this = this;
+			request.onprogress = function (event) {
+				if (event.lengthComputable) {
+					_this.loadProgress[url] = event.loaded / event.total;
+				}
+			};
 			request.onload = function () {
 				if (request.status == 200) {
 					success(request.responseText);
@@ -2200,6 +2207,7 @@ var spine;
 				else {
 					error(request.status, request.responseText);
 				}
+				delete _this.loadProgress[url];
 			};
 			request.onerror = function () {
 				error(request.status, request.responseText);
@@ -2212,6 +2220,12 @@ var spine;
 				url = this.rawDataUris[url];
 			request.open("GET", url, true);
 			request.responseType = "arraybuffer";
+			var _this = this;
+			request.onprogress = function (event) {
+				if (event.lengthComputable) {
+					_this.loadProgress[url] = event.loaded / event.total;
+				}
+			};
 			request.onload = function () {
 				if (request.status == 200) {
 					success(new Uint8Array(request.response));
@@ -2219,6 +2233,7 @@ var spine;
 				else {
 					error(request.status, request.responseText);
 				}
+				delete _this.loadProgress[url];
 			};
 			request.onerror = function () {
 				error(request.status, request.responseText);
@@ -2231,6 +2246,12 @@ var spine;
 				url = this.rawDataUris[url];
 			request.open("GET", url, true);
 			request.responseType = "blob";
+			var _this = this;
+			request.onprogress = function (event) {
+				if (event.lengthComputable) {
+					_this.loadProgress[url] = event.loaded / event.total;
+				}
+			};
 			request.onload = function () {
 				if (request.status === 200) {
 					var blob = request.response;
@@ -2242,11 +2263,19 @@ var spine;
 				} else {
 					error(request.status, request.statusText);
 				}
+				delete _this.loadProgress[url];
 			};
 			request.onerror = function () {
 				error(request.status, request.statusText);
 			};
 			request.send();
+		};
+		AssetManager.prototype.getLoadProgress = function () {
+			if (Object.keys(this.loadProgress).length <= 0) {
+				return 1;
+			} else {
+				return Object.values(this.loadProgress).reduce((acc, cur) => acc + cur, 0);
+			}
 		};
 		AssetManager.prototype.setRawDataURI = function (path, data) {
 			this.rawDataUris[this.pathPrefix + path] = data;

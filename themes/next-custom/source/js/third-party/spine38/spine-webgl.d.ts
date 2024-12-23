@@ -395,6 +395,7 @@ declare module spine {
 		private downloadText;
 		private downloadBinary;
 		setRawDataURI(path: string, data: string): void;
+		getLoadProgress(): number;
 		loadBinary(path: string, success?: (path: string, binary: Uint8Array) => void, error?: (path: string, error: string) => void): void;
 		loadText(path: string, success?: (path: string, text: string) => void, error?: (path: string, error: string) => void): void;
 		loadTexture(path: string, success?: (path: string, image: HTMLImageElement) => void, error?: (path: string, error: string) => void): void;
