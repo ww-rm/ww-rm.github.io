@@ -1,551 +1,78 @@
 /// <reference path="../../themes/next-custom/source/js/third-party/spine38/spine-webgl.d.ts" />
 
-/** @type {Object<string, {chName: string, skelNames: string[], pages: string[]}>} */
-const ASSET_MAPPING = {
-    "aerhangeersike_3": {
-        "chName": "阿尔汉格尔斯克_与魔女同行",
-        "skelNames": ["aerhangeersike_3"],
-        "pages": ["aerhangeersike_3.png", "aerhangeersike_32.png", "aerhangeersike_33.png"]
-    },
-    "aersasi": {
-        "chName": "阿尔萨斯",
-        "skelNames": ["aersasi"],
-        "pages": ["aersasi.png", "aersasi2.png", "aersasi3.png"]
-    },
-    "aidang_6": {
-        "chName": "爱宕_满月之夜的狼",
-        "skelNames": ["aidang_6"],
-        "pages": ["aidang_6.png"]
-    },
-    "aierdeliqi_g": {
-        "chName": "埃尔德里奇_改",
-        "skelNames": ["aierdeliqi_g"],
-        "pages": ["aierdeliqi_g.png", "aierdeliqi_g2.png"]
-    },
-    "aijier": {
-        "chName": "埃吉尔",
-        "skelNames": ["aijierT", "aijierM", "aijierB"],
-        "pages": ["aijierT.png", "aijierM.png", "aijierB.png"]
-    },
-    "aimudeng_4": {
-        "chName": "埃姆登_引路的双轨极星",
-        "skelNames": ["aimudeng_4T", "aimudeng_4M", "aimudeng_4B"],
-        "pages": ["aimudeng_4T.png", "aimudeng_4M.png", "aimudeng_4B.png"]
-    },
-    "aisaikesi_7": {
-        "chName": "埃塞克斯_碧海之梦",
-        "skelNames": ["aisaikesi_7T", "aisaikesi_7B"],
-        "pages": ["aisaikesi_7T.png", "aisaikesi_7B.png"]
-    },
-    "aogusite_3": {
-        "chName": "奥古斯特_被阳光照亮之时",
-        "skelNames": ["aogusite_3"],
-        "pages": ["aogusite_3.png"]
-    },
-    "bailong": {
-        "chName": "白龙",
-        "skelNames": ["bailongT", "bailongM", "bailongB"],
-        "pages": ["bailongT.png", "bailongM.png", "bailongB.png"]
-    },
-    "banerwei_2": {
-        "chName": "伴尔维_俩人的柔软体操",
-        "skelNames": ["banerwei_2"],
-        "pages": ["banerwei_2.png"]
-    },
-    "beierfasite_9": {
-        "chName": "贝尔法斯特_至福的侍奉",
-        "skelNames": ["beierfasite_9"],
-        "pages": ["beierfasite_9.png"]
-    },
-    "bisimaiz": {
-        "chName": "俾斯麦Zwei",
-        "skelNames": ["bisimaiZT", "bisimaiZM", "bisimaiZB"],
-        "pages": ["bisimaiZT.png", "bisimaiZM.png", "bisimaiZB.png"]
-    },
-    "bisimaiz_2": {
-        "chName": "俾斯麦Zwei_清澈假日",
-        "skelNames": ["bisimaiZ_2T", "bisimaiZ_2M", "bisimaiZ_2B"],
-        "pages": ["bisimaiZ_2T.png", "bisimaiZ_2M.png", "bisimaiZ_2B.png"]
-    },
-    "bulaimodun_6": {
-        "chName": "布莱默顿_特别的治愈时间",
-        "skelNames": ["bulaimodun_6"],
-        "pages": ["bulaimodun_6.png"]
-    },
-    "buleisite": {
-        "chName": "布雷斯特",
-        "skelNames": ["buleisite_T", "buleisite_B"],
-        "pages": ["buleisite_T.png", "buleisite_B.png"]
-    },
-    "buli_super": {
-        "chName": "特装型布里MKIII",
-        "skelNames": ["buli_super"],
-        "pages": ["buli_super.png"]
-    },
-    "dahuangfengii_2": {
-        "chName": "大黄蜂II_驰骋于大海之上",
-        "skelNames": ["dahuangfengII_2_T", "dahuangfengII_2_B"],
-        "pages": ["dahuangfengII_2_T.png", "dahuangfengII_2_B.png"]
-    },
-    "daofeng": {
-        "chName": "岛风",
-        "skelNames": ["daofengT", "daofengB"],
-        "pages": ["daofengT.png", "daofengB.png"]
-    },
-    "deleike": {
-        "chName": "德雷克",
-        "skelNames": ["deleike"],
-        "pages": ["deleike.png"]
-    },
-    "diliyasite_3": {
-        "chName": "的里雅斯特_热气蒸腾温泉夜",
-        "skelNames": ["diliyasite_3T", "diliyasite_3M", "diliyasite_3B"],
-        "pages": ["diliyasite_3T.png", "diliyasite_3M.png", "diliyasite_3B.png"]
-    },
-    "duyisibao_2": {
-        "chName": "杜伊斯堡_两人的秘密特训",
-        "skelNames": ["duyisibao_2"],
-        "pages": ["duyisibao_2.png"]
-    },
-    "fage_2": {
-        "chName": "法戈_纯白热潮",
-        "skelNames": ["fage_2"],
-        "pages": ["fage_2.png"]
-    },
-    "feiteliedadi": {
-        "chName": "腓特烈大帝",
-        "skelNames": ["feiteliedadi"],
-        "pages": ["feiteliedadi.png"]
-    },
-    "fengyun_2": {
-        "chName": "风云_烟火之夜、静谧之海",
-        "skelNames": ["fengyun_2_T", "fengyun_2_B"],
-        "pages": ["fengyun_2_T.png", "fengyun_2_B.png"]
-    },
-    "fulici": {
-        "chName": "弗里茨",
-        "skelNames": ["fulici"],
-        "pages": ["fulici.png", "fulici2.png", "fulici3.png"]
-    },
-    "fuluoxiluofu_2": {
-        "chName": "伏罗希洛夫_山间暖雪",
-        "skelNames": ["fuluoxiluofu_2"],
-        "pages": ["fuluoxiluofu_2.png"]
-    },
-    "gangyishawa_2": {
-        "chName": "冈依沙瓦号_被封印的美人鱼",
-        "skelNames": ["gangyishawa_2"],
-        "pages": ["gangyishawa_2.png", "gangyishawa_22.png"]
-    },
-    "gaoxiong_6": {
-        "chName": "高雄_破魔舰术-神护",
-        "skelNames": ["gaoxiong_6T", "gaoxiong_6B"],
-        "pages": ["gaoxiong_6T.png", "gaoxiong_6T2.png", "gaoxiong_6B.png"]
-    },
-    "geluosite_3": {
-        "chName": "格罗斯特_魅紫旋舞",
-        "skelNames": ["geluosite_3"],
-        "pages": ["geluosite_3.png"]
-    },
-    "guandao": {
-        "chName": "关岛",
-        "skelNames": ["guandaoT", "guandaoB"],
-        "pages": ["guandaoT.png", "guandaoB.png"]
-    },
-    "haerbin_3": {
-        "chName": "哈尔滨_奢享于盛夏之滨",
-        "skelNames": ["haerbin_3"],
-        "pages": ["haerbin_3.png"]
-    },
-    "hemuhao_2": {
-        "chName": "和睦号_友好的弗兰肯",
-        "skelNames": ["hemuhao_2"],
-        "pages": ["hemuhao_2.png", "hemuhao_22.png"]
-    },
-    "huajia_2": {
-        "chName": "华甲_欢乐喜庆僵尸夜",
-        "skelNames": ["huajia_2T", "huajia_2M", "huajia_2B"],
-        "pages": ["huajia_2T.png", "huajia_2M.png", "huajia_2B.png"]
-    },
-    "huanchang_2": {
-        "chName": "寰昌_月下蹁跹",
-        "skelNames": ["huanchang_2T", "huanchang_2B"],
-        "pages": ["huanchang_2T.png", "huanchang_2T2.png", "huanchang_2B.png", "huanchang_2B2.png"]
-    },
-    "huangjiacaifu_3": {
-        "chName": "皇家财富号_海边的约定",
-        "skelNames": ["huangjiacaifu_3T", "huangjiacaifu_3B"],
-        "pages": ["huangjiacaifu_3T.png", "huangjiacaifu_3B.png"]
-    },
-    "huben_2": {
-        "chName": "虎贲_舞虎迎春",
-        "skelNames": ["huben_2"],
-        "pages": ["huben_2.png", "huben_22.png", "huben_23.png"]
-    },
-    "jianye_5": {
-        "chName": "樫野_新鲜与甜蜜",
-        "skelNames": ["jianye_5"],
-        "pages": ["jianye_5.png"]
-    },
-    "jingang_5": {
-        "chName": "金刚_海浪之下的意外",
-        "skelNames": ["jingang_5"],
-        "pages": ["jingang_5.png", "jingang_52.png"]
-    },
-    "kaiersheng_2": {
-        "chName": "凯尔圣_阳光下的跑者",
-        "skelNames": ["kaiersheng_2"],
-        "pages": ["kaiersheng_2.png"]
-    },
-    "kaiersheng_3": {
-        "chName": "凯尔圣_神圣的怜悯并非恶事",
-        "skelNames": ["kaiersheng_3"],
-        "pages": ["kaiersheng_3.png", "kaiersheng_32.png"]
-    },
-    "kalangshitade": {
-        "chName": "喀琅施塔得",
-        "skelNames": ["kalangshitade"],
-        "pages": ["kalangshitade.png"]
-    },
-    "kewei_5": {
-        "chName": "可畏_凌乱的秘密加演",
-        "skelNames": ["kewei_5T", "kewei_5"],
-        "pages": ["kewei_5T.png", "kewei_5.png", "kewei_52.png"]
-    },
-    "lafeiii": {
-        "chName": "拉菲II",
-        "skelNames": ["lafeiII"],
-        "pages": ["lafeiII.png", "lafeiII2.png"]
-    },
-    "lafei_12": {
-        "chName": "拉菲_白日慵懒",
-        "skelNames": ["lafei_12T", "lafei_12B"],
-        "pages": ["lafei_12T.png", "lafei_12B.png"]
-    },
-    "linglai_2": {
-        "chName": "绫濑_兔子小姐的更衣时间",
-        "skelNames": ["linglai_2"],
-        "pages": ["linglai_2.png", "linglai_22.png"]
-    },
-    "luna_2_doa": {
-        "chName": "露娜_沙滩上的女神",
-        "skelNames": ["luna_2_doa"],
-        "pages": ["luna_2_doa.png"]
-    },
-    "lundun_3": {
-        "chName": "伦敦_高效工作时间",
-        "skelNames": ["lundun_3"],
-        "pages": ["lundun_3.png"]
-    },
-    "luyisiweier_2": {
-        "chName": "路易斯维尔_梦幻推荐",
-        "skelNames": ["luyisiweier_2"],
-        "pages": ["luyisiweier_2.png"]
-    },
-    "mabuerheide_5": {
-        "chName": "马布尔黑德_雨天的非偶然相遇",
-        "skelNames": ["mabuerheide_5T", "mabuerheide_5B"],
-        "pages": ["mabuerheide_5T.png", "mabuerheide_5B.png"]
-    },
-    "masaiqu_2": {
-        "chName": "马赛曲_战斗天使的健身训练",
-        "skelNames": ["masaiqu_2"],
-        "pages": ["masaiqu_2.png"]
-    },
-    "mojiaduoer": {
-        "chName": "莫加多尔",
-        "skelNames": ["mojiaduoer"],
-        "pages": ["mojiaduoer.png", "mojiaduoer2.png"]
-    },
-    "nabulesi": {
-        "chName": "那不勒斯",
-        "skelNames": ["nabulesi"],
-        "pages": ["nabulesi.png", "nabulesi2.png"]
-    },
-    "naximofu": {
-        "chName": "纳希莫夫海军上将",
-        "skelNames": ["naximofu"],
-        "pages": ["naximofu.png", "naximofu2.png"]
-    },
-    "ougen_7": {
-        "chName": "欧根亲王_闪耀达阵",
-        "skelNames": ["ougen_7"],
-        "pages": ["ougen_7.png", "ougen_72.png"]
-    },
-    "pulimaosi": {
-        "chName": "普利茅斯",
-        "skelNames": ["pulimaosi_T", "pulimaosi_M", "pulimaosi_B"],
-        "pages": ["pulimaosi_T.png", "pulimaosi_M.png", "pulimaosi_B.png"]
-    },
-    "qianwei": {
-        "chName": "前卫",
-        "skelNames": ["qianweiT", "qianweiB"],
-        "pages": ["qianweiT.png", "qianweiB.png"]
-    },
-    "qiershazhi": {
-        "chName": "奇尔沙治",
-        "skelNames": ["qiershazhi"],
-        "pages": ["qiershazhi.png", "qiershazhi2.png"]
-    },
-    "shengdiyage_g": {
-        "chName": "圣地亚哥_改",
-        "skelNames": ["shengdiyage_g"],
-        "pages": ["shengdiyage_g.png"]
-    },
-    "suweiaitongmengnew": {
-        "chName": "苏维埃同盟",
-        "skelNames": ["suweiaitongmengNew"],
-        "pages": ["suweiaitongmengNew.png", "suweiaitongmengNew2.png", "suweiaitongmengNew3.png", "suweiaitongmengNew4.png", "suweiaitongmengNew5.png"]
-    },
-    "tashigan_4": {
-        "chName": "塔什干_独属于你的邀约",
-        "skelNames": ["tashigan_4"],
-        "pages": ["tashigan_4.png", "tashigan_42.png", "tashigan_43.png"]
-    },
-    "tiancheng_cv": {
-        "chName": "天城（航母）",
-        "skelNames": ["tiancheng_cv"],
-        "pages": ["tiancheng_cv.png", "tiancheng_cv2.png", "tiancheng_cv3.png"]
-    },
-    "tuzuo_3": {
-        "chName": "土佐_水色间的游曳",
-        "skelNames": ["tuzuo_3"],
-        "pages": ["tuzuo_3.png", "tuzuo_32.png"]
-    },
-    "u96_4": {
-        "chName": "U-96_WOLFEN DOLLY",
-        "skelNames": ["u96_4"],
-        "pages": ["u96_4.png", "u96_42.png"]
-    },
-    "weida_2": {
-        "chName": "维达号_慵懒的黑天使",
-        "skelNames": ["weida_2"],
-        "pages": ["weida_2.png", "weida_22.png", "weida_23.png"]
-    },
-    "weizhang_2": {
-        "chName": "尾张_波光潋滟",
-        "skelNames": ["weizhang_2T", "weizhang_2B"],
-        "pages": ["weizhang_2T.png", "weizhang_2B.png"]
-    },
-    "wuerlixi": {
-        "chName": "乌尔里希",
-        "skelNames": ["wuerlixi"],
-        "pages": ["wuerlixi.png"]
-    },
-    "wuerlixi_4": {
-        "chName": "乌尔里希_在教室中等待",
-        "skelNames": ["wuerlixi_4"],
-        "pages": ["wuerlixi_4.png", "wuerlixi_42.png"]
-    },
-    "wuqi": {
-        "chName": "吾妻",
-        "skelNames": ["wuqi"],
-        "pages": ["wuqi.png"]
-    },
-    "wuzang": {
-        "chName": "武藏",
-        "skelNames": ["wuzang1", "wuzang2", "wuzang3", "wuzang4", "wuzang5", "wuzang6", "wuzang7"],
-        "pages": ["wuzang1.png", "wuzang2.png", "wuzang3.png", "wuzang4.png", "wuzang5.png", "wuzang6.png", "wuzang7.png"]
-    },
-    "xiafei_3": {
-        "chName": "霞飞_至高乐园",
-        "skelNames": ["xiafei_3T", "xiafei_3B"],
-        "pages": ["xiafei_3T.png", "xiafei_3B.png"]
-    },
-    "xili_g": {
-        "chName": "夕立_改",
-        "skelNames": ["xili_g"],
-        "pages": ["xili_g.png"]
-    },
-    "xingdengbao": {
-        "chName": "兴登堡",
-        "skelNames": ["xingdengbao"],
-        "pages": ["xingdengbao.png", "xingdengbao2.png", "xingdengbao3.png", "xingdengbao4.png"]
-    },
-    "xingzuo_2": {
-        "chName": "星座_星选之夜",
-        "skelNames": ["xingzuo_2"],
-        "pages": ["xingzuo_2.png"]
-    },
-    "xinnong": {
-        "chName": "信浓",
-        "skelNames": ["xinnongT", "xinnongB"],
-        "pages": ["xinnongT.png", "xinnongB.png"]
-    },
-    "xinzexi": {
-        "chName": "新泽西",
-        "skelNames": ["xinzexi"],
-        "pages": ["xinzexi.png"]
-    },
-    "yaerweite_2": {
-        "chName": "亚尔薇特_灼热中的秘密",
-        "skelNames": ["yaerweite_2"],
-        "pages": ["yaerweite_2.png"]
-    },
-    "yanusi_4": {
-        "chName": "雅努斯_踌躇的换衣时间",
-        "skelNames": ["yanusi_4"],
-        "pages": ["yanusi_4.png"]
-    },
-    "yanzhan_g": {
-        "chName": "厌战_改",
-        "skelNames": ["yanzhan_g"],
-        "pages": ["yanzhan_g.png"]
-    },
-    "yindianna_2": {
-        "chName": "印第安纳_酒馆大劫案",
-        "skelNames": ["yindianna_2"],
-        "pages": ["yindianna_2.png"]
-    },
-    "yixian_2": {
-        "chName": "逸仙_膏发凝脂",
-        "skelNames": ["yixian_2T", "yixian_2M", "yixian_2B"],
-        "pages": ["yixian_2T.png", "yixian_2M.png", "yixian_2B.png"]
-    },
-    "yuanchou": {
-        "chName": "怨仇",
-        "skelNames": ["yuanchouT", "yuanchouB"],
-        "pages": ["yuanchouT.png", "yuanchouB.png"]
-    },
-    "yuanchou_2": {
-        "chName": "怨仇_办公室的“意外”",
-        "skelNames": ["yuanchou_2"],
-        "pages": ["yuanchou_2.png"]
-    },
-    "yuekechengii": {
-        "chName": "约克城II",
-        "skelNames": ["yukechengIIT", "yukechengIIM", "yukechengIIB"],
-        "pages": ["yukechengIIT.png", "yukechengIIM.png", "yukechengIIB.png"]
-    },
-    "yuekechengii_2": {
-        "chName": "约克城II_白昼美人鱼",
-        "skelNames": ["yuekechengII_2T", "yuekechengII_2B"],
-        "pages": ["yuekechengII_2T.png", "yuekechengII_2B.png"]
-    },
-    "yuekegongjue_4": {
-        "chName": "约克公爵_渊智的指路人",
-        "skelNames": ["yuekegongjue_4"],
-        "pages": ["yuekegongjue_4.png"]
-    },
-    "yueke_ger_3": {
-        "chName": "约克（铁血）_相伴于泳池之夜",
-        "skelNames": ["yueke_ger_3"],
-        "pages": ["yueke_ger_3.png", "yueke_ger_32.png"]
-    },
-    "yunxian": {
-        "chName": "云仙",
-        "skelNames": ["yunxian"],
-        "pages": ["yunxian.png", "yunxian2.png"]
-    },
-    "z52": {
-        "chName": "Z52",
-        "skelNames": ["z52"],
-        "pages": ["z52.png"]
-    },
-    "z52_2": {
-        "chName": "Z52_疾驰而来的兔小姐",
-        "skelNames": ["z52_2"],
-        "pages": ["z52_2.png"]
-    },
-    "dashan_2": {
-        "chName": "大山_祈愿的巫女兔",
-        "skelNames": ["dashan_2", "dashan_2T"],
-        "pages": ["dashan_2.png", "dashan_22.png", "dashan_23.png", "dashan_2T.png"]
-    },
-    "haerfude_2": {
-        "chName": "哈尔福德_血族亲王的限定陪伴日",
-        "skelNames": ["haerfude_2"],
-        "pages": ["haerfude_2.png", "haerfude_22.png"]
-    }
-}
-
 const CANVAS_SIZE = 4096
 const BGCOLOR_DARK = [0.17, 0.26, 0.44, 1];
 const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
 
-var ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
-var DEFAULT_SKIN = "buli_super";
-
-// 接收一些位于 url 上的传参
-var params = new URLSearchParams(window.location.search);
-if (params.get("p")) {
-    var altPrefix = params.get("p");
-    if (!altPrefix.endsWith("/")) altPrefix += "/";
-    console.log("Use another asset prefix:", altPrefix);
-    ASSET_PREFIX = altPrefix;
-}
-if (params.get("s")) {
-    var altDefaultSkin = params.get("s");
-    if (ASSET_MAPPING[altDefaultSkin]) {
-        console.log("Use another default skin:", altDefaultSkin);
-        DEFAULT_SKIN = altDefaultSkin;
-    }
-}
+/** @type {Object<string, {chName: string, skelNames: string[], pages: string[]}>} */
+let ASSET_MAPPING = null
+let ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
+let DEFAULT_SKIN = "buli_super";
 
 /** @type {HTMLCanvasElement} */
-var canvas = document.getElementById("canvas-spine");
+let canvas = document.getElementById("canvas-spine");
 
 /** @type {HTMLSelectElement} */
-var animationSelect = document.getElementById("animation-select");
+let animationSelect = document.getElementById("animation-select");
 
 /** @type {RenderingContext} */
-var context = null;
-var shader = null;
-var batcher = null;
-var renderer = null;
-var mvp = new spine.webgl.Matrix4();
+let context = null;
+let shader = null;
+let batcher = null;
+let renderer = null;
+let mvp = new spine.webgl.Matrix4();
 
 /** @type {Object<string, spine.webgl.AssetManager>} */
-var assetsCache = {}
+let assetsCache = {}
 
-var spineObjects = [];
-var lastFrameTime = Date.now() / 1000;
-var loadTask = null;
+let spineObjects = [];
+let lastFrameTime = Date.now() / 1000;
+let loadTask = null;
 
-var mvpScale = 1;
-var mvpTranslationX = 0;
-var mvpTranslationY = 0;
-var mvpX = 0;
-var mvpY = 0;
-var mvpW = CANVAS_SIZE;
-var mvpH = CANVAS_SIZE;
+let mvpScale = 1;
+let mvpTranslationX = 0;
+let mvpTranslationY = 0;
+let mvpX = 0;
+let mvpY = 0;
+let mvpW = CANVAS_SIZE;
+let mvpH = CANVAS_SIZE;
 
-var dragSrc = null; // 记录拖放源点
-var pinchDistance = null; // 记录双指缩放距离
+let dragSrc = null; // 记录拖放源点
+let pinchDistance = null; // 记录双指缩放距离
 
 /** 计算骨骼包围盒 */
 function calculateBounds(skeleton) {
     skeleton.setToSetupPose();
     skeleton.updateWorldTransform();
-    var offset = new spine.Vector2();
-    var size = new spine.Vector2();
+    let offset = new spine.Vector2();
+    let size = new spine.Vector2();
     skeleton.getBounds(offset, size, []);
     return { offset: offset, size: size };
 }
 
 /** 创建 Spine 对象 */
 function createSpineObject(skelFileData, atlasFileData, textureLoader) {
-    var atlas = new spine.TextureAtlas(atlasFileData, textureLoader);
-    var skeletonBinary = new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(atlas));
-    var skeletonData = skeletonBinary.readSkeletonData(skelFileData);
-    var animationNames = skeletonData.animations.map(e => e.name);
+    let atlas = new spine.TextureAtlas(atlasFileData, textureLoader);
+    let skeletonBinary = new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(atlas));
+    let skeletonData = skeletonBinary.readSkeletonData(skelFileData);
+    let animationNames = skeletonData.animations.map(e => e.name);
 
-    var skeleton = new spine.Skeleton(skeletonData);
-    var bounds = calculateBounds(skeleton);
-    var animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
+    let skeleton = new spine.Skeleton(skeletonData);
+    let bounds = calculateBounds(skeleton);
+    let animationState = new spine.AnimationState(new spine.AnimationStateData(skeleton.data));
 
     return { skeleton: skeleton, state: animationState, bounds: bounds, animations: animationNames };
 }
 
 /** 重置显示位置 */
 function resize() {
-    var offsetX = spineObjects.length ? Math.min(...spineObjects.map(e => e.bounds.offset.x)) : 0;
-    var offsetY = spineObjects.length ? Math.min(...spineObjects.map(e => e.bounds.offset.y)) : 0;
-    var sizeX = spineObjects.length ? Math.max(...spineObjects.map(e => e.bounds.size.x)) : canvas.width;
-    var sizeY = spineObjects.length ? Math.max(...spineObjects.map(e => e.bounds.size.y)) : canvas.height;
-    var centerX = offsetX + sizeX / 2;
-    var centerY = offsetY + sizeY / 2;
-    var scale = Math.max(sizeX / canvas.width, sizeY / canvas.height);
+    let offsetX = spineObjects.length ? Math.min(...spineObjects.map(e => e.bounds.offset.x)) : 0;
+    let offsetY = spineObjects.length ? Math.min(...spineObjects.map(e => e.bounds.offset.y)) : 0;
+    let sizeX = spineObjects.length ? Math.max(...spineObjects.map(e => e.bounds.size.x)) : canvas.width;
+    let sizeY = spineObjects.length ? Math.max(...spineObjects.map(e => e.bounds.size.y)) : canvas.height;
+    let centerX = offsetX + sizeX / 2;
+    let centerY = offsetY + sizeY / 2;
+    let scale = Math.max(sizeX / canvas.width, sizeY / canvas.height);
 
     mvpW = canvas.width * scale;
     mvpH = canvas.height * scale;
@@ -563,12 +90,12 @@ function resize() {
 /** 更新视图 */
 function updateMvp() {
     // 先平移再中心缩放
-    var centerX = mvpX + mvpW / 2 - mvpTranslationX;
-    var centerY = mvpY + mvpH / 2 - mvpTranslationY;
-    var w = mvpW / mvpScale;
-    var h = mvpH / mvpScale;
-    var x = centerX - w / 2;
-    var y = centerY - h / 2;
+    let centerX = mvpX + mvpW / 2 - mvpTranslationX;
+    let centerY = mvpY + mvpH / 2 - mvpTranslationY;
+    let w = mvpW / mvpScale;
+    let h = mvpH / mvpScale;
+    let x = centerX - w / 2;
+    let y = centerY - h / 2;
 
     console.debug("updateMvp: ", x, y, w, h);
     mvp.ortho2d(x, y, w, h);
@@ -576,15 +103,15 @@ function updateMvp() {
 
 /** 渲染循环 */
 function render() {
-    var now = Date.now() / 1000;
-    var delta = now - lastFrameTime;
+    let now = Date.now() / 1000;
+    let delta = now - lastFrameTime;
     lastFrameTime = now;
 
     context.clear(context.COLOR_BUFFER_BIT);
 
     // 倒序渲染所有骨骼动画
-    for (var i = spineObjects.length - 1; i >= 0; i--) {
-        var obj = spineObjects[i];
+    for (let i = spineObjects.length - 1; i >= 0; i--) {
+        let obj = spineObjects[i];
         obj.state.update(delta);
         obj.state.apply(obj.skeleton);
         obj.skeleton.updateWorldTransform();
@@ -610,10 +137,10 @@ function getSkinUrls(skinName) {
         return;
     }
 
-    var prefix = ASSET_PREFIX + skinName + "/";
-    var skelUrls = [];
-    var atlasUrls = [];
-    var pageUrls = [];
+    let prefix = ASSET_PREFIX + skinName + "/";
+    let skelUrls = [];
+    let atlasUrls = [];
+    let pageUrls = [];
     ASSET_MAPPING[skinName].skelNames.forEach(name => {
         skelUrls.push(prefix + name + ".skel");
         atlasUrls.push(prefix + name + ".atlas");
@@ -631,14 +158,14 @@ function loadSkin(skinName) {
         console.error(skinName, "not found");
         return;
     }
-    var manager = assetsCache[skinName] || (assetsCache[skinName] = new spine.webgl.AssetManager(context));
+    let manager = assetsCache[skinName] || (assetsCache[skinName] = new spine.webgl.AssetManager(context));
     if (!manager) {
         delete assetsCache[skinName];
         return;
     }
 
     // 开始下载资源 (如果浏览器有缓存就不会重复下载)
-    var urls = getSkinUrls(skinName);
+    let urls = getSkinUrls(skinName);
     urls.skelUrls.forEach(e => { manager.loadBinary(e); });
     urls.atlasUrls.forEach(e => { manager.loadText(e); });
     urls.pageUrls.forEach(e => { manager.loadTexture(e); })
@@ -652,15 +179,15 @@ function loadSkin(skinName) {
     }
 
     loadTask = setInterval(function () {
-        var chName = ASSET_MAPPING[skinName].chName;
+        let chName = ASSET_MAPPING[skinName].chName;
         if (manager.isLoadingComplete()) {
             spineObjects = [];
-            for (var i = 0; i < urls.skelUrls.length; i++) {
-                var skelFileData = manager.get(urls.skelUrls[i]);
-                var atlasFileData = manager.get(urls.atlasUrls[i]);
-                var textureLoader = (path) => manager.get(urls.prefix + path);
+            for (let i = 0; i < urls.skelUrls.length; i++) {
+                let skelFileData = manager.get(urls.skelUrls[i]);
+                let atlasFileData = manager.get(urls.atlasUrls[i]);
+                let textureLoader = (path) => manager.get(urls.prefix + path);
                 try {
-                    var spObj = createSpineObject(skelFileData, atlasFileData, textureLoader);
+                    let spObj = createSpineObject(skelFileData, atlasFileData, textureLoader);
                     spineObjects.push(spObj);
                 } catch (error) {
                     console.error(skinName, i, "load failed.");
@@ -676,7 +203,7 @@ function loadSkin(skinName) {
             clearInterval(loadTask);
             loadTask = null;
         } else {
-            var progress = manager.getLoadProgress();
+            let progress = manager.getLoadProgress();
             document.getElementById("current-loading").textContent = `正在加载: ${chName}(${(progress * 100).toFixed(2)}%)`;
         }
     }, 100);
@@ -690,7 +217,7 @@ function changeSkinHandler(event) {
 /** canvas 缩放事件 */
 function canvasWheelHandler(event) {
     event.preventDefault();
-    var scale = mvpScale * (1 - event.deltaY / 500);
+    let scale = mvpScale * (1 - event.deltaY / 500);
     mvpScale = Math.max(Math.min(scale, 100), 0.1);
     updateMvp();
 }
@@ -705,11 +232,11 @@ function canvasMouseDown(event) {
 function canvasMouseMove(event) {
     if (!(event.buttons & 1) || !dragSrc) return;
 
-    var deltaX = event.clientX - dragSrc.x;
-    var deltaY = -(event.clientY - dragSrc.y);
+    let deltaX = event.clientX - dragSrc.x;
+    let deltaY = -(event.clientY - dragSrc.y);
 
-    var scaleX = (mvpW / canvas.clientWidth) / mvpScale;
-    var scaleY = (mvpH / canvas.clientHeight) / mvpScale;
+    let scaleX = (mvpW / canvas.clientWidth) / mvpScale;
+    let scaleY = (mvpH / canvas.clientHeight) / mvpScale;
 
     mvpTranslationX += deltaX * scaleX;
     mvpTranslationY += deltaY * scaleY;
@@ -726,8 +253,8 @@ function canvasMouseUp(event) {
 
 /** 获取两点之间的距离 */
 function getDistance(touches) {
-    var dx = touches[0].clientX - touches[1].clientX;
-    var dy = touches[0].clientY - touches[1].clientY;
+    let dx = touches[0].clientX - touches[1].clientX;
+    let dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
 }
 
@@ -748,18 +275,18 @@ function canvasTouchMove(event) {
 
     if (event.touches.length === 2 && pinchDistance) {
         // 处理双指缩放
-        var newDistance = getDistance(event.touches);
-        var scale = mvpScale * (newDistance / pinchDistance);
+        let newDistance = getDistance(event.touches);
+        let scale = mvpScale * (newDistance / pinchDistance);
         mvpScale = Math.max(Math.min(scale, 100), 0.1);
         updateMvp();
         pinchDistance = newDistance; // 更新初始距离
     } else if (event.touches.length === 1 && dragSrc) {
         // 处理单指拖动
-        var deltaX = event.touches[0].clientX - dragSrc.x;
-        var deltaY = -(event.touches[0].clientY - dragSrc.y);
+        let deltaX = event.touches[0].clientX - dragSrc.x;
+        let deltaY = -(event.touches[0].clientY - dragSrc.y);
 
-        var scaleX = (mvpW / canvas.clientWidth) / mvpScale;
-        var scaleY = (mvpH / canvas.clientHeight) / mvpScale;
+        let scaleX = (mvpW / canvas.clientWidth) / mvpScale;
+        let scaleY = (mvpH / canvas.clientHeight) / mvpScale;
 
         mvpTranslationX += deltaX * scaleX;
         mvpTranslationY += deltaY * scaleY;
@@ -795,17 +322,17 @@ function setAnimationList() {
     if (spineObjects.length <= 0)
         return;
 
-    var animationNames = spineObjects[0].animations;
+    let animationNames = spineObjects[0].animations;
 
     animationSelect.innerHTML = "";
     animationNames.forEach(name => {
-        var option = document.createElement("option");
+        let option = document.createElement("option");
         option.value = name;
         option.textContent = name;
         animationSelect.appendChild(option);
     });
 
-    var initAnimation = animationNames[animationNames.length - 1];
+    let initAnimation = animationNames[animationNames.length - 1];
     if (animationNames.includes("normal")) {
         initAnimation = "normal";
     } else if (animationNames.includes("idle")) {
@@ -833,15 +360,15 @@ function setBackgroundColor(color) {
 
 /** 背景色设置事件 */
 function backgroundColorChange(event) {
-    var value = document.querySelector('input[name="bgcolor"]:checked').value;
+    let value = document.querySelector('input[name="bgcolor"]:checked').value;
     setBackgroundColor(value);
 }
 
 /** 皮肤列表筛选事件 */
 function filterSkinInputChange(event) {
-    var text = event.target.value;
+    let text = event.target.value;
     console.log(text);
-    var links = document.getElementById("shipnames-container").querySelectorAll("a");
+    let links = document.getElementById("shipnames-container").querySelectorAll("a");
     if (!text) {
         links.forEach(link => {
             link.style.backgroundColor = "";
@@ -863,12 +390,64 @@ function filterSkinInputChange(event) {
     }
 }
 
+function init() {
+    let params = new URLSearchParams(window.location.search);
+
+    // 处理参数 p
+    if (params.get("p")) {
+        let altPrefix = params.get("p");
+        if (!altPrefix.endsWith("/")) altPrefix += "/";
+        console.log("Use another asset prefix:", altPrefix);
+        ASSET_PREFIX = altPrefix;
+    }
+
+    // 通过 XHR 获取 JSON 数据
+    let assetMappingUrl = ASSET_PREFIX + "index.json";
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", assetMappingUrl, true);
+    xhr.responseType = "json";
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            let skinData = xhr.response;
+            if (!skinData || typeof skinData !== "object") {
+                alert("皮肤信息解析失败！");
+                return;
+            }
+
+            // 将获取的皮肤数据赋值到 ASSET_MAPPING
+            ASSET_MAPPING = skinData;
+
+            // 处理参数 s
+            if (params.get("s")) {
+                let altDefaultSkin = params.get("s");
+                if (ASSET_MAPPING[altDefaultSkin]) {
+                    console.log("Use another default skin:", altDefaultSkin);
+                    DEFAULT_SKIN = altDefaultSkin;
+                }
+            }
+
+            // 执行 main 函数
+            main();
+        } else {
+            // 处理加载失败
+            alert("皮肤信息获取失败！");
+        }
+    };
+
+    xhr.onerror = function () {
+        alert("皮肤信息获取失败！");
+    };
+
+    xhr.send();
+}
+
 function main() {
     // 生成皮肤列表
-    var container = document.getElementById("shipnames-container");
-    for (var key of Object.keys(ASSET_MAPPING).sort()) {
+    let container = document.getElementById("shipnames-container");
+    for (let key of Object.keys(ASSET_MAPPING).sort()) {
         value = ASSET_MAPPING[key];
-        var link = document.createElement("a");
+        let link = document.createElement("a");
         link.href = "javascript:void(0)";
         link.textContent = value.chName;
         link.setAttribute("data-key", key);
@@ -880,7 +459,7 @@ function main() {
     document.getElementById("filter-skin-input").oninput = filterSkinInputChange;
 
     // 创建绘图资源
-    var config = { alpha: false };
+    let config = { alpha: false };
     context = canvas.getContext("webgl", config) || canvas.getContext("experimental-webgl", config);
     if (!context) {
         console.error("WebGL 加载失败")
@@ -924,4 +503,4 @@ function main() {
     render();
 }
 
-(function () { main(); }());
+(function () { init(); }());
