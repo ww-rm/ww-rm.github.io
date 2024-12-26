@@ -446,6 +446,16 @@ const ASSET_MAPPING = {
         "chName": "Z52_疾驰而来的兔小姐",
         "skelNames": ["z52_2"],
         "pages": ["z52_2.png"]
+    },
+    "dashan_2": {
+        "chName": "大山_祈愿的巫女兔",
+        "skelNames": ["dashan_2", "dashan_2T"],
+        "pages": ["dashan_2.png", "dashan_22.png", "dashan_23.png", "dashan_2T.png"]
+    },
+    "haerfude_2": {
+        "chName": "哈尔福德_血族亲王的限定陪伴日",
+        "skelNames": ["haerfude_2"],
+        "pages": ["haerfude_2.png", "haerfude_22.png"]
     }
 }
 
@@ -856,7 +866,7 @@ function filterSkinInputChange(event) {
 function main() {
     // 生成皮肤列表
     var container = document.getElementById("shipnames-container");
-    for (var key in ASSET_MAPPING) {
+    for (var key of Object.keys(ASSET_MAPPING).sort()) {
         value = ASSET_MAPPING[key];
         var link = document.createElement("a");
         link.href = "javascript:void(0)";
