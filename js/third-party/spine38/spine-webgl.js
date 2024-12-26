@@ -2197,7 +2197,7 @@ var spine;
 			var _this = this;
 			request.onprogress = function (event) {
 				if (event.lengthComputable) {
-					_this.loadProgress[url] = event.loaded / event.total;
+					_this.loadProgress[url] = { "loaded": event.loaded, "total": event.total };
 				}
 			};
 			request.onload = function () {
@@ -2224,7 +2224,7 @@ var spine;
 			var _this = this;
 			request.onprogress = function (event) {
 				if (event.lengthComputable) {
-					_this.loadProgress[url] = event.loaded / event.total;
+					_this.loadProgress[url] = { "loaded": event.loaded, "total": event.total };
 				}
 			};
 			request.onload = function () {
@@ -2251,7 +2251,7 @@ var spine;
 			var _this = this;
 			request.onprogress = function (event) {
 				if (event.lengthComputable) {
-					_this.loadProgress[url] = event.loaded / event.total;
+					_this.loadProgress[url] = { "loaded": event.loaded, "total": event.total };
 				}
 			};
 			request.onload = function () {
@@ -2274,12 +2274,15 @@ var spine;
 			request.send();
 		};
 		AssetManager.prototype.getLoadProgress = function () {
-			var count = Object.keys(this.loadProgress).length;
-			if (count <= 0) {
-				return 0;
-			} else {
-				return Object.values(this.loadProgress).reduce((acc, cur) => acc + cur, 0) / count;
-			}
+			let totalLoaded = 0;
+			let totalSize = 0;
+
+			Object.keys(this.loadProgress).forEach(key => {
+				totalLoaded += this.loadProgress[key].loaded;
+				totalSize += this.loadProgress[key].total;
+			});
+
+			return totalSize === 0 ? 0 : totalLoaded / totalSize;
 		};
 		AssetManager.prototype.setRawDataURI = function (path, data) {
 			this.rawDataUris[this.pathPrefix + path] = data;
