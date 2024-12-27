@@ -204,7 +204,10 @@ function loadSkin(skinName) {
             loadTask = null;
         } else {
             let progress = manager.getLoadProgress();
-            document.getElementById("current-loading").textContent = `正在加载: ${chName}(${(progress * 100).toFixed(2)}%)`;
+            let loaded = (progress.loaded / 1048576).toFixed(2);
+            let total = (progress.total / 1048576).toFixed(2)
+            let progressText = `正在加载[${loaded}/${total}MB]: ${chName}`;
+            document.getElementById("current-loading").textContent = progressText;
         }
     }, 100);
 }
