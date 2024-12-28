@@ -897,7 +897,7 @@ images: images
 ###### ================ User Custom Settings ===================== ######
 background_image:
   enable: true
-  url: "/images/background/dark.jpg"
+  url: "/images/background/dark.webp"
   opacity: 1
   zindex: -100
 
