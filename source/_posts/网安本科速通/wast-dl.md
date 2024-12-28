@@ -42,7 +42,7 @@ example/
     main.ipynb
 ```
 
-![vrAZse.png](https://ww-rm.github.io/static/image/wast-dl/vrAZse.png)
+![vrAZse.png](/static/image/wast-dl/vrAZse.png)
 
 ## 并不快速的快速上手
 

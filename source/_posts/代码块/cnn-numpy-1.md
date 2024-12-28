@@ -33,7 +33,7 @@ mathjax: true
 
 神经网络的本质是一个多元复合函数, 因此在给定输入的情况下计算网络的输出, 就是网络的前向传播过程.
 
-![forward.jpg](https://ww-rm.github.io/static/image/cnn-numpy-1/forward.jpg)
+![forward.jpg](/static/image/cnn-numpy-1/forward.jpg)
 
 如果有上图所示的一个简单网络, 其中:
 
@@ -79,7 +79,7 @@ $$
 
 和上面的函数复合关系对应一下, 很容易就能看出链式求导逻辑, 然后可以按下图标记偏导数.
 
-![backward.jpg](https://ww-rm.github.io/static/image/cnn-numpy-1/backward.jpg)
+![backward.jpg](/static/image/cnn-numpy-1/backward.jpg)
 
 可以看出来整个网络图形成了一个树形结构, 也可称之为计算图, 其中树的根部是损失值, 而函数所有的输入参数是树的叶节点.
 
@@ -182,7 +182,7 @@ class NetworkLayer:
 
 在卷积神经网络中, 我们需要用到最大池化层, 这里我们简单起见, 只实现核大小等于两个方向上步长且能整除图片宽高的情况. 以图片大小 $6 \times 4$, 核大小为 $3 \times 2$ 举例, 池化过程如下图所示.
 
-![pooling.jpg](https://ww-rm.github.io/static/image/cnn-numpy-1/pooling.jpg)
+![pooling.jpg](/static/image/cnn-numpy-1/pooling.jpg)
 
 对于前向传播, 虚线是使用循环遍历的方式求解, 而实线则是通过数组变形使用矩阵方式求解.
 

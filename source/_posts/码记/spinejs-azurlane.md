@@ -16,7 +16,7 @@ date: 2024-12-22 16:25:16
 
 虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.
 
-成品见[碧蓝航线动态立绘在线预览 (持续更新)](https://ww-rm.github.io/azurlane/), 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.
+成品见[碧蓝航线动态立绘在线预览 (持续更新)](/azurlane/), 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.
 
 <!-- more -->
 
@@ -34,7 +34,7 @@ date: 2024-12-22 16:25:16
 
 拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.
 
-仓库见 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting), 里面的资源应该是可以通过以 `https://ww-rm.github.io/azurlane_spinepainting/` 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.
+仓库见 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting), 里面的资源应该是可以通过以 `/azurlane_spinepainting/` 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.
 
 ### 前端页面
 
@@ -54,13 +54,13 @@ date: 2024-12-22 16:25:16
 
 最后的效果大概长这样:
 
-![page-preview.jpg](https://ww-rm.github.io/static/image/spinejs-azurlane/page-preview.jpg)
+![page-preview.jpg](/static/image/spinejs-azurlane/page-preview.jpg)
 
-![page-preview1.gif](https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview1.gif)
+![page-preview1.gif](/static/image/spinejs-azurlane/canvas-preview1.gif)
 
-![page-preview2.gif](https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview2.gif)
+![page-preview2.gif](/static/image/spinejs-azurlane/canvas-preview2.gif)
 
-![page-preview3.gif](https://ww-rm.github.io/static/image/spinejs-azurlane/canvas-preview3.gif)
+![page-preview3.gif](/static/image/spinejs-azurlane/canvas-preview3.gif)
 
 ## 源码
 
@@ -72,4 +72,4 @@ date: 2024-12-22 16:25:16
 
 立绘资源在仓库 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting).
 
-不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 [DeskSpine](https://github.com/ww-rm/DeskSpine), 目前还没彻底完工~~咕咕咕~~, 但是基本功能已经差不多了~~能用~~, 是我基于过去项目 [DesktopSprite](https://ww-rm.github.io/posts/2023/08/30/desktopsprite/) 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多~~bug也少很多~~, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    
+不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 [DeskSpine](https://github.com/ww-rm/DeskSpine), 目前还没彻底完工~~咕咕咕~~, 但是基本功能已经差不多了~~能用~~, 是我基于过去项目 [DesktopSprite](/posts/2023/08/30/desktopsprite/) 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多~~bug也少很多~~, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    

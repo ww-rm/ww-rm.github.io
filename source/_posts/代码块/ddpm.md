@@ -534,7 +534,7 @@ class GaussianDiffusion(nn.Module):
 
 第一个是原始 UNet 结构, 第二个是对应于 DDPM 的 UNet 结构, 参考一下理解原理即可.
 
-对于扩散部分的代码, 可以参考很久之前的总结[扩散模型阅读笔记](https://ww-rm.github.io/posts/2022/10/29/diffusion-model/), 里面有前向和反向的计算公式, 对着写就好了.
+对于扩散部分的代码, 可以参考很久之前的总结[扩散模型阅读笔记](/posts/2022/10/29/diffusion-model/), 里面有前向和反向的计算公式, 对着写就好了.
 
 ## 主程序
 
@@ -820,34 +820,34 @@ if __name__ == "__main__":
 放几张反向去噪的结果图, 效果还行, 颇有毕加索的美术风格.
 
 {% note success "**[点击展开]** 未收敛时反向扩散结果" %}
-![ckpt-1e03x10.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x10.png)
-![ckpt-1e03x15.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x15.png)
-![ckpt-1e03x20.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x20.png)
-![ckpt-1e04x05.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x05.png)
-![ckpt-1e04x10.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x10.png)
-![ckpt-1e04x15.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x15.png)
-![ckpt-1e04x20.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x20.png)
-![ckpt-1e04x25.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x25.png)
+![ckpt-1e03x10.png](/static/image/ddpm/ckpt-1e03x10.png)
+![ckpt-1e03x15.png](/static/image/ddpm/ckpt-1e03x15.png)
+![ckpt-1e03x20.png](/static/image/ddpm/ckpt-1e03x20.png)
+![ckpt-1e04x05.png](/static/image/ddpm/ckpt-1e04x05.png)
+![ckpt-1e04x10.png](/static/image/ddpm/ckpt-1e04x10.png)
+![ckpt-1e04x15.png](/static/image/ddpm/ckpt-1e04x15.png)
+![ckpt-1e04x20.png](/static/image/ddpm/ckpt-1e03x20.png)
+![ckpt-1e04x25.png](/static/image/ddpm/ckpt-1e04x25.png)
 {% endnote %}
 
 {% note success "**[点击展开]** 收敛之后反向扩散结果" %}
-![ckpt-1e07x10.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e07x10.png)
-![ckpt-1e07x20.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e07x20.png)
-![ckpt-1e08x10.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e08x10.png)
-![ckpt-1e08x20.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e08x20.png)
-![ckpt-1e09x10.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e09x10.png)
-![ckpt-1e09x20.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e09x20.png)
-![ckpt-1e10x10.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e10x10.png)
-![ckpt-1e10x20.png](https://ww-rm.github.io/static/image/ddpm/ckpt-1e10x20.png)
+![ckpt-1e07x10.png](/static/image/ddpm/ckpt-1e07x10.png)
+![ckpt-1e07x20.png](/static/image/ddpm/ckpt-1e07x20.png)
+![ckpt-1e08x10.png](/static/image/ddpm/ckpt-1e08x10.png)
+![ckpt-1e08x20.png](/static/image/ddpm/ckpt-1e08x20.png)
+![ckpt-1e09x10.png](/static/image/ddpm/ckpt-1e09x10.png)
+![ckpt-1e09x20.png](/static/image/ddpm/ckpt-1e09x20.png)
+![ckpt-1e10x10.png](/static/image/ddpm/ckpt-1e10x10.png)
+![ckpt-1e10x20.png](/static/image/ddpm/ckpt-1e10x20.png)
 {% endnote %}
 
 {% note success "**[点击展开]** 同一组高斯噪声随模型收敛采样结果" %}
-![ckpt-all.png](https://ww-rm.github.io/static/image/ddpm/ckpt-all.png)
+![ckpt-all.png](/static/image/ddpm/ckpt-all.png)
 {% endnote %}
 
 最后放一个抽卡结果, 随机抽 64 张.
 
-![sample-64.png](https://ww-rm.github.io/static/image/ddpm/sample-64.png)
+![sample-64.png](/static/image/ddpm/sample-64.png)
 
 说实话, 炼丹效果和数据集有相当大关系, 越高质量的数据集炼出来的模型越好, 越不容易出问题, 并且数据量越大生成的结果也越丰富~~模型其实都不是什么特别重要的事情, 反正都是乱拟合一个~~.
 

@@ -23,7 +23,7 @@ date: 2022-04-17 19:11:58
 
 界面大概长这样:
 
-![hashtool.png](https://ww-rm.github.io/static/image/hashtool/hashtool.png)
+![hashtool.png](/static/image/hashtool/hashtool.png)
 
 支持下列算法:
 

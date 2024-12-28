@@ -43,7 +43,7 @@ example/
     main.ipynb
 ```
 
-![vBh4sA.png](https://ww-rm.github.io/static/image/wast-ml/vBh4sA.png)
+![vBh4sA.png](/static/image/wast-ml/vBh4sA.png)
 
 ## 快速上手
 

@@ -10,7 +10,7 @@ tags:
 date: 2023-11-05 17:43:40
 ---
 
-基于上一篇[NCM 文件批量转换 (保留专辑和封面信息)](https://ww-rm.github.io/posts/2023/11/04/ncmdump/), 记录一下自己第一次往 PyPI 上发布包的过程.
+基于上一篇[NCM 文件批量转换 (保留专辑和封面信息)](/posts/2023/11/04/ncmdump/), 记录一下自己第一次往 PyPI 上发布包的过程.
 
 本文结合 Python 官方教程 [Packaging Python Projects](https://packaging.python.org/en/latest/tutorials/packaging-projects/) 和 [Setuptools](https://setuptools.pypa.io/en/latest/index.html) 的 [User guide](https://setuptools.pypa.io/en/latest/userguide/) 进行打包和发布.
 

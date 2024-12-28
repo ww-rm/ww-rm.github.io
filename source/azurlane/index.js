@@ -6,7 +6,7 @@ const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
 
 /** @type {Object<string, {chName: string, skelNames: string[], pages: string[]}>} */
 let ASSET_MAPPING = null
-let ASSET_PREFIX = "https://ww-rm.github.io/azurlane_spinepainting/"
+let ASSET_PREFIX = "/azurlane_spinepainting/"
 let DEFAULT_SKIN = "buli_super";
 
 /** @type {HTMLCanvasElement} */

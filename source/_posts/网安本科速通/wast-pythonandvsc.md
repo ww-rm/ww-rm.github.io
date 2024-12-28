@@ -31,19 +31,19 @@ date: 2022-08-13 13:53:17
 
 下载好之后双击进入安装界面. 下面两项都勾上, 并且选择 "Customize installation".
 
-![vtamNQ.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vtamNQ.png)
+![vtamNQ.png](/static/image/wast-pythonandvsc/vtamNQ.png)
 
 这一面也是直接全勾.
 
-![vtaN4J.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vtaN4J.png)
+![vtaN4J.png](/static/image/wast-pythonandvsc/vtaN4J.png)
 
 再次 Next 之后, 这个界面里, 勾选 "Install for all users", 并且可以在下方调整 `python` 的安装路径. 推荐装到 D 盘或者其他方便找到的地方, 比如 `D:\Program Files\Python38`.
 
-![vtd9VU.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vtd9VU.png)
+![vtd9VU.png](/static/image/wast-pythonandvsc/vtd9VU.png)
 
 重启一下电脑, 快捷键 `Win + R`, 输入 `cmd` 打开命令提示符, 敲一下 `python --version`, 如下图所示则安装成功.
 
-![vtdqeK.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vtdqeK.png)
+![vtdqeK.png](/static/image/wast-pythonandvsc/vtdqeK.png)
 
 ## Python 虚拟环境
 
@@ -150,13 +150,13 @@ jupyter
 
 打开之前曾经创建的 `example` 文件夹, 并且新建一个终端.
 
-![vNUegI.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vNUegI.png)
+![vNUegI.png](/static/image/wast-pythonandvsc/vNUegI.png)
 
 我们使用以下命令为这个项目建立一个单独的虚拟环境, 取名为 `env`.
 
 `python -m venv env`
 
-![vNami4.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vNami4.png)
+![vNami4.png](/static/image/wast-pythonandvsc/vNami4.png)
 
 命令执行完成后, 左边的资源管理器面板上多出来一个 `env` 文件夹, 这就是我们刚刚创建好的虚拟环境. 我们使用 `.\env\Scripts\activate` 在终端中激活这个虚拟环境, 激活完成后可以看到终端的提示信息前面多了一个 `(env)` 标记, 表示当前终端处于 `env` 的虚拟环境之下.
 
@@ -164,19 +164,19 @@ jupyter
 
 解决完问题之后就如下图所示了.
 
-![vNdYn0.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vNdYn0.png)
+![vNdYn0.png](/static/image/wast-pythonandvsc/vNdYn0.png)
 
 此时在终端里直接执行 `python` 有关的命令, 都会映射到虚拟环境里的命令.
 
 然后我们继续, 使用 `pip` 向虚拟环境里添加一个第三方库 `numpy`.
 
-![vNwSvn.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vNwSvn.png)
+![vNwSvn.png](/static/image/wast-pythonandvsc/vNwSvn.png)
 
 顺利安装完成之后, 可以看到左边的 `env` 文件夹里 `site-packages` 下多出来一个 `numpy` 的文件夹, 这就是我们刚刚安装好的第三方库了. 同时终端里给了我们一个 `WARNING`, 提示我们可以对 `pip` 模块进行升级. 虽然影响不是很大, 不过推荐复制它提供的指令升一下级, 这样 `pip` 在查找和安装包时能够使用最新的功能, 减小安装失败的风险~~主要是有彩色进度条~~.
 
 然后清空之前 `main.py` 里面的代码, 并且敲入以下新的内容.
 
-![vNDSvd.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDSvd.png)
+![vNDSvd.png](/static/image/wast-pythonandvsc/vNDSvd.png)
 
 ```python
 import numpy as np
@@ -193,13 +193,13 @@ if __name__ == "__main__":
 
 这是因为虽然我们刚刚在终端里是已经成功激活了虚拟环境, 但是对于 `VS Code` 来说, 它并不关心终端里是什么情况, 而是对于这个项目来说, 它需要使用什么环境来处理项目内容, 所以我们还需要在下方的状态栏里切换 `VS Code` 对于当前项目使用的 `python` 环境.
 
-![vN0OpQ.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vN0OpQ.png)
+![vN0OpQ.png](/static/image/wast-pythonandvsc/vN0OpQ.png)
 
 点击下方状态栏的环境选择, 并且切换到刚刚创建的 `env` 环境, 此时下方的环境已经换成了 `'env':venv`, 并且刚刚的黄色波浪线与问题也消失了.
 
 此时我们可以选择在激活了虚拟环境的终端里运行这份代码, 或者使用快捷键 `Ctrl + F5` 让 `VS Code` 帮我们运行. 这里展示一下在终端里直接运行的结果, 可以看到成功输出, 一个是向量内积结果, 一个是向量按位乘法结果.
 
-![vNDsPO.png](https://ww-rm.github.io/static/image/wast-pythonandvsc/vNDsPO.png)
+![vNDsPO.png](/static/image/wast-pythonandvsc/vNDsPO.png)
 
 ## 后话
 

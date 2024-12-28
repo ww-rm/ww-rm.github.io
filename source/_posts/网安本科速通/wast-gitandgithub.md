@@ -39,15 +39,15 @@ date: 2022-08-15 17:22:32
 
 首先当然是安装 `git`, 官网地址 [https://git-scm.com/](https://git-scm.com/), 点进去直接 "Downloads" 最新版本进行安装, 安装时有一些选项值得注意一下.
 
-![vaPitJ.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png)]
+![vaPitJ.png](/static/image/wast-gitandgithub/vaPitJ.png)]
 
 这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 `git` 终端.
 
-![vaPtnf.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png)
+![vaPtnf.png](/static/image/wast-gitandgithub/vaPtnf.png)
 
 然后是这个, 使用 `VS Code` 作为 `git` 的默认文本编辑器. 要求我们安装了 `VS Code`, 然后勾选这个选项. 这个意思是一旦 `git` 出现需要我们手动敲一点文本内容的时候, 会弹出来 `VS Code` 界面作为输入界面. 强烈建议换掉, 一是好看二是省事~~珍爱生命, 远离 Vim~~.
 
-![vaPTjx.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png)
+![vaPTjx.png](/static/image/wast-gitandgithub/vaPTjx.png)
 
 然后是这个, 也是建议选下面的, 曾经 `git` 的主分支默认叫 `master`, 但是现在大部分新项目都叫 `main` 了. 不是什么大问题, 但是建议按新的约定来~~紧随时代潮流~~.
 
@@ -89,13 +89,13 @@ example/
 
 总共两部分, 一个是 `env` 文件夹, `python` 的虚拟环境, 另一个是我们的源文件 `main.py`, 我们的目标是只提交 `main.py`, 而忽略虚拟环境 `env`, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.
 
-![vaVnBt.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png)
+![vaVnBt.png](/static/image/wast-gitandgithub/vaVnBt.png)
 
 首先进入 `example` 文件夹, 然后使用 `ls` 命令查看了一下文件夹内的内容. 之后便是 `init -> add -> commit` 的一连串操作.
 
 需要注意的地方是, 第一次使用 `commit` 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, `git` 必须记录是 "谁" 提交了这次修改, 并且是通过 "邮箱" 和 "用户名" 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 `commit` 命令进行提交即可.
 
-![vaVI8e.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png)
+![vaVI8e.png](/static/image/wast-gitandgithub/vaVI8e.png)
 
 然后我们使用 `log` 和 `show` 两个命令查看一下刚刚的提交记录, 其中 `+` 表示文件内新增的行, 而 `-` 表示删去的行, 一般来说如果是对某一行进行了修改则会是 `+` 和 `-` 交替出现, 这里只有 `+` 是因为提交了一份全新的文件.
 
@@ -125,7 +125,7 @@ example/
 
 注册好之后, 你的个人界面网址应该就是 `https://github.com/<用户名>/`, 并且进去后界面大概长的像下面的样子.
 
-![vaLItP.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png)
+![vaLItP.png](/static/image/wast-gitandgithub/vaLItP.png)
 
 但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 `Github` 里添加 `ssh` 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 `http` 协议的方式, `Github` 已经不推荐并且由于不可抗力网络质量也很差.)
 
@@ -139,15 +139,15 @@ example/
 其中 `-C` 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.
 成功生成之后, 可以使用 `ls` 和 `cat` 命令查看生成的文件与公钥内容.
 所有操作和成功生成后的结果如下图所示.
-![vwila8.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png)
+![vwila8.png](/static/image/wast-gitandgithub/vwila8.png)
 2.将公钥添加到 Github
 回到 `github` 的个人主页面, 进入 "Settings" 界面, 在左侧选择 "SSH and GPG Keys", 然后选择 `New SSH Key`, 并将**公钥文件 `id_rsa.pub`** 的内容复制进去, 注意是**公钥文件 `id_rsa.pub`**.
-![vwi2s1.png](https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png)
+![vwi2s1.png](/static/image/wast-gitandgithub/vwi2s1.png)
 {% endnote %}
 
 继续回到我们的 `Github` 个人主页面, 点击页面右上角的加号, 选择 "New repository", 创建我们的第一个项目仓库.
 
-![v0E9gg.png](https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png)
+![v0E9gg.png](/static/image/wast-gitandgithub/v0E9gg.png)
 
 如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 `github` 上访问并查看里面的文件内容.
 
@@ -181,7 +181,7 @@ example/
 
 `VS Code` 本身自带对 `git` 的支持, 且已经能够满足基本使用. 打开我们的 `example` 项目, 左边切换到 `源代码管理` 的面板.
 
-![v0naB4.png](https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png)
+![v0naB4.png](/static/image/wast-gitandgithub/v0naB4.png)
 
 在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.
 
@@ -189,13 +189,13 @@ example/
 
 我们选择 `main.py` 一行右侧的 `+` 号, "暂存更改", 其行为等价于 `add` 操作.
 
-![v0uFrF.png](https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png)
+![v0uFrF.png](/static/image/wast-gitandgithub/v0uFrF.png)
 
 操作之后 `main.py` 被放入 "暂存的更改" 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 `git commit` 操作.
 
 如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.
 
-![v0KiWt.png](https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png)
+![v0KiWt.png](/static/image/wast-gitandgithub/v0KiWt.png)
 
 提交完成后, `VS Code` 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, `VS Code` 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 `pull` 再进行 `push`.
 

@@ -171,17 +171,17 @@ if __name__ == "__main__":
 输入两张图片, 例如:
 
 {% gp 2-2 %}
-![lenna1.png](https://ww-rm.github.io/static/image/imgcmp/lenna1.png)
-![lenna2.png](https://ww-rm.github.io/static/image/imgcmp/lenna2.png)
+![lenna1.png](/static/image/imgcmp/lenna1.png)
+![lenna2.png](/static/image/imgcmp/lenna2.png)
 {% endgp %}
 
 可以得到相似度: HlsSimilarity(H=0.32851660966060825, L=0.6765325641597513, S=0.6573630520719462)
 
 并且有差异图:
 
-![hist.png](https://ww-rm.github.io/static/image/imgcmp/hist.png)
+![hist.png](/static/image/imgcmp/hist.png)
 
-![diff.png](https://ww-rm.github.io/static/image/imgcmp/diff.png)
+![diff.png](/static/image/imgcmp/diff.png)
 
 可以看出来左图比右图多了很多红色部分, 并且少一一丢丢的蓝色.
 

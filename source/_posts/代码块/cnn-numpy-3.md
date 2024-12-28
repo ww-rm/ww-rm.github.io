@@ -31,7 +31,7 @@ mathjax: true
 
 因为只是一个简单的示例, 所以弄一个小一点的网络, 大概长这样.
 
-![cnn.jpg](https://ww-rm.github.io/static/image/cnn-numpy-3/cnn.jpg)
+![cnn.jpg](/static/image/cnn-numpy-3/cnn.jpg)
 
 然后就是按照这个结构用代码把前面实现的层串起来.
 
@@ -279,7 +279,7 @@ if __name__ == "__main__":
 
 损失曲线图:
 
-![loss.jpg](https://ww-rm.github.io/static/image/cnn-numpy-3/loss.png)
+![loss.jpg](/static/image/cnn-numpy-3/loss.png)
 
 分类性能报告:
 

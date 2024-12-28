@@ -20,7 +20,7 @@ mathjax: true
 
 ### 邻居
 
-![ppVbSaR.png](https://ww-rm.github.io/static/image/njtree/ppVbSaR.png)
+![ppVbSaR.png](/static/image/njtree/ppVbSaR.png)
 
 首先是关于"邻居"的定义, 在 NJ 树中, 一对"邻居"指的是在一个无根分叉树中仅仅通过一个内部结点连接起来一对分类单元 (OTU).
 
@@ -30,17 +30,17 @@ mathjax: true
 
 ### 进化树构建流程
 
-![ppVqOHJ.png](https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png)
+![ppVqOHJ.png](/static/image/njtree/ppVqOHJ.png)
 
 假设初始时没有任何分类单元聚集在一起, 算法起始于一个星状树, 如上图左侧所示. 算法的一步变换则是将左图变成了右图.
 
 在这些分类单元中, 分类单元之间有着不同的距离远近, 右侧的图将 $1$ 和 $2$ 聚合在了一起, 并形成了一个新结点 $Y$, 将 $1$, $2$ 视作一个整体, 则相比于左图, $<1, 2>$ 作为新分类单元整体替换了左图里的分类单元 $1$ 和 $2$, 整个星状树减少了 1 个分类单元, 增加了 1 条内部分支, 每次选择要聚合的邻居时, 都是使得聚合后的新树总枝长最短. 如此循环, 则可以一步一步减少星状树的分类单元, 直至分类单元只剩下 3 个, 内部分支增加至 $N - 3$ 个.
 
-![ppVX9mD.png](https://ww-rm.github.io/static/image/njtree/ppVX9mD.png)
+![ppVX9mD.png](/static/image/njtree/ppVX9mD.png)
 
 ## 算法流程
 
-![ppVqOHJ.png](https://ww-rm.github.io/static/image/njtree/ppVqOHJ.png)
+![ppVqOHJ.png](/static/image/njtree/ppVqOHJ.png)
 
 ### 计算总枝长
 

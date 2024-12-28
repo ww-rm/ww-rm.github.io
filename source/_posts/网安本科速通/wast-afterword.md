@@ -18,4 +18,4 @@ date: 2022-08-19 15:43:07
 
 就这样了, 网安本科速通, 完成!
 
-![zzz.gif](https://ww-rm.github.io/static/image/wast-afterword/zzz.gif)
+![zzz.gif](/static/image/wast-afterword/zzz.gif)

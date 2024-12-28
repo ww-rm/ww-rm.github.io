@@ -21,7 +21,7 @@ mathjax: true
 
 先不看 $\bmod$ 记号, 那么这就是一条普通的连续曲线, 可以按照普通的方程求解, 给定一个 $x$, 就可以求出来对应的 $y$. 容易看出来, 这条曲线是关于 $x$ 轴对称的, 因此它的图像大概长下面这种样子.
 
-![zcG6gI.png](https://ww-rm.github.io/static/image/simple-ecc/zcG6gI.png)
+![zcG6gI.png](/static/image/simple-ecc/zcG6gI.png)
 
 可以有几种不同的形式, 但是基本上差不多.
 
@@ -58,7 +58,7 @@ mathjax: true
 
 接下来就是对于点加法具体过程的定义, 用一张图来直观解释椭圆曲线上点是如何进行"相加"的.
 
-![zcYiWj.png](https://ww-rm.github.io/static/image/simple-ecc/zcYiWj.png)
+![zcYiWj.png](/static/image/simple-ecc/zcYiWj.png)
 
 设 $P$, $Q$ 为椭圆曲线上的两点, 则 $P+Q$ 就是 $P$, $Q$ 连线与曲线的交点关于 $x$ 轴的对称点.
 

@@ -18,7 +18,7 @@ type: about
 
 网站目前包含以下几部分.
 
-- 主站: [暗香画楼](https://ww-rm.github.io/)
+- 主站: [暗香画楼](/)
 - Pixiv 资源站: [Pixiv 精选](https://ww-rm.github.io/pixivdaily/)
 
 没事多看看吧~

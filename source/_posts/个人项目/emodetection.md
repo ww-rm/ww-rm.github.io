@@ -52,7 +52,7 @@ mathjax: true
 
 整个结构可以用下图表示:
 
-![detection_model](https://ww-rm.github.io/static/image/emodetection/detection_model.jpg)
+![detection_model](/static/image/emodetection/detection_model.jpg)
 
 其中 $U_t$ 就是每一句话, $t$ 代表时刻.
 

@@ -41,7 +41,7 @@ class ParamLayer(NetworkLayer):
 
 首先是线性层, 也是含学习参数中最简单的层, 先上图.
 
-![linear.jpg](https://ww-rm.github.io/static/image/cnn-numpy-2/linear.jpg)
+![linear.jpg](/static/image/cnn-numpy-2/linear.jpg)
 
 方便起见, 这里我们的输入都是行向量的形式, 因此第一维是样本数, 第二维是特征数.
 
@@ -188,7 +188,7 @@ class LinearLayer(ParamLayer):
 
 卷积层是整个网络的核心层, 网络也因此得名卷积神经网络, 用下图来简单回顾一下网络里的卷积操作.
 
-![conv.jpg](https://ww-rm.github.io/static/image/cnn-numpy-2/conv.jpg)
+![conv.jpg](/static/image/cnn-numpy-2/conv.jpg)
 
 卷积核 $\mathbf{K}$ 在输入 $\mathbf{X}$ 上逐步移动, 将每个位置上的值相乘并求和, 得到卷积后的结果 $\mathbf{Y}$, 然后对于每一次卷积都加上一个偏置常数 $b$, 得到网络中对于单张图片单通道的完整卷积过程.
 
@@ -208,7 +208,7 @@ class LinearLayer(ParamLayer):
 
 有两种数据重组方式可以达到同样的效果, 分别是对输入 $\mathbf{X}$ 和卷积核 $\mathbf{K}$ 进行数据重组. 首先介绍第一种方式, 对 $\mathbf{X}$ 进行数据重组, 而 $\mathbf{K}$ 只需要保持数据不变, 维度变换即可.
 
-![unfold_x.jpg](https://ww-rm.github.io/static/image/cnn-numpy-2/unfold_x.jpg)
+![unfold_x.jpg](/static/image/cnn-numpy-2/unfold_x.jpg)
 
 上图展示的是对于一个样本下矩阵化运算, 如果是 $n$ 个样本, $\mathbf{X'}$ 和 $\mathbf{Y'}$ 在行上变成 $n$ 倍即可.
 
@@ -222,7 +222,7 @@ $$
 
 第二种方式则是只对输入数据 $\mathbf{X}$ 进行变形, 对卷积核 $\mathbf{K}$ 进行数据重组.
 
-![unfold_k.jpg](https://ww-rm.github.io/static/image/cnn-numpy-2/unfold_k.jpg)
+![unfold_k.jpg](/static/image/cnn-numpy-2/unfold_k.jpg)
 
 图太大画不下, 所以中间部分用省略号省去, 只保留了一些关键内容和维度信息.
 

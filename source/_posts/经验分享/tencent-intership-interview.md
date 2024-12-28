@@ -85,7 +85,7 @@ date: 2024-03-19 21:21:47
 
 面试官首先问觉得这几个项目里难度最高的是哪个, 能否介绍一下项目内容.
 
-我说了一个个人项目, [基于 Spine 的碧蓝航线桌宠](https://ww-rm.github.io/posts/2023/08/30/desktopsprite/), 这个是当时自己感兴趣做的, 虽然是基于学习的心态做的自娱自乐程序, 但是确实对我来说挺难的, 因为专业从未接触过计算机图形学相关的内容, 而且也自学了一下原生的 win32 开发, 期间还遇到一些数学问题, 都折腾了挺久的.
+我说了一个个人项目, [基于 Spine 的碧蓝航线桌宠](/posts/2023/08/30/desktopsprite/), 这个是当时自己感兴趣做的, 虽然是基于学习的心态做的自娱自乐程序, 但是确实对我来说挺难的, 因为专业从未接触过计算机图形学相关的内容, 而且也自学了一下原生的 win32 开发, 期间还遇到一些数学问题, 都折腾了挺久的.
 
 介绍了一下为什么做这个项目, 项目实现了些啥, 觉得最难的地方在哪, 怎么解决的诸如此类的.
 
@@ -174,4 +174,4 @@ date: 2024-03-19 21:21:47
 
 最后, 祝各位同学都能顺利通过面试, 收到自己心仪的 Offer~
 
-![tencent_offer](https://ww-rm.github.io/static/image/tencent-intership-interview/sign_img.png)
+![tencent_offer](/static/image/tencent-intership-interview/sign_img.png)
