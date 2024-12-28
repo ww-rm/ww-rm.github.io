@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-1/backward.jpg">
 <meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-1/pooling.jpg">
 <meta property="article:published_time" content="2023-10-13T10:41:27.000Z">
-<meta property="article:modified_time" content="2024-12-28T03:39:15.523Z">
+<meta property="article:modified_time" content="2024-12-28T13:45:32.560Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="numpy">
 <meta property="article:tag" content="手写数字识别">
@@ -94,7 +94,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="https://ww-rm.github.io/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
         </a>
@@ -311,7 +311,7 @@
 </ul>
 <h2 id="必要的理论知识"><a href="#必要的理论知识" class="headerlink" title="必要的理论知识"></a>必要的理论知识</h2><p>本节是对神经网络所需的数学知识进行简单介绍, 只涉及基本的高数知识. <del>全文可能有一些不严谨的数学式子, 会意即可.</del></p>
 <h3 id="前向传播"><a href="#前向传播" class="headerlink" title="前向传播"></a>前向传播</h3><p>神经网络的本质是一个多元复合函数, 因此在给定输入的情况下计算网络的输出, 就是网络的前向传播过程.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/forward.jpg" alt="forward.jpg"></p>
+<p><img data-src="/static/image/cnn-numpy-1/forward.jpg" alt="forward.jpg"></p>
 <p>如果有上图所示的一个简单网络, 其中:</p>
 <p>$$<br>\begin{aligned}<br>  y_1 &amp;= y_1(x_1, x_2) \\<br>  y_2 &amp;= y_2(x_2, x_3) \\<br>  z &amp;= z(y_1, y_2) = z(y_1(x_1, x_2), y_2(x_2, x_3))<br>\end{aligned}<br>$$</p>
 <p>则称 $y_1$ 是关于 $x_1, x_2$ 的函数, $y_2$ 是关于 $x_2, x_3$ 的函数, $z$ 是关于 $x_1, x_2, x_3$ 的函数, 且由 $y_1, y_2$ 复合而成.</p>
@@ -326,7 +326,7 @@
 <p>例如要求 $z$ 的所有偏导数, 则:</p>
 <p>$$<br>\begin{aligned}<br>  \frac{\partial{z}}{\partial{x_1}} &amp;= \frac{\partial{z}}{\partial{y_1}}\frac{\partial{y_1}}{\partial{x_1}} \\<br>  \frac{\partial{z}}{\partial{x_2}} &amp;= \frac{\partial{z}}{\partial{y_1}}\frac{\partial{y_1}}{\partial{x_2}} + \frac{\partial{z}}{\partial{y_2}}\frac{\partial{y_2}}{\partial{x_2}} \\<br>  \frac{\partial{z}}{\partial{x_3}} &amp;= \frac{\partial{z}}{\partial{y_2}}\frac{\partial{y_2}}{\partial{x_3}}<br>\end{aligned}<br>$$</p>
 <p>和上面的函数复合关系对应一下, 很容易就能看出链式求导逻辑, 然后可以按下图标记偏导数.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/backward.jpg" alt="backward.jpg"></p>
+<p><img data-src="/static/image/cnn-numpy-1/backward.jpg" alt="backward.jpg"></p>
 <p>可以看出来整个网络图形成了一个树形结构, 也可称之为计算图, 其中树的根部是损失值, 而函数所有的输入参数是树的叶节点.</p>
 <p>显然, 从算法角度考虑, 如果要复用中间结果, 减少计算量, 最佳方式就是总树的根部开始遍历每一个叶节点, 中途不断按照链式法则进行累加和累乘, 得到根节点关于每一个叶节点的偏导值.</p>
 <p>由于这种梯度计算方式和前向计算 $z$ 的过程刚好相反, 因此得名反向传播算法. 只要在前向计算时构造好计算图, 则计算梯度时只需要反方向从计算图根部遍历叶节点即可算出所有参数的梯度值.</p>
@@ -354,7 +354,7 @@
 <p>但是由于本文要实现的卷积神经网络, 整个计算图只有一条路径, 并且以 $x$ 为主线路, 所以关于 $x$ 的梯度可以直接被返回依次向前传递, 同时在每次求解各个参数的梯度时, 也不必进行累加, 直接清空重新赋值即可, 这一点在后续的代码实现中可以看到.</p></div>
 
 <h3 id="Pooling"><a href="#Pooling" class="headerlink" title="Pooling"></a>Pooling</h3><p>在卷积神经网络中, 我们需要用到最大池化层, 这里我们简单起见, 只实现核大小等于两个方向上步长且能整除图片宽高的情况. 以图片大小 $6 \times 4$, 核大小为 $3 \times 2$ 举例, 池化过程如下图所示.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/cnn-numpy-1/pooling.jpg" alt="pooling.jpg"></p>
+<p><img data-src="/static/image/cnn-numpy-1/pooling.jpg" alt="pooling.jpg"></p>
 <p>对于前向传播, 虚线是使用循环遍历的方式求解, 而实线则是通过数组变形使用矩阵方式求解.</p>
 <p>我们本篇代码实现里, 对于所有计算均采用矩阵化形式实现, 每一小节都有详细的讲解. 因此只看实线部分即可.</p>
 <p>重点关注反向传播, 对于池化操作而言, 池化后的值被原封不动的传递到下一层, 相当于是 $y = x$ 函数, 因此这些值在这一层的梯度为 1. 而没有被传递的值, 相当于是常数函数 $y = 0$, 因此梯度值为 0.</p>

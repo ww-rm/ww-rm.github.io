@@ -48,7 +48,7 @@
 <meta property="og:image" content="https://ww-rm.github.io/static/image/ddpm/ckpt-all.png">
 <meta property="og:image" content="https://ww-rm.github.io/static/image/ddpm/sample-64.png">
 <meta property="article:published_time" content="2024-02-16T05:18:17.000Z">
-<meta property="article:modified_time" content="2024-12-28T03:39:15.523Z">
+<meta property="article:modified_time" content="2024-12-28T13:45:32.560Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="DDPM">
 <meta property="article:tag" content="动漫头像生成">
@@ -110,7 +110,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-pixiv"><a href="https://ww-rm.github.io/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv 精选</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
         </a>
@@ -351,7 +351,7 @@
 <p><img data-src="https://nn.labml.ai/unet/unet.png" alt="UNet"></p>
 <p><img data-src="https://pic3.zhimg.com/80/v2-f396d21e0cfdfe324a2dc7a8636ac88e_1440w.webp" alt="UNet-DDPM"></p>
 <p>第一个是原始 UNet 结构, 第二个是对应于 DDPM 的 UNet 结构, 参考一下理解原理即可.</p>
-<p>对于扩散部分的代码, 可以参考很久之前的总结<a href="https://ww-rm.github.io/posts/2022/10/29/diffusion-model/">扩散模型阅读笔记</a>, 里面有前向和反向的计算公式, 对着写就好了.</p>
+<p>对于扩散部分的代码, 可以参考很久之前的总结<a href="/posts/2022/10/29/diffusion-model/">扩散模型阅读笔记</a>, 里面有前向和反向的计算公式, 对着写就好了.</p>
 <h2 id="主程序"><a href="#主程序" class="headerlink" title="主程序"></a>主程序</h2><p>包含训练和生成部分代码, 以及命令行参数选项.</p>
 <details class="note "><summary><p><strong>[点击展开]</strong> 训练和采样代码</p>
 </summary>
@@ -369,24 +369,24 @@
 <p>放几张反向去噪的结果图, 效果还行, 颇有毕加索的美术风格.</p>
 <details class="note success"><summary><p><strong>[点击展开]</strong> 未收敛时反向扩散结果</p>
 </summary>
-<p><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x10.png" alt="ckpt-1e03x10.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x15.png" alt="ckpt-1e03x15.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x20.png" alt="ckpt-1e03x20.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x05.png" alt="ckpt-1e04x05.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x10.png" alt="ckpt-1e04x10.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x15.png" alt="ckpt-1e04x15.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e03x20.png" alt="ckpt-1e04x20.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e04x25.png" alt="ckpt-1e04x25.png"></p>
+<p><img data-src="/static/image/ddpm/ckpt-1e03x10.png" alt="ckpt-1e03x10.png"><br><img data-src="/static/image/ddpm/ckpt-1e03x15.png" alt="ckpt-1e03x15.png"><br><img data-src="/static/image/ddpm/ckpt-1e03x20.png" alt="ckpt-1e03x20.png"><br><img data-src="/static/image/ddpm/ckpt-1e04x05.png" alt="ckpt-1e04x05.png"><br><img data-src="/static/image/ddpm/ckpt-1e04x10.png" alt="ckpt-1e04x10.png"><br><img data-src="/static/image/ddpm/ckpt-1e04x15.png" alt="ckpt-1e04x15.png"><br><img data-src="/static/image/ddpm/ckpt-1e03x20.png" alt="ckpt-1e04x20.png"><br><img data-src="/static/image/ddpm/ckpt-1e04x25.png" alt="ckpt-1e04x25.png"></p>
 
 </details>
 
 <details class="note success"><summary><p><strong>[点击展开]</strong> 收敛之后反向扩散结果</p>
 </summary>
-<p><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e07x10.png" alt="ckpt-1e07x10.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e07x20.png" alt="ckpt-1e07x20.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e08x10.png" alt="ckpt-1e08x10.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e08x20.png" alt="ckpt-1e08x20.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e09x10.png" alt="ckpt-1e09x10.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e09x20.png" alt="ckpt-1e09x20.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e10x10.png" alt="ckpt-1e10x10.png"><br><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-1e10x20.png" alt="ckpt-1e10x20.png"></p>
+<p><img data-src="/static/image/ddpm/ckpt-1e07x10.png" alt="ckpt-1e07x10.png"><br><img data-src="/static/image/ddpm/ckpt-1e07x20.png" alt="ckpt-1e07x20.png"><br><img data-src="/static/image/ddpm/ckpt-1e08x10.png" alt="ckpt-1e08x10.png"><br><img data-src="/static/image/ddpm/ckpt-1e08x20.png" alt="ckpt-1e08x20.png"><br><img data-src="/static/image/ddpm/ckpt-1e09x10.png" alt="ckpt-1e09x10.png"><br><img data-src="/static/image/ddpm/ckpt-1e09x20.png" alt="ckpt-1e09x20.png"><br><img data-src="/static/image/ddpm/ckpt-1e10x10.png" alt="ckpt-1e10x10.png"><br><img data-src="/static/image/ddpm/ckpt-1e10x20.png" alt="ckpt-1e10x20.png"></p>
 
 </details>
 
 <details class="note success"><summary><p><strong>[点击展开]</strong> 同一组高斯噪声随模型收敛采样结果</p>
 </summary>
-<p><img data-src="https://ww-rm.github.io/static/image/ddpm/ckpt-all.png" alt="ckpt-all.png"></p>
+<p><img data-src="/static/image/ddpm/ckpt-all.png" alt="ckpt-all.png"></p>
 
 </details>
 
 <p>最后放一个抽卡结果, 随机抽 64 张.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/ddpm/sample-64.png" alt="sample-64.png"></p>
+<p><img data-src="/static/image/ddpm/sample-64.png" alt="sample-64.png"></p>
 <p>说实话, 炼丹效果和数据集有相当大关系, 越高质量的数据集炼出来的模型越好, 越不容易出问题, 并且数据量越大生成的结果也越丰富<del>模型其实都不是什么特别重要的事情, 反正都是乱拟合一个</del>.</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><span class="exturl" data-url="aHR0cHM6Ly9hcnhpdi5vcmcvcGRmLzIwMDYuMTEyMzkucGRm">Denoising Diffusion Probabilistic Models<i class="fa fa-external-link-alt"></i></span></li>
