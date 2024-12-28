@@ -1203,67 +1203,6 @@
       </tags>
   </entry>
   <entry>
-    <title>PCA 算法原理与实现</title>
-    <url>//posts/2023/02/18/pca/</url>
-    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
-<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
-<span id="more"></span>
-
-<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
-<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
-<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
-<p>因此, 在 PCA 方法中, 我们希望:</p>
-<ul>
-<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
-<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
-</ul>
-<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
-<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
-<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
-<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
-<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
-<p>首先是方差与协方差的公式:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
-<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
-<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
-<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
-<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
-<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
-<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
-<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
-<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
-<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
-<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
-</div>
-
-<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
-<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
-<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
-<p>输出: $Y_{n \times q}$</p>
-<ol>
-<li>对 $X$ 进行均值方差归一化.</li>
-<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
-<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
-<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
-<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
-<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
-</ol>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>数据降维</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>NJ 树算法原理与实现</title>
     <url>//posts/2023/03/08/njtree/</url>
     <content><![CDATA[<p>邻接法 (Neighbor-Joining Method), 是一种利用进化距离数据重建系统进化树的方法, 用这个方法得到的进化树通常称为 NJ 树. 这是一种自底向上的聚类方法, 将每个个体看作一个类别, 然后依次两两聚合, 最终得到一整个聚合后的进化树.</p>
@@ -1345,6 +1284,67 @@
         <tag>聚类算法</tag>
         <tag>生信</tag>
         <tag>NJ 树</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PCA 算法原理与实现</title>
+    <url>//posts/2023/02/18/pca/</url>
+    <content><![CDATA[<p>PCA 算法, 也就是主成分分析法 (Principal Component Analysis), 是一种数据降维算法, 能够在尽可能保留数据特征的同时压缩数据, 降低数据复杂度, 便于数据分析的进行.</p>
+<p>本文简要介绍 PCA 算法的基本思想与数学推导, 并在文末提供对应的 <code>python</code> 实现.</p>
+<span id="more"></span>
+
+<h2 id="问题定义"><a href="#问题定义" class="headerlink" title="问题定义"></a>问题定义</h2><p>有一组 $p$ 维向量 $X_{n \times p} = \begin{bmatrix}<br>  \boldsymbol{x}_1 \\<br>  \boldsymbol{x}_2 \\<br>  \vdots \\<br>  \boldsymbol{x}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  x_{11} &amp; x_{12} &amp; \ldots &amp; x_{1p} \\<br>  x_{21} &amp; x_{22} &amp; \ldots &amp; x_{2p} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_{n1} &amp; x_{n2} &amp; \ldots &amp; x_{np}<br>\end{bmatrix}$, 需要通过一种方法使得它们变成一组 $q~(q &lt; p)$ 维向量 $Y_{n \times q} = \begin{bmatrix}<br>  \boldsymbol{y}_1 \\<br>  \boldsymbol{y}_2 \\<br>  \vdots \\<br>  \boldsymbol{y}_n<br>\end{bmatrix} = \begin{bmatrix}<br>  y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>  y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>\end{bmatrix}$, 在降低维数的同时, 尽可能减少信息损失.</p>
+<h2 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h2><h3 id="信息重分配"><a href="#信息重分配" class="headerlink" title="信息重分配"></a>信息重分配</h3><p>对于一个向量 $\boldsymbol{x}_i = \begin{pmatrix}x_{i1}, x_{i2}, \ldots, x_{ip}\end{pmatrix}$, $p$ 个值代表了该向量在 $p$ 个方向上的不同特征, 而信息量大小的直接表现就是对数据的区分程度. 如果说在某一维上的值越能对不同的 $\boldsymbol{x}$ 进行区分, 则数据的<strong>离散程度</strong>就越大, 它所包含的信息量就越多, 最终这 $p$ 维共同完成了对 $X$ 所有数据的区分.</p>
+<p>对于一组数据 $X$ 来说, 信息总量是确定的, 原始的 $X$ 中信息的分配方式是按某种分布分摊在 $p$ 个维度中.</p>
+<p>因此, 在 PCA 方法中, 我们希望:</p>
+<ul>
+<li>经过变换之后的数据 $Y$, 能够对每一维的信息含量进行调整, 可以将整体数据的信息量先尽可能的分配到第 1 维, 然后分配到第 2 维, 第 3 维, ..., 直到最后一维</li>
+<li>在新的数据 $Y$ 中, 每一维之间的<strong>关联性</strong>尽可能小, 最好是不相关, 这样子就能让信息独立的被分配到每一维中, 不会在不同维之间产生维间信息.</li>
+</ul>
+<p>上述有两个问题需要解决, 同一维之间的离散程度和不同维之间的关联性. 而在数学上, 方差和协方差可以很好的解决这两个问题.</p>
+<h3 id="降维"><a href="#降维" class="headerlink" title="降维"></a>降维</h3><p>$X$ 是一个 $n \times p$ 的矩阵, 如果能找到一个 $q \times p$ 的矩阵 $W$ 满足对信息分配的要求, 对 $X$ 进行线性变换, 使得 $Y^T = WX^T$, 就可以得到降维后 $n \times q$ 的数据表示 $Y$.</p>
+<p>$$<br>\begin{aligned}<br>  Y^T &amp;= \begin{bmatrix}{\boldsymbol{y}_1}^T &amp; {\boldsymbol{y}_2}^T &amp; \ldots &amp; {\boldsymbol{y}_n}^T\end{bmatrix} \\<br>  ~&amp;= WX^T \\<br>  ~&amp;= \begin{bmatrix}<br>    \boldsymbol{w}_1 \\<br>    \boldsymbol{w}_2 \\<br>    \vdots \\<br>    \boldsymbol{w}_q<br>  \end{bmatrix} \begin{bmatrix}{\boldsymbol{x}_1}^T &amp; {\boldsymbol{x}_2}^T &amp; \ldots &amp; {\boldsymbol{x}_n}^T\end{bmatrix}<br>\end{aligned}<br>$$</p>
+<h2 id="数学推导"><a href="#数学推导" class="headerlink" title="数学推导"></a>数学推导</h2><p>我们的目标是, 寻找一个 $W$ , 使得新数据 $Y^T$ 同一维上的方差最大化, 不同维之间的协方差最小化.</p>
+<p>为了方便数据处理, 我们假设 $X$ 已经经过均值和方差的归一化处理, 即 $X = \frac{X - E(X)}{\sqrt{D(X)}}$, 这样子均值为 0, 方便后续计算.</p>
+<p>首先是方差与协方差的公式:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) - E(X)E(Y) \\<br>  D(X) &amp;= E(X^2) - E^2(X)<br>\end{aligned}<br>$$</p>
+<p>因为数据已经经过归一化处理, 所以可以简化成:</p>
+<p>$$<br>\begin{aligned}<br>  Cov(X, Y) &amp;= E(XY) = \frac{1}{n}\sum_{i=1}^{n}x_iy_i \\<br>  D(X) &amp;= E(X^2) = \frac{1}{n}\sum_{i=1}^{n}x_i^2<br>\end{aligned}<br>$$</p>
+<p>现在, 需要把数据 $Y$ 的方差与协方差进行表示, 定义矩阵 $Y_{Cov}$ 为 $Y$ 的协方差矩阵, 有:</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>  ~&amp;= \frac{1}{n} \begin{bmatrix}<br>    y_{11} &amp; y_{21} &amp; \ldots &amp; y_{n1} \\<br>    y_{12} &amp; y_{22} &amp; \ldots &amp; y_{n2} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{1q} &amp; y_{2q} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \begin{bmatrix}<br>    y_{11} &amp; y_{12} &amp; \ldots &amp; y_{1q} \\<br>    y_{21} &amp; y_{22} &amp; \ldots &amp; y_{2q} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    y_{n1} &amp; y_{n2} &amp; \ldots &amp; y_{nq}<br>  \end{bmatrix} \\<br>  ~&amp;= \begin{bmatrix}<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i1}^2 &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i1}y_{iq} \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}^2 &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{i2}y_{iq} \\<br>    \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>    \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i1} &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}y_{i2} &amp; \ldots &amp; \frac{1}{n}\sum_{i=1}^{n}y_{iq}^2<br>  \end{bmatrix}<br>\end{aligned}<br>$$</p>
+<p>可以看到协方差矩阵的主对角线上是 $q$ 个维度上的方差, 而其余位置则是两两之间的协方差, 并且协方差矩阵还是一个实对称矩阵. 所以我们的目标就是让 $Y_{Cov}$ 除了主对角线以外的部分尽量接近 0.</p>
+<p>同理可以得到 $X_{Cov} = \frac{1}{n}X^TX$.</p>
+<p>下面推导 $Y_{Cov}$ 与原始数据 $X$ 之间的关系.</p>
+<p>$$<br>\begin{aligned}<br>  Y_{Cov} &amp;= \frac{1}{n}Y^TY \\<br>    ~&amp;= \frac{1}{n}(WX^T)(WX^T)^T \\<br>    ~&amp;= \frac{1}{n}WX^TXW^T \\<br>    ~&amp;= WX_{Cov}W^T<br>\end{aligned}<br>$$</p>
+<p>结合我们的目标可以发现, $Y_{Cov}$ 的最优情况其实就是实对称矩阵 $X_{Cov}$ 的对角化矩阵, 而 $W$ 就是能够满足 $X_{Cov}$ 对角化的矩阵.</p>
+<p>关于实对称矩阵的对角化, 线代里面有详细的介绍, 这里简单提一下结论.</p>
+<div class="note info"><p>对于一个 $n \times n$ 的实对称矩阵 $D$, 一定可以找到 $n$ 个单位正交特征向量, 组成矩阵 $E = \begin{bmatrix}<br>\boldsymbol{e}_1 \\<br>  \boldsymbol{e}_2 \\<br>  \vdots \\<br>  \boldsymbol{e}_n<br>\end{bmatrix}$, 使得 $\Lambda = EDE^T = \begin{bmatrix}<br>  \lambda_1 &amp; ~ &amp; ~ &amp; ~ \\<br>  ~ &amp; \lambda_2 &amp; ~ &amp; ~ \\<br>  ~ &amp; ~ &amp; \ddots &amp; ~ \\<br>  ~ &amp; ~ &amp; ~ &amp;\lambda_n<br>\end{bmatrix}$, 其中 $\Lambda$ 是对角矩阵, 对角元素是特征向量对应的特征值.</p>
+</div>
+
+<p>因此, 对于实对称矩阵 $X_{Cov}$, 总能通过求其特征值与特征向量, 得到一个满足要求的 $W$ 使其对角化, 得到 $Y_{Cov}$.</p>
+<p>到这里还没有完全结束, $X_{Cov}$ 是 $p$ 维实对称矩阵, 因此一定存在 $p$ 个特征值与特征向量, 而我们的目标是降维, 因此 $W$ 只需要选择其中的 $q$ 个特征向量组成一个 $q \times p$ 的矩阵即可.</p>
+<p>从最后对角化的结果来看, $Y_{Cov}$ 的对角线上, 也就是新数据每一维的方差值, 其实就是 $W$ 按顺序特征向量对应的特征值. 那么为了充分保留原数据里的信息, 需要将特征向量按特征值大小进行降序排列, 然后依次选取前 $q$ 个特征向量去组成最终的 $W$ 矩阵.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>输入: $X_{n \times p}$, $q~(q \leq p)$</p>
+<p>输出: $Y_{n \times q}$</p>
+<ol>
+<li>对 $X$ 进行均值方差归一化.</li>
+<li>求解 $X_{Cov} = \frac{1}{n}X^TX$.</li>
+<li>求出 $X_{Cov}$ 的 $p$ 个特征值 $\lambda_1, \lambda_2, \ldots, \lambda_p$, 及其对应的特征向量 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$.</li>
+<li>将 $\boldsymbol{w}_1, \boldsymbol{w}_2, \ldots, \boldsymbol{w}_p$ 按 $\lambda_1, \lambda_2, \ldots, \lambda_p$ 降序排列, 得到 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_p$.</li>
+<li>选取 $\boldsymbol{w}&#39;_1, \boldsymbol{w}&#39;_2, \ldots, \boldsymbol{w}&#39;_q$, 组成变换矩阵 $W = \begin{bmatrix}<br> \boldsymbol{w}&#39;_1 \\<br> \boldsymbol{w}&#39;_2 \\<br> \vdots \\<br> \boldsymbol{w}&#39;_q<br>\end{bmatrix}$</li>
+<li>计算 $Y^T = WX^T$, 得到降维后的新数据 $Y$.</li>
+</ol>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">pca</span>(<span class="params">X: np.ndarray, n_compnents: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">    n, p = X.shape</span><br><span class="line">    q = n_compnents</span><br><span class="line"></span><br><span class="line">    <span class="comment"># normalization</span></span><br><span class="line">    X = (X - np.mean(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)) / np.std(X, axis=<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># covariance of x</span></span><br><span class="line">    X_cov = (<span class="number">1</span> / n) * X.T @ X</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute eigenwerts and eigenvectors</span></span><br><span class="line">    w, v = np.linalg.eigh(X_cov)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sort by descending order</span></span><br><span class="line">    w = w[::-<span class="number">1</span>]</span><br><span class="line">    v = v[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># choose top q vectors</span></span><br><span class="line">    W = v[:q]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># compute Y</span></span><br><span class="line">    Y = (W @ X.T).T</span><br><span class="line">    <span class="keyword">return</span> Y</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vdXJhcmNoaXZlLm90YWdvLmFjLm56L2JpdHN0cmVhbS9oYW5kbGUvMTA1MjMvNzUzNC9PVUNTLTIwMDItMTIucGRm">A tutorial on principal components analysis<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>数据降维</tag>
       </tags>
   </entry>
   <entry>
@@ -1503,6 +1503,73 @@
       </tags>
   </entry>
   <entry>
+    <title>SM9 算法中的塔式扩张公式推导</title>
+    <url>//posts/2023/12/04/sm9fpex/</url>
+    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
+<span id="more"></span>
+
+<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
+<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
+<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
+<p>即解二元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
+<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
+<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
+<p>同理可得模逆运算为:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
+<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
+<p>则 $Z$ 可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
+<p>所以:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
+<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
+<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
+<p>即解三元一次方程组:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
+<p>解得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
+<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line">Fp2Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp4Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp12Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">FpExEle = <span class="type">Tuple</span>[<span class="built_in">int</span>, ...]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>塔式扩张</tag>
+        <tag>扩域运算</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
     <url>//posts/2024/06/16/sm9gfn/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
@@ -1575,73 +1642,6 @@
       <tags>
         <tag>SSH</tag>
         <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SM9 算法中的塔式扩张公式推导</title>
-    <url>//posts/2023/12/04/sm9fpex/</url>
-    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
-<span id="more"></span>
-
-<h2 id="SM9-扩域元素的表示"><a href="#SM9-扩域元素的表示" class="headerlink" title="SM9 扩域元素的表示"></a>SM9 扩域元素的表示</h2><p>以下来自 GB/T 38635.1-2020 A.2 部分 &quot;扩域元素的表示&quot; 小节原文内容.</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<h2 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h2><p>加法和减法就是类似于向量运算, 每个位置进行加减并模 $p$ 即可, 因此只需要推导乘法和模逆运算.</p>
-<h3 id="2-次扩域"><a href="#2-次扩域" class="headerlink" title="2 次扩域"></a>2 次扩域</h3><p>设 $X = (x_1, x_0), Y = (y_1, y_0), Z = (z_1, z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $u^2 - \alpha, \alpha=-2$.</p>
-<p>则 $Z$ 可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  (z_1, z_0) &amp;= (x_1, x_0) \cdot (y_1, y_0) \\<br>  ~ &amp;= (x_1u + x_0)(y_1u + y_0) \\<br>  ~ &amp;= x_1y_1u^2 + (x_1y_0 + x_0y_1)u + x_0y_0 \\<br>  ~ &amp;= (x_1y_0 + x_0y_1)u + (\alpha x_1y_1 + x_0y_0) \\<br>  ~ &amp;= (x_1y_0 + x_0y_1, \alpha x_1y_1 + x_0y_0)<br>\end{align*}<br>$$</p>
-<p>所以:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  z_1 &amp;= x_1y_0 + x_0y_1 \\<br>  z_0 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>然后设 $Y = X^{-1}$, 也就是求 $X$ 的模逆:</p>
-<p>$$<br>(0, 1) = (x_1, x_0) \cdot (y_1, y_0)<br>$$</p>
-<p>即解二元一次方程组:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  0 &amp;= x_1y_0 + x_0y_1 \\<br>  1 &amp;= \alpha x_1y_1 + x_0y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>解得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  y_1 &amp;= \frac{x_1}{\alpha x_1^2 - x_0^2} \\<br>  y_0 &amp;= \frac{-x_0}{\alpha x_1^2 - x_0^2}<br>\end{align*}<br>\right.<br>$$</p>
-<p>上述公式将 $F_{q^{2}}$ 中的运算全部变成 $F_{q}$ 中的运算, 所有元素计算后均需要模 $p$.</p>
-<h3 id="4-次扩域"><a href="#4-次扩域" class="headerlink" title="4 次扩域"></a>4 次扩域</h3><p>设 $X = (X_1, X_0), Y = (Y_1, Y_0), Z = (Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $v^2 - u, u^2 = \alpha, u = \sqrt{-2}$.</p>
-<p>其中 $X = (X_1, X_0) = (x_3, x_2, x_1, x_0)$ 是 $F_{q^{4}}$ 上的元素, $X_1, X_0$ 都是 $F_{q^{2}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
-<p>仿照第一次 2 次扩张的过程, 则 $Z$ 可以表示为:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Z_1 &amp;= X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= u X_1Y_1 + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $u X_1Y_1 = (1, 0) \cdot X_1 \cdot Y_1$, 可以直接使用上一节中 $F_{q^{2}}$ 上的运算完成.</p>
-<p>同理可得模逆运算为:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Y_1 &amp;= \frac{X_1}{u X_1^2 - X_0^2} \\<br>  Y_0 &amp;= \frac{-X_0}{u X_1^2 - X_0^2}<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $u X_1^2 = (1, 0) \cdot X_1 \cdot X_1$.</p>
-<h3 id="12-次扩域"><a href="#12-次扩域" class="headerlink" title="12 次扩域"></a>12 次扩域</h3><p>设 $X = (X_2, X_1, X_0), Y = (Y_2, Y_1, Y_0), Z = (Z_2, Z_1, Z_0)$, 且 $Z = X \cdot Y$, 约化多项式为: $w^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>其中 $X = (X_2, X_1, X_0) = (x_{11}, x_{10}, \ldots, x_0)$ 是 $F_{q^{12}}$ 上的元素, $X_2, X_1, X_0$ 都是 $F_{q^{4}}$ 上的元素, $Y$ 和 $Z$ 同理.</p>
-<p>则 $Z$ 可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  (Z_2, Z_1, Z_0) &amp;= (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0) \\<br>  ~ &amp;= (X_2 w^2 + X_1w + X_0)(Y_2 w^2 + Y_1w + Y_0) \\<br>  ~ &amp;= X_2Y_2w^4 + (X_2Y_1 + X_1Y_2)w^3 + (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (X_1Y_0 + X_0Y_1)w + X_0Y_0 \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2)w^2 + (vX_2Y_2 + X_1Y_0 + X_0Y_1)w + (vX_2Y_1 + vX_1Y_2 + X_0Y_0) \\<br>  ~ &amp;= (X_2Y_0 + X_1Y_1 + X_0Y_2, vX_2Y_2 + X_1Y_0 + X_0Y_1, v(X_2Y_1 + X_1Y_2) + X_0Y_0)<br>\end{align*}<br>$$</p>
-<p>所以:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Z_2 &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  Z_1 &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  Z_0 &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $v = ((0, 1), (0, 0)) = (0, 1, 0, 0)$, 可以用 $F_{q^{4}}$ 完成计算.</p>
-<p>设 $Y = X^{-1}$, 求 $X$ 的模逆:</p>
-<p>$$<br>(\mathbf{0}_{F_{q^4}}, \mathbf{0}_{F_{q^4}}, \mathbf{1}_{F_{q^4}}) = (X_2, X_1, X_0) \cdot (Y_2, Y_1, Y_0)<br>$$</p>
-<p>即解三元一次方程组:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \mathbf{0}_{F_{q^4}} &amp;= X_2Y_0 + X_1Y_1 + X_0Y_2 \\<br>  \mathbf{0}_{F_{q^4}} &amp;= vX_2Y_2 + X_1Y_0 + X_0Y_1 \\<br>  \mathbf{1}_{F_{q^4}} &amp;= v(X_2Y_1 + X_1Y_2) + X_0Y_0<br>\end{align*}<br>\right.<br>$$</p>
-<p>解得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  Y_2 &amp;= \frac{X_1^2 - X_2X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_1 &amp;= \frac{vX_2^2 - X_1X_0}{\mathbf{det}_{F_{q^4}}} \\<br>  Y_0 &amp;= \frac{X_0^2 - vX_2X_1}{\mathbf{det}_{F_{q^4}}}<br>\end{align*}<br>\right.<br>$$</p>
-<p>其中 $\mathbf{det}_{F_{q^4}} = v^2X_2^3 + vX_1^3 + X_0^3 - 3 \cdot (vX_2X_1X_0)$, 符号 $\cdot$ 表示 $F_{q^4}$ 上的标量乘法运算.</p>
-<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>用 python 简单实现一下上述涉及的所有运算.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Tuple</span></span><br><span class="line"></span><br><span class="line">Fp2Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp4Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">Fp12Ele = <span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>, <span class="built_in">int</span>]</span><br><span class="line">FpExEle = <span class="type">Tuple</span>[<span class="built_in">int</span>, ...]</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PrimeFiledEx</span>(<span class="title class_ inherited__">PrimeField</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Fp2, Fp4, Fp12 operations.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, p: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.p = p</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv</span>(<span class="params">self, x: <span class="built_in">int</span></span>):</span><br><span class="line">        <span class="keyword">return</span> inverse(x, self.p)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">addex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 + i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">subex</span>(<span class="params">self, X: FpExEle, Y: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((i1 - i2) % self.p <span class="keyword">for</span> i1, i2 <span class="keyword">in</span> <span class="built_in">zip</span>(X, Y))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">negex</span>(<span class="params">self, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>(self.p - i <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">smulex</span>(<span class="params">self, k: <span class="built_in">int</span>, X: FpExEle</span>) -&gt; FpExEle:</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">tuple</span>((k * i) % self.p <span class="keyword">for</span> i <span class="keyword">in</span> X)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul2</span>(<span class="params">self, X: Fp2Ele, Y: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        y1, y0 = Y</span><br><span class="line">        x1y1 = x1 * y1</span><br><span class="line">        x0y0 = x0 * y0</span><br><span class="line">        z1 = ((x1 + x0) * (y1 + y0) - x1y1 - x0y0) % self.p</span><br><span class="line">        z0 = (x0y0 - <span class="number">2</span> * x1y1) % self.p</span><br><span class="line">        <span class="keyword">return</span> z1, z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv2</span>(<span class="params">self, X: Fp2Ele</span>) -&gt; Fp2Ele:</span><br><span class="line">        x1, x0 = X</span><br><span class="line">        invdet = self.inv(<span class="number">2</span> * x1 * x1 + x0 * x0)</span><br><span class="line">        y1 = (-x1 * invdet) % self.p</span><br><span class="line">        y0 = (x0 * invdet) % self.p</span><br><span class="line">        <span class="keyword">return</span> y1, y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul4</span>(<span class="params">self, X: Fp4Ele, Y: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        a, m = self.addex, self.mul2</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        Y1, Y0 = Y[:<span class="number">2</span>], Y[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X1mY1 = m(X1, Y1)</span><br><span class="line">        X0mY0 = m(X0, Y0)</span><br><span class="line"></span><br><span class="line">        X1aX0_m_Y1aY0 = m(a(X1, X0), a(Y1, Y0))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(U, X1mY1), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv4</span>(<span class="params">self, X: Fp4Ele</span>) -&gt; Fp4Ele:</span><br><span class="line">        m, n, s = self.mul2, self.negex, self.subex</span><br><span class="line">        X1, X0 = X[:<span class="number">2</span>], X[<span class="number">2</span>:]</span><br><span class="line">        U = (<span class="number">1</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        UmX1mX1_s_X0mX0 = s(m(U, m(X1, X1)), m(X0, X0))</span><br><span class="line">        invdet = self.inv2(UmX1mX1_s_X0mX0)</span><br><span class="line"></span><br><span class="line">        Y1 = m(X1, invdet)</span><br><span class="line">        Y0 = m(n(X0), invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y1 + Y0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">mul12</span>(<span class="params">self, X: Fp12Ele, Y: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        a, m = self.addex, self.mul4</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        Y2, Y1, Y0 = Y[:<span class="number">4</span>], Y[<span class="number">4</span>:<span class="number">8</span>], Y[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        X2mY2, X1mY1, X0mY0 = m(X2, Y2), m(X1, Y1), m(X0, Y0)</span><br><span class="line">        X2aX1, X2aX0, X1aX0 = a(X2, X1), a(X2, X0), a(X1, X0)</span><br><span class="line">        Y2aY1, Y2aY0, Y1aY0 = a(Y2, Y1), a(Y2, Y0), a(Y1, Y0)</span><br><span class="line"></span><br><span class="line">        X2aX1_m_Y2aY1 = m(X2aX1, Y2aY1)</span><br><span class="line">        X2aX0_m_Y2aY0 = m(X2aX0, Y2aY0)</span><br><span class="line">        X1aX0_m_Y1aY0 = m(X1aX0, Y1aY0)</span><br><span class="line"></span><br><span class="line">        VmX2mY2 = m(V, X2mY2)</span><br><span class="line">        X2mY1_a_X1Y2 = <span class="built_in">tuple</span>((i1 - i2 - i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX1_m_Y2aY1, X2mY2, X1mY1))</span><br><span class="line"></span><br><span class="line">        Z2 = <span class="built_in">tuple</span>((i1 - i2 - i3 + i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(X2aX0_m_Y2aY0, X2mY2, X0mY0, X1mY1))</span><br><span class="line">        Z1 = <span class="built_in">tuple</span>((i1 + i2 - i3 - i4) % self.p <span class="keyword">for</span> i1, i2, i3, i4 <span class="keyword">in</span> <span class="built_in">zip</span>(VmX2mY2, X1aX0_m_Y1aY0, X1mY1, X0mY0))</span><br><span class="line">        Z0 = a(m(V, X2mY1_a_X1Y2), X0mY0)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Z2 + Z1 + Z0</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">inv12</span>(<span class="params">self, X: Fp12Ele</span>) -&gt; Fp12Ele:</span><br><span class="line">        m, s = self.mul4, self.subex</span><br><span class="line">        X2, X1, X0 = X[:<span class="number">4</span>], X[<span class="number">4</span>:<span class="number">8</span>], X[<span class="number">8</span>:]</span><br><span class="line">        V = (<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        VmX2 = m(V, X2)</span><br><span class="line">        VmX1 = m(V, X1)</span><br><span class="line"></span><br><span class="line">        X1mX1_s_X2mX0 = s(m(X1, X1), m(X2, X0))</span><br><span class="line">        VmX2mX2_s_X1X0 = s(m(VmX2, X2), m(X1, X0))</span><br><span class="line">        X0mX0_s_VmX2mX1 = s(m(X0, X0), m(VmX2, X1))</span><br><span class="line"></span><br><span class="line">        det = <span class="built_in">tuple</span>((i1 + i2 + i3) % self.p <span class="keyword">for</span> i1, i2, i3 <span class="keyword">in</span> <span class="built_in">zip</span>(m(VmX2, VmX2mX2_s_X1X0), m(VmX1, X1mX1_s_X2mX0), m(X0, X0mX0_s_VmX2mX1)))</span><br><span class="line">        invdet = self.inv4(det)</span><br><span class="line"></span><br><span class="line">        Y2 = m(X1mX1_s_X2mX0, invdet)</span><br><span class="line">        Y1 = m(VmX2mX2_s_X1X0, invdet)</span><br><span class="line">        Y0 = m(X0mX0_s_VmX2mX1, invdet)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Y2 + Y1 + Y0</span><br></pre></td></tr></table></figure>
-
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9vcGVuc3RkLnNhbXIuZ292LmNuL2J6Z2svZ2IvbmV3R2JJbmZvP2hjbm89QjdBMEQ3REZGNDExQ0QwQUFFNzYxMzVBREU5MTg4NkE=">信息安全技术 SM9标识密码算法 第1部分：总则<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5NjMwNy5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(1)------第一次扩张<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vaGVzaHVjaGFvL3AvODE5ODQ5NC5odG1s">伽罗瓦域(有限域)GFq^12上元素的1→2→4→12塔式扩张(2)------第二次扩张<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>塔式扩张</tag>
-        <tag>扩域运算</tag>
       </tags>
   </entry>
   <entry>
@@ -2079,103 +2079,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Git 与 Github 入门</title>
-    <url>//posts/2022/08/15/wast-gitandgithub/</url>
-    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
-<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
-<span id="more"></span>
-
-<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
-<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
-<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
-<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
-<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
-<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
-<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
-<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
-<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
-<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
-<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
-<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
-<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
-<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
-<p><code>git init</code>: 初始化一个本地仓库.</p>
-<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
-<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
-<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
-<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
-<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
-<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
-<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
-<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
-<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
-
-<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
-<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
-<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
-<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
-<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
-<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
-<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
-<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
-<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
-<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
-<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
-<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
-<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
-<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
-<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
-<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
-<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
-</div>
-
-<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
-<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
-<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
-<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
-<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
-<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
-<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
-<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
-<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
-<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
-<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
-<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
-<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
-<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
-<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
-<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
-<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
-<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
-<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
-<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
-<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
-<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
-        <tag>github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 PyTorch 的手写数字分类</title>
     <url>//posts/2022/08/18/wast-dl/</url>
     <content><![CDATA[<p>本篇算是对 <code>pytorch</code> 这一 <code>python</code> 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 <code>pytorch</code> 来搭建一个自定义的网络结构, 并加以训练.</p>
@@ -2275,6 +2178,103 @@
         <tag>深度学习</tag>
         <tag>pytorch</tag>
         <tag>手写数字分类</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git 与 Github 入门</title>
+    <url>//posts/2022/08/15/wast-gitandgithub/</url>
+    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
+<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
+<span id="more"></span>
+
+<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
+<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
+<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
+<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
+<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
+<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
+<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
+<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
+<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
+<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
+<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
+<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
+<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
+<p><code>git init</code>: 初始化一个本地仓库.</p>
+<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
+<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
+<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
+<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
+<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
+<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
+<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
+<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
+<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
+
+<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
+<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
+<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
+<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
+<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
+<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
+<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
+<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
+<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
+<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
+<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
+<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
+<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
+<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
+<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
+<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
+</div>
+
+<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
+<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
+<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
+<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
+<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
+<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
+<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
+<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
+<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
+<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
+<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
+<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
+<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
+<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
+<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
+<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
+<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
+<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
+<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
+<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
+<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
+<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+        <tag>github</tag>
       </tags>
   </entry>
   <entry>
@@ -2754,6 +2754,68 @@
       </tags>
   </entry>
   <entry>
+    <title>MultiheadAttention 使用方法</title>
+    <url>//posts/2024/01/22/multiheadattention/</url>
+    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
+<blockquote>
+<ul>
+<li><code>embed_dim</code> – Total dimension of the model.</li>
+<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
+<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
+<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
+</ul>
+</blockquote>
+<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
+<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
+</div>
+
+<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
+<ul>
+<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
+<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
+</ul>
+<p>下一步则是计算注意力, 也就是经典公式:</p>
+<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
+<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
+<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
+<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
+<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
+<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
+<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
+<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
+<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
+<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
+<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
+<ul>
+<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
+<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
+<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
+<li>参数 <code>num_heads</code> 对应 $h$.</li>
+<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
+<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
+<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
+</ul>
+<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>PyTorch</tag>
+        <tag>MultiheadAttention</tag>
+        <tag>NLP</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>扩散模型阅读笔记</title>
     <url>//posts/2022/10/29/diffusion-model/</url>
     <content><![CDATA[<p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
@@ -2814,68 +2876,6 @@
         <tag>图像生成</tag>
         <tag>扩散模型</tag>
         <tag>Diffusion Model</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MultiheadAttention 使用方法</title>
-    <url>//posts/2024/01/22/multiheadattention/</url>
-    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
-<blockquote>
-<ul>
-<li><code>embed_dim</code> – Total dimension of the model.</li>
-<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
-<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
-<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
-</ul>
-</blockquote>
-<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
-<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
-</div>
-
-<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
-<ul>
-<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
-<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
-</ul>
-<p>下一步则是计算注意力, 也就是经典公式:</p>
-<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
-<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
-<p><img data-src="https://ww-rm.github.io/static/image/multiheadattention/attention.jpg" alt="attention"></p>
-<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
-<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
-<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
-<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
-<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
-<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
-<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
-<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
-<ul>
-<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
-<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
-<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
-<li>参数 <code>num_heads</code> 对应 $h$.</li>
-<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
-<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
-<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
-<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
-</ul>
-<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>PyTorch</tag>
-        <tag>MultiheadAttention</tag>
-        <tag>NLP</tag>
       </tags>
   </entry>
   <entry>
@@ -3132,6 +3132,115 @@
       </tags>
   </entry>
   <entry>
+    <title>Simpleperf 三部曲 (三)</title>
+    <url>//posts/2024/07/07/simpleperf3/</url>
+    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Simpleperf</tag>
+        <tag>Android</tag>
+        <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Simpleperf 三部曲 (二)</title>
     <url>//posts/2024/07/07/simpleperf2/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3268,115 +3377,6 @@
 <h3 id="报告调用图"><a href="#报告调用图" class="headerlink" title="报告调用图"></a>报告调用图</h3><p>要报告调用图, 请确保分析数据是带有调用图记录的, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjcmVjb3JkLWNhbGwtZ3JhcGhz">Record call graphs<i class="fa fa-external-link-alt"></i></span> 所示.</p>
 <hr>
 <p>更多详细内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXJlY29yZC1jb21tYW5k">The record command<i class="fa fa-external-link-alt"></i></span>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Simpleperf</tag>
-        <tag>Android</tag>
-        <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Simpleperf 三部曲 (三)</title>
-    <url>//posts/2024/07/07/simpleperf3/</url>
-    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
-<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
-
-<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
-
-<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
-
-<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
-<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
-<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
-
-<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
-<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
-<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
-
-<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
-
-<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
-<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
-<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
-<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
-<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
-<ul>
-<li>显示该函数调用的函数的火焰图.</li>
-<li>显示调用该函数的函数的火焰图.</li>
-<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
-<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
-</ul>
-<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
-
-<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
-<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
-<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
-<ul>
-<li>每线程轨迹</li>
-<li>火焰图</li>
-<li>搜索, 聚焦于特定的堆栈</li>
-<li>时间序列视图, 以时间戳顺序查看样本</li>
-<li>按线程和持续时间过滤</li>
-</ul>
-<p>使用方法:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
-
-<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
-<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
-<p>这种格式可以导入到:</p>
-<ul>
-<li>FlameGraph</li>
-<li>Flamescope</li>
-<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
-<li>Speedscope</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
-<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
-
-<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
-<p>折叠堆栈格式可被以下工具读取:</p>
-<ul>
-<li>The FlameGraph toolkit</li>
-<li>Inferno (FlameGraph 的 Rust 移植版)</li>
-<li>Speedscope</li>
-</ul>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
-
-<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
-<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
-<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
-
-<p>结果如下所示:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
-
-<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
-<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>阅读笔记</category>
