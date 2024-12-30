@@ -8,11 +8,11 @@ const { unescapeHTML } = require('hexo-util');
 hexo.extend.filter.register('after_post_render', data => {
   const { config } = hexo;
   const theme = hexo.theme.config;
-  if (!theme.exturl && !theme.lazyload) return;
-  if (theme.lazyload) {
+  if (data.path.endsWith('.js')) return;
+  if (theme.lazyload && data.lazyload !== false) {
     data.content = data.content.replace(/(<img[^>]*)\ssrc=/ig, '$1 data-src=');
   }
-  if (theme.exturl) {
+  if (theme.exturl && data.exturl !== false) {
     const siteHost = parse(config.url).hostname || config.url;
     // External URL icon
     const exturlIcon = theme.exturl_icon ? '<i class="fa fa-external-link-alt"></i>' : '';
