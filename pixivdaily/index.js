@@ -18,8 +18,8 @@ function generateIllustHtml(illustInfo) {
                 <span class="description-label">UID: </span><span>${illustInfo.userId}</span>
             </a>
         </div>
-        <div class="description-item">
-            <span><span class="description-label">标签: </span>${illustInfo.tags.map(e => "# " + e).join(", ")}</span>
+        <div class="flex-line description-item">
+            <span class="description-label">标签: </span>${illustInfo.tags.map(e => `<span># ${e}</span>`).join("")}
         </div>
         <div class="description-item">
             <span>共 <span class="description-label">${illustInfo.urls.length}</span> 张, 可上下滑动查看其他页，点击图片访问原图</span>
