@@ -1,5 +1,5 @@
 ---
-title: History
+title: Pixiv Daily 历史记录
 ---
 
 在下方选择日期查看对应的 Pixiv 榜单.

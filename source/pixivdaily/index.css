@@ -100,7 +100,7 @@
 }
 
 /* 选中的a标签背景变更亮 */
-.typenav-selected {
+.typenav.typenav-selected {
     background-color: #ffffffc0;
 }
 

@@ -79,6 +79,9 @@ function main() {
                 return;
             }
 
+            // 设置标题
+            document.getElementsByClassName("post-title")[0].innerText = `Pixiv Daily (${CURRENT_DATE.slice(0, 4)}年${CURRENT_DATE.slice(4, 6)}月${CURRENT_DATE.slice(6, 8)}日)`;
+
             // 设置榜单类型链接
             document.getElementById(`typenav-${CURRENT_TYPE}`).classList.add("typenav-selected");
             const typenavUrl = new URL(window.location.href);
@@ -94,13 +97,13 @@ function main() {
                 datenavUrl.searchParams.set("d", DATELIST[currentDateIndex - 1]);
                 document.getElementById("datenav-next").setAttribute("href", datenavUrl.toString());
             } else {
-                document.getElementById("datenav-next").style.display = "none";
+                document.getElementById("datenav-next").style.visibility = "hidden";
             }
             if (currentDateIndex < DATELIST.length - 1) {
                 datenavUrl.searchParams.set("d", DATELIST[currentDateIndex + 1]);
                 document.getElementById("datenav-prev").setAttribute("href", datenavUrl.toString());
             } else {
-                document.getElementById("datenav-prev").style.display = "none";
+                document.getElementById("datenav-prev").style.visibility = "hidden";
             }
 
             // 渲染插画内容
