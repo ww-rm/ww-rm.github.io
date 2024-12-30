@@ -1,0 +1,134 @@
+/* 设置整体容器为 Flexbox 布局 */
+.illusts {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: #f9f9f980;
+    row-gap: 10px;
+}
+
+.illust-container:not(:last-child) {
+    border-bottom: 5px double #9f9f9f80;
+    /* 使用 1px solid 来添加底部间隔线 */
+}
+
+/* 文字说明部分 */
+.description {
+    padding: 10px 10px 2px 10px;
+}
+
+.description-item {
+    margin: 0 0 5px 0;
+}
+
+/* 每一行的样式 */
+.description .flex-line {
+    display: flex;
+    flex-wrap: wrap;
+    /* 允许换行 */
+    row-gap: 5px;
+    column-gap: 10px;
+}
+
+.description-label {
+    font-weight: bold;
+}
+
+/* 图片展示部分 */
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2px 10px 10px 10px;
+    overflow: hidden;
+}
+
+/* 图片列表容器 */
+.image-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 600px;
+    width: 100%;
+    align-items: center;
+}
+
+.image-list a {
+    width: 100%;
+    border: none;
+}
+
+.image-list img {
+    margin: 0 0 3px 0;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.typenav-container {
+    display: flex;
+    /* 使用flex布局 */
+    justify-content: space-between;
+    /* 均匀分布a标签 */
+    width: 100%;
+    /* 让div的宽度占满父级 */
+    background-color: transparent;
+    /* div底部透明 */
+}
+
+.typenav-container a {
+    border: none;
+}
+
+.typenav {
+    display: block;
+    /* 使a标签成为块级元素 */
+    flex: 1;
+    /* 每个a标签均分父级宽度 */
+    text-align: center;
+    /* 文字居中 */
+    padding: 10px 5px;
+    /* 上下内边距 */
+    background-color: transparent;
+    /* a标签背景透明 */
+    text-decoration: none;
+    /* 去除默认的下划线 */
+    color: black;
+    /* 设置文字颜色 */
+}
+
+/* 选中的a标签背景变更亮 */
+.typenav.typenav-selected {
+    background-color: #ffffffc0;
+}
+
+/* 鼠标悬停时背景变白 */
+.typenav:hover {
+    background-color: #fff;
+}
+
+.datenav-container {
+    display: flex;
+    /* 使用flex布局 */
+    justify-content: space-between;
+    /* 左右均匀分布，保持中间元素居中 */
+    width: 100%;
+    /* 容器宽度占满父级 */
+    background-color: transparent;
+    /* 容器背景透明 */
+}
+
+.datenav {
+    text-decoration: none;
+    /* 去掉默认下划线 */
+    color: black;
+    /* 设置文字颜色 */
+    display: block;
+    /* 让a标签成为块级元素，以便添加padding */
+    text-align: center;
+    /* 文字居中 */
+    margin: 15px 5px 5px 5px;
+    /* 上下内边距 */
+}
