@@ -11,9 +11,9 @@ title: Pixiv Daily
 </div>
 <div id="illusts" class="illusts"></div>
 <div class="datenav-container">
-    <a href="#" class="datenav" id="datenav-next" target="_self">← 后一期</a>
+    <a href="#" class="datenav" id="datenav-next" target="_self"><i class="fa fa-arrow-left fa-fw"></i>后一期</a>
     <a href="/pixivdaily/history/" class="datenav" id="datenav-all" target="_self">历史记录</a>
-    <a href="#" class="datenav" id="datenav-prev" target="_self">前一期 →</a>
+    <a href="#" class="datenav" id="datenav-prev" target="_self">前一期<i class="fa fa-arrow-right fa-fw"></i></a>
 </div>
 <script src="index.js"></script>
 {% endraw %}
