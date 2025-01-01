@@ -101,8 +101,9 @@ menu:
   #sitemap: /sitemap.xml || fa fa-sitemap
   #commonweal: /404/ || fa fa-heartbeat
   # festival: /festival/ || fa fa-gift
-  Pixiv Daily: /pixivdaily/ || fa fa-p
   Azur Lane: /azurlane/ || fa fa-b
+  Pixiv Daily: /pixivdaily/ || fa fa-p
+  Pixiv Puzzle: /pixivpuzzle/ || fa fa-puzzle-piece
 
 # Enable / Disable menu icons / item badges.
 menu_settings:
