@@ -72,7 +72,9 @@ function generateRandomPuzzle() {
     const state = [0, 1, 2, 3, 4, 5, 6, 7];
 
     while (true) {
-        state.sort(() => Math.random() - 0.5);
+        for (let i = 0; i < 100; i++) {
+            state.sort(() => Math.random() - 0.5);
+        }
         let invCount = 0;
         for (let i = 0; i < 8; i++) {
             for (let j = i + 1; j < 8; j++) {

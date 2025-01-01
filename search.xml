@@ -16,55 +16,6 @@
       </tags>
   </entry>
   <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 Spine 的碧蓝航线桌宠</title>
     <url>//posts/2023/08/30/desktopsprite/</url>
     <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
@@ -177,6 +128,55 @@
         <tag>桌宠</tag>
         <tag>碧蓝航线</tag>
         <tag>Spine</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
       </tags>
   </entry>
   <entry>
@@ -824,6 +824,89 @@
       </tags>
   </entry>
   <entry>
+    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (三)</title>
+    <url>//posts/2023/10/15/cnn-numpy-3/</url>
+    <content><![CDATA[<blockquote>
+<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+</blockquote>
+<p>本文为第三篇, 也是最后一篇, 结合前两篇的内容搭建完整的卷积神经网络并完成训练和评估.</p>
+<span id="more"></span>
+
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+<h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><h3 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h3><p>因为只是一个简单的示例, 所以弄一个小一点的网络, 大概长这样.</p>
+<p><img data-src="/static/image/cnn-numpy-3/cnn.jpg" alt="cnn.jpg"></p>
+<p>然后就是按照这个结构用代码把前面实现的层串起来.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.layers = [</span><br><span class="line">            ConvolutionLayer(<span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">5</span>),  <span class="comment"># 24 * 24</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 12 * 12</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            ConvolutionLayer(<span class="number">4</span>, <span class="number">16</span>, <span class="number">3</span>, <span class="number">3</span>),  <span class="comment"># 10 * 10</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 5 * 5</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            FlattenLayer(),</span><br><span class="line">            LinearLayer(<span class="number">16</span> * <span class="number">5</span> * <span class="number">5</span>, <span class="number">10</span>)</span><br><span class="line">        ]</span><br><span class="line">        self.loss_func = CrossEntropyLoss()</span><br><span class="line">        self.layer_inputs = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string">            keepgrad: whether keep temp layer inputs</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), logits</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> keepgrad:</span><br><span class="line">                self.layer_inputs.append(x)</span><br><span class="line">            x = layer.forward(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_cls), computed by loss function</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_ch, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> x, layer <span class="keyword">in</span> <span class="built_in">zip</span>(self.layer_inputs[::-<span class="number">1</span>], self.layers[::-<span class="number">1</span>]):</span><br><span class="line">            last_x_grad = layer.backward(x, last_x_grad)</span><br><span class="line">        <span class="keyword">return</span> last_x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(layer, ParamLayer):</span><br><span class="line">                layer.update(lr)</span><br></pre></td></tr></table></figure>
+
+<p>这里网络同样需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是增加了 <code>layer_inputs</code> 成员, 用于保存网络的计算图中间节点, 在反向传播时能直接读取数据计算.</p>
+<p>至于网络每层的参数填多大, 得视数据量和网络深度决定<del>玄学问题</del>, 这里就填了几个比较小的值, 方便下一步训练.</p>
+<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>然后实现网络的训练代码.</p>
+<p>训练分几个固定步骤:</p>
+<ol>
+<li>前向传播</li>
+<li>计算损失</li>
+<li>反向传播</li>
+<li>更新参数</li>
+<li>清空本次计算的中间值和梯度</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for train_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, train_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = train_x[i:i+batch_size], train_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs, <span class="literal">True</span>)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># backward</span></span><br><span class="line">            last_x_grad = self.loss_func.backward(logits, targets)</span><br><span class="line">            self.backward(last_x_grad)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># update</span></span><br><span class="line">            self.update(lr)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># clear temp values</span></span><br><span class="line">            self.layer_inputs.clear()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试和预测"><a href="#测试和预测" class="headerlink" title="测试和预测"></a>测试和预测</h3><p>测试和训练步骤是类似的, 但是不需要计算损失和梯度, 同时也不需要保留中间计算结果.</p>
+<p>而预测则是在 <code>forward</code> 的基础上, 将输出结果使用 <code>Softmax</code> 函数转换成概率值, 公式如下:</p>
+<p>$$<br>\begin{aligned}<br>  Softmax(x_{ij}) &amp;= \frac{\exp\left( {x_{ij}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij} - \max_{j=1}^{C}{x_{ij}}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij}&#39;} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39;\right)}}<br>\end{aligned}<br>$$</p>
+<p>其实就是在计算交叉熵损失中间 $\log$ 括号内的内容, 并且同样可以减去最大值来防止数据溢出.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">self, test_x: np.ndarray, test_y: np.ndarray, batch_size: <span class="built_in">int</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for test_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, test_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = test_x[i:i+batch_size], test_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), probs by softmax</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        x = self.forward(x)</span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        outputs = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
+
+<h2 id="训练并评估网络"><a href="#训练并评估网络" class="headerlink" title="训练并评估网络"></a>训练并评估网络</h2><p>完成网络搭建后, 接下来就是进行训练和评估. 先贴上完整的代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    np.random.seed(<span class="number">1234</span>)</span><br><span class="line"></span><br><span class="line">    train_x, train_y = load_dataset(<span class="string">&quot;./cv-data/train&quot;</span>, <span class="literal">True</span>)</span><br><span class="line">    test_x, test_y = load_dataset(<span class="string">&quot;./cv-data/test&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(train_x.shape, train_y.shape)</span><br><span class="line">    <span class="built_in">print</span>(test_x.shape, test_y.shape)</span><br><span class="line"></span><br><span class="line">    batch_size = <span class="number">100</span></span><br><span class="line">    epochs = <span class="number">200</span></span><br><span class="line">    lr = <span class="number">0.1</span></span><br><span class="line">    cnn = ConvolutionNeuralNetwork()</span><br><span class="line"></span><br><span class="line">    train_losses = []</span><br><span class="line">    test_losses = []</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Begin Train ===============&quot;</span>)</span><br><span class="line">    start_time = time.time()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">        train_loss = cnn.train(train_x, train_y, batch_size, epochs, lr)</span><br><span class="line">        test_loss = cnn.test(test_x, test_y, batch_size)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Epoch: <span class="subst">&#123;i + <span class="number">1</span>:3d&#125;</span> Train Loss: <span class="subst">&#123;train_loss:<span class="number">.4</span>f&#125;</span> Test Loss: <span class="subst">&#123;test_loss:<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        train_losses.append(train_loss)</span><br><span class="line">        test_losses.append(test_loss)</span><br><span class="line"></span><br><span class="line">    time_elapsed = time.time() - start_time</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;=============== End Train: <span class="subst">&#123;time_elapsed / <span class="number">60</span>:<span class="number">.2</span>f&#125;</span> min ===============&quot;</span>)</span><br><span class="line"></span><br><span class="line">    train_losses = np.array(train_losses)</span><br><span class="line">    test_losses = np.array(test_losses)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制损失变化曲线, 忽略第一轮损失</span></span><br><span class="line">    plt.plot(np.arange(train_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), train_losses[<span class="number">1</span>:], label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">    plt.plot(np.arange(test_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), test_losses[<span class="number">1</span>:], label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.savefig(<span class="string">&quot;loss.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    y_true = train_y</span><br><span class="line">    y_pred = cnn.predict(train_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Train ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br><span class="line"></span><br><span class="line">    y_true = test_y</span><br><span class="line">    y_pred = cnn.predict(test_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Test ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br></pre></td></tr></table></figure>
+
+<p>这里为了稳定结果, 固定了一下随机种子为 <code>1234</code>.</p>
+<p>有三个训练的超参数:</p>
+<ul>
+<li><code>batch_size</code>: 每一轮 mini-batch 的大小.</li>
+<li><code>epochs</code>: 共训练多少轮.</li>
+<li><code>lr</code>: 网络学习率.</li>
+</ul>
+<p>具体填多少得反复尝试<del>也是炼丹的精髓</del>, 这里学习率是尝试后收敛比较快而且比较稳定的一个值.</p>
+<p>中途把每一轮的损失记录一下, 并且用 <code>matplotlib.pyplot</code> 画个简单的曲线图, 对比一下训练集和测试集损失随轮数的变化关系.</p>
+<p>最后借用一下 <code>classification_report</code> 来看看网络在训练集和测试集上的分类性能报告.</p>
+<p>200 轮的训练大概跑了 20 分钟左右, 挺久的.</p>
+<p>损失曲线图:</p>
+<p><img data-src="/static/image/cnn-numpy-3/loss.png" alt="loss.jpg"></p>
+<p>分类性能报告:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">=============== Classification Report: Train ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9970    0.9900    0.9935       999</span><br><span class="line">           1     0.9955    0.9928    0.9941      1106</span><br><span class="line">           2     0.9871    0.9765    0.9818      1020</span><br><span class="line">           3     0.9814    0.9786    0.9800      1027</span><br><span class="line">           4     0.9958    0.9712    0.9834       973</span><br><span class="line">           5     0.9821    0.9854    0.9838       891</span><br><span class="line">           6     0.9959    0.9939    0.9949       977</span><br><span class="line">           7     0.9750    0.9887    0.9818      1063</span><br><span class="line">           8     0.9567    0.9888    0.9725       984</span><br><span class="line">           9     0.9781    0.9771    0.9776       960</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9844     10000</span><br><span class="line">   macro avg     0.9845    0.9843    0.9843     10000</span><br><span class="line">weighted avg     0.9845    0.9844    0.9844     10000</span><br><span class="line"></span><br><span class="line">=============== Classification Report: Test ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9517    0.9848    0.9679       460</span><br><span class="line">           1     0.9723    0.9825    0.9774       571</span><br><span class="line">           2     0.9618    0.9491    0.9554       530</span><br><span class="line">           3     0.9298    0.9540    0.9418       500</span><br><span class="line">           4     0.9630    0.9360    0.9493       500</span><br><span class="line">           5     0.9538    0.9518    0.9528       456</span><br><span class="line">           6     0.9581    0.9416    0.9498       462</span><br><span class="line">           7     0.9384    0.9219    0.9300       512</span><br><span class="line">           8     0.9039    0.9427    0.9229       489</span><br><span class="line">           9     0.9324    0.9019    0.9169       520</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9466      5000</span><br><span class="line">   macro avg     0.9465    0.9466    0.9464      5000</span><br><span class="line">weighted avg     0.9468    0.9466    0.9466      5000</span><br></pre></td></tr></table></figure>
+
+<p>效果还不错, 损失曲线也很经典, 大约从 15 轮开始收敛, 120 轮左右测试集损失就差不多到底了. 中途试过一些别的随机种子, 收敛速度有差异, 但是最终的损失值都差不多.</p>
+<p>分类性能的话, 训练集的 F1 值和测试集差了 4% 左右, 看着也还不错, 正常表现.</p>
+<h2 id="进一步探索"><a href="#进一步探索" class="headerlink" title="进一步探索"></a>进一步探索</h2><p>到这里我们就已经彻底完成了基于纯 NumPy 手工搭建的卷积神经网络了, 从这个过程中我们可以了解到很多底层原理以及一些细节问题, 比如参数的初始化和训练超参数的调节. 大部分时间我们都是使用深度学习框架来完成这些事情, 我们只需要专注于搭积木即可. 这里联系一下我常用的 PyTorch 库, 里面内置了很多不同的模块, 分别对应整个网络搭建和训练过程中的基本环节.</p>
+<ul>
+<li><code>torch.utils.data</code>: 数据处理模块, 控制数据的读取和迭代方式.</li>
+<li><code>torch.nn</code>: 常用的网络模块, 例如 <code>Linear</code> 和 <code>Conv2d</code>.</li>
+<li><code>torch.nn.functional</code>: <code>torch.nn</code> 中模块的函数形式, 需要手动传入计算的参数.</li>
+<li><code>torch.nn.init</code>: 不同的网络参数初始化方法.</li>
+<li><code>torch.optim</code>: 优化器模块, 包含不同的学习率调整算法, 控制网络的优化过程.</li>
+</ul>
+<p>这是一些常用的, 还有很多, 可以去看看 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9pbmRleC5odG1s">PyTorch 文档<i class="fa fa-external-link-alt"></i></span>并加以实践.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>这份文档写了很久, 起因是觉得要是下次再碰到相关的问题, 自己有轮子和内容就不用上网找了<del>属实是闲着没事</del>. 前后花了一两周的时间, 因为要从头跑一份代码, 然后又是调公式又是画图, 不过算是彻底复习了一遍神经网络, 把很多深度学习框架的使用原理都串起来了, 还是挺好的.</p>
+<p>这个系列就此圆满结束<del>作业报告从此一劳永逸</del>.</p>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>手写数字识别</tag>
+        <tag>卷积神经网络</tag>
+        <tag>深度学习</tag>
+        <tag>pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>从零开始的 DDPM 动漫头像生成</title>
     <url>//posts/2024/02/16/ddpm/</url>
     <content><![CDATA[<p>Stable Diffusion 已经火了很久了, 在此之前也是在自己电脑上部署过 Github 上那个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0FVVE9NQVRJQzExMTEvc3RhYmxlLWRpZmZ1c2lvbi13ZWJ1aQ==">stable-diffusion-webui<i class="fa fa-external-link-alt"></i></span>. 作为一个折腾分子, 本着更深入了解一下概率扩散模型的想法, 决定在参考其他教程的基础上从零开始炼制一个基于 DDPM 的动漫头像生成模型.</p>
@@ -915,89 +998,6 @@
         <tag>DDPM</tag>
         <tag>动漫头像生成</tag>
         <tag>概率扩散模型</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (三)</title>
-    <url>//posts/2023/10/15/cnn-numpy-3/</url>
-    <content><![CDATA[<blockquote>
-<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
-<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
-</blockquote>
-<p>本文为第三篇, 也是最后一篇, 结合前两篇的内容搭建完整的卷积神经网络并完成训练和评估.</p>
-<span id="more"></span>
-
-<p>本系列文章传送门:</p>
-<ul>
-<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
-<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
-<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
-</ul>
-<h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><h3 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h3><p>因为只是一个简单的示例, 所以弄一个小一点的网络, 大概长这样.</p>
-<p><img data-src="/static/image/cnn-numpy-3/cnn.jpg" alt="cnn.jpg"></p>
-<p>然后就是按照这个结构用代码把前面实现的层串起来.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.layers = [</span><br><span class="line">            ConvolutionLayer(<span class="number">1</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">5</span>),  <span class="comment"># 24 * 24</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 12 * 12</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            ConvolutionLayer(<span class="number">4</span>, <span class="number">16</span>, <span class="number">3</span>, <span class="number">3</span>),  <span class="comment"># 10 * 10</span></span><br><span class="line">            MaxPoolingLayer(<span class="number">2</span>, <span class="number">2</span>),  <span class="comment"># 5 * 5</span></span><br><span class="line">            ReLULayer(),</span><br><span class="line">            FlattenLayer(),</span><br><span class="line">            LinearLayer(<span class="number">16</span> * <span class="number">5</span> * <span class="number">5</span>, <span class="number">10</span>)</span><br><span class="line">        ]</span><br><span class="line">        self.loss_func = CrossEntropyLoss()</span><br><span class="line">        self.layer_inputs = []</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string">            keepgrad: whether keep temp layer inputs</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), logits</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> keepgrad:</span><br><span class="line">                self.layer_inputs.append(x)</span><br><span class="line">            x = layer.forward(x)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_cls), computed by loss function</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            last_x_grad: (B, C_ch, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> x, layer <span class="keyword">in</span> <span class="built_in">zip</span>(self.layer_inputs[::-<span class="number">1</span>], self.layers[::-<span class="number">1</span>]):</span><br><span class="line">            last_x_grad = layer.backward(x, last_x_grad)</span><br><span class="line">        <span class="keyword">return</span> last_x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</span><br><span class="line">            <span class="keyword">if</span> <span class="built_in">isinstance</span>(layer, ParamLayer):</span><br><span class="line">                layer.update(lr)</span><br></pre></td></tr></table></figure>
-
-<p>这里网络同样需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是增加了 <code>layer_inputs</code> 成员, 用于保存网络的计算图中间节点, 在反向传播时能直接读取数据计算.</p>
-<p>至于网络每层的参数填多大, 得视数据量和网络深度决定<del>玄学问题</del>, 这里就填了几个比较小的值, 方便下一步训练.</p>
-<h3 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h3><p>然后实现网络的训练代码.</p>
-<p>训练分几个固定步骤:</p>
-<ol>
-<li>前向传播</li>
-<li>计算损失</li>
-<li>反向传播</li>
-<li>更新参数</li>
-<li>清空本次计算的中间值和梯度</li>
-</ol>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for train_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, train_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = train_x[i:i+batch_size], train_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs, <span class="literal">True</span>)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># backward</span></span><br><span class="line">            last_x_grad = self.loss_func.backward(logits, targets)</span><br><span class="line">            self.backward(last_x_grad)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># update</span></span><br><span class="line">            self.update(lr)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># clear temp values</span></span><br><span class="line">            self.layer_inputs.clear()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试和预测"><a href="#测试和预测" class="headerlink" title="测试和预测"></a>测试和预测</h3><p>测试和训练步骤是类似的, 但是不需要计算损失和梯度, 同时也不需要保留中间计算结果.</p>
-<p>而预测则是在 <code>forward</code> 的基础上, 将输出结果使用 <code>Softmax</code> 函数转换成概率值, 公式如下:</p>
-<p>$$<br>\begin{aligned}<br>  Softmax(x_{ij}) &amp;= \frac{\exp\left( {x_{ij}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij} - \max_{j=1}^{C}{x_{ij}}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}}\right)}} \\<br>  ~ &amp;= \frac{\exp\left( {x_{ij}&#39;} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39;\right)}}<br>\end{aligned}<br>$$</p>
-<p>其实就是在计算交叉熵损失中间 $\log$ 括号内的内容, 并且同样可以减去最大值来防止数据溢出.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionNeuralNetwork</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">    Conv -&gt; Pool -&gt; ReLU -&gt; Conv -&gt; Pool -&gt; ReLU -&gt; Flatten -&gt; Linear -&gt; CrossEntropy</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, keepgrad: <span class="built_in">bool</span> = <span class="literal">False</span></span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, last_x_grad: np.ndarray</span>) -&gt; np.ndarray: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>: ...</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">train</span>(<span class="params">self, train_x: np.ndarray, train_y: np.ndarray, batch_size: <span class="built_in">int</span>, epochs: <span class="built_in">int</span>, lr: <span class="built_in">float</span></span>) -&gt; <span class="built_in">float</span>: ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">self, test_x: np.ndarray, test_y: np.ndarray, batch_size: <span class="built_in">int</span></span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: mean loss for test_x</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        losses = []</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, test_x.shape[<span class="number">0</span>], batch_size):</span><br><span class="line">            inputs, targets = test_x[i:i+batch_size], test_y[i:i+batch_size]</span><br><span class="line"></span><br><span class="line">            <span class="comment"># forward</span></span><br><span class="line">            logits = self.forward(inputs)</span><br><span class="line">            loss = self.loss_func.forward(logits, targets)</span><br><span class="line">            losses.append(loss)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">sum</span>(losses) / <span class="built_in">len</span>(losses)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C_ch, H, W), images</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, C_cls), probs by softmax</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        x = self.forward(x)</span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        outputs = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br></pre></td></tr></table></figure>
-
-<h2 id="训练并评估网络"><a href="#训练并评估网络" class="headerlink" title="训练并评估网络"></a>训练并评估网络</h2><p>完成网络搭建后, 接下来就是进行训练和评估. 先贴上完整的代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    np.random.seed(<span class="number">1234</span>)</span><br><span class="line"></span><br><span class="line">    train_x, train_y = load_dataset(<span class="string">&quot;./cv-data/train&quot;</span>, <span class="literal">True</span>)</span><br><span class="line">    test_x, test_y = load_dataset(<span class="string">&quot;./cv-data/test&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(train_x.shape, train_y.shape)</span><br><span class="line">    <span class="built_in">print</span>(test_x.shape, test_y.shape)</span><br><span class="line"></span><br><span class="line">    batch_size = <span class="number">100</span></span><br><span class="line">    epochs = <span class="number">200</span></span><br><span class="line">    lr = <span class="number">0.1</span></span><br><span class="line">    cnn = ConvolutionNeuralNetwork()</span><br><span class="line"></span><br><span class="line">    train_losses = []</span><br><span class="line">    test_losses = []</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Begin Train ===============&quot;</span>)</span><br><span class="line">    start_time = time.time()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(epochs):</span><br><span class="line">        train_loss = cnn.train(train_x, train_y, batch_size, epochs, lr)</span><br><span class="line">        test_loss = cnn.test(test_x, test_y, batch_size)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Epoch: <span class="subst">&#123;i + <span class="number">1</span>:3d&#125;</span> Train Loss: <span class="subst">&#123;train_loss:<span class="number">.4</span>f&#125;</span> Test Loss: <span class="subst">&#123;test_loss:<span class="number">.4</span>f&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        train_losses.append(train_loss)</span><br><span class="line">        test_losses.append(test_loss)</span><br><span class="line"></span><br><span class="line">    time_elapsed = time.time() - start_time</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;=============== End Train: <span class="subst">&#123;time_elapsed / <span class="number">60</span>:<span class="number">.2</span>f&#125;</span> min ===============&quot;</span>)</span><br><span class="line"></span><br><span class="line">    train_losses = np.array(train_losses)</span><br><span class="line">    test_losses = np.array(test_losses)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 绘制损失变化曲线, 忽略第一轮损失</span></span><br><span class="line">    plt.plot(np.arange(train_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), train_losses[<span class="number">1</span>:], label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">    plt.plot(np.arange(test_losses.shape[<span class="number">0</span>]-<span class="number">1</span>), test_losses[<span class="number">1</span>:], label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">    plt.legend()</span><br><span class="line">    plt.savefig(<span class="string">&quot;loss.png&quot;</span>)</span><br><span class="line"></span><br><span class="line">    y_true = train_y</span><br><span class="line">    y_pred = cnn.predict(train_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Train ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br><span class="line"></span><br><span class="line">    y_true = test_y</span><br><span class="line">    y_pred = cnn.predict(test_x).argmax(-<span class="number">1</span>)</span><br><span class="line">    report = classification_report(y_true, y_pred, digits=<span class="number">4</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=============== Classification Report: Test ===============&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(report)</span><br></pre></td></tr></table></figure>
-
-<p>这里为了稳定结果, 固定了一下随机种子为 <code>1234</code>.</p>
-<p>有三个训练的超参数:</p>
-<ul>
-<li><code>batch_size</code>: 每一轮 mini-batch 的大小.</li>
-<li><code>epochs</code>: 共训练多少轮.</li>
-<li><code>lr</code>: 网络学习率.</li>
-</ul>
-<p>具体填多少得反复尝试<del>也是炼丹的精髓</del>, 这里学习率是尝试后收敛比较快而且比较稳定的一个值.</p>
-<p>中途把每一轮的损失记录一下, 并且用 <code>matplotlib.pyplot</code> 画个简单的曲线图, 对比一下训练集和测试集损失随轮数的变化关系.</p>
-<p>最后借用一下 <code>classification_report</code> 来看看网络在训练集和测试集上的分类性能报告.</p>
-<p>200 轮的训练大概跑了 20 分钟左右, 挺久的.</p>
-<p>损失曲线图:</p>
-<p><img data-src="/static/image/cnn-numpy-3/loss.png" alt="loss.jpg"></p>
-<p>分类性能报告:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">=============== Classification Report: Train ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9970    0.9900    0.9935       999</span><br><span class="line">           1     0.9955    0.9928    0.9941      1106</span><br><span class="line">           2     0.9871    0.9765    0.9818      1020</span><br><span class="line">           3     0.9814    0.9786    0.9800      1027</span><br><span class="line">           4     0.9958    0.9712    0.9834       973</span><br><span class="line">           5     0.9821    0.9854    0.9838       891</span><br><span class="line">           6     0.9959    0.9939    0.9949       977</span><br><span class="line">           7     0.9750    0.9887    0.9818      1063</span><br><span class="line">           8     0.9567    0.9888    0.9725       984</span><br><span class="line">           9     0.9781    0.9771    0.9776       960</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9844     10000</span><br><span class="line">   macro avg     0.9845    0.9843    0.9843     10000</span><br><span class="line">weighted avg     0.9845    0.9844    0.9844     10000</span><br><span class="line"></span><br><span class="line">=============== Classification Report: Test ===============</span><br><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0     0.9517    0.9848    0.9679       460</span><br><span class="line">           1     0.9723    0.9825    0.9774       571</span><br><span class="line">           2     0.9618    0.9491    0.9554       530</span><br><span class="line">           3     0.9298    0.9540    0.9418       500</span><br><span class="line">           4     0.9630    0.9360    0.9493       500</span><br><span class="line">           5     0.9538    0.9518    0.9528       456</span><br><span class="line">           6     0.9581    0.9416    0.9498       462</span><br><span class="line">           7     0.9384    0.9219    0.9300       512</span><br><span class="line">           8     0.9039    0.9427    0.9229       489</span><br><span class="line">           9     0.9324    0.9019    0.9169       520</span><br><span class="line"></span><br><span class="line">    accuracy                         0.9466      5000</span><br><span class="line">   macro avg     0.9465    0.9466    0.9464      5000</span><br><span class="line">weighted avg     0.9468    0.9466    0.9466      5000</span><br></pre></td></tr></table></figure>
-
-<p>效果还不错, 损失曲线也很经典, 大约从 15 轮开始收敛, 120 轮左右测试集损失就差不多到底了. 中途试过一些别的随机种子, 收敛速度有差异, 但是最终的损失值都差不多.</p>
-<p>分类性能的话, 训练集的 F1 值和测试集差了 4% 左右, 看着也还不错, 正常表现.</p>
-<h2 id="进一步探索"><a href="#进一步探索" class="headerlink" title="进一步探索"></a>进一步探索</h2><p>到这里我们就已经彻底完成了基于纯 NumPy 手工搭建的卷积神经网络了, 从这个过程中我们可以了解到很多底层原理以及一些细节问题, 比如参数的初始化和训练超参数的调节. 大部分时间我们都是使用深度学习框架来完成这些事情, 我们只需要专注于搭积木即可. 这里联系一下我常用的 PyTorch 库, 里面内置了很多不同的模块, 分别对应整个网络搭建和训练过程中的基本环节.</p>
-<ul>
-<li><code>torch.utils.data</code>: 数据处理模块, 控制数据的读取和迭代方式.</li>
-<li><code>torch.nn</code>: 常用的网络模块, 例如 <code>Linear</code> 和 <code>Conv2d</code>.</li>
-<li><code>torch.nn.functional</code>: <code>torch.nn</code> 中模块的函数形式, 需要手动传入计算的参数.</li>
-<li><code>torch.nn.init</code>: 不同的网络参数初始化方法.</li>
-<li><code>torch.optim</code>: 优化器模块, 包含不同的学习率调整算法, 控制网络的优化过程.</li>
-</ul>
-<p>这是一些常用的, 还有很多, 可以去看看 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9pbmRleC5odG1s">PyTorch 文档<i class="fa fa-external-link-alt"></i></span>并加以实践.</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>这份文档写了很久, 起因是觉得要是下次再碰到相关的问题, 自己有轮子和内容就不用上网找了<del>属实是闲着没事</del>. 前后花了一两周的时间, 因为要从头跑一份代码, 然后又是调公式又是画图, 不过算是彻底复习了一遍神经网络, 把很多深度学习框架的使用原理都串起来了, 还是挺好的.</p>
-<p>这个系列就此圆满结束<del>作业报告从此一劳永逸</del>.</p>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>手写数字识别</tag>
-        <tag>卷积神经网络</tag>
-        <tag>深度学习</tag>
-        <tag>pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -1866,47 +1866,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网页预览碧蓝航线动态立绘</title>
-    <url>//posts/2024/12/22/spinejs-azurlane/</url>
-    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
-<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
-<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
-<span id="more"></span>
-
-<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
-<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
-<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
-<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
-<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
-<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
-<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
-<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
-<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
-<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
-<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
-<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
-<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
-<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>spine</tag>
-        <tag>spine-js</tag>
-        <tag>Azur Lane</tag>
-        <tag>动态立绘</tag>
-        <tag>前端</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用 transformers.Pipeline 迭代生成数据</title>
     <url>//posts/2024/05/07/py-transformers-genexpr/</url>
     <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
@@ -1960,6 +1919,47 @@
         <tag>transformers</tag>
         <tag>Pipeline</tag>
         <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网页预览碧蓝航线动态立绘</title>
+    <url>//posts/2024/12/22/spinejs-azurlane/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -2333,6 +2333,103 @@
       </tags>
   </entry>
   <entry>
+    <title>打造一个舒适的 Python 编程环境</title>
+    <url>//posts/2022/08/13/wast-pythonandvsc/</url>
+    <content><![CDATA[<p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
+<p>因此本篇主要基于个人经验介绍一下比较舒适的 <code>python</code> 编程环境设置, 让大家能够把精力放在<del>抄</del>写代码上, 而不是被环境弄的头疼.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>从本篇开始, 基本上算是完全的个人经验分享. 由于我自己是网安专业而非信安, 因此可能分享的内容对网安同学适用性更好, 不过信安同学可以酌情参考. 如果还没分专业, 也可以参考一下将来可能需要点一些啥技能来速通网安各个课程作业.</p>
+<p>如果对 <code>VS Code</code> 没有了解, 可以看前一篇<a href="/posts/2022/08/11/wast-vscandvs/">给新生的编程工具推荐与基本使用方法</a>, 这里面讲了 <code>VS Code</code> 的基本使用方法. 而本篇将会基于 <code>VS Code</code>, 打造一个相对舒适的 <code>python</code> 编程环境.</p>
+<h2 id="安装-Python"><a href="#安装-Python" class="headerlink" title="安装 Python"></a>安装 Python</h2><p>第一步肯定是安装 <code>python</code>, 官网就是 <span class="exturl" data-url="aHR0cHM6Ly93d3cucHl0aG9uLm9yZy8=">https://www.python.org/<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>可以选择下最新版, 不过不是那么的推荐, 而是适当旧一点, 比如现在最新的版本是 <code>3.10.6</code>, 那么可以下 <code>3.8.10</code> (<code>3.8.x</code> 发布的最后一个有安装包的版本). 这样子兼容度大一点. (曾经遇见过要装的某个包还没发布适配新版本 <code>python</code> 的版本, 害得我又重装降级了 <code>python</code>).</p>
+<p>这里直接提供 <a href="https://www.python.org/downloads/release/python-3810/"><code>Python 3.8.10</code></a> 的官方下载页面, 点进去之后选 &quot;Windows installer (64-bit)&quot; 这个版本就好了.</p>
+<p>下载好之后双击进入安装界面. 下面两项都勾上, 并且选择 &quot;Customize installation&quot;.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vtamNQ.png" alt="vtamNQ.png"></p>
+<p>这一面也是直接全勾.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vtaN4J.png" alt="vtaN4J.png"></p>
+<p>再次 Next 之后, 这个界面里, 勾选 &quot;Install for all users&quot;, 并且可以在下方调整 <code>python</code> 的安装路径. 推荐装到 D 盘或者其他方便找到的地方, 比如 <code>D:\Program Files\Python38</code>.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vtd9VU.png" alt="vtd9VU.png"></p>
+<p>重启一下电脑, 快捷键 <code>Win + R</code>, 输入 <code>cmd</code> 打开命令提示符, 敲一下 <code>python --version</code>, 如下图所示则安装成功.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vtdqeK.png" alt="vtdqeK.png"></p>
+<h2 id="Python-虚拟环境"><a href="#Python-虚拟环境" class="headerlink" title="Python 虚拟环境"></a>Python 虚拟环境</h2><h3 id="虚拟环境简介"><a href="#虚拟环境简介" class="headerlink" title="虚拟环境简介"></a>虚拟环境简介</h3><p>关于虚拟环境的详细介绍很多, 必应一搜就有很多<span class="exturl" data-url="aHR0cHM6Ly9jbi5iaW5nLmNvbS9zZWFyY2g/cT1weXRob24lRTclOUElODQlRTglOTklOUElRTYlOEIlOUYlRTclOEUlQUYlRTUlQTIlODMlRTYlOTglQUYlRTQlQkIlODAlRTQlQjklODg=">结果<i class="fa fa-external-link-alt"></i></span>, 有时间可以慢慢理解.</p>
+<p>当你写代码时, 不可能完全都靠自己从零开始, 这样子很低效<del>并且很蠢</del>, 所以对于 <code>python</code> 而言, 写代码之前确定并安装合适的第三方包就是基本操作.</p>
+<p>然而, 第三方包在发布的时候, 可能会存在许多不同的版本, 不同项目之间所需要的包版本也不尽相同, 会造成巨大的兼容问题 (比如万恶的 <code>tensorflow 1.x</code> 和 <code>tensorflow 2.x</code>). 这种时候就需要使用虚拟环境.</p>
+<p>虚拟环境可以简单认为是 &quot;<code>python</code> 和对应的包的副本&quot;, 最基本的要素是环境内的 <code>python</code> 版本和包的版本. 每一个环境之间的 <code>python</code> 和包版本都是相互独立的. 这样子在运行项目时, 我们可以选择特定的某一个环境, 从而使用某个特定的 <code>python</code> 版本与包版本.</p>
+<h3 id="虚拟环境管理"><a href="#虚拟环境管理" class="headerlink" title="虚拟环境管理"></a>虚拟环境管理</h3><p>网上很多推荐使用 <span class="exturl" data-url="aHR0cHM6Ly93d3cuYW5hY29uZGEuY29tLw==">Anaconda<i class="fa fa-external-link-alt"></i></span> 来进行包和环境的管理, 我觉得可以但没必要, 一是臃肿二是让新手有点摸不着头脑. 不过等熟练之后用倒是个不错的选择.</p>
+<p>这里只介绍一下 <code>python</code> 自带的 <code>venv</code> 模块使用以及第三方包 <code>virtualenvwrapper-win</code> 的使用.</p>
+<h4 id="在环境中安装第三方包"><a href="#在环境中安装第三方包" class="headerlink" title="在环境中安装第三方包"></a>在环境中安装第三方包</h4><p>一般来说, 安装完 <code>python</code> 之后, 就会有一个 &quot;本地环境&quot;, 而将除本地环境之外的其他环境通常 &quot;虚拟环境&quot;.</p>
+<p>在运行 <code>python</code> 程序时, 是按照所指定的 <code>python</code> 解释器来决定使用的环境的.</p>
+<p>我们在命令行里可以直接使用 <code>python</code> 指令, 实际上是因为我们在安装时勾选了 &quot;Add Python 3.8 to PATH&quot;, 在环境变量 <code>PATH</code> 中添加了本地环境中 <code>python</code> 解释器的路径, 所以在使用 <code>python</code> 指令时, 实际上就是使用了本地环境.</p>
+<p>通常主要使用内置的 <code>pip</code> 模块进行第三方包的管理, 并且有以下几个常用命令.</p>
+<ul>
+<li><p><code>&lt;解释器&gt; -m pip list &lt;包名&gt;</code>: 列出当前环境所有安装的包.</p>
+</li>
+<li><p><code>&lt;解释器&gt; -m pip install &lt;包名&gt;</code>: 安装包.</p>
+</li>
+<li><p><code>&lt;解释器&gt; -m pip install &lt;包名&gt;</code>: 卸载包.</p>
+</li>
+</ul>
+<p><code>&lt;解释器&gt;</code> 就是你要进行包管理的环境的解释器 <code>python.exe</code> 路径, 对于本地环境来说就是直接使用的 <code>python</code> 命令.</p>
+<p><code>-m pip</code> 表示调用了指定解释器中的 <code>pip</code> 模块进行包的管理.</p>
+<p><code>&lt;包名&gt;</code> 则是你需要的包的 &quot;安装名称&quot;, 一般来说它和 <code>import</code> 语句的名字是一致的, 但是也有可能不一样, 推荐去官方的包发布网站 <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy8=">https://pypi.org/<i class="fa fa-external-link-alt"></i></span> 上进行搜索.</p>
+<p>除此之外, <code>pip</code> 也支持使用 <code>whl</code> 文件或者源码安装, 具体的可以自行进一步学习.</p>
+<h4 id="创建并使用虚拟环境"><a href="#创建并使用虚拟环境" class="headerlink" title="创建并使用虚拟环境"></a>创建并使用虚拟环境</h4><p>最简单的创建方法是使用自带的 <code>venv</code> 模块, 命令如下.</p>
+<p><code>python -m venv &lt;路径&gt;</code></p>
+<p>比如使用 <code>python -m venv env</code> 则会在当前目录下生成一个 <code>env</code> 文件夹, 这里面就包含了名为 <code>env</code> 的虚拟环境的解释器以及第三方库.</p>
+<p>另外比较重要的文件是 <code>activate</code> 与 <code>deactivate</code>, 用于激活和退出虚拟环境.</p>
+<p>具体的使用在后面的部分<a href="#%E5%9C%A8-VS-Code-%E4%B8%AD%E4%BD%BF%E7%94%A8-Python">在 VS Code 中使用 Python</a> 中再进行说明.</p>
+<p>另一种方案是使用第三方库 <code>virtualenvwrapper-win</code> 来辅助我们管理虚拟环境.</p>
+<p>使用 <code>python -m pip install virtualenvwrapper-win</code> 进行安装. 安装完后, 即可以在命令行中使用以下几个常用命令对机器上的虚拟环境进行集中管理.</p>
+<ul>
+<li><code>mkvirtualenv &lt;虚拟环境名称&gt;</code>: 创建虚拟环境.</li>
+<li><code>workon &lt;虚拟环境名称&gt;</code>: 激活对应的虚拟环境.</li>
+<li><code>rmvirtualenv &lt;虚拟环境名称&gt;</code>: 删除虚拟环境.</li>
+</ul>
+<p>前面的 <code>venv</code> 模块常常用于某个项目内的临时环境, 而 <code>virtualenvwrapper-win</code> 这个第三方工具主要用于你希望自己的电脑上常驻某些不同类别的环境, 并对它们方便的进行集中管理.</p>
+<p>默认该模块创建的环境都将位于 <code>%USERPROFILE%\envs</code> 文件夹下,可以通过环境变量 <code>WORKON_HOME</code> 来自定义你希望的存储位置.</p>
+<h3 id="常用的第三方包"><a href="#常用的第三方包" class="headerlink" title="常用的第三方包"></a>常用的第三方包</h3><p>对于速通网安, 有一些常用的第三方库总结, 在这里把我自己常用的包情况列举一下.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 用于格式化和检测代码规范的工具</span><br><span class="line">autopep8</span><br><span class="line">pylint</span><br><span class="line"></span><br><span class="line"># 与爬虫有关的库</span><br><span class="line">lxml</span><br><span class="line">beautifulsoup4</span><br><span class="line">requests</span><br><span class="line"></span><br><span class="line"># 与数据处理有关的库</span><br><span class="line">numpy</span><br><span class="line">pandas</span><br><span class="line">matplotlib</span><br><span class="line"></span><br><span class="line"># 机器学习以及深度学习相关的库</span><br><span class="line">opencv-python</span><br><span class="line">scikit-learn</span><br><span class="line"># torch</span><br><span class="line"># torchaudio</span><br><span class="line"># torchvision</span><br><span class="line"></span><br><span class="line"># 在 VS Code 内使用 jupyter notebook 有关的库</span><br><span class="line">ipykernel</span><br><span class="line">jupyter</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>torch</code> 的安装需要前往官网 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">https://pytorch.org/<i class="fa fa-external-link-alt"></i></span> 按说明进行安装.</p>
+<h2 id="在-VS-Code-中使用-Python"><a href="#在-VS-Code-中使用-Python" class="headerlink" title="在 VS Code 中使用 Python"></a>在 VS Code 中使用 Python</h2><p>这一节将会实践一下前面所有的内容, 在 <code>VS Code</code> 中使用 <code>python</code> 完成一次向量乘法计算.</p>
+<p>打开之前曾经创建的 <code>example</code> 文件夹, 并且新建一个终端.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vNUegI.png" alt="vNUegI.png"></p>
+<p>我们使用以下命令为这个项目建立一个单独的虚拟环境, 取名为 <code>env</code>.</p>
+<p><code>python -m venv env</code></p>
+<p><img data-src="/static/image/wast-pythonandvsc/vNami4.png" alt="vNami4.png"></p>
+<p>命令执行完成后, 左边的资源管理器面板上多出来一个 <code>env</code> 文件夹, 这就是我们刚刚创建好的虚拟环境. 我们使用 <code>.\env\Scripts\activate</code> 在终端中激活这个虚拟环境, 激活完成后可以看到终端的提示信息前面多了一个 <code>(env)</code> 标记, 表示当前终端处于 <code>env</code> 的虚拟环境之下.</p>
+<p>如果出现不能执行的情况, 可以参考<span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vZGF4aW9uZzEzMTQvcC8xNjI2NTU0OS5odG1s">这篇博客<i class="fa fa-external-link-alt"></i></span>解决权限问题. 或者在 <code>VS Code</code> 的设置里把默认的终端类型调成 <code>cmd</code> 而不是 <code>powershell</code>, 我推荐改成 <code>cmd</code> 一劳永逸. <del><code>powershell</code> 屁事多</del>.</p>
+<p>解决完问题之后就如下图所示了.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vNdYn0.png" alt="vNdYn0.png"></p>
+<p>此时在终端里直接执行 <code>python</code> 有关的命令, 都会映射到虚拟环境里的命令.</p>
+<p>然后我们继续, 使用 <code>pip</code> 向虚拟环境里添加一个第三方库 <code>numpy</code>.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vNwSvn.png" alt="vNwSvn.png"></p>
+<p>顺利安装完成之后, 可以看到左边的 <code>env</code> 文件夹里 <code>site-packages</code> 下多出来一个 <code>numpy</code> 的文件夹, 这就是我们刚刚安装好的第三方库了. 同时终端里给了我们一个 <code>WARNING</code>, 提示我们可以对 <code>pip</code> 模块进行升级. 虽然影响不是很大, 不过推荐复制它提供的指令升一下级, 这样 <code>pip</code> 在查找和安装包时能够使用最新的功能, 减小安装失败的风险<del>主要是有彩色进度条</del>.</p>
+<p>然后清空之前 <code>main.py</code> 里面的代码, 并且敲入以下新的内容.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vNDSvd.png" alt="vNDSvd.png"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    vector1 = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">    vector2 = np.array([<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(np.dot(vector1, vector2))</span><br><span class="line">    <span class="built_in">print</span>(np.multiply(vector1, vector2))</span><br></pre></td></tr></table></figure>
+
+<p>会发现 <code>import</code> 语句的 <code>numpy</code> 有黄色波浪线, 同时下面的 &quot;问题&quot; 面板有写出来原因, 意思是没有 <code>numpy</code> 这个库.</p>
+<p>这是因为虽然我们刚刚在终端里是已经成功激活了虚拟环境, 但是对于 <code>VS Code</code> 来说, 它并不关心终端里是什么情况, 而是对于这个项目来说, 它需要使用什么环境来处理项目内容, 所以我们还需要在下方的状态栏里切换 <code>VS Code</code> 对于当前项目使用的 <code>python</code> 环境.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vN0OpQ.png" alt="vN0OpQ.png"></p>
+<p>点击下方状态栏的环境选择, 并且切换到刚刚创建的 <code>env</code> 环境, 此时下方的环境已经换成了 <code>&#39;env&#39;:venv</code>, 并且刚刚的黄色波浪线与问题也消失了.</p>
+<p>此时我们可以选择在激活了虚拟环境的终端里运行这份代码, 或者使用快捷键 <code>Ctrl + F5</code> 让 <code>VS Code</code> 帮我们运行. 这里展示一下在终端里直接运行的结果, 可以看到成功输出, 一个是向量内积结果, 一个是向量按位乘法结果.</p>
+<p><img data-src="/static/image/wast-pythonandvsc/vNDsPO.png" alt="vNDsPO.png"></p>
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>到这里就结束了, 说实话只讲了 <code>VS Code</code> 中使用 <code>python</code> 的最基本技巧, 这些操作之后写代码的时候多操作几次应该就烂熟于心了.</p>
+<p>但是对于进校没多久的萌新们来说, 估计看的还是很晕的, 因为有很多新名词, 特别是 &quot;环境变量&quot; 这种, 可能是完全第一次听说, 而且也容易出问题. 所以还是建议多动手尝试尝试, 并且善用搜索引擎, 多翻几篇博客, 总会能够找到适合你问题的解决方案.</p>
+<p>就这样了, 下回单独写写怎么合理的科学上网, 为使用 <code>Github</code> <del>抄代码</del>打下坚实基础.</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>新手入门</category>
+      </categories>
+      <tags>
+        <tag>python</tag>
+        <tag>VS Code</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>再遇文本分类</title>
     <url>//posts/2022/08/19/wast-nlp/</url>
     <content><![CDATA[<p>这是<a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">网安本科速通</a>系列的最后一篇了, 主题还是 <code>pytorch</code>, 但是问题换成了 <code>NLP</code>, 并且还是以经典的文本分类作为示例, 数据集使用与前面<a href="/posts/2022/08/17/wast-ml/">经典问题之文本分类</a>相同的一份小数据集, 方便进行比较.</p>
@@ -2468,100 +2565,17 @@
       </tags>
   </entry>
   <entry>
-    <title>打造一个舒适的 Python 编程环境</title>
-    <url>//posts/2022/08/13/wast-pythonandvsc/</url>
-    <content><![CDATA[<p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
-<p>因此本篇主要基于个人经验介绍一下比较舒适的 <code>python</code> 编程环境设置, 让大家能够把精力放在<del>抄</del>写代码上, 而不是被环境弄的头疼.</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>从本篇开始, 基本上算是完全的个人经验分享. 由于我自己是网安专业而非信安, 因此可能分享的内容对网安同学适用性更好, 不过信安同学可以酌情参考. 如果还没分专业, 也可以参考一下将来可能需要点一些啥技能来速通网安各个课程作业.</p>
-<p>如果对 <code>VS Code</code> 没有了解, 可以看前一篇<a href="/posts/2022/08/11/wast-vscandvs/">给新生的编程工具推荐与基本使用方法</a>, 这里面讲了 <code>VS Code</code> 的基本使用方法. 而本篇将会基于 <code>VS Code</code>, 打造一个相对舒适的 <code>python</code> 编程环境.</p>
-<h2 id="安装-Python"><a href="#安装-Python" class="headerlink" title="安装 Python"></a>安装 Python</h2><p>第一步肯定是安装 <code>python</code>, 官网就是 <span class="exturl" data-url="aHR0cHM6Ly93d3cucHl0aG9uLm9yZy8=">https://www.python.org/<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>可以选择下最新版, 不过不是那么的推荐, 而是适当旧一点, 比如现在最新的版本是 <code>3.10.6</code>, 那么可以下 <code>3.8.10</code> (<code>3.8.x</code> 发布的最后一个有安装包的版本). 这样子兼容度大一点. (曾经遇见过要装的某个包还没发布适配新版本 <code>python</code> 的版本, 害得我又重装降级了 <code>python</code>).</p>
-<p>这里直接提供 <a href="https://www.python.org/downloads/release/python-3810/"><code>Python 3.8.10</code></a> 的官方下载页面, 点进去之后选 &quot;Windows installer (64-bit)&quot; 这个版本就好了.</p>
-<p>下载好之后双击进入安装界面. 下面两项都勾上, 并且选择 &quot;Customize installation&quot;.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vtamNQ.png" alt="vtamNQ.png"></p>
-<p>这一面也是直接全勾.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vtaN4J.png" alt="vtaN4J.png"></p>
-<p>再次 Next 之后, 这个界面里, 勾选 &quot;Install for all users&quot;, 并且可以在下方调整 <code>python</code> 的安装路径. 推荐装到 D 盘或者其他方便找到的地方, 比如 <code>D:\Program Files\Python38</code>.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vtd9VU.png" alt="vtd9VU.png"></p>
-<p>重启一下电脑, 快捷键 <code>Win + R</code>, 输入 <code>cmd</code> 打开命令提示符, 敲一下 <code>python --version</code>, 如下图所示则安装成功.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vtdqeK.png" alt="vtdqeK.png"></p>
-<h2 id="Python-虚拟环境"><a href="#Python-虚拟环境" class="headerlink" title="Python 虚拟环境"></a>Python 虚拟环境</h2><h3 id="虚拟环境简介"><a href="#虚拟环境简介" class="headerlink" title="虚拟环境简介"></a>虚拟环境简介</h3><p>关于虚拟环境的详细介绍很多, 必应一搜就有很多<span class="exturl" data-url="aHR0cHM6Ly9jbi5iaW5nLmNvbS9zZWFyY2g/cT1weXRob24lRTclOUElODQlRTglOTklOUElRTYlOEIlOUYlRTclOEUlQUYlRTUlQTIlODMlRTYlOTglQUYlRTQlQkIlODAlRTQlQjklODg=">结果<i class="fa fa-external-link-alt"></i></span>, 有时间可以慢慢理解.</p>
-<p>当你写代码时, 不可能完全都靠自己从零开始, 这样子很低效<del>并且很蠢</del>, 所以对于 <code>python</code> 而言, 写代码之前确定并安装合适的第三方包就是基本操作.</p>
-<p>然而, 第三方包在发布的时候, 可能会存在许多不同的版本, 不同项目之间所需要的包版本也不尽相同, 会造成巨大的兼容问题 (比如万恶的 <code>tensorflow 1.x</code> 和 <code>tensorflow 2.x</code>). 这种时候就需要使用虚拟环境.</p>
-<p>虚拟环境可以简单认为是 &quot;<code>python</code> 和对应的包的副本&quot;, 最基本的要素是环境内的 <code>python</code> 版本和包的版本. 每一个环境之间的 <code>python</code> 和包版本都是相互独立的. 这样子在运行项目时, 我们可以选择特定的某一个环境, 从而使用某个特定的 <code>python</code> 版本与包版本.</p>
-<h3 id="虚拟环境管理"><a href="#虚拟环境管理" class="headerlink" title="虚拟环境管理"></a>虚拟环境管理</h3><p>网上很多推荐使用 <span class="exturl" data-url="aHR0cHM6Ly93d3cuYW5hY29uZGEuY29tLw==">Anaconda<i class="fa fa-external-link-alt"></i></span> 来进行包和环境的管理, 我觉得可以但没必要, 一是臃肿二是让新手有点摸不着头脑. 不过等熟练之后用倒是个不错的选择.</p>
-<p>这里只介绍一下 <code>python</code> 自带的 <code>venv</code> 模块使用以及第三方包 <code>virtualenvwrapper-win</code> 的使用.</p>
-<h4 id="在环境中安装第三方包"><a href="#在环境中安装第三方包" class="headerlink" title="在环境中安装第三方包"></a>在环境中安装第三方包</h4><p>一般来说, 安装完 <code>python</code> 之后, 就会有一个 &quot;本地环境&quot;, 而将除本地环境之外的其他环境通常 &quot;虚拟环境&quot;.</p>
-<p>在运行 <code>python</code> 程序时, 是按照所指定的 <code>python</code> 解释器来决定使用的环境的.</p>
-<p>我们在命令行里可以直接使用 <code>python</code> 指令, 实际上是因为我们在安装时勾选了 &quot;Add Python 3.8 to PATH&quot;, 在环境变量 <code>PATH</code> 中添加了本地环境中 <code>python</code> 解释器的路径, 所以在使用 <code>python</code> 指令时, 实际上就是使用了本地环境.</p>
-<p>通常主要使用内置的 <code>pip</code> 模块进行第三方包的管理, 并且有以下几个常用命令.</p>
-<ul>
-<li><p><code>&lt;解释器&gt; -m pip list &lt;包名&gt;</code>: 列出当前环境所有安装的包.</p>
-</li>
-<li><p><code>&lt;解释器&gt; -m pip install &lt;包名&gt;</code>: 安装包.</p>
-</li>
-<li><p><code>&lt;解释器&gt; -m pip install &lt;包名&gt;</code>: 卸载包.</p>
-</li>
-</ul>
-<p><code>&lt;解释器&gt;</code> 就是你要进行包管理的环境的解释器 <code>python.exe</code> 路径, 对于本地环境来说就是直接使用的 <code>python</code> 命令.</p>
-<p><code>-m pip</code> 表示调用了指定解释器中的 <code>pip</code> 模块进行包的管理.</p>
-<p><code>&lt;包名&gt;</code> 则是你需要的包的 &quot;安装名称&quot;, 一般来说它和 <code>import</code> 语句的名字是一致的, 但是也有可能不一样, 推荐去官方的包发布网站 <span class="exturl" data-url="aHR0cHM6Ly9weXBpLm9yZy8=">https://pypi.org/<i class="fa fa-external-link-alt"></i></span> 上进行搜索.</p>
-<p>除此之外, <code>pip</code> 也支持使用 <code>whl</code> 文件或者源码安装, 具体的可以自行进一步学习.</p>
-<h4 id="创建并使用虚拟环境"><a href="#创建并使用虚拟环境" class="headerlink" title="创建并使用虚拟环境"></a>创建并使用虚拟环境</h4><p>最简单的创建方法是使用自带的 <code>venv</code> 模块, 命令如下.</p>
-<p><code>python -m venv &lt;路径&gt;</code></p>
-<p>比如使用 <code>python -m venv env</code> 则会在当前目录下生成一个 <code>env</code> 文件夹, 这里面就包含了名为 <code>env</code> 的虚拟环境的解释器以及第三方库.</p>
-<p>另外比较重要的文件是 <code>activate</code> 与 <code>deactivate</code>, 用于激活和退出虚拟环境.</p>
-<p>具体的使用在后面的部分<a href="#%E5%9C%A8-VS-Code-%E4%B8%AD%E4%BD%BF%E7%94%A8-Python">在 VS Code 中使用 Python</a> 中再进行说明.</p>
-<p>另一种方案是使用第三方库 <code>virtualenvwrapper-win</code> 来辅助我们管理虚拟环境.</p>
-<p>使用 <code>python -m pip install virtualenvwrapper-win</code> 进行安装. 安装完后, 即可以在命令行中使用以下几个常用命令对机器上的虚拟环境进行集中管理.</p>
-<ul>
-<li><code>mkvirtualenv &lt;虚拟环境名称&gt;</code>: 创建虚拟环境.</li>
-<li><code>workon &lt;虚拟环境名称&gt;</code>: 激活对应的虚拟环境.</li>
-<li><code>rmvirtualenv &lt;虚拟环境名称&gt;</code>: 删除虚拟环境.</li>
-</ul>
-<p>前面的 <code>venv</code> 模块常常用于某个项目内的临时环境, 而 <code>virtualenvwrapper-win</code> 这个第三方工具主要用于你希望自己的电脑上常驻某些不同类别的环境, 并对它们方便的进行集中管理.</p>
-<p>默认该模块创建的环境都将位于 <code>%USERPROFILE%\envs</code> 文件夹下,可以通过环境变量 <code>WORKON_HOME</code> 来自定义你希望的存储位置.</p>
-<h3 id="常用的第三方包"><a href="#常用的第三方包" class="headerlink" title="常用的第三方包"></a>常用的第三方包</h3><p>对于速通网安, 有一些常用的第三方库总结, 在这里把我自己常用的包情况列举一下.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 用于格式化和检测代码规范的工具</span><br><span class="line">autopep8</span><br><span class="line">pylint</span><br><span class="line"></span><br><span class="line"># 与爬虫有关的库</span><br><span class="line">lxml</span><br><span class="line">beautifulsoup4</span><br><span class="line">requests</span><br><span class="line"></span><br><span class="line"># 与数据处理有关的库</span><br><span class="line">numpy</span><br><span class="line">pandas</span><br><span class="line">matplotlib</span><br><span class="line"></span><br><span class="line"># 机器学习以及深度学习相关的库</span><br><span class="line">opencv-python</span><br><span class="line">scikit-learn</span><br><span class="line"># torch</span><br><span class="line"># torchaudio</span><br><span class="line"># torchvision</span><br><span class="line"></span><br><span class="line"># 在 VS Code 内使用 jupyter notebook 有关的库</span><br><span class="line">ipykernel</span><br><span class="line">jupyter</span><br></pre></td></tr></table></figure>
-
-<p>其中 <code>torch</code> 的安装需要前往官网 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy8=">https://pytorch.org/<i class="fa fa-external-link-alt"></i></span> 按说明进行安装.</p>
-<h2 id="在-VS-Code-中使用-Python"><a href="#在-VS-Code-中使用-Python" class="headerlink" title="在 VS Code 中使用 Python"></a>在 VS Code 中使用 Python</h2><p>这一节将会实践一下前面所有的内容, 在 <code>VS Code</code> 中使用 <code>python</code> 完成一次向量乘法计算.</p>
-<p>打开之前曾经创建的 <code>example</code> 文件夹, 并且新建一个终端.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vNUegI.png" alt="vNUegI.png"></p>
-<p>我们使用以下命令为这个项目建立一个单独的虚拟环境, 取名为 <code>env</code>.</p>
-<p><code>python -m venv env</code></p>
-<p><img data-src="/static/image/wast-pythonandvsc/vNami4.png" alt="vNami4.png"></p>
-<p>命令执行完成后, 左边的资源管理器面板上多出来一个 <code>env</code> 文件夹, 这就是我们刚刚创建好的虚拟环境. 我们使用 <code>.\env\Scripts\activate</code> 在终端中激活这个虚拟环境, 激活完成后可以看到终端的提示信息前面多了一个 <code>(env)</code> 标记, 表示当前终端处于 <code>env</code> 的虚拟环境之下.</p>
-<p>如果出现不能执行的情况, 可以参考<span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vZGF4aW9uZzEzMTQvcC8xNjI2NTU0OS5odG1s">这篇博客<i class="fa fa-external-link-alt"></i></span>解决权限问题. 或者在 <code>VS Code</code> 的设置里把默认的终端类型调成 <code>cmd</code> 而不是 <code>powershell</code>, 我推荐改成 <code>cmd</code> 一劳永逸. <del><code>powershell</code> 屁事多</del>.</p>
-<p>解决完问题之后就如下图所示了.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vNdYn0.png" alt="vNdYn0.png"></p>
-<p>此时在终端里直接执行 <code>python</code> 有关的命令, 都会映射到虚拟环境里的命令.</p>
-<p>然后我们继续, 使用 <code>pip</code> 向虚拟环境里添加一个第三方库 <code>numpy</code>.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vNwSvn.png" alt="vNwSvn.png"></p>
-<p>顺利安装完成之后, 可以看到左边的 <code>env</code> 文件夹里 <code>site-packages</code> 下多出来一个 <code>numpy</code> 的文件夹, 这就是我们刚刚安装好的第三方库了. 同时终端里给了我们一个 <code>WARNING</code>, 提示我们可以对 <code>pip</code> 模块进行升级. 虽然影响不是很大, 不过推荐复制它提供的指令升一下级, 这样 <code>pip</code> 在查找和安装包时能够使用最新的功能, 减小安装失败的风险<del>主要是有彩色进度条</del>.</p>
-<p>然后清空之前 <code>main.py</code> 里面的代码, 并且敲入以下新的内容.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vNDSvd.png" alt="vNDSvd.png"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    vector1 = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line">    vector2 = np.array([<span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(np.dot(vector1, vector2))</span><br><span class="line">    <span class="built_in">print</span>(np.multiply(vector1, vector2))</span><br></pre></td></tr></table></figure>
-
-<p>会发现 <code>import</code> 语句的 <code>numpy</code> 有黄色波浪线, 同时下面的 &quot;问题&quot; 面板有写出来原因, 意思是没有 <code>numpy</code> 这个库.</p>
-<p>这是因为虽然我们刚刚在终端里是已经成功激活了虚拟环境, 但是对于 <code>VS Code</code> 来说, 它并不关心终端里是什么情况, 而是对于这个项目来说, 它需要使用什么环境来处理项目内容, 所以我们还需要在下方的状态栏里切换 <code>VS Code</code> 对于当前项目使用的 <code>python</code> 环境.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vN0OpQ.png" alt="vN0OpQ.png"></p>
-<p>点击下方状态栏的环境选择, 并且切换到刚刚创建的 <code>env</code> 环境, 此时下方的环境已经换成了 <code>&#39;env&#39;:venv</code>, 并且刚刚的黄色波浪线与问题也消失了.</p>
-<p>此时我们可以选择在激活了虚拟环境的终端里运行这份代码, 或者使用快捷键 <code>Ctrl + F5</code> 让 <code>VS Code</code> 帮我们运行. 这里展示一下在终端里直接运行的结果, 可以看到成功输出, 一个是向量内积结果, 一个是向量按位乘法结果.</p>
-<p><img data-src="/static/image/wast-pythonandvsc/vNDsPO.png" alt="vNDsPO.png"></p>
-<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>到这里就结束了, 说实话只讲了 <code>VS Code</code> 中使用 <code>python</code> 的最基本技巧, 这些操作之后写代码的时候多操作几次应该就烂熟于心了.</p>
-<p>但是对于进校没多久的萌新们来说, 估计看的还是很晕的, 因为有很多新名词, 特别是 &quot;环境变量&quot; 这种, 可能是完全第一次听说, 而且也容易出问题. 所以还是建议多动手尝试尝试, 并且善用搜索引擎, 多翻几篇博客, 总会能够找到适合你问题的解决方案.</p>
-<p>就这样了, 下回单独写写怎么合理的科学上网, 为使用 <code>Github</code> <del>抄代码</del>打下坚实基础.</p>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
-        <category>网安本科速通</category>
-        <category>新手入门</category>
+        <category>资源分享</category>
       </categories>
       <tags>
-        <tag>python</tag>
-        <tag>VS Code</tag>
+        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
@@ -2708,20 +2722,6 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
