@@ -451,7 +451,7 @@ function main() {
     for (let key of Object.keys(ASSET_MAPPING).sort()) {
         value = ASSET_MAPPING[key];
         let link = document.createElement("a");
-        link.href = "javascript:void(0)";
+        link.href = "javascript:void(0);";
         link.textContent = value.chName;
         link.setAttribute("data-key", key);
         link.onclick = changeSkinHandler;
