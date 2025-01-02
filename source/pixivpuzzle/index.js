@@ -1,3 +1,4 @@
+const PIXIV_DOMAIN = "i.pximg.net";
 const PROXY_DOMAIN = "i.pixiv.re";
 const puzzleContainer = document.getElementsByClassName("puzzle-container")[0];
 const piecesContainer = document.getElementsByClassName("puzzle-piece-container")[0];
@@ -11,7 +12,7 @@ let isSolved = false;
 let stepCount = 0;
 
 function showPuzzleReport() {
-    const originalUrl = illustInfo.urls[0].urls.original.replace("i.pximg.net", PROXY_DOMAIN);
+    const originalUrl = illustInfo.urls[0].urls.original.replace(PIXIV_DOMAIN, PROXY_DOMAIN);
 
     puzzleReport.style.display = "";
     puzzleReport.innerHTML = `
@@ -59,7 +60,6 @@ function updatePieceContainerSize() {
     const pieceH = puzzleH / 3;
 
     pieces.forEach(piece => {
-        if (piece.classList.contains("empty")) return;
         const xOffset = -(piece.dataset.col * pieceW);
         const yOffset = -(piece.dataset.row * pieceH);
         piece.style.backgroundSize = `${puzzleW}px ${puzzleH}px`;
@@ -148,7 +148,7 @@ function clickPiece(event) {
 /** 初始化拼图 */
 function initPuzzle() {
     const pageInfo = illustInfo.urls[0];
-    const imgUrl = pageInfo.urls.small.replace("i.pximg.net", PROXY_DOMAIN)
+    const imgUrl = pageInfo.urls.small.replace(PIXIV_DOMAIN, PROXY_DOMAIN)
     const imgWidth = pageInfo.width;
     const imgHeight = pageInfo.height;
 
@@ -177,6 +177,8 @@ function initPuzzle() {
             } else {
                 // 最后一个块作为空白块
                 piece.classList.add("empty");
+                piece.style.backgroundImage = "";
+                piece.dataset.url = imgUrl;
             }
             pieces.push(piece);
         }
@@ -191,9 +193,16 @@ function initPuzzle() {
 
 /** 重置当前拼图状态 */
 function resetPuzzle() {
+    // 重置拼图状态
     isSolved = false;
     stepCount = 0;
+
+    // 重置拼图块
     const pieces = Array.from(document.querySelectorAll('.puzzle-piece'));
+    pieces.sort((a, b) => a.dataset.index - b.dataset.index);
+    pieces[pieces.length - 1].style.backgroundImage = ""; // 清除空白块内容
+
+    // 重新生成随机拼图
     const state = generateRandomPuzzle();
     piecesContainer.innerHTML = "";
     state.forEach(idx => piecesContainer.appendChild(pieces[idx]));
@@ -201,6 +210,11 @@ function resetPuzzle() {
 
 /** 拼图完成 */
 function finishPuzzle() {
+    // 设置空白块背景
+    const emptyPiece = document.querySelector(".puzzle-piece.empty");
+    emptyPiece.style.backgroundImage = `url(${emptyPiece.dataset.url})`;
+
+    // 显示拼图报告
     showPuzzleReport();
 }
 
