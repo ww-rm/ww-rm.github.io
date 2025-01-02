@@ -34,7 +34,6 @@
 }
 
 .puzzle-piece {
-    background-size: 100%;
     background-repeat: no-repeat;
     border: none;
     cursor: pointer;
@@ -42,7 +41,6 @@
 
 .puzzle-piece.empty {
     background: none;
-    border: none;
     cursor: default;
 }
 
