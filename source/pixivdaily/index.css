@@ -4,28 +4,30 @@
     flex-direction: column;
     width: 100%;
     background-color: #f9f9f980;
-    row-gap: 10px;
 }
 
-.illust-container:not(:last-child) {
-    border-bottom: 5px double #9f9f9f80;
+.illust-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    row-gap: 5px;
+}
+
+.illust-container:not(:first-child) {
+    border-top: 5px double #9f9f9f80;
     /* 使用 1px solid 来添加底部间隔线 */
 }
 
 /* 文字说明部分 */
 .description {
-    padding: 10px 10px 2px 10px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
 }
 
 .description-item {
-    margin: 0 0 5px 0;
-}
-
-/* 每一行的样式 */
-.description .flex-line {
     display: flex;
     flex-wrap: wrap;
-    /* 允许换行 */
     justify-content: flex-start;
     row-gap: 5px;
     column-gap: 10px;
@@ -40,7 +42,6 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 2px 10px 10px 10px;
     overflow: hidden;
 }
 

@@ -6,11 +6,14 @@ let PROXY_DOMAIN = "i.pixiv.re";
 /** 生成一份 illust 的页面内容 */
 function generateIllustHtml(illustInfo) {
     const description = `<div class="description">
-        <div class="flex-line description-item">
+        <div class="description-item">
+            <span>共 <span class="description-label">${illustInfo.urls.length}</span> 张, 可上下滑动查看其他页，点击图片访问原图</span>
+        </div>
+        <div class="description-item">
             <span><span class="description-label">标题: </span>${illustInfo.illustTitle}</span>
             <span><span class="description-label">作者: </span>${illustInfo.userName}</span>
         </div>
-        <div class="flex-line description-item">
+        <div class="description-item">
             <a href="https://pixiv.net/artworks/${illustInfo.illustId}" target="_blank" rel="noopener noreferrer">
                 <span class="description-label">PID: </span><span>${illustInfo.illustId}</span>
             </a>
@@ -18,11 +21,8 @@ function generateIllustHtml(illustInfo) {
                 <span class="description-label">UID: </span><span>${illustInfo.userId}</span>
             </a>
         </div>
-        <div class="flex-line description-item">
-            <span class="description-label">标签: </span>${illustInfo.tags.map(e => `<span># ${e}</span>`).join("")}
-        </div>
         <div class="description-item">
-            <span>共 <span class="description-label">${illustInfo.urls.length}</span> 张, 可上下滑动查看其他页，点击图片访问原图</span>
+            <span class="description-label">标签: </span>${illustInfo.tags.map(e => `<span># ${e}</span>`).join("")}
         </div>
     </div>`;
     const hasLazyload = "lozad" in window; // 如果有懒加载则启用懒加载 data-src
@@ -31,7 +31,7 @@ function generateIllustHtml(illustInfo) {
         return `<a href="${e.urls.original.replace("i.pximg.net", PROXY_DOMAIN)}" target="_blank" rel="noopener noreferrer">${img}</a>`;
     }).join("\n");
     const imagelist = `<div class="image-container"><div class="image-list">${imagelinks}</div></div>`;
-    const illustHtml = `<div class="illust-container">${description}${imagelist}</div>`;
+    const illustHtml = `<div class="illust-container">${imagelist}${description}</div>`;
 
     return illustHtml;
 }
