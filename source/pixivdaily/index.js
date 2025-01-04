@@ -7,7 +7,7 @@ let PROXY_DOMAIN = "i.pixiv.re";
 function generateIllustHtml(illustInfo) {
     const description = `<div class="description">
         <div class="description-item">
-            <span>共 <span class="description-label">${illustInfo.urls.length}</span> 张, 可上下滑动查看其他页，点击图片访问原图</span>
+            <span>共 <span class="description-label">${illustInfo.urls.length}</span> 张, 可上下滑动, 点击访问原图</span>
         </div>
         <div class="description-item">
             <span><span class="description-label">标题: </span>${illustInfo.illustTitle}</span>
