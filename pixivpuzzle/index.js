@@ -252,9 +252,9 @@ function initGame() {
 
 function init() {
     document.getElementById("puzzle-actions").innerHTML = [
-        `<span>不合XP? <a href="javascript:void(0);" id="change-puzzle">换一张<i class="fa fa-shuffle fa-fw" aria-hidden="true"></i></a></span>`,
-        `<span>太难了? <a href="javascript:void(0);" id="reset-puzzle">重开一次<i class="fa fa-refresh fa-fw" aria-hidden="true"></i></a></span>`,
-        `<span>或者, <a href="javascript:void(0);" id="autosolve">一键还原<i class="fa fa-wand-magic-sparkles fa-fw" aria-hidden="true"></i></a></span>`,
+        `<span><a href="javascript:void(0);" id="change-puzzle" title="换一张">不合XP<i class="fa fa-shuffle fa-fw" aria-hidden="true"></i></a></span>`,
+        `<span><a href="javascript:void(0);" id="reset-puzzle" title="重开一次">重开一次<i class="fa fa-refresh fa-fw" aria-hidden="true"></i></a></span>`,
+        `<span><a href="javascript:void(0);" id="autosolve" title="自动求解">太难了<i class="fa fa-wand-magic-sparkles fa-fw" aria-hidden="true"></i></a></span>`,
     ].join("<span>|</span>");
     // 动态设置拼图区域大小
     (new ResizeObserver(updatePieceContainerSize)).observe(puzzleContainer);
