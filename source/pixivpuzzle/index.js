@@ -253,13 +253,78 @@ function initGame() {
 function init() {
     document.getElementById("puzzle-actions").innerHTML = [
         `<span>不合XP? <a href="javascript:void(0);" id="change-puzzle">换一张<i class="fa fa-shuffle fa-fw" aria-hidden="true"></i></a></span>`,
-        `<span>太难了? <a href="javascript:void(0);" id="reset-puzzle">重开一次<i class="fa fa-refresh fa-fw" aria-hidden="true"></a></span>`,
+        `<span>太难了? <a href="javascript:void(0);" id="reset-puzzle">重开一次<i class="fa fa-refresh fa-fw" aria-hidden="true"></i></a></span>`,
+        `<span>或者, <a href="javascript:void(0);" id="autosolve">一键还原<i class="fa fa-wand-magic-sparkles fa-fw" aria-hidden="true"></i></a></span>`,
     ].join("<span>|</span>");
     // 动态设置拼图区域大小
     (new ResizeObserver(updatePieceContainerSize)).observe(puzzleContainer);
     document.getElementById("change-puzzle").onclick = initGame;
     document.getElementById("reset-puzzle").onclick = resetPuzzle;
+    document.getElementById("autosolve").onclick = autoSolve;
     initGame();
+}
+
+/** BFS 求解最优步骤 */
+function bfsSolve(initState) {
+    if (initState === "012345678")
+        return [];
+
+    function* getValidNextStates(state) {
+        const emptyIdx = state.indexOf("8");
+        const emptyRow = Math.floor(emptyIdx / 3);
+        const emptyCol = emptyIdx % 3;
+        for (const [deltaRow, deltaCol] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+            const swapRow = emptyRow + deltaRow;
+            const swapCol = emptyCol + deltaCol;
+            if (swapRow >= 0 && swapRow <= 2 && swapCol >= 0 && swapCol <= 2) {
+                const swapIdx = swapRow * 3 + swapCol;
+                const nextState = [...state];
+                [nextState[emptyIdx], nextState[swapIdx]] = [nextState[swapIdx], nextState[emptyIdx]];
+                yield { "state": nextState.join(""), "swap": Number(state[swapIdx]) };
+            }
+        }
+    }
+
+    const queue = [{ "state": initState, "parent": null }];
+    const queueStates = new Set();
+    queueStates.add(queue[0].state)
+    while (queue.length > 0) {
+        const curNode = queue.shift();
+        for (const nextState of getValidNextStates(curNode.state)) {
+            if (queueStates.has(nextState.state)) {
+                continue;
+            } else {
+                queueStates.add(nextState.state);
+            }
+            const nextNode = { "state": nextState.state, "parent": { "node": curNode, "swap": nextState.swap } };
+            if (nextNode.state === "012345678") {
+                const answer = [];
+                let node = nextNode;
+                while (node.parent !== null) {
+                    answer.unshift(node.parent.swap);
+                    node = node.parent.node;
+                }
+                return answer;
+            } else {
+                queue.push(nextNode);
+            }
+        }
+    }
+}
+
+/** 自动求解 */
+function autoSolve() {
+    const piecesList = Array.from(piecesContainer.children);
+    const initState = piecesList.map(e => e.dataset.index).join("");
+    piecesList.sort((e1, e2) => Number(e1.dataset.index) - Number(e2.dataset.index));
+    const answer = bfsSolve(initState);
+    function doStep() {
+        if (answer.length > 0) {
+            piecesList[answer.shift()].click();
+            setTimeout(doStep, 100);
+        };
+    }
+    setTimeout(doStep);
 }
 
 init();
