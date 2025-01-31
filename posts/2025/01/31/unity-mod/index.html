@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="最近在 DLsite 上找到了一个比较有意思的音游, 于是在资源平台上下载下来玩了一下. 虽然说 v1.1 版本增加了自动游玩的功能, 但是会忽略特殊音符, 所以玩起来总感觉少点什么. 于是乎在各大论坛帖子的帮助下, 成功做出了第一个 Unity 游戏 Mod, 顺带还了解了一些基础的汉化方式.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unity 手工 Mod 制作方法整理">
+<meta property="og:url" content="https://ww-rm.github.io/posts/2025/01/31/unity-mod/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="最近在 DLsite 上找到了一个比较有意思的音游, 于是在资源平台上下载下来玩了一下. 虽然说 v1.1 版本增加了自动游玩的功能, 但是会忽略特殊音符, 所以玩起来总感觉少点什么. 于是乎在各大论坛帖子的帮助下, 成功做出了第一个 Unity 游戏 Mod, 顺带还了解了一些基础的汉化方式.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-31T02:09:20.000Z">
+<meta property="article:modified_time" content="2025-01-31T08:20:04.524Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="Mod">
+<meta property="article:tag" content="汉化">
+<meta property="article:tag" content="UABEA">
+<meta property="article:tag" content="Unity">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.github.io/posts/2025/01/31/unity-mod/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2025/01/31/unity-mod/","path":"/posts/2025/01/31/unity-mod/","title":"Unity 手工 Mod 制作方法整理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Unity 手工 Mod 制作方法整理 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.webp); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li><li class="menu-item menu-item-pixiv-daily"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv Daily</a></li><li class="menu-item menu-item-pixiv-puzzle"><a href="/pixivpuzzle/" rel="section"><i class="fa fa-puzzle-piece fa-fw"></i>Pixiv Puzzle</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD-Mod"><span class="nav-number">1.</span> <span class="nav-text">功能 Mod</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%BD%8D-C-%E4%BB%A3%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">定位 C# 代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-IL-%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.</span> <span class="nav-text">修改 IL 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%89%E5%8C%96-Mod"><span class="nav-number">2.</span> <span class="nav-text">汉化 Mod</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C-1"><span class="nav-number">2.1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%BD%8D%E8%B5%84%E6%BA%90"><span class="nav-number">2.2.</span> <span class="nav-text">定位资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E8%B5%84%E6%BA%90"><span class="nav-number">2.3.</span> <span class="nav-text">修改资源</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">111</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2025/01/31/unity-mod/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Unity 手工 Mod 制作方法整理 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Unity 手工 Mod 制作方法整理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-01-31 10:09:20" itemprop="dateCreated datePublished" datetime="2025-01-31T10:09:20+08:00">2025-01-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9D%82%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">杂学</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>19k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>34 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近在 DLsite 上找到了<span class="exturl" data-url="aHR0cHM6Ly93d3cuZGxzaXRlLmNvbS9tYW5pYXgvd29yay89L3Byb2R1Y3RfaWQvUkowMTIxMjkyMS5odG1s">一个比较有意思的音游<i class="fa fa-external-link-alt"></i></span>, 于是在资源平台上下载下来玩了一下. 虽然说 v1.1 版本增加了自动游玩的功能, 但是会忽略特殊音符, 所以玩起来总感觉少点什么. 于是乎在各大论坛帖子的帮助下, 成功做出了第一个 Unity 游戏 Mod, 顺带还了解了一些基础的汉化方式.</p>
+<span id="more"></span>
+
+<h2 id="功能-Mod"><a href="#功能-Mod" class="headerlink" title="功能 Mod"></a>功能 Mod</h2><h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>我需要增加的功能很简单, 游戏原本的自动游玩功能是自动 Perfect 所有的常规音符, 但是实际上音轨上会有很多特殊音符, 如果点击了会触发特殊效果<del>涩涩</del>, 所以我希望在原本自动游玩功能的基础上, 增加对特殊音符的点击操作.</p>
+<p>很幸运的是, 这个游戏是 Unity 引擎制作的, 并且脚本编译方式也是 Mono 模式, 因此操作起来难度比较低, 适合我这个小白入门练手.</p>
+<p>在游戏根目录下的 <code>XXX_Data/Managed</code> 目录下可以找到一个 <code>Assembly-CSharp.dll</code> 文件, 这是 Mono 方式编译的特点, 而游戏逻辑代码也位于这份 dll 文件里.</p>
+<p>我们需要用到 <span class="exturl" data-url="aHR0cHM6Ly93d3cuamV0YnJhaW5zLmNvbS9kZWNvbXBpbGVyLw==">dotPeek<i class="fa fa-external-link-alt"></i></span>, 任意版本 Visual Studio 和 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybi5taWNyb3NvZnQuY29tL3poLWNuL2RvdG5ldC9mcmFtZXdvcmsvdG9vbHMvaWxkYXNtLWV4ZS1pbC1kaXNhc3NlbWJsZXI=">ildasm/ilasm<i class="fa fa-external-link-alt"></i></span> 几个工具.</p>
+<p>dotPeek 是一个 .NET 反编译工具, 可以帮助我们导出 dll 对应的 C# 源代码, 然后理解游戏逻辑, 定位功能代码所处的位置.</p>
+<p>Visual Studio 用来打开 dotPeek 导出的 dll 项目, 方便查找代码.</p>
+<p>ildasm/ilasm 是一组 IL 语言反汇编/汇编工具, 可以将 dll 转换成能够手工修改的 IL 代码, 并把修改过的 IL 代码重新打包成 dll 文件, 完成 Mod. 该工具随 Visual Studio 一起安装.</p>
+<p>此外还需要一个文本编辑器, 推荐 VSCode.</p>
+<p>我们的思路很简单, 将原始 dll 导出 IL 代码, 修改需要的功能, 重新把 IL 代码打包回 dll 并替换原始 dll, 从而增加 Mod 功能.</p>
+<p>打开 dotPeek, 并且 Open 我们需要修改的 dll 文件, 加载完成后右键项目名选择 <code>Export to Project</code>, 并选择一个地方保存导出的 VS 项目.</p>
+<p>然后是 IL 代码的反汇编和汇编, 可以在 VS 开发人员命令提示符里使用下面的命令.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 反汇编并指定输出, 会得到 il 以及一份 res 文件</span></span><br><span class="line">ildasm Assembly-CSharp.dll /output:Assembly-CSharp.il</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将修改后的 il 文件和 res 重新打包回 dll, 不报错即成功</span></span><br><span class="line">ilasm /dll /resource:Assembly-CSharp.res Assembly-CSharp.il /output:Assembly-CSharp.dll</span><br></pre></td></tr></table></figure>
+
+<p>可能还有更好的工具, 例如 dnSpy, 但是作为小白, 我参考的帖子就是用的这几个, 所以成功之后也没花时间去研究更好的工具了, 有兴趣的可以试试.</p>
+<h3 id="定位-C-代码"><a href="#定位-C-代码" class="headerlink" title="定位 C# 代码"></a>定位 C# 代码</h3><p>打开我们导出的 VS 项目, 接下来我们需要发挥我们的聪明才智和编程经验, 找到和判定有关的逻辑, 以及一些好用的导航功能:</p>
+<ul>
+<li><code>Ctrl + F</code>: 查找所有单词</li>
+<li><code>F12</code>: 查找定义</li>
+<li><code>Shift + F12</code>: 查找引用</li>
+</ul>
+<p>经过一番搜寻, 可以找到一个这样的函数.</p>
+<details class="note info"><summary><p>怎么找的?</p>
+</summary>
+<p>作为一个音游, 可以看到代码里很多和 Judge 有关的函数, 为了挂机自动 Perfect, 我们需要修改挂机判定部分逻辑, 因此围绕 Judge 这个单词去查找有关的方法.</p>
+
+</details>
+
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">CheckTimeLimit</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">  NotesData target1;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>.NotesQueueLeft.TryPeek(<span class="keyword">ref</span> target1))</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> (target1.NotesType == RhysmGame.NotesType.Event || target1.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> ((<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt;= (<span class="built_in">double</span>) target1.EndTime + (<span class="built_in">double</span>) target1.HitCount * (<span class="built_in">double</span>) <span class="keyword">this</span>.adjustData.ThroughTime)</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">if</span> (target1.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">          <span class="keyword">this</span>.PlayEventNotes(target1);</span><br><span class="line">        <span class="keyword">this</span>.NotesViewer.SetActiveNotes(target1.Id);</span><br><span class="line">        <span class="keyword">this</span>.NotesQueueLeft.Dequeue();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.IsAutoPlay &amp;&amp; (<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt; (<span class="built_in">double</span>) target1.EndTime)</span><br><span class="line">    &#123;</span><br><span class="line">      NotesData targetNotes = <span class="keyword">this</span>.NotesQueueLeft.Dequeue();</span><br><span class="line">      <span class="keyword">this</span>.SetJudgeResult(targetNotes, RhysmGame.JudgeType.Perfect);</span><br><span class="line">      <span class="keyword">this</span>.NotesViewer.SetActiveNotes(targetNotes.Id);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> ((<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt; (<span class="built_in">double</span>) target1.EndTime + (<span class="built_in">double</span>) target1.HitCount * <span class="number">0.10000000149011612</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      NotesData targetNotes = <span class="keyword">this</span>.NotesQueueLeft.Dequeue();</span><br><span class="line">      <span class="keyword">this</span>.SetJudgeResult(targetNotes, RhysmGame.JudgeType.Bad);</span><br><span class="line">      <span class="keyword">this</span>.NotesViewer.SetActiveNotes(targetNotes.Id);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  NotesData target2;</span><br><span class="line">  <span class="keyword">if</span> (!<span class="keyword">this</span>.NotesQueueRight.TryPeek(<span class="keyword">ref</span> target2))</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">if</span> (target2.NotesType == RhysmGame.NotesType.Event || target2.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &lt; (<span class="built_in">double</span>) target2.EndTime + (<span class="built_in">double</span>) target2.HitCount * (<span class="built_in">double</span>) <span class="keyword">this</span>.adjustData.ThroughTime)</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span> (target2.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">      <span class="keyword">this</span>.PlayEventNotes(target2);</span><br><span class="line">    <span class="keyword">this</span>.NotesViewer.SetActiveNotes(target2.Id);</span><br><span class="line">    <span class="keyword">this</span>.NotesQueueRight.Dequeue();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">this</span>.IsAutoPlay &amp;&amp; (<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt; (<span class="built_in">double</span>) target2.EndTime)</span><br><span class="line">  &#123;</span><br><span class="line">    NotesData targetNotes = <span class="keyword">this</span>.NotesQueueRight.Dequeue();</span><br><span class="line">    <span class="keyword">this</span>.SetJudgeResult(targetNotes, RhysmGame.JudgeType.Perfect);</span><br><span class="line">    <span class="keyword">this</span>.NotesViewer.SetActiveNotes(targetNotes.Id);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &lt;= (<span class="built_in">double</span>) target2.EndTime + (<span class="built_in">double</span>) target2.HitCount * <span class="number">0.079999998211860657</span>)</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">this</span>.SetJudgeResult(<span class="keyword">this</span>.NotesQueueRight.Dequeue(), RhysmGame.JudgeType.Bad);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数描述的是在挂机时什么都没做音符超时了如何处理, 可以看到对不同类型的音符有不同的处理规则.</p>
+<p>如果是自动游玩模式, 则对于超时的音符会判定成 Perfect, 否则会判定超时 0.1 秒变成 Bad.</p>
+<p>我们现在需要在对 <code>Temptation</code> 类型的音符里增加触发操作, 原逻辑直接忽略了该类型音符.</p>
+<p>于是我们针对这个关键词, 寻找一下非自动模式点击后特殊音符的触发逻辑.</p>
+<p>进一步找到核心函数 <code>SetJudgeResult</code>, 用于处理每个音符点击后的判定结果.</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">SetJudgeResult</span>(<span class="params">NotesData targetNotes, RhysmGame.JudgeType type</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span> (targetNotes.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">this</span>.NotesViewer.SetActiveNotes(targetNotes.Id);</span><br><span class="line">  <span class="keyword">if</span> (targetNotes.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  &#123;</span><br><span class="line">    SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(<span class="string">&quot;BattleSE&quot;</span>, <span class="string">&quot;Temptation&quot;</span>);</span><br><span class="line">    <span class="keyword">this</span>.SetActiveTemptation(targetNotes.AnimationId);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">int</span> num = !targetNotes.IsLong ? targetNotes.AnimationType() : <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">int</span> type1 = targetNotes.HitType == RhysmGame.HitType.Up ? <span class="number">-1</span> : num;</span><br><span class="line">    <span class="keyword">this</span>.IsPlayLoopAnim |= targetNotes.IsLong;</span><br><span class="line">    <span class="keyword">if</span> (targetNotes.IsLong)</span><br><span class="line">      SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlayLoopSE(<span class="string">&quot;BattleSE&quot;</span>, <span class="string">&quot;Loop&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (targetNotes.HitType == RhysmGame.HitType.Up)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">this</span>.IsPlayLoopAnim = <span class="literal">false</span>;</span><br><span class="line">      SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.StopLoopSE();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.IsPlayLoopAnim)</span><br><span class="line">      type1 = <span class="number">0</span>;</span><br><span class="line">    Action onPlaySe = <span class="keyword">this</span>.OnPlaySe;</span><br><span class="line">    <span class="keyword">if</span> (onPlaySe != <span class="literal">null</span>)</span><br><span class="line">      onPlaySe();</span><br><span class="line">    <span class="keyword">switch</span> (type - <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">case</span> RhysmGame.JudgeType.Bad:</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">case</span> RhysmGame.JudgeType.Good:</span><br><span class="line">        <span class="keyword">this</span>.ComboMiss();</span><br><span class="line">        <span class="keyword">this</span>.PlayBadAnim();</span><br><span class="line">        <span class="keyword">this</span>.OnPlayBadEffect(<span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">this</span>.PlayAnimation(type1, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">this</span>.JudgeEffect(targetNotes.IsLong, <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> RhysmGame.JudgeType.Perfect:</span><br><span class="line">        <span class="keyword">this</span>.AddCombo();</span><br><span class="line">        <span class="keyword">this</span>.OnPlayBadEffect(<span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">this</span>.PlayAnimation(type1, <span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">this</span>.JudgeEffect(targetNotes.IsLong);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      <span class="keyword">case</span> RhysmGame.JudgeType.Good | RhysmGame.JudgeType.Perfect:</span><br><span class="line">        <span class="keyword">this</span>.AddCombo();</span><br><span class="line">        <span class="keyword">this</span>.OnPlayBadEffect(<span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">this</span>.PlayAnimation(type1, <span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">this</span>.JudgeEffect(targetNotes.IsLong);</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (type == RhysmGame.JudgeType.Ready)</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">this</span>.PlaySe(type);</span><br><span class="line">    <span class="keyword">this</span>.ScoreDic[type]++;</span><br><span class="line">    <span class="keyword">this</span>.AddEcstasy(type);</span><br><span class="line">    <span class="built_in">string</span> timingText = (SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() - targetNotes.EndTime).ToString();</span><br><span class="line">    <span class="keyword">this</span>.InstantiateJudgeObject(type, timingText);</span><br><span class="line">    <span class="keyword">if</span> (targetNotes.NotesType != RhysmGame.NotesType.Heart)</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">this</span>.PlayHeartSe(type);</span><br><span class="line">    <span class="keyword">this</span>.AddHeartScore(type);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>起作用的就是这两句:</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(<span class="string">&quot;BattleSE&quot;</span>, <span class="string">&quot;Temptation&quot;</span>);</span><br><span class="line"><span class="keyword">this</span>.SetActiveTemptation(targetNotes.AnimationId);</span><br></pre></td></tr></table></figure>
+
+<p>触发了特殊动画效果, 那么我们只需要在 <code>CheckTimeLimit</code> 函数里增加这两句就行, 类似下面这样:</p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">CheckTimeLimit</span>()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line">  <span class="keyword">if</span> (target1.NotesType == RhysmGame.NotesType.Event || target1.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt; (<span class="built_in">double</span>) target1.EndTime)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> (target1.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">        <span class="keyword">this</span>.PlayEventNotes(target1);</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.IsAutoPlay &amp;&amp; target1.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">      &#123;</span><br><span class="line">        SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(<span class="string">&quot;BattleSE&quot;</span>, <span class="string">&quot;Temptation&quot;</span>);</span><br><span class="line">        <span class="keyword">this</span>.SetActiveTemptation(target1.AnimationId);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">this</span>.NotesViewer.SetActiveNotes(target1.Id);</span><br><span class="line">      <span class="keyword">this</span>.NotesQueueLeft.Dequeue();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line">  <span class="keyword">if</span> (target2.NotesType == RhysmGame.NotesType.Event || target2.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ((<span class="built_in">double</span>) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &lt;= (<span class="built_in">double</span>) target2.EndTime)</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span> (target2.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">      <span class="keyword">this</span>.PlayEventNotes(target2);</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.IsAutoPlay &amp;&amp; target2.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">    &#123;</span><br><span class="line">      SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(<span class="string">&quot;BattleSE&quot;</span>, <span class="string">&quot;Temptation&quot;</span>);</span><br><span class="line">      <span class="keyword">this</span>.SetActiveTemptation(target2.AnimationId);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.NotesViewer.SetActiveNotes(target2.Id);</span><br><span class="line">    <span class="keyword">this</span>.NotesQueueRight.Dequeue();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改-IL-代码"><a href="#修改-IL-代码" class="headerlink" title="修改 IL 代码"></a>修改 IL 代码</h3><p>确认 C# 层面的代码修改逻辑之后, 就可以去修改 IL 代码了.</p>
+<p>用 ildasm 导出 <code>Assembly-CSharp.il</code>, 然后用 VSCode 打开, 直接搜索这两个函数名, 找到 IL 代码的定义.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">.method public hidebysig instance void </span><br><span class="line">        SetJudgeResult(class NotesData targetNotes,</span><br><span class="line">                        valuetype RhysmGame/JudgeType &#x27;type&#x27;) cil managed</span><br><span class="line">&#123;</span><br><span class="line">  // 代码大小       461 (0x1cd)</span><br><span class="line">  .maxstack  4</span><br><span class="line">  .locals init (int32 V_0,</span><br><span class="line">            string V_1,</span><br><span class="line">            valuetype RhysmGame/JudgeType V_2,</span><br><span class="line">            int32 V_3,</span><br><span class="line">            float32 V_4)</span><br><span class="line">  // ......</span><br><span class="line"></span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  // if (targetNotes.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  // &#123;</span><br><span class="line">  //   SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(&quot;BattleSE&quot;, &quot;Temptation&quot;);</span><br><span class="line">  //   this.SetActiveTemptation(targetNotes.AnimationId);</span><br><span class="line">  // &#125;</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  IL_001c:  ldarg.1</span><br><span class="line">  IL_001d:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_0022:  ldc.i4.4</span><br><span class="line">  IL_0023:  bne.un.s   IL_0046</span><br><span class="line"></span><br><span class="line">  IL_0025:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_002a:  ldstr      &quot;BattleSE&quot;</span><br><span class="line">  IL_002f:  ldstr      &quot;Temptation&quot;</span><br><span class="line">  IL_0034:  callvirt   instance void SoundManager::PlaySE(string,</span><br><span class="line">                                                          string)</span><br><span class="line">  IL_0039:  ldarg.0</span><br><span class="line">  IL_003a:  ldarg.1</span><br><span class="line">  IL_003b:  ldfld      string NotesData::AnimationId</span><br><span class="line">  IL_0040:  call       instance void RhysmGame::SetActiveTemptation(string)</span><br><span class="line">  IL_0045:  ret</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line"></span><br><span class="line">  // ......</span><br><span class="line">&#125; // end of method RhysmGame::SetJudgeResult</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line">.method public hidebysig instance void </span><br><span class="line">        CheckTimeLimit() cil managed</span><br><span class="line">&#123;</span><br><span class="line">  // 代码大小       511 (0x1ff)</span><br><span class="line">  .maxstack  4</span><br><span class="line">  .locals init (class NotesData V_0,</span><br><span class="line">            class NotesData V_1,</span><br><span class="line">            class NotesData V_2,</span><br><span class="line">            class NotesData V_3,</span><br><span class="line">            class NotesData V_4,</span><br><span class="line">            class NotesData V_5)</span><br><span class="line">  </span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  // if ((double) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt;= (double) target1.EndTime + (double) target1.HitCount * (double) this.adjustData.ThroughTime)</span><br><span class="line">  // &#123;</span><br><span class="line">  //   if (target1.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">  //     this.PlayEventNotes(target1);</span><br><span class="line">  //   this.NotesViewer.SetActiveNotes(target1.Id);</span><br><span class="line">  //   this.NotesQueueLeft.Dequeue();</span><br><span class="line">  // &#125;</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  IL_0024:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_0029:  callvirt   instance float32 SoundManager::GetBGMCurrentTime()</span><br><span class="line">  IL_002e:  ldloc.0</span><br><span class="line">  IL_002f:  ldfld      float32 NotesData::EndTime</span><br><span class="line">  IL_0034:  ldloc.0</span><br><span class="line">  IL_0035:  ldfld      int32 NotesData::HitCount</span><br><span class="line">  IL_003a:  conv.r4</span><br><span class="line">  IL_003b:  ldarg.0</span><br><span class="line">  IL_003c:  ldfld      class AdjustData RhysmGame::adjustData</span><br><span class="line">  IL_0041:  ldfld      float32 AdjustData::ThroughTime</span><br><span class="line">  IL_0046:  mul</span><br><span class="line">  IL_0047:  add</span><br><span class="line">  IL_0048:  blt.un     IL_0108</span><br><span class="line"></span><br><span class="line">  IL_004d:  ldloc.0</span><br><span class="line">  IL_004e:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_0053:  ldc.i4.5</span><br><span class="line">  IL_0054:  bne.un.s   IL_005d</span><br><span class="line"></span><br><span class="line">  IL_0056:  ldarg.0</span><br><span class="line">  IL_0057:  ldloc.0</span><br><span class="line">  IL_0058:  call       instance void RhysmGame::PlayEventNotes(class NotesData)</span><br><span class="line">  IL_005d:  ldarg.0</span><br><span class="line">  IL_005e:  ldfld      class RhysmGameNotesViewer RhysmGame::NotesViewer</span><br><span class="line">  IL_0063:  ldloc.0</span><br><span class="line">  IL_0064:  ldfld      int64 NotesData::Id</span><br><span class="line">  IL_0069:  ldc.i4.0</span><br><span class="line">  IL_006a:  callvirt   instance void RhysmGameNotesViewer::SetActiveNotes(int64,</span><br><span class="line">                                                                          bool)</span><br><span class="line">  IL_006f:  ldarg.0</span><br><span class="line">  IL_0070:  ldfld      class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt; RhysmGame::NotesQueueLeft</span><br><span class="line">  IL_0075:  callvirt   instance !0 class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt;::Dequeue()</span><br><span class="line">  IL_007a:  pop</span><br><span class="line">  IL_007b:  br         IL_0108</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line"></span><br><span class="line">  // ......</span><br><span class="line"></span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  // if ((double) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &lt; (double) target2.EndTime + (double) target2.HitCount * (double) this.adjustData.ThroughTime)</span><br><span class="line">  //   return;</span><br><span class="line">  // if (target2.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">  //   this.PlayEventNotes(target2);</span><br><span class="line">  // this.NotesViewer.SetActiveNotes(target2.Id);</span><br><span class="line">  // this.NotesQueueRight.Dequeue();</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  IL_012c:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_0131:  callvirt   instance float32 SoundManager::GetBGMCurrentTime()</span><br><span class="line">  IL_0136:  ldloc.1</span><br><span class="line">  IL_0137:  ldfld      float32 NotesData::EndTime</span><br><span class="line">  IL_013c:  ldloc.1</span><br><span class="line">  IL_013d:  ldfld      int32 NotesData::HitCount</span><br><span class="line">  IL_0142:  conv.r4</span><br><span class="line">  IL_0143:  ldarg.0</span><br><span class="line">  IL_0144:  ldfld      class AdjustData RhysmGame::adjustData</span><br><span class="line">  IL_0149:  ldfld      float32 AdjustData::ThroughTime</span><br><span class="line">  IL_014e:  mul</span><br><span class="line">  IL_014f:  add</span><br><span class="line">  IL_0150:  blt.un     IL_01fe</span><br><span class="line"></span><br><span class="line">  IL_0155:  ldloc.1</span><br><span class="line">  IL_0156:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_015b:  ldc.i4.5</span><br><span class="line">  IL_015c:  bne.un.s   IL_0165</span><br><span class="line"></span><br><span class="line">  IL_015e:  ldarg.0</span><br><span class="line">  IL_015f:  ldloc.1</span><br><span class="line">  IL_0160:  call       instance void RhysmGame::PlayEventNotes(class NotesData)</span><br><span class="line">  IL_0165:  ldarg.0</span><br><span class="line">  IL_0166:  ldfld      class RhysmGameNotesViewer RhysmGame::NotesViewer</span><br><span class="line">  IL_016b:  ldloc.1</span><br><span class="line">  IL_016c:  ldfld      int64 NotesData::Id</span><br><span class="line">  IL_0171:  ldc.i4.0</span><br><span class="line">  IL_0172:  callvirt   instance void RhysmGameNotesViewer::SetActiveNotes(int64,</span><br><span class="line">                                                                          bool)</span><br><span class="line">  IL_0177:  ldarg.0</span><br><span class="line">  IL_0178:  ldfld      class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt; RhysmGame::NotesQueueRight</span><br><span class="line">  IL_017d:  callvirt   instance !0 class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt;::Dequeue()</span><br><span class="line">  IL_0182:  pop</span><br><span class="line">  IL_0183:  ret</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line"></span><br><span class="line">  // ......</span><br><span class="line"></span><br><span class="line">  IL_01fe:  ret</span><br><span class="line">&#125; // end of method RhysmGame::CheckTimeLimit</span><br></pre></td></tr></table></figure>
+
+<p>IL 代码太长, 贴了一下核心代码片段的对照. 我们要做的就是把 <code>SetJudgeResult</code> 里的 IL 代码片段添加到 <code>CheckTimeLimit</code> 里. 不同 IL 代码指令含义用法可以查询文档 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybi5taWNyb3NvZnQuY29tL2VuLXVzL2RvdG5ldC9hcGkvc3lzdGVtLnJlZmxlY3Rpb24uZW1pdC5vcGNvZGVz">OpCodes Class<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里简单说一下每条指令运行格式, 方法运行中会有一个计算栈, 每条指令都规定了指令大小和参数数量, 调用前先将需要的参数进栈, 然后调用指令后, 调用的参数都会被出栈, 指令的返回结果被进栈. 可以把每条指令理解成遵循 stdcall 调用约定的函数.</p>
+<p>在 IL 代码的方法里, 每条指令都有自己的地址 (十六进制), 并且下一行地址等于上一行地址加上上一行指令所占字节数. 同时对于流程控制, 会存在一些跳转指令来完成类似于 <code>if/else</code> 的逻辑判断.</p>
+<p>明白上述关系后, 我们就可以依葫芦画瓢, 模仿现有的 IL 代码进行修改, 改完之后大概长这样.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line">.method public hidebysig instance void </span><br><span class="line">        CheckTimeLimit() cil managed</span><br><span class="line">&#123;</span><br><span class="line">  // 代码大小       511 (0x1ff)</span><br><span class="line">  .maxstack  4</span><br><span class="line">  .locals init (class NotesData V_0,</span><br><span class="line">            class NotesData V_1,</span><br><span class="line">            class NotesData V_2,</span><br><span class="line">            class NotesData V_3,</span><br><span class="line">            class NotesData V_4,</span><br><span class="line">            class NotesData V_5)</span><br><span class="line">  </span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  // if ((double) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &gt; (double) target1.EndTime)</span><br><span class="line">  // &#123;</span><br><span class="line">  //   if (target1.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">  //     this.PlayEventNotes(target1);</span><br><span class="line">  //   if (this.IsAutoPlay &amp;&amp; target1.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  //   &#123;</span><br><span class="line">  //     SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(&quot;BattleSE&quot;, &quot;Temptation&quot;);</span><br><span class="line">  //     this.SetActiveTemptation(target1.AnimationId);</span><br><span class="line">  //   &#125;</span><br><span class="line">  //   this.NotesViewer.SetActiveNotes(target1.Id);</span><br><span class="line">  //   this.NotesQueueLeft.Dequeue();</span><br><span class="line">  // &#125;</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  IL_0024:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_0029:  callvirt   instance float32 SoundManager::GetBGMCurrentTime()</span><br><span class="line">  IL_002e:  ldloc.0</span><br><span class="line">  IL_002f:  ldfld      float32 NotesData::EndTime</span><br><span class="line">  IL_0034:  ble.un     IL_0125</span><br><span class="line"></span><br><span class="line">  IL_0039:  ldloc.0</span><br><span class="line">  IL_003a:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_003f:  ldc.i4.5</span><br><span class="line">  IL_0040:  bne.un.s   IL_0049</span><br><span class="line"></span><br><span class="line">  IL_0042:  ldarg.0</span><br><span class="line">  IL_0043:  ldloc.0</span><br><span class="line">  IL_0044:  call       instance void RhysmGame::PlayEventNotes(class NotesData)</span><br><span class="line">  IL_0049:  ldarg.0</span><br><span class="line">  IL_004a:  ldfld      bool RhysmGame::IsAutoPlay</span><br><span class="line">  IL_004f:  brfalse.s  IL_007a</span><br><span class="line"></span><br><span class="line">  IL_0051:  ldloc.0</span><br><span class="line">  IL_0052:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_0057:  ldc.i4.4</span><br><span class="line">  IL_0058:  bne.un.s   IL_007a</span><br><span class="line"></span><br><span class="line">  IL_005a:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_005f:  ldstr      &quot;BattleSE&quot;</span><br><span class="line">  IL_0064:  ldstr      &quot;Temptation&quot;</span><br><span class="line">  IL_0069:  callvirt   instance void SoundManager::PlaySE(string,</span><br><span class="line">                                                          string)</span><br><span class="line">  IL_006e:  ldarg.0</span><br><span class="line">  IL_006f:  ldloc.0</span><br><span class="line">  IL_0070:  ldfld      string NotesData::AnimationId</span><br><span class="line">  IL_0075:  call       instance void RhysmGame::SetActiveTemptation(string)</span><br><span class="line">  IL_007a:  ldarg.0</span><br><span class="line">  IL_007b:  ldfld      class RhysmGameNotesViewer RhysmGame::NotesViewer</span><br><span class="line">  IL_0080:  ldloc.0</span><br><span class="line">  IL_0081:  ldfld      int64 NotesData::Id</span><br><span class="line">  IL_0086:  ldc.i4.0</span><br><span class="line">  IL_0087:  callvirt   instance void RhysmGameNotesViewer::SetActiveNotes(int64,</span><br><span class="line">                                                                          bool)</span><br><span class="line">  IL_008c:  ldarg.0</span><br><span class="line">  IL_008d:  ldfld      class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt; RhysmGame::NotesQueueLeft</span><br><span class="line">  IL_0092:  callvirt   instance !0 class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt;::Dequeue()</span><br><span class="line">  IL_0097:  pop</span><br><span class="line">  IL_0098:  br         IL_0125</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line"></span><br><span class="line">  // ......</span><br><span class="line"></span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  // if ((double) SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.GetBGMCurrentTime() &lt;= (double) target2.EndTime)</span><br><span class="line">  //   return;</span><br><span class="line">  // if (target2.NotesType == RhysmGame.NotesType.Event)</span><br><span class="line">  //   this.PlayEventNotes(target2);</span><br><span class="line">  // if (this.IsAutoPlay &amp;&amp; target2.NotesType == RhysmGame.NotesType.Temptation)</span><br><span class="line">  // &#123;</span><br><span class="line">  //   SingletonMonoBehaviour&lt;SoundManager&gt;.Instance.PlaySE(&quot;BattleSE&quot;, &quot;Temptation&quot;);</span><br><span class="line">  //   this.SetActiveTemptation(target2.AnimationId);</span><br><span class="line">  // &#125;</span><br><span class="line">  // this.NotesViewer.SetActiveNotes(target2.Id);</span><br><span class="line">  // this.NotesQueueRight.Dequeue();</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line">  IL_0149:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_014e:  callvirt   instance float32 SoundManager::GetBGMCurrentTime()</span><br><span class="line">  IL_0153:  ldloc.1</span><br><span class="line">  IL_0154:  ldfld      float32 NotesData::EndTime</span><br><span class="line">  IL_0159:  ble.un     IL_0238</span><br><span class="line"></span><br><span class="line">  IL_015e:  ldloc.1</span><br><span class="line">  IL_015f:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_0164:  ldc.i4.5</span><br><span class="line">  IL_0165:  bne.un.s   IL_016e</span><br><span class="line"></span><br><span class="line">  IL_0167:  ldarg.0</span><br><span class="line">  IL_0168:  ldloc.1</span><br><span class="line">  IL_0169:  call       instance void RhysmGame::PlayEventNotes(class NotesData)</span><br><span class="line">  IL_016e:  ldarg.0</span><br><span class="line">  IL_016f:  ldfld      bool RhysmGame::IsAutoPlay</span><br><span class="line">  IL_0174:  brfalse.s  IL_019f</span><br><span class="line"></span><br><span class="line">  IL_0176:  ldloc.1</span><br><span class="line">  IL_0177:  ldfld      valuetype RhysmGame/NotesType NotesData::NotesType</span><br><span class="line">  IL_017c:  ldc.i4.4</span><br><span class="line">  IL_017d:  bne.un.s   IL_019f</span><br><span class="line"></span><br><span class="line">  IL_017f:  call       !0 class SingletonMonoBehaviour`1&lt;class SoundManager&gt;::get_Instance()</span><br><span class="line">  IL_0184:  ldstr      &quot;BattleSE&quot;</span><br><span class="line">  IL_0189:  ldstr      &quot;Temptation&quot;</span><br><span class="line">  IL_018e:  callvirt   instance void SoundManager::PlaySE(string,</span><br><span class="line">                                                          string)</span><br><span class="line">  IL_0193:  ldarg.0</span><br><span class="line">  IL_0194:  ldloc.1</span><br><span class="line">  IL_0195:  ldfld      string NotesData::AnimationId</span><br><span class="line">  IL_019a:  call       instance void RhysmGame::SetActiveTemptation(string)</span><br><span class="line">  IL_019f:  ldarg.0</span><br><span class="line">  IL_01a0:  ldfld      class RhysmGameNotesViewer RhysmGame::NotesViewer</span><br><span class="line">  IL_01a5:  ldloc.1</span><br><span class="line">  IL_01a6:  ldfld      int64 NotesData::Id</span><br><span class="line">  IL_01ab:  ldc.i4.0</span><br><span class="line">  IL_01ac:  callvirt   instance void RhysmGameNotesViewer::SetActiveNotes(int64,</span><br><span class="line">                                                                          bool)</span><br><span class="line">  IL_01b1:  ldarg.0</span><br><span class="line">  IL_01b2:  ldfld      class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt; RhysmGame::NotesQueueRight</span><br><span class="line">  IL_01b7:  callvirt   instance !0 class [netstandard]System.Collections.Generic.Queue`1&lt;class NotesData&gt;::Dequeue()</span><br><span class="line">  IL_01bc:  pop</span><br><span class="line">  IL_01bd:  ret</span><br><span class="line">  //////////////////////////////////////////</span><br><span class="line"></span><br><span class="line">  // ......</span><br><span class="line"></span><br><span class="line">  IL_0238:  ret</span><br><span class="line">&#125; // end of method RhysmGame::CheckTimeLimit</span><br></pre></td></tr></table></figure>
+
+<p>修改逻辑是比较简单的, 只需要添加几行 IL 代码即可, 但是改完之后还有<strong>一件最重要的事情</strong>, 就是更新该方法下面所有的地址, 确保修改后每一行地址以及跳转指令的目标地址都是新的正确的地址.</p>
+<p>这部分自己怎么顺手怎么来了, 反正能正确改好就行, 相当于是人肉编译器了.</p>
+<p>改完之后用 ilasm 把 IL 文件重新编回 dll 文件, <strong>备份一下原始的 Assembly-CSharp.dll</strong>, 然后用新的替换掉它, 也可以用 dotPeek 导出一下新的 dll 文件看看源代码逻辑是不是符合预期.</p>
+<p>至此一个简单的 Mod 就制作完成了, 可以进游戏愉快的<del>涩涩</del>游玩了.</p>
+<h2 id="汉化-Mod"><a href="#汉化-Mod" class="headerlink" title="汉化 Mod"></a>汉化 Mod</h2><h3 id="准备工作-1"><a href="#准备工作-1" class="headerlink" title="准备工作"></a>准备工作</h3><p>既然都做了功能 Mod, 我寻思顺便也了解一下汉化 Mod 怎么打, 因为感觉应该不难, 毕竟之前有一些 Unity 游戏的拆包经验, 我猜测就是把文本资源拆出来, 然后替换成汉化, 再重新装回去就行了.</p>
+<p>所以关键解决两个问题, 怎么定位资源, 怎么拆/装资源.</p>
+<p>关于资源定位, 最简单的方式是先拆包然后搜字符串.</p>
+<p>网上大部分都推荐 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8=">AssetStudio<i class="fa fa-external-link-alt"></i></span>, 但是已经很久没维护了, 对新版本 Unity 支持似乎有问题, 可以换成<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3poYW5namllcXVhbi9Bc3NldFN0dWRpbw==">某 fork 版本<i class="fa fa-external-link-alt"></i></span>试试.</p>
+<p>另外也可以用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Fzc2V0UmlwcGVyL0Fzc2V0UmlwcGVy">AssetRipper<i class="fa fa-external-link-alt"></i></span> 导出资源, 方便我们定位文本位置.</p>
+<p>然后是资源文件的编辑, 网上很多教程还是用的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1NlcmlvdXNDYWNoZS9VQUJF">UABE<i class="fa fa-external-link-alt"></i></span>, 但是也已经很久没维护了, 新版本也有问题, 可以换成 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL25lc3JhazEvVUFCRUE=">UABEA<i class="fa fa-external-link-alt"></i></span>.</p>
+<h3 id="定位资源"><a href="#定位资源" class="headerlink" title="定位资源"></a>定位资源</h3><p>这里我们用 AssetRipper 把整个游戏 Data 目录下面的东西全部导出, 加载一整个文件夹然后导出原始内容 (Export Primary Content).</p>
+<p>接着在导出的内容里面直接搜索游戏内文本, 可以发现位于 <code>MonoBehaviour/ScenarioDataSO.json</code> 内, 进去查看, 可以发现该资源位于文件 <code>sharedassets0.assets</code> 里.</p>
+<p>此时可以在 AssetRipper 里已导入内容里 View 一下, 记录一下 <code>ScenarioDataSO</code> 的 Path ID.</p>
+<h3 id="修改资源"><a href="#修改资源" class="headerlink" title="修改资源"></a>修改资源</h3><p>用 UABEA 打开文件 <code>sharedassets0.assets</code>, 根据名称或者 Path ID 找到 <code>ScenarioDataSO</code>, 然后使用 <code>Export Dump</code> 按钮导出该资源内容.</p>
+<p>此时我们将该文件里的文本进行汉化, 汉化完成后, 再使用同样的操作, 找到刚刚的 <code>ScenarioDataSO</code> 并使用 <code>Import Dump</code> 导入修改后的文件进行替换, <strong>替换之前请备份一份原文件</strong>, 然后保存即完成了资源的重新封装. 进入游戏内查看, 可以发现已经汉化成功.</p>
+<p>需要注意仔细甄别需要汉化的文本到底在哪, 因为开发者可能用非英语作为程序需要的内容 (非显示文本), 这些影响程序的文本是不能动的.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC82NzQzMjYzMA==">Unity引擎类游戏MOD制作通用教程<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuYmlsaWJpbGkuY29tL3ZpZGVvL0JWMWs1NHkxejdvWS8=">[Unity3D-游戏汉化教程]第3期：MonoBehaviour<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Mod/" rel="tag"><i class="fa fa-tag"></i> Mod</a>
+              <a href="/tags/%E6%B1%89%E5%8C%96/" rel="tag"><i class="fa fa-tag"></i> 汉化</a>
+              <a href="/tags/UABEA/" rel="tag"><i class="fa fa-tag"></i> UABEA</a>
+              <a href="/tags/Unity/" rel="tag"><i class="fa fa-tag"></i> Unity</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2024/12/22/spinejs-azurlane/" rel="prev" title="网页预览碧蓝航线动态立绘">
+                  <i class="fa fa-chevron-left"></i> 网页预览碧蓝航线动态立绘
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">266k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">8:03</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+</body>
+</html>
