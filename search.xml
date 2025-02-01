@@ -698,132 +698,6 @@
       </tags>
   </entry>
   <entry>
-    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (二)</title>
-    <url>//posts/2023/10/14/cnn-numpy-2/</url>
-    <content><![CDATA[<blockquote>
-<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
-<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
-</blockquote>
-<p>本文为第二篇, 介绍含参数网络层和损失函数的实现, 以及反向传播时的梯度推导.</p>
-<span id="more"></span>
-
-<p>本系列文章传送门:</p>
-<ul>
-<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
-<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
-<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
-</ul>
-<h2 id="含参数网络层"><a href="#含参数网络层" class="headerlink" title="含参数网络层"></a>含参数网络层</h2><p>上一篇中我们结束了无参数网络层的内容, 我们来到网络的重点部分, 含参数层. 这一类层依然需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是在 <code>backward</code> 方法中需要计算自己拥有的参数的梯度值并存起来, 同时需要新增 <code>update</code> 方法, 用于按照梯度值更新自己的参数.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ParamLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
-
-<p>继承一下 <code>NetworkLayer</code> 类, 并且增加一个 <code>update</code> 方法, 该方法接收学习率 <code>lr</code> 作为参数.</p>
-<h3 id="Linear"><a href="#Linear" class="headerlink" title="Linear"></a>Linear</h3><p>首先是线性层, 也是含学习参数中最简单的层, 先上图.</p>
-<p><img data-src="/static/image/cnn-numpy-2/linear.jpg" alt="linear.jpg"></p>
-<p>方便起见, 这里我们的输入都是行向量的形式, 因此第一维是样本数, 第二维是特征数.</p>
-<p>一般的, 设 $\mathbf{X}$ 为一个 $n \times d_1$ 的矩阵, 权重 $\mathbf{W}$ 为一个 $d_1 \times d_2$ 的矩阵, $\mathbf{b}$ 为长度 $d_2$ 的偏置向量, 则 $\mathbf{Y}, \mathbf{Z}$ 均为 $n \times d_2$. 线性层的可学习参数就是 $\mathbf{W}$ 和 $\mathbf{b}$.</p>
-<p>图上高亮部分表示对最终输出 $z_{11}$ 的计算过程, 而对 $z_{ik}$ 的计算过程用公式表示如下:</p>
-<p>$$<br>z_{ik} = \sum_{j=1}^{d_1}{x_{ij}w_{jk}} + b_k<br>$$</p>
-<p>写成矩阵形式就是:</p>
-<p>$$<br>\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}<br>$$</p>
-<p>其中 $\mathbf{b}$ 需要重复每一行扩展成矩阵.</p>
-<p>前向计算就到此结束了, 下面我们看看反向中梯度是如何计算的.</p>
-<p>首先是 $\mathbf{b}$ 的, 这一层中, 对于 $b_k$ 而言, 因为是加上常数, 所以都是 1, 因此只需要直接等于上一层传进来的梯度即可. 再由链式法则里的加法法则可知, 同一个 $b_k$ 每个样本中都参与了运算, 因此需要把后一层传过来的梯度进行累加.</p>
-<p>设最终损失为 $L$, 则:</p>
-<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{b_k}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{b_k}}} \\<br>  ~ &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}} \cdot 1<br>\end{aligned}<br>$$</p>
-<p>所以 $\mathbf{b}$ 的梯度就是把后一层传进来关于 $z$ 的梯度按行累加即可.</p>
-<p>下面来看关于 $\mathbf{W}$ 的梯度. 在 $z_{ik}$ 的表达式中, $b_k$ 作为常数存在, 因此可以忽略, 所以梯度只与 $x_{ij}$ 有关, 所以我们第一步是找出来含有 $w_{jk}$ 的结果有哪些.</p>
-<p>注意到 $w_{jk}$ 是不包含下标 $i$ 的, 因此在 $z_{1k}, z_{2k}, \ldots, z_{nk}$ 中都是有 $w_{jk}$ 的. 所以:</p>
-<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{w_{jk}}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{w_{jk}}}} \\<br>  ~ &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}x_{ij}}<br>\end{aligned}<br>$$</p>
-<p>换成矩阵形式则是:</p>
-<p>$$<br>\frac{\partial{L}}{\partial{\mathbf{W}}} = \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Z}}}<br>$$</p>
-<p>其中 $\frac{\partial{L}}{\partial{\mathbf{Z}}}$ 是最终损失 $L$ 对 $z_{ik}$ 的梯度矩阵, 形状与 $\mathbf{Z}$ 相同.</p>
-<p>最后我们来看关于 $\mathbf{X}$ 的梯度, 有了求 $\mathbf{W}$ 梯度的经验, 我们很容易写出下列推导:</p>
-<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{x_{ij}}} &amp;= \sum_{k=1}^{d_2}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{x_{ij}}}} \\<br>  ~ &amp;= \sum_{k=1}^{d_2}{\frac{\partial{L}}{\partial{z_{ik}}}w_{jk}}<br>\end{aligned}<br>$$</p>
-<p>同样可以换成矩阵形式:</p>
-<p>$$<br>\frac{\partial{L}}{\partial{\mathbf{X}}} = \frac{\partial{L}}{\partial{\mathbf{Z}}}\mathbf{W}^\top<br>$$</p>
-<p>到这里我们已经完成对线性层的前向和反向过程推导, 矩阵形式的公式总结就是:</p>
-<p>前向:</p>
-<p>$$<br>\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}<br>$$</p>
-<p>反向:</p>
-<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{b_k}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{W}}} &amp;= \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Z}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Z}}}\mathbf{W}^\top<br>\end{aligned}<br>$$</p>
-<p>这个结论很重要, 在卷积层中还会用到.</p>
-<p>然后我们可以按照公式完成线性层的代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LinearLayer</span>(<span class="title class_ inherited__">ParamLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;线性层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, d1: <span class="built_in">int</span>, d2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.w = np.random.random((d1, d2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.b = np.random.random((<span class="number">1</span>, d2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        self.w_grad = np.zeros_like(self.w)</span><br><span class="line">        self.b_grad = np.zeros_like(self.b)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, d1)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, d2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x @ self.w + self.b</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, d1)</span></span><br><span class="line"><span class="string">            last_grad: (B, d2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, d1)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        self.b_grad = last_x_grad.<span class="built_in">sum</span>(<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        self.w_grad = x.T @ last_x_grad</span><br><span class="line"></span><br><span class="line">        x_grad = last_x_grad @ self.w.T</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.w -= lr * self.w_grad</span><br><span class="line">        self.b -= lr * self.b_grad</span><br></pre></td></tr></table></figure>
-
-<p><code>update</code> 方法就是按学习率 <code>lr</code> 给每个参数减去相应的梯度就行了.</p>
-<p>一个值得注意的地方是 <code>__init__</code> 中, 对 <code>w</code> 和 <code>b</code> 的初始化是使用了 -1 到 1 之间的均匀分布, 这有助于训练的稳定性, 防止出现梯度爆炸.</p>
-<h3 id="Convolution"><a href="#Convolution" class="headerlink" title="Convolution"></a>Convolution</h3><p>这里我们只实现步长为 1 的无填充卷积操作.</p>
-<h4 id="卷积及其参数维度"><a href="#卷积及其参数维度" class="headerlink" title="卷积及其参数维度"></a>卷积及其参数维度</h4><p>卷积层是整个网络的核心层, 网络也因此得名卷积神经网络, 用下图来简单回顾一下网络里的卷积操作.</p>
-<p><img data-src="/static/image/cnn-numpy-2/conv.jpg" alt="conv.jpg"></p>
-<p>卷积核 $\mathbf{K}$ 在输入 $\mathbf{X}$ 上逐步移动, 将每个位置上的值相乘并求和, 得到卷积后的结果 $\mathbf{Y}$, 然后对于每一次卷积都加上一个偏置常数 $b$, 得到网络中对于单张图片单通道的完整卷积过程.</p>
-<p>如果是多通道的情况, 设输入 $\mathbf{X}$ 的通道数是 $c_1$, 输出通道数是 $c_2$.</p>
-<p>输入 $\mathbf{X}$ 的形状变为 $n \times c_1 \times h_\mathbf{X} \times w_\mathbf{X}$, 其中 $n$ 是样本数, $h_\mathbf{X}, w_\mathbf{X}$ 分别是图片的高宽.</p>
-<p>那么对于 $\mathbf{K}$ 而言, 输入通道数从 $1$ 变成 $c_1$, 所以每一次卷积都需要 $c_1$ 个单层的 $\mathbf{K}$. 进一步, 输出通道数从 $1$ 变成 $c_2$, 因此总共需要 $c_2 \times c_1$ 个单层卷积核. 所以最终卷积核 $\mathbf{K}$ 的形状为 $c_2 \times c_1 \times h_\mathbf{K} \times w_\mathbf{K}$, 其中 $h_\mathbf{K}, w_\mathbf{K}$ 分别表示卷积核的高宽.</p>
-<p>对于 $b$ 而言, 只和输出通道数有关, 因此变成了一个长度为 $c_2$ 向量 $\mathbf{b}$, 在其他维度上重复数值即可.</p>
-<p>在卷积层中, $\mathbf{K}$ 和 $\mathbf{b}$ 就是需要被学习的参数.</p>
-<h4 id="卷积矩阵化"><a href="#卷积矩阵化" class="headerlink" title="卷积矩阵化"></a>卷积矩阵化</h4><p>基本的卷积操作需要多重循环, 无法充分利用 GPU 等硬件设备的加速效果, 因此需要将常规的卷积操作转化成矩阵形式, 从而批量运算.</p>
-<p>有两种数据重组方式可以达到同样的效果, 分别是对输入 $\mathbf{X}$ 和卷积核 $\mathbf{K}$ 进行数据重组. 首先介绍第一种方式, 对 $\mathbf{X}$ 进行数据重组, 而 $\mathbf{K}$ 只需要保持数据不变, 维度变换即可.</p>
-<p><img data-src="/static/image/cnn-numpy-2/unfold_x.jpg" alt="unfold_x.jpg"></p>
-<p>上图展示的是对于一个样本下矩阵化运算, 如果是 $n$ 个样本, $\mathbf{X&#39;}$ 和 $\mathbf{Y&#39;}$ 在行上变成 $n$ 倍即可.</p>
-<p>这里, $h_{\mathbf{Y}} = h_{\mathbf{X}} - h_{\mathbf{K}} + 1$, $w_{\mathbf{Y}} = w_{\mathbf{X}} - w_{\mathbf{K}} + 1$, 是卷积后的图像高宽.</p>
-<p>在这种情况下, 变形后的 $\mathbf{K}&#39;$ 和原始的 $\mathbf{K}$ 数据相同, 前向公式为:</p>
-<p>$$<br>\mathbf{Y}&#39; = \mathbf{X}&#39;\mathbf{K}&#39;^\top<br>$$</p>
-<p>第二种方式则是只对输入数据 $\mathbf{X}$ 进行变形, 对卷积核 $\mathbf{K}$ 进行数据重组.</p>
-<p><img data-src="/static/image/cnn-numpy-2/unfold_k.jpg" alt="unfold_k.jpg"></p>
-<p>图太大画不下, 所以中间部分用省略号省去, 只保留了一些关键内容和维度信息.</p>
-<p>同样的, 这里也是展示了对于一个样本的矩阵化运算.</p>
-<p>图片被完全展平, 而卷积核被重组成中间包含一些 0 值的矩阵. 在这种情况下, $\mathbf{X}&#39;&#39;$ 和原本的 $\mathbf{X}$ 内容完全相同. 前向公式为:</p>
-<p>$$<br>\mathbf{Y}&#39;&#39; = \mathbf{X}&#39;&#39;\mathbf{K}&#39;&#39;^\top<br>$$</p>
-<h4 id="梯度计算"><a href="#梯度计算" class="headerlink" title="梯度计算"></a>梯度计算</h4><p>卷积层的梯度计算都是基于矩阵化之后的卷积操作. 首先是偏置向量 $\mathbf{b}$ 的梯度计算, 前向中有两种方式能算出 $\mathbf{Y}$, 但是通过数据变形后, 与 $\mathbf{b}$ 的相加方式相同, 结合前面线性层的结论, $\mathbf{b}$ 的梯度就是将除了 $c_2$ 的其他维度求和即可.</p>
-<p>现在我们来看最关键的 $\mathbf{K}$ 和 $\mathbf{X}$ 的梯度怎么求, 首先回忆线性层得到的结论.</p>
-<div class="note info"><p>设最终的损失为 $L$, 当前向传播为:</p>
-<p>$$<br>\mathbf{Y} = \mathbf{X}\mathbf{W}<br>$$</p>
-<p>时, 则反向传播 $\mathbf{X}$ 和 $\mathbf{W}$ 的梯度为:</p>
-<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{\mathbf{W}}} &amp;= \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Y}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Y}}}\mathbf{W}^\top<br>\end{aligned}<br>$$</p>
-<p>其中 $\frac{\partial{L}}{\partial{\mathbf{Y}}}$ 是损失 $L$ 对输出 $\mathbf{Y}$ 的损失矩阵, 形状与 $\mathbf{Y}$ 相同.</p></div>
-
-<p>这是一个通用结论, 可以用于任意的两个矩阵相乘. 结合我们前面得到了两种不同的前向计算方式:</p>
-<p>$$<br>\begin{aligned}<br>  \mathbf{Y}&#39; &amp;= \mathbf{X}&#39;\mathbf{K}&#39;^\top \\<br>  \mathbf{Y}&#39;&#39; &amp;= \mathbf{X}&#39;&#39;\mathbf{K}&#39;&#39;^\top<br>\end{aligned}<br>$$</p>
-<p>在这两个不同的计算中, $\mathbf{K}&#39;$ 与原始的 $\mathbf{K}$ 相同, $\mathbf{X}&#39;&#39;$ 与原始的 $\mathbf{X}$ 数据相同, 只是进行了数据变形. 因此只要分别求出 $\mathbf{K}&#39;$ 和 $\mathbf{X}&#39;&#39;$ 的梯度, 再通过变形就能得到原始 $\mathbf{K}$ 和 $\mathbf{X}$ 的梯度. 结合结论, 有:</p>
-<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{\mathbf{K}&#39;}} &amp;= \mathbf{X}&#39;^\top\frac{\partial{L}}{\partial{\mathbf{Y}&#39;}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}&#39;&#39;}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Y}&#39;&#39;}}\mathbf{K}&#39;&#39;^\top<br>\end{aligned}<br>$$</p>
-<p>其中, $\frac{\partial{L}}{\partial{\mathbf{Y}&#39;}}$ 和 $\frac{\partial{L}}{\partial{\mathbf{Y}&#39;&#39;}}$ 都可以通过对后一层传进来的 $\frac{\partial{L}}{\partial{\mathbf{Y}}}$ 进行数据变形得到.</p>
-<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p>到这里我们已经完成了卷积层的前向和反向推导, 按照前面的内容便可完成代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionLayer</span>(<span class="title class_ inherited__">ParamLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;步长为 1 的卷积层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, c1: <span class="built_in">int</span>, c2: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            c1: 输入通道数</span></span><br><span class="line"><span class="string">            c2: 输出通道数</span></span><br><span class="line"><span class="string">            k1: 卷积核高</span></span><br><span class="line"><span class="string">            k2: 卷积核宽</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        self.k = np.random.random((c2, c1, k1, k2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.b = np.random.random((<span class="number">1</span>, c2, <span class="number">1</span>, <span class="number">1</span>)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.k_grad = np.zeros_like(self.k)</span><br><span class="line">        self.b_grad = np.zeros_like(self.b)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_unfold_k</span>(<span class="params">self, h: <span class="built_in">int</span>, w: <span class="built_in">int</span>, c1: <span class="built_in">int</span>, c2: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span>, o1: <span class="built_in">int</span>, o2: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;展开卷积核 k, 能够与展平的多通道图像直接相乘</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            k: (c2 * o1 * o2, c1 * H * W)</span></span><br><span class="line"><span class="string">                有 c2 个 (o1 * o2, c1 * H * W) 的展平卷积核, 每一个核大小是 c1 * H * W, 将在一张 c1 通道的一维图片上进行 o1 * o2 次卷积</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        ridx = np.arange(o1 * o2).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        cidx1 = np.arange(o2).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>).repeat(o1, <span class="number">0</span>).reshape(o1 * o2, k1 * k2)</span><br><span class="line">        cidx2 = np.arange(k2).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(o1 * o2 * k1, <span class="number">0</span>).reshape(o1 * o2, k1 * k2)</span><br><span class="line">        cidx3 = np.arange(<span class="number">0</span>, k1 * w, w).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(k2, <span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        cidx4 = np.arange(<span class="number">0</span>, o1 * w, w).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(o2, <span class="number">0</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        cidx = cidx1 + cidx2 + cidx3 + cidx4</span><br><span class="line"></span><br><span class="line">        k = np.zeros((c2, c1, o1 * o2, h * w))</span><br><span class="line">        k[:, :, ridx, cidx] = self.k.reshape(c2, c1, <span class="number">1</span>, k1 * k2).repeat(o1 * o2, <span class="number">2</span>)</span><br><span class="line">        k = k.transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>).reshape(c2 * o1 * o2, c1 * h * w)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> k</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_unfold_x</span>(<span class="params">self, x: np.ndarray, c1: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span>, o1: <span class="built_in">int</span>, o2: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;展开输入 x, 能够与展平的卷积核直接相乘</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, o1 * o2, c1 * k1 * k2)</span></span><br><span class="line"><span class="string">                每张图片将与 c1 通道的一维卷积核进行 o1 * o2 次卷积</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        ridx_r = np.arange(k1).reshape(<span class="number">1</span>, k1).repeat(k2, <span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        ridx_c = np.arange(o1).reshape(o1, <span class="number">1</span>).repeat(o2, <span class="number">0</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        ridx = ridx_r + ridx_c</span><br><span class="line"></span><br><span class="line">        cidx_r = np.arange(k2).reshape(<span class="number">1</span>, k2).repeat(k1, <span class="number">0</span>).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        cidx_c = np.arange(o2).reshape(<span class="number">1</span>, o2).repeat(o1, <span class="number">0</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        cidx = cidx_r + cidx_c</span><br><span class="line"></span><br><span class="line">        x = x[:, :, ridx, cidx].transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>).reshape(-<span class="number">1</span>, o1 * o2, c1 * k1 * k2)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, c2, o1, o2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        _, _, h, w = x.shape</span><br><span class="line">        c2, c1, k1, k2 = self.k.shape</span><br><span class="line">        o1 = h - k1 + <span class="number">1</span></span><br><span class="line">        o2 = w - k2 + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 展开卷积核</span></span><br><span class="line">        output = x.reshape(-<span class="number">1</span>, c1 * h * w) @ self._unfold_k(h, w, c1, c2, k1, k2, o1, o2).T</span><br><span class="line">        output = output.reshape(-<span class="number">1</span>, c2, o1, o2) + self.b</span><br><span class="line">        <span class="keyword">return</span> output</span><br><span class="line"></span><br><span class="line">        <span class="comment"># # 展开输入 (B, o1 * o2, c1 * k1 * k2) @ (c1 * k1 * k2, c2) = (B, o1 * o2, c2)</span></span><br><span class="line">        <span class="comment"># output = self._unfold_x(x, c1, k1, k2, o1, o2) @ self.k.reshape(c2, c1 * k1 * k2).T</span></span><br><span class="line">        <span class="comment"># output = output.transpose(0, 2, 1).reshape(-1, c2, o1, o2) + self.b</span></span><br><span class="line">        <span class="comment"># return output</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string">            last_x_grad: (B, c2, o1, o2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, c1, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, _, h, w = x.shape</span><br><span class="line">        c2, c1, k1, k2 = self.k.shape</span><br><span class="line">        o1 = h - k1 + <span class="number">1</span></span><br><span class="line">        o2 = w - k2 + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        unfold_x = self._unfold_x(x, c1, k1, k2, o1, o2)</span><br><span class="line">        unfold_k = self._unfold_k(h, w, c1, c2, k1, k2, o1, o2)</span><br><span class="line"></span><br><span class="line">        self.b_grad = last_x_grad.<span class="built_in">sum</span>((<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">        self.k_grad = unfold_x.reshape(-<span class="number">1</span>, c1 * k1 * k2).T @ last_x_grad.transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>).reshape(-<span class="number">1</span>, c2)</span><br><span class="line">        self.k_grad = self.k_grad.transpose().reshape(c2, c1, k1, k2)</span><br><span class="line"></span><br><span class="line">        x_grad = last_x_grad.reshape(-<span class="number">1</span>, c2 * o1 * o2) @ unfold_k</span><br><span class="line">        x_grad = x_grad.reshape(-<span class="number">1</span>, c1, h, w)</span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>):</span><br><span class="line">        self.k -= lr * self.k_grad</span><br><span class="line">        self.b -= lr * self.b_grad</span><br></pre></td></tr></table></figure>
-
-<p>这里的 <code>_unfold_k</code> 和 <code>_unfold_x</code> 就是对卷积核 $\mathbf{K}$ 和输入 $\mathbf{X}$ 进行数据重组的方法, 可以用于不同的前向和反向梯度计算. 前向中实现两种矩阵化方法的一种就行, 而反向中则需要同时使用两个方法来计算参数梯度.</p>
-<h2 id="损失函数层"><a href="#损失函数层" class="headerlink" title="损失函数层"></a>损失函数层</h2><p>最后是网络的损失函数, 从 <code>Linear</code> 层往后, 将网络的输出与真实标签进行损失计算.</p>
-<p>这里我们实现分类任务最常用的损失函数, 交叉熵损失函数, 它的前向和反向所需要的参数与前面的网络层有一些小的区别, 均需要输入真实标签值.</p>
-<h3 id="CrossEntropy"><a href="#CrossEntropy" class="headerlink" title="CrossEntropy"></a>CrossEntropy</h3><p>首先上交叉熵损失的公式. 损失计算从线性层的输出开始, 设函数输入为 $\mathbf{X}$, 形状为 $n \times C$, 真实标签 $\mathbf{y}$ 为长度是 $n$ , 取值范围 $[1, C]$ 的向量, 则损失 $L$:</p>
-<p>$$<br>\begin{aligned}<br>  L &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( -\log\left( \frac{\exp\left( {x_{i y_i}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( -\log\left( \frac{\exp\left({x_{i y_i} - \max_{j=1}^{C}{x_{ij}}}\right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}} \right)}} \right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( \log\left( \sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}} \right)} \right) - \left({x_{i y_i} - \max_{j=1}^{C}{x_{ij}}}\right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( \log\left( \sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)} \right) - x_{i y_i}&#39; \right)}<br>\end{aligned}<br>$$</p>
-<p>详细的原理就不说了, 网上都有, 这里说一下为什么要给每个 $x$ 减去 $\max_{j=1}^{C}{x_{ij}}$, 因为中间用到了指数函数, 所以为了防止数据溢出, 将数据都变换到小于等于 0 的区间, 这样指数函数的值域就在 $(0, 1]$, 容易看出来这种变换是等价不影响计算结果的.</p>
-<p>前向计算就这样了, 然后看反向梯度计算. 注意到最外层是将每个样本的 &quot;小损失 $L_i$&quot; 进行了求和平均, 所以我们先看求和符号内每一个样本的值如何求梯度.</p>
-<p>掏出高中求导知识, 很容易得到:</p>
-<p>$$<br>\frac{\partial{L_i}}{\partial{x_{ij}}} = \left\{<br>  \begin{aligned}<br>    &amp; \frac{\exp{(x_{ij}&#39;)}}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}}     &amp; , ~ &amp; j \neq y_i \\<br>    &amp; \frac{\exp{(x_{ij}&#39;)}}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} - 1 &amp; , ~ &amp; j = y_i<br>  \end{aligned}<br>\right.<br>$$</p>
-<p>这里为了防止数据溢出, 同样使用 $x&#39;_{ij}$ 而不是原始输入值.</p>
-<p>最后, 由于求和平均的关系, 整个梯度也需要乘上一个系数, 因此有最终的梯度计算公式:</p>
-<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{x_{ij}}} &amp;= \frac{\partial{L}}{\partial{L_i}}\frac{\partial{L_i}}{\partial{x_{ij}}} \\<br>  ~ &amp;= \frac{1}{n}\frac{\partial{L_i}}{\partial{x_{ij}}} \\<br>  ~ &amp;= \left\{<br>  \begin{aligned}<br>    &amp; \frac{1}{n}\left( \frac{\exp{(x_{ij}&#39;)}}{n\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} \right) &amp; , ~ &amp; j \neq y_i \\<br>    &amp; \frac{1}{n}\left( \frac{\exp{(x_{ij}&#39;)}}{n\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} - 1 \right) &amp; , ~ &amp; j = y_i<br>  \end{aligned}<br>\right.<br>\end{aligned}<br>$$</p>
-<p>至此, 损失函数的前向和反向都已经推导完成, 然后完成代码实现.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CrossEntropyLoss</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, y: np.ndarray</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C)</span></span><br><span class="line"><span class="string">            y: (B, )</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: float number</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        x = x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        loss = np.log(np.exp(x).<span class="built_in">sum</span>(-<span class="number">1</span>)) - x[np.arange(x.shape[<span class="number">0</span>]), y]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">float</span>(loss.mean())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, y: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C)</span></span><br><span class="line"><span class="string">            y: (B, )</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, C)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        x_grad = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        x_grad[np.arange(x.shape[<span class="number">0</span>]), y] -= <span class="number">1</span></span><br><span class="line">        x_grad /= x.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br></pre></td></tr></table></figure>
-
-<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本篇到此结束, 我们终于完成了网络需要的所有基础结构. 而下一篇, 也是最后一篇, 我们将把这些零件拼接起来, 组合出最终的卷积神经网络, 并完成对网络的训练和评估.</p>
-<p>本系列文章传送门:</p>
-<ul>
-<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
-<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
-<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>深度学习</tag>
-        <tag>矩阵求导</tag>
-        <tag>卷积矩阵化</tag>
-        <tag>交叉熵损失函数</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 NumPy 的手写数字识别 (卷积神经网络) (三)</title>
     <url>//posts/2023/10/15/cnn-numpy-3/</url>
     <content><![CDATA[<blockquote>
@@ -998,6 +872,132 @@
         <tag>DDPM</tag>
         <tag>动漫头像生成</tag>
         <tag>概率扩散模型</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于 NumPy 的手写数字识别 (卷积神经网络) (二)</title>
+    <url>//posts/2023/10/14/cnn-numpy-2/</url>
+    <content><![CDATA[<blockquote>
+<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
+<p>全文包含完整的卷积网络实现, 以及矩阵梯度和卷积矩阵化的推导过程, 由于全文过长, 因此分成了三部分, 内容上是完全连着的.</p>
+</blockquote>
+<p>本文为第二篇, 介绍含参数网络层和损失函数的实现, 以及反向传播时的梯度推导.</p>
+<span id="more"></span>
+
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+<h2 id="含参数网络层"><a href="#含参数网络层" class="headerlink" title="含参数网络层"></a>含参数网络层</h2><p>上一篇中我们结束了无参数网络层的内容, 我们来到网络的重点部分, 含参数层. 这一类层依然需要实现 <code>forward</code> 和 <code>backward</code> 方法, 但是在 <code>backward</code> 方法中需要计算自己拥有的参数的梯度值并存起来, 同时需要新增 <code>update</code> 方法, 用于按照梯度值更新自己的参数.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ParamLayer</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br></pre></td></tr></table></figure>
+
+<p>继承一下 <code>NetworkLayer</code> 类, 并且增加一个 <code>update</code> 方法, 该方法接收学习率 <code>lr</code> 作为参数.</p>
+<h3 id="Linear"><a href="#Linear" class="headerlink" title="Linear"></a>Linear</h3><p>首先是线性层, 也是含学习参数中最简单的层, 先上图.</p>
+<p><img data-src="/static/image/cnn-numpy-2/linear.jpg" alt="linear.jpg"></p>
+<p>方便起见, 这里我们的输入都是行向量的形式, 因此第一维是样本数, 第二维是特征数.</p>
+<p>一般的, 设 $\mathbf{X}$ 为一个 $n \times d_1$ 的矩阵, 权重 $\mathbf{W}$ 为一个 $d_1 \times d_2$ 的矩阵, $\mathbf{b}$ 为长度 $d_2$ 的偏置向量, 则 $\mathbf{Y}, \mathbf{Z}$ 均为 $n \times d_2$. 线性层的可学习参数就是 $\mathbf{W}$ 和 $\mathbf{b}$.</p>
+<p>图上高亮部分表示对最终输出 $z_{11}$ 的计算过程, 而对 $z_{ik}$ 的计算过程用公式表示如下:</p>
+<p>$$<br>z_{ik} = \sum_{j=1}^{d_1}{x_{ij}w_{jk}} + b_k<br>$$</p>
+<p>写成矩阵形式就是:</p>
+<p>$$<br>\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}<br>$$</p>
+<p>其中 $\mathbf{b}$ 需要重复每一行扩展成矩阵.</p>
+<p>前向计算就到此结束了, 下面我们看看反向中梯度是如何计算的.</p>
+<p>首先是 $\mathbf{b}$ 的, 这一层中, 对于 $b_k$ 而言, 因为是加上常数, 所以都是 1, 因此只需要直接等于上一层传进来的梯度即可. 再由链式法则里的加法法则可知, 同一个 $b_k$ 每个样本中都参与了运算, 因此需要把后一层传过来的梯度进行累加.</p>
+<p>设最终损失为 $L$, 则:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{b_k}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{b_k}}} \\<br>  ~ &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}} \cdot 1<br>\end{aligned}<br>$$</p>
+<p>所以 $\mathbf{b}$ 的梯度就是把后一层传进来关于 $z$ 的梯度按行累加即可.</p>
+<p>下面来看关于 $\mathbf{W}$ 的梯度. 在 $z_{ik}$ 的表达式中, $b_k$ 作为常数存在, 因此可以忽略, 所以梯度只与 $x_{ij}$ 有关, 所以我们第一步是找出来含有 $w_{jk}$ 的结果有哪些.</p>
+<p>注意到 $w_{jk}$ 是不包含下标 $i$ 的, 因此在 $z_{1k}, z_{2k}, \ldots, z_{nk}$ 中都是有 $w_{jk}$ 的. 所以:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{w_{jk}}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{w_{jk}}}} \\<br>  ~ &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}x_{ij}}<br>\end{aligned}<br>$$</p>
+<p>换成矩阵形式则是:</p>
+<p>$$<br>\frac{\partial{L}}{\partial{\mathbf{W}}} = \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Z}}}<br>$$</p>
+<p>其中 $\frac{\partial{L}}{\partial{\mathbf{Z}}}$ 是最终损失 $L$ 对 $z_{ik}$ 的梯度矩阵, 形状与 $\mathbf{Z}$ 相同.</p>
+<p>最后我们来看关于 $\mathbf{X}$ 的梯度, 有了求 $\mathbf{W}$ 梯度的经验, 我们很容易写出下列推导:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{x_{ij}}} &amp;= \sum_{k=1}^{d_2}{\frac{\partial{L}}{\partial{z_{ik}}}\frac{\partial{z_{ik}}}{\partial{x_{ij}}}} \\<br>  ~ &amp;= \sum_{k=1}^{d_2}{\frac{\partial{L}}{\partial{z_{ik}}}w_{jk}}<br>\end{aligned}<br>$$</p>
+<p>同样可以换成矩阵形式:</p>
+<p>$$<br>\frac{\partial{L}}{\partial{\mathbf{X}}} = \frac{\partial{L}}{\partial{\mathbf{Z}}}\mathbf{W}^\top<br>$$</p>
+<p>到这里我们已经完成对线性层的前向和反向过程推导, 矩阵形式的公式总结就是:</p>
+<p>前向:</p>
+<p>$$<br>\mathbf{Z} = \mathbf{X}\mathbf{W} + \mathbf{b}<br>$$</p>
+<p>反向:</p>
+<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{b_k}} &amp;= \sum_{i=1}^{n}{\frac{\partial{L}}{\partial{z_{ik}}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{W}}} &amp;= \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Z}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Z}}}\mathbf{W}^\top<br>\end{aligned}<br>$$</p>
+<p>这个结论很重要, 在卷积层中还会用到.</p>
+<p>然后我们可以按照公式完成线性层的代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LinearLayer</span>(<span class="title class_ inherited__">ParamLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;线性层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, d1: <span class="built_in">int</span>, d2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.w = np.random.random((d1, d2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.b = np.random.random((<span class="number">1</span>, d2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        self.w_grad = np.zeros_like(self.w)</span><br><span class="line">        self.b_grad = np.zeros_like(self.b)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, d1)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, d2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x @ self.w + self.b</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, d1)</span></span><br><span class="line"><span class="string">            last_grad: (B, d2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, d1)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        self.b_grad = last_x_grad.<span class="built_in">sum</span>(<span class="number">0</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        self.w_grad = x.T @ last_x_grad</span><br><span class="line"></span><br><span class="line">        x_grad = last_x_grad @ self.w.T</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self.w -= lr * self.w_grad</span><br><span class="line">        self.b -= lr * self.b_grad</span><br></pre></td></tr></table></figure>
+
+<p><code>update</code> 方法就是按学习率 <code>lr</code> 给每个参数减去相应的梯度就行了.</p>
+<p>一个值得注意的地方是 <code>__init__</code> 中, 对 <code>w</code> 和 <code>b</code> 的初始化是使用了 -1 到 1 之间的均匀分布, 这有助于训练的稳定性, 防止出现梯度爆炸.</p>
+<h3 id="Convolution"><a href="#Convolution" class="headerlink" title="Convolution"></a>Convolution</h3><p>这里我们只实现步长为 1 的无填充卷积操作.</p>
+<h4 id="卷积及其参数维度"><a href="#卷积及其参数维度" class="headerlink" title="卷积及其参数维度"></a>卷积及其参数维度</h4><p>卷积层是整个网络的核心层, 网络也因此得名卷积神经网络, 用下图来简单回顾一下网络里的卷积操作.</p>
+<p><img data-src="/static/image/cnn-numpy-2/conv.jpg" alt="conv.jpg"></p>
+<p>卷积核 $\mathbf{K}$ 在输入 $\mathbf{X}$ 上逐步移动, 将每个位置上的值相乘并求和, 得到卷积后的结果 $\mathbf{Y}$, 然后对于每一次卷积都加上一个偏置常数 $b$, 得到网络中对于单张图片单通道的完整卷积过程.</p>
+<p>如果是多通道的情况, 设输入 $\mathbf{X}$ 的通道数是 $c_1$, 输出通道数是 $c_2$.</p>
+<p>输入 $\mathbf{X}$ 的形状变为 $n \times c_1 \times h_\mathbf{X} \times w_\mathbf{X}$, 其中 $n$ 是样本数, $h_\mathbf{X}, w_\mathbf{X}$ 分别是图片的高宽.</p>
+<p>那么对于 $\mathbf{K}$ 而言, 输入通道数从 $1$ 变成 $c_1$, 所以每一次卷积都需要 $c_1$ 个单层的 $\mathbf{K}$. 进一步, 输出通道数从 $1$ 变成 $c_2$, 因此总共需要 $c_2 \times c_1$ 个单层卷积核. 所以最终卷积核 $\mathbf{K}$ 的形状为 $c_2 \times c_1 \times h_\mathbf{K} \times w_\mathbf{K}$, 其中 $h_\mathbf{K}, w_\mathbf{K}$ 分别表示卷积核的高宽.</p>
+<p>对于 $b$ 而言, 只和输出通道数有关, 因此变成了一个长度为 $c_2$ 向量 $\mathbf{b}$, 在其他维度上重复数值即可.</p>
+<p>在卷积层中, $\mathbf{K}$ 和 $\mathbf{b}$ 就是需要被学习的参数.</p>
+<h4 id="卷积矩阵化"><a href="#卷积矩阵化" class="headerlink" title="卷积矩阵化"></a>卷积矩阵化</h4><p>基本的卷积操作需要多重循环, 无法充分利用 GPU 等硬件设备的加速效果, 因此需要将常规的卷积操作转化成矩阵形式, 从而批量运算.</p>
+<p>有两种数据重组方式可以达到同样的效果, 分别是对输入 $\mathbf{X}$ 和卷积核 $\mathbf{K}$ 进行数据重组. 首先介绍第一种方式, 对 $\mathbf{X}$ 进行数据重组, 而 $\mathbf{K}$ 只需要保持数据不变, 维度变换即可.</p>
+<p><img data-src="/static/image/cnn-numpy-2/unfold_x.jpg" alt="unfold_x.jpg"></p>
+<p>上图展示的是对于一个样本下矩阵化运算, 如果是 $n$ 个样本, $\mathbf{X&#39;}$ 和 $\mathbf{Y&#39;}$ 在行上变成 $n$ 倍即可.</p>
+<p>这里, $h_{\mathbf{Y}} = h_{\mathbf{X}} - h_{\mathbf{K}} + 1$, $w_{\mathbf{Y}} = w_{\mathbf{X}} - w_{\mathbf{K}} + 1$, 是卷积后的图像高宽.</p>
+<p>在这种情况下, 变形后的 $\mathbf{K}&#39;$ 和原始的 $\mathbf{K}$ 数据相同, 前向公式为:</p>
+<p>$$<br>\mathbf{Y}&#39; = \mathbf{X}&#39;\mathbf{K}&#39;^\top<br>$$</p>
+<p>第二种方式则是只对输入数据 $\mathbf{X}$ 进行变形, 对卷积核 $\mathbf{K}$ 进行数据重组.</p>
+<p><img data-src="/static/image/cnn-numpy-2/unfold_k.jpg" alt="unfold_k.jpg"></p>
+<p>图太大画不下, 所以中间部分用省略号省去, 只保留了一些关键内容和维度信息.</p>
+<p>同样的, 这里也是展示了对于一个样本的矩阵化运算.</p>
+<p>图片被完全展平, 而卷积核被重组成中间包含一些 0 值的矩阵. 在这种情况下, $\mathbf{X}&#39;&#39;$ 和原本的 $\mathbf{X}$ 内容完全相同. 前向公式为:</p>
+<p>$$<br>\mathbf{Y}&#39;&#39; = \mathbf{X}&#39;&#39;\mathbf{K}&#39;&#39;^\top<br>$$</p>
+<h4 id="梯度计算"><a href="#梯度计算" class="headerlink" title="梯度计算"></a>梯度计算</h4><p>卷积层的梯度计算都是基于矩阵化之后的卷积操作. 首先是偏置向量 $\mathbf{b}$ 的梯度计算, 前向中有两种方式能算出 $\mathbf{Y}$, 但是通过数据变形后, 与 $\mathbf{b}$ 的相加方式相同, 结合前面线性层的结论, $\mathbf{b}$ 的梯度就是将除了 $c_2$ 的其他维度求和即可.</p>
+<p>现在我们来看最关键的 $\mathbf{K}$ 和 $\mathbf{X}$ 的梯度怎么求, 首先回忆线性层得到的结论.</p>
+<div class="note info"><p>设最终的损失为 $L$, 当前向传播为:</p>
+<p>$$<br>\mathbf{Y} = \mathbf{X}\mathbf{W}<br>$$</p>
+<p>时, 则反向传播 $\mathbf{X}$ 和 $\mathbf{W}$ 的梯度为:</p>
+<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{\mathbf{W}}} &amp;= \mathbf{X}^\top\frac{\partial{L}}{\partial{\mathbf{Y}}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Y}}}\mathbf{W}^\top<br>\end{aligned}<br>$$</p>
+<p>其中 $\frac{\partial{L}}{\partial{\mathbf{Y}}}$ 是损失 $L$ 对输出 $\mathbf{Y}$ 的损失矩阵, 形状与 $\mathbf{Y}$ 相同.</p></div>
+
+<p>这是一个通用结论, 可以用于任意的两个矩阵相乘. 结合我们前面得到了两种不同的前向计算方式:</p>
+<p>$$<br>\begin{aligned}<br>  \mathbf{Y}&#39; &amp;= \mathbf{X}&#39;\mathbf{K}&#39;^\top \\<br>  \mathbf{Y}&#39;&#39; &amp;= \mathbf{X}&#39;&#39;\mathbf{K}&#39;&#39;^\top<br>\end{aligned}<br>$$</p>
+<p>在这两个不同的计算中, $\mathbf{K}&#39;$ 与原始的 $\mathbf{K}$ 相同, $\mathbf{X}&#39;&#39;$ 与原始的 $\mathbf{X}$ 数据相同, 只是进行了数据变形. 因此只要分别求出 $\mathbf{K}&#39;$ 和 $\mathbf{X}&#39;&#39;$ 的梯度, 再通过变形就能得到原始 $\mathbf{K}$ 和 $\mathbf{X}$ 的梯度. 结合结论, 有:</p>
+<p>$$<br>\begin{aligned}<br>    \frac{\partial{L}}{\partial{\mathbf{K}&#39;}} &amp;= \mathbf{X}&#39;^\top\frac{\partial{L}}{\partial{\mathbf{Y}&#39;}} \\<br>    \frac{\partial{L}}{\partial{\mathbf{X}&#39;&#39;}} &amp;= \frac{\partial{L}}{\partial{\mathbf{Y}&#39;&#39;}}\mathbf{K}&#39;&#39;^\top<br>\end{aligned}<br>$$</p>
+<p>其中, $\frac{\partial{L}}{\partial{\mathbf{Y}&#39;}}$ 和 $\frac{\partial{L}}{\partial{\mathbf{Y}&#39;&#39;}}$ 都可以通过对后一层传进来的 $\frac{\partial{L}}{\partial{\mathbf{Y}}}$ 进行数据变形得到.</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p>到这里我们已经完成了卷积层的前向和反向推导, 按照前面的内容便可完成代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ConvolutionLayer</span>(<span class="title class_ inherited__">ParamLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;步长为 1 的卷积层&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, c1: <span class="built_in">int</span>, c2: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span></span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            c1: 输入通道数</span></span><br><span class="line"><span class="string">            c2: 输出通道数</span></span><br><span class="line"><span class="string">            k1: 卷积核高</span></span><br><span class="line"><span class="string">            k2: 卷积核宽</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        self.k = np.random.random((c2, c1, k1, k2)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.b = np.random.random((<span class="number">1</span>, c2, <span class="number">1</span>, <span class="number">1</span>)) * <span class="number">2</span> - <span class="number">1</span></span><br><span class="line">        self.k_grad = np.zeros_like(self.k)</span><br><span class="line">        self.b_grad = np.zeros_like(self.b)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_unfold_k</span>(<span class="params">self, h: <span class="built_in">int</span>, w: <span class="built_in">int</span>, c1: <span class="built_in">int</span>, c2: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span>, o1: <span class="built_in">int</span>, o2: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;展开卷积核 k, 能够与展平的多通道图像直接相乘</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            k: (c2 * o1 * o2, c1 * H * W)</span></span><br><span class="line"><span class="string">                有 c2 个 (o1 * o2, c1 * H * W) 的展平卷积核, 每一个核大小是 c1 * H * W, 将在一张 c1 通道的一维图片上进行 o1 * o2 次卷积</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        ridx = np.arange(o1 * o2).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">        cidx1 = np.arange(o2).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>).repeat(o1, <span class="number">0</span>).reshape(o1 * o2, k1 * k2)</span><br><span class="line">        cidx2 = np.arange(k2).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(o1 * o2 * k1, <span class="number">0</span>).reshape(o1 * o2, k1 * k2)</span><br><span class="line">        cidx3 = np.arange(<span class="number">0</span>, k1 * w, w).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(k2, <span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        cidx4 = np.arange(<span class="number">0</span>, o1 * w, w).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(o2, <span class="number">0</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        cidx = cidx1 + cidx2 + cidx3 + cidx4</span><br><span class="line"></span><br><span class="line">        k = np.zeros((c2, c1, o1 * o2, h * w))</span><br><span class="line">        k[:, :, ridx, cidx] = self.k.reshape(c2, c1, <span class="number">1</span>, k1 * k2).repeat(o1 * o2, <span class="number">2</span>)</span><br><span class="line">        k = k.transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>).reshape(c2 * o1 * o2, c1 * h * w)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> k</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_unfold_x</span>(<span class="params">self, x: np.ndarray, c1: <span class="built_in">int</span>, k1: <span class="built_in">int</span>, k2: <span class="built_in">int</span>, o1: <span class="built_in">int</span>, o2: <span class="built_in">int</span></span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;展开输入 x, 能够与展平的卷积核直接相乘</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, o1 * o2, c1 * k1 * k2)</span></span><br><span class="line"><span class="string">                每张图片将与 c1 通道的一维卷积核进行 o1 * o2 次卷积</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        ridx_r = np.arange(k1).reshape(<span class="number">1</span>, k1).repeat(k2, <span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        ridx_c = np.arange(o1).reshape(o1, <span class="number">1</span>).repeat(o2, <span class="number">0</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        ridx = ridx_r + ridx_c</span><br><span class="line"></span><br><span class="line">        cidx_r = np.arange(k2).reshape(<span class="number">1</span>, k2).repeat(k1, <span class="number">0</span>).reshape(<span class="number">1</span>, -<span class="number">1</span>).repeat(o1 * o2, <span class="number">0</span>)</span><br><span class="line">        cidx_c = np.arange(o2).reshape(<span class="number">1</span>, o2).repeat(o1, <span class="number">0</span>).reshape(-<span class="number">1</span>, <span class="number">1</span>).repeat(k1 * k2, <span class="number">1</span>)</span><br><span class="line">        cidx = cidx_r + cidx_c</span><br><span class="line"></span><br><span class="line">        x = x[:, :, ridx, cidx].transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>).reshape(-<span class="number">1</span>, o1 * o2, c1 * k1 * k2)</span><br><span class="line">        <span class="keyword">return</span> x</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x: (B, c2, o1, o2)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        _, _, h, w = x.shape</span><br><span class="line">        c2, c1, k1, k2 = self.k.shape</span><br><span class="line">        o1 = h - k1 + <span class="number">1</span></span><br><span class="line">        o2 = w - k2 + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 展开卷积核</span></span><br><span class="line">        output = x.reshape(-<span class="number">1</span>, c1 * h * w) @ self._unfold_k(h, w, c1, c2, k1, k2, o1, o2).T</span><br><span class="line">        output = output.reshape(-<span class="number">1</span>, c2, o1, o2) + self.b</span><br><span class="line">        <span class="keyword">return</span> output</span><br><span class="line"></span><br><span class="line">        <span class="comment"># # 展开输入 (B, o1 * o2, c1 * k1 * k2) @ (c1 * k1 * k2, c2) = (B, o1 * o2, c2)</span></span><br><span class="line">        <span class="comment"># output = self._unfold_x(x, c1, k1, k2, o1, o2) @ self.k.reshape(c2, c1 * k1 * k2).T</span></span><br><span class="line">        <span class="comment"># output = output.transpose(0, 2, 1).reshape(-1, c2, o1, o2) + self.b</span></span><br><span class="line">        <span class="comment"># return output</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, last_x_grad: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, c1, H, W)</span></span><br><span class="line"><span class="string">            last_x_grad: (B, c2, o1, o2)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, c1, H, W)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">        _, _, h, w = x.shape</span><br><span class="line">        c2, c1, k1, k2 = self.k.shape</span><br><span class="line">        o1 = h - k1 + <span class="number">1</span></span><br><span class="line">        o2 = w - k2 + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        unfold_x = self._unfold_x(x, c1, k1, k2, o1, o2)</span><br><span class="line">        unfold_k = self._unfold_k(h, w, c1, c2, k1, k2, o1, o2)</span><br><span class="line"></span><br><span class="line">        self.b_grad = last_x_grad.<span class="built_in">sum</span>((<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>), keepdims=<span class="literal">True</span>)</span><br><span class="line">        self.k_grad = unfold_x.reshape(-<span class="number">1</span>, c1 * k1 * k2).T @ last_x_grad.transpose(<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>).reshape(-<span class="number">1</span>, c2)</span><br><span class="line">        self.k_grad = self.k_grad.transpose().reshape(c2, c1, k1, k2)</span><br><span class="line"></span><br><span class="line">        x_grad = last_x_grad.reshape(-<span class="number">1</span>, c2 * o1 * o2) @ unfold_k</span><br><span class="line">        x_grad = x_grad.reshape(-<span class="number">1</span>, c1, h, w)</span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">update</span>(<span class="params">self, lr: <span class="built_in">float</span></span>):</span><br><span class="line">        self.k -= lr * self.k_grad</span><br><span class="line">        self.b -= lr * self.b_grad</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>_unfold_k</code> 和 <code>_unfold_x</code> 就是对卷积核 $\mathbf{K}$ 和输入 $\mathbf{X}$ 进行数据重组的方法, 可以用于不同的前向和反向梯度计算. 前向中实现两种矩阵化方法的一种就行, 而反向中则需要同时使用两个方法来计算参数梯度.</p>
+<h2 id="损失函数层"><a href="#损失函数层" class="headerlink" title="损失函数层"></a>损失函数层</h2><p>最后是网络的损失函数, 从 <code>Linear</code> 层往后, 将网络的输出与真实标签进行损失计算.</p>
+<p>这里我们实现分类任务最常用的损失函数, 交叉熵损失函数, 它的前向和反向所需要的参数与前面的网络层有一些小的区别, 均需要输入真实标签值.</p>
+<h3 id="CrossEntropy"><a href="#CrossEntropy" class="headerlink" title="CrossEntropy"></a>CrossEntropy</h3><p>首先上交叉熵损失的公式. 损失计算从线性层的输出开始, 设函数输入为 $\mathbf{X}$, 形状为 $n \times C$, 真实标签 $\mathbf{y}$ 为长度是 $n$ , 取值范围 $[1, C]$ 的向量, 则损失 $L$:</p>
+<p>$$<br>\begin{aligned}<br>  L &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( -\log\left( \frac{\exp\left( {x_{i y_i}} \right)}{\sum_{j=1}^{C}{\exp\left(x_{ij}\right)}} \right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( -\log\left( \frac{\exp\left({x_{i y_i} - \max_{j=1}^{C}{x_{ij}}}\right)}{\sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}} \right)}} \right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( \log\left( \sum_{j=1}^{C}{\exp\left(x_{ij} - \max_{j=1}^{C}{x_{ij}} \right)} \right) - \left({x_{i y_i} - \max_{j=1}^{C}{x_{ij}}}\right) \right)} \\<br>  ~ &amp;= \frac{1}{n} \sum_{i=1}^{n} {\left( \log\left( \sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)} \right) - x_{i y_i}&#39; \right)}<br>\end{aligned}<br>$$</p>
+<p>详细的原理就不说了, 网上都有, 这里说一下为什么要给每个 $x$ 减去 $\max_{j=1}^{C}{x_{ij}}$, 因为中间用到了指数函数, 所以为了防止数据溢出, 将数据都变换到小于等于 0 的区间, 这样指数函数的值域就在 $(0, 1]$, 容易看出来这种变换是等价不影响计算结果的.</p>
+<p>前向计算就这样了, 然后看反向梯度计算. 注意到最外层是将每个样本的 &quot;小损失 $L_i$&quot; 进行了求和平均, 所以我们先看求和符号内每一个样本的值如何求梯度.</p>
+<p>掏出高中求导知识, 很容易得到:</p>
+<p>$$<br>\frac{\partial{L_i}}{\partial{x_{ij}}} = \left\{<br>  \begin{aligned}<br>    &amp; \frac{\exp{(x_{ij}&#39;)}}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}}     &amp; , ~ &amp; j \neq y_i \\<br>    &amp; \frac{\exp{(x_{ij}&#39;)}}{\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} - 1 &amp; , ~ &amp; j = y_i<br>  \end{aligned}<br>\right.<br>$$</p>
+<p>这里为了防止数据溢出, 同样使用 $x&#39;_{ij}$ 而不是原始输入值.</p>
+<p>最后, 由于求和平均的关系, 整个梯度也需要乘上一个系数, 因此有最终的梯度计算公式:</p>
+<p>$$<br>\begin{aligned}<br>  \frac{\partial{L}}{\partial{x_{ij}}} &amp;= \frac{\partial{L}}{\partial{L_i}}\frac{\partial{L_i}}{\partial{x_{ij}}} \\<br>  ~ &amp;= \frac{1}{n}\frac{\partial{L_i}}{\partial{x_{ij}}} \\<br>  ~ &amp;= \left\{<br>  \begin{aligned}<br>    &amp; \frac{1}{n}\left( \frac{\exp{(x_{ij}&#39;)}}{n\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} \right) &amp; , ~ &amp; j \neq y_i \\<br>    &amp; \frac{1}{n}\left( \frac{\exp{(x_{ij}&#39;)}}{n\sum_{j=1}^{C}{\exp\left(x_{ij}&#39; \right)}} - 1 \right) &amp; , ~ &amp; j = y_i<br>  \end{aligned}<br>\right.<br>\end{aligned}<br>$$</p>
+<p>至此, 损失函数的前向和反向都已经推导完成, 然后完成代码实现.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">CrossEntropyLoss</span>(<span class="title class_ inherited__">NetworkLayer</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x: np.ndarray, y: np.ndarray</span>) -&gt; <span class="built_in">float</span>:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C)</span></span><br><span class="line"><span class="string">            y: (B, )</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            loss: float number</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        x = x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        loss = np.log(np.exp(x).<span class="built_in">sum</span>(-<span class="number">1</span>)) - x[np.arange(x.shape[<span class="number">0</span>]), y]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">float</span>(loss.mean())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">backward</span>(<span class="params">self, x: np.ndarray, y: np.ndarray</span>) -&gt; np.ndarray:</span><br><span class="line">        <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            x: (B, C)</span></span><br><span class="line"><span class="string">            y: (B, )</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        Returns:</span></span><br><span class="line"><span class="string">            x_grad: (B, C)</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        exp_x = np.exp(x - x.<span class="built_in">max</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>))</span><br><span class="line">        x_grad = exp_x / exp_x.<span class="built_in">sum</span>(-<span class="number">1</span>, keepdims=<span class="literal">True</span>)</span><br><span class="line">        x_grad[np.arange(x.shape[<span class="number">0</span>]), y] -= <span class="number">1</span></span><br><span class="line">        x_grad /= x.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> x_grad</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本篇到此结束, 我们终于完成了网络需要的所有基础结构. 而下一篇, 也是最后一篇, 我们将把这些零件拼接起来, 组合出最终的卷积神经网络, 并完成对网络的训练和评估.</p>
+<p>本系列文章传送门:</p>
+<ul>
+<li><a href="/posts/2023/10/13/cnn-numpy-1/">基于 NumPy 的手写数字识别 (卷积神经网络) (一)</a></li>
+<li><a href="/posts/2023/10/14/cnn-numpy-2/">基于 NumPy 的手写数字识别 (卷积神经网络) (二)</a></li>
+<li><a href="/posts/2023/10/15/cnn-numpy-3/">基于 NumPy 的手写数字识别 (卷积神经网络) (三)</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>深度学习</tag>
+        <tag>矩阵求导</tag>
+        <tag>卷积矩阵化</tag>
+        <tag>交叉熵损失函数</tag>
       </tags>
   </entry>
   <entry>
@@ -1728,7 +1728,7 @@
 <p>导出后的内容大概是这样的, 而字体文件以纯二进制数据的方式进行记录, 在 <code>m_FontData.Array</code> 里, 以 <code>int8</code> 类型数组被导出.</p>
 <p>所以我们需要把新的字体文件转换成相同类型的数组替换掉这部分, 然后保存用 UABEA 重新导入.</p>
 <p>可以用一个简短的 Python 脚本完成.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">fontdata = Path(<span class="string">&quot;msyhbd.ttc&quot;</span>).read_bytes()</span><br><span class="line">fontdata_int8 = [(byte - <span class="number">256</span>) <span class="keyword">if</span> byte &gt; <span class="number">127</span> <span class="keyword">else</span> byte <span class="keyword">for</span> byte <span class="keyword">in</span> fontdata]  <span class="comment"># 要换成 int8 的范围, 默认情况 Python 的数字大小是无限制的</span></span><br><span class="line"></span><br><span class="line">old_data = json.loads(Path(<span class="string">&quot;YUMIN-sharedassets0.assets-1799.json&quot;</span>).read_text())</span><br><span class="line">old_data[<span class="string">&quot;m_FontData&quot;</span>][<span class="string">&quot;Array&quot;</span>] = fontdata_int8</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;./out-1799.json&quot;</span>).write_text(json.dumps(old_data, indent=<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"></span><br><span class="line">fontdata = Path(<span class="string">&quot;msyh.ttc&quot;</span>).read_bytes()</span><br><span class="line">fontdata_int8 = [(byte - <span class="number">256</span>) <span class="keyword">if</span> byte &gt; <span class="number">127</span> <span class="keyword">else</span> byte <span class="keyword">for</span> byte <span class="keyword">in</span> fontdata]  <span class="comment"># 要换成 int8 的范围, 默认情况 Python 的数字大小是无限制的</span></span><br><span class="line"></span><br><span class="line">old_data = json.loads(Path(<span class="string">&quot;YUMIN-sharedassets0.assets-1799.json&quot;</span>).read_text())</span><br><span class="line">old_data[<span class="string">&quot;m_FontData&quot;</span>][<span class="string">&quot;Array&quot;</span>] = fontdata_int8</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;./out-1799.json&quot;</span>).write_text(json.dumps(old_data, indent=<span class="number">2</span>))</span><br></pre></td></tr></table></figure>
 
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC82NzQzMjYzMA==">Unity引擎类游戏MOD制作通用教程<i class="fa fa-external-link-alt"></i></span></li>
@@ -1744,6 +1744,62 @@
         <tag>汉化</tag>
         <tag>UABEA</tag>
         <tag>Unity</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用 transformers.Pipeline 迭代生成数据</title>
+    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
+    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后这样子进行推理.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
+<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
+<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
+<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
+<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>其中提到了:</p>
+<blockquote>
+<p>For ease of use, a generator is also possible:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
+<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
+<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
+<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
+<ul>
+<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
+<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
+</ul>
+<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
+<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
+<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
+<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
+<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>transformers</tag>
+        <tag>Pipeline</tag>
+        <tag>Python</tag>
       </tags>
   </entry>
   <entry>
@@ -2006,62 +2062,6 @@
         <tag>Azur Lane</tag>
         <tag>动态立绘</tag>
         <tag>前端</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 transformers.Pipeline 迭代生成数据</title>
-    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
-    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
-<span id="more"></span>
-
-<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>然后这样子进行推理.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
-
-<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
-<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
-<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
-<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
-<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>其中提到了:</p>
-<blockquote>
-<p>For ease of use, a generator is also possible:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
-<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
-<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
-<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
-<ul>
-<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
-<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
-</ul>
-<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
-<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
-<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
-<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
-<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>transformers</tag>
-        <tag>Pipeline</tag>
-        <tag>Python</tag>
       </tags>
   </entry>
   <entry>
@@ -2813,49 +2813,6 @@
       </tags>
   </entry>
   <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Typora 破解版</title>
-    <url>//posts/2023/07/03/typora-cracked/</url>
-    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows 10 激活工具</title>
-    <url>//posts/2023/02/27/win10activation/</url>
-    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>激活工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>扩散模型阅读笔记</title>
     <url>//posts/2022/10/29/diffusion-model/</url>
     <content><![CDATA[<p>本文是对知乎的一篇文章<span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC81NDgxMTI3MTE=">扩散模型 Diffusion Models - 原理篇<i class="fa fa-external-link-alt"></i></span>的摘要性总结.</p>
@@ -3490,41 +3447,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Transformer 的训练与推理</title>
-    <url>//posts/2023/08/29/transformer/</url>
-    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
-<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
-<span id="more"></span>
-
-<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
-<p>这张图是一个简略的 Transformer 整体框架图.</p>
-<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
-<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
-<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
-<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
-<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
-<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
-<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
-<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
-<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
-<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
-<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
-<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
-<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
-<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>NLP</tag>
-        <tag>Transformer</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SM9 文档阅读笔记</title>
     <url>//posts/2023/12/15/sm9/</url>
     <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
@@ -3593,6 +3515,84 @@
         <tag>R-ate</tag>
         <tag>Frobenius</tag>
         <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Transformer 的训练与推理</title>
+    <url>//posts/2023/08/29/transformer/</url>
+    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
+<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
+<span id="more"></span>
+
+<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
+<p>这张图是一个简略的 Transformer 整体框架图.</p>
+<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
+<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
+<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
+<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
+<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
+<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
+<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
+<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
+<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
+<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
+<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
+<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
+<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
+<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>Transformer</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Typora 破解版</title>
+    <url>//posts/2023/07/03/typora-cracked/</url>
+    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
       </tags>
   </entry>
 </search>
