@@ -671,3 +671,4 @@ Path("./out-1799.json").write_text(json.dumps(old_data, indent=2))
 
 1. [Unity引擎类游戏MOD制作通用教程](https://zhuanlan.zhihu.com/p/67432630)
 2. [[Unity3D-游戏汉化教程]第3期：MonoBehaviour](https://www.bilibili.com/video/BV1k54y1z7oY/)
+3. [Unity手游汉化笔记②：使用UABE替换TTF字体](https://www.cnblogs.com/guobaoxu/p/12060027.html)
