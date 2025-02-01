@@ -180,6 +180,68 @@
       </tags>
   </entry>
   <entry>
+    <title>国密算法的纯 Python 实现</title>
+    <url>//posts/2023/12/14/gmalg/</url>
+    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
+<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
+<span id="more"></span>
+
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
+
+<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
+<li>祖冲之序列密码算法</li>
+<li>SM2 椭圆曲线公钥密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>加密解密</li>
+</ul>
+</li>
+<li>SM3 密码杂凑算法</li>
+<li>SM4 分组密码算法</li>
+<li>SM9 标识密码算法<ul>
+<li>签名验签</li>
+<li>密钥交换</li>
+<li>密钥封装</li>
+<li>加密解密</li>
+</ul>
+</li>
+</ul>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
+
+<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
+
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>国密</tag>
+        <tag>SM2</tag>
+        <tag>SM3</tag>
+        <tag>SM4</tag>
+        <tag>SM9</tag>
+        <tag>ZUC</tag>
+        <tag>gmalg</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用 C# 写一个哈希计算小工具</title>
     <url>//posts/2022/04/17/hashtool/</url>
     <content><![CDATA[<p>之前电脑上有一个用来计算文件哈希值的迷你小工具, 带界面能直接拖文件计算, 挺方便的. 正好最近闲着了, 于是想着自己仿造一个差不多的小工具, 顺便再补充一些缺少的哈希算法进去, 同时也能入门一下 <code>C#</code> 这门语言.</p>
@@ -251,68 +313,6 @@
         <tag>hashtool</tag>
         <tag>C#</tag>
         <tag>winforms</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>国密算法的纯 Python 实现</title>
-    <url>//posts/2023/12/14/gmalg/</url>
-    <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
-<p>Github 地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">https://github.com/ww-rm/gmalg<i class="fa fa-external-link-alt"></i></span></p>
-<span id="more"></span>
-
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install gmalg</span><br></pre></td></tr></table></figure>
-
-<h2 id="实现的核心算法"><a href="#实现的核心算法" class="headerlink" title="实现的核心算法"></a>实现的核心算法</h2><ul>
-<li>祖冲之序列密码算法</li>
-<li>SM2 椭圆曲线公钥密码算法<ul>
-<li>签名验签</li>
-<li>密钥交换</li>
-<li>加密解密</li>
-</ul>
-</li>
-<li>SM3 密码杂凑算法</li>
-<li>SM4 分组密码算法</li>
-<li>SM9 标识密码算法<ul>
-<li>签名验签</li>
-<li>密钥交换</li>
-<li>密钥封装</li>
-<li>加密解密</li>
-</ul>
-</li>
-</ul>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="ZUC-生成伪随机密钥流"><a href="#ZUC-生成伪随机密钥流" class="headerlink" title="ZUC 生成伪随机密钥流"></a>ZUC 生成伪随机密钥流</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">zuc = gmalg.ZUC(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3d4c4be96a82fdaeb58f641db17b455b&quot;</span>),</span><br><span class="line">                <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;84319aa8de6915ca1f6bda6bfbd8c766&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(zuc.generate().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM3-计算哈希值"><a href="#SM3-计算哈希值" class="headerlink" title="SM3 计算哈希值"></a>SM3 计算哈希值</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm3 = gmalg.SM3()</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm3.update(<span class="string">b&quot;I&#x27;m SM3 algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(sm3.value().<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM4-加密-解密"><a href="#SM4-加密-解密" class="headerlink" title="SM4 加密/解密"></a>SM4 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm4 = gmalg.SM4(<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0123456789ABCDEFFEDCBA9876543210&quot;</span>))</span><br><span class="line">cipher = sm4.encrypt(<span class="string">b&quot;0102030405060708&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm4.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-签名-验签"><a href="#SM2-签名-验签" class="headerlink" title="SM2 签名/验签"></a>SM2 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>,</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                  <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line">msg = <span class="string">b&quot;I&#x27;m SM2 sign/verify algorithm.&quot;</span></span><br><span class="line">r, s = sm2.sign(msg)</span><br><span class="line"><span class="built_in">print</span>(r.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(s.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.verify(msg, r, s))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-加密-解密"><a href="#SM2-加密-解密" class="headerlink" title="SM2 加密/解密"></a>SM2 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">sm2 = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;3945208F 7B2144B1 3F36E38A C6D39F95 88939369 2860B51A 42FB81EF 4DF7C5B8&quot;</span>),</span><br><span class="line">    P=<span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 09F9DF31 1E5421A1 50DD7D16 1E4BC5C6 72179FAD 1833FC07 6BB08FF3 56F35020&quot;</span></span><br><span class="line">                    <span class="string">&quot;CCEA490C E26775A5 2DC6EA71 8CC1AA60 0AED05FB F35E084A 6632F607 2DA9AD13&quot;</span>),</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">cipher = sm2.encrypt(<span class="string">b&quot;I&#x27;m SM2 encrypt/decrypt algorithm.&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(sm2.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM2-密钥交换"><a href="#SM2-密钥交换" class="headerlink" title="SM2 密钥交换"></a>SM2 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">PA = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 160E1289 7DF4EDB6 1DD812FE B96748FB D3CCF4FF E26AA6F6 DB9540AF 49C94232&quot;</span></span><br><span class="line">                   <span class="string">&quot;4A7DAD08 BB9A4595 31694BEB 20AA489D 6649975E 1BFCF8C4 741B78B4 B223007F&quot;</span>)</span><br><span class="line">sm2A = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;81EB26E9 41BB5AF1 6DF11649 5F906952 72AE2CD6 3D6C4AE1 678418BE 48230029&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">PB = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04 6AE848C5 7C53C7B1 B5FA99EB 2286AF07 8BA64C64 591B8B56 6F7357D5 76F16DFB&quot;</span></span><br><span class="line">                   <span class="string">&quot;EE489D77 1621A27B 36C5C799 2062E9CD 09A92643 86F3FBEA 54DFF693 05621C4D&quot;</span>)</span><br><span class="line">sm2B = gmalg.SM2(</span><br><span class="line">    <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;78512991 7D45A9EA 5437A593 56B82338 EAADDA6C EB199088 F14AE10D EFA229B5&quot;</span>),</span><br><span class="line">    <span class="string">b&quot;1234567812345678&quot;</span>, PB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">RA, tA = sm2A.begin_key_exchange()</span><br><span class="line">RB, tB = sm2B.begin_key_exchange()</span><br><span class="line"></span><br><span class="line">KB = sm2B.end_key_exchange(<span class="number">16</span>, tB, RA, <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>, PA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm2A.end_key_exchange(<span class="number">16</span>, tA, RB, <span class="string">b&quot;1234567812345678&quot;</span>, PB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-签名-验签"><a href="#SM9-签名-验签" class="headerlink" title="SM9 签名/验签"></a>SM9 签名/验签</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_s = <span class="string">b&quot;\x01&quot;</span></span><br><span class="line">msk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;0130E7 8459D785 45CB54C5 87E02CF4 80CE0B66 340F319F 348A1D5B 1F2DC5F4&quot;</span>)</span><br><span class="line">mpk_s = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;9F64080B 3084F733 E48AFF4B 41B56501 1CE0711C 5E392CFB 0AB1B679 1B94C408&quot;</span></span><br><span class="line">                      <span class="string">&quot;29DBA116 152D1F78 6CE843ED 24A3B573 414D2177 386A92DD 8F14D656 96EA5E32&quot;</span></span><br><span class="line">                      <span class="string">&quot;69850938 ABEA0112 B57329F4 47E3A0CB AD3E2FDB 1A77F335 E89E1408 D0EF1C25&quot;</span></span><br><span class="line">                      <span class="string">&quot;41E00A53 DDA532DA 1A7CE027 B7A46F74 1006E85F 5CDFF073 0E75C05F B4E3216D&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_s=hid_s, msk_s=msk_s, mpk_s=mpk_s)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_s = kgc.generate_sk_sign(uid)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sk_s.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_s=hid_s, mpk_s=mpk_s, sk_s=sk_s, uid=uid)</span><br><span class="line"></span><br><span class="line">message = <span class="string">b&quot;Chinese IBS standard&quot;</span></span><br><span class="line">h, S = sm9.sign(message)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(h.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(S.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.verify(message, h, S))</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-密钥交换"><a href="#SM9-密钥交换" class="headerlink" title="SM9 密钥交换"></a>SM9 密钥交换</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x02&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;02E65B 0762D042 F51F0D23 542B13ED 8CFA2E9A 0E720636 1E013A28 3905E31F&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;91745426 68E8F14A B273C094 5C3690C6 6E5DD096 78B86F73 4C435056 7ED06283&quot;</span></span><br><span class="line">                      <span class="string">&quot;54E598C6 BF749A3D ACC9FFFE DD9DB686 6C50457C FC7AA2A4 AD65C316 8FF74210&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid_A = <span class="string">b&quot;Alice&quot;</span></span><br><span class="line">sk_e_A = kgc.generate_sk_encrypt(uid_A)</span><br><span class="line"><span class="built_in">print</span>(sk_e_A.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">uid_B = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line">sk_e_B = kgc.generate_sk_encrypt(uid_B)</span><br><span class="line"><span class="built_in">print</span>(sk_e_B.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9_A = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_A, uid=uid_A)</span><br><span class="line">sm9_B = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e_B, uid=uid_B)</span><br><span class="line"></span><br><span class="line">rA, RA = sm9_A.begin_key_exchange(uid_B)</span><br><span class="line">rB, RB = sm9_B.begin_key_exchange(uid_A)</span><br><span class="line"></span><br><span class="line">KB = sm9_B.end_key_exchange(<span class="number">16</span>, rB, RB, uid_A, RA, gmalg.KEYXCHG_MODE.RESPONDER)</span><br><span class="line">KA = sm9_A.end_key_exchange(<span class="number">16</span>, rA, RA, uid_B, RB, gmalg.KEYXCHG_MODE.INITIATOR)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(KA == KB)</span><br><span class="line"><span class="built_in">print</span>(KA.<span class="built_in">hex</span>())</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-密钥封装"><a href="#SM9-密钥封装" class="headerlink" title="SM9 密钥封装"></a>SM9 密钥封装</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">K, C = sm9.encapsulate(<span class="number">32</span>, uid)  <span class="comment"># encapsulate key to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(K.<span class="built_in">hex</span>())</span><br><span class="line"><span class="built_in">print</span>(C.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decapsulate(C, <span class="number">32</span>) == K)</span><br></pre></td></tr></table></figure>
-
-<h3 id="SM9-加密-解密"><a href="#SM9-加密-解密" class="headerlink" title="SM9 加密/解密"></a>SM9 加密/解密</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> gmalg</span><br><span class="line"></span><br><span class="line">hid_e = <span class="string">b&quot;\x03&quot;</span></span><br><span class="line">msk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;01EDEE 3778F441 F8DEA3D9 FA0ACC4E 07EE36C9 3F9A0861 8AF4AD85 CEDE1C22&quot;</span>)</span><br><span class="line">mpk_e = <span class="built_in">bytes</span>.fromhex(<span class="string">&quot;04&quot;</span></span><br><span class="line">                      <span class="string">&quot;787ED7B8 A51F3AB8 4E0A6600 3F32DA5C 720B17EC A7137D39 ABC66E3C 80A892FF&quot;</span></span><br><span class="line">                      <span class="string">&quot;769DE617 91E5ADC4 B9FF85A3 1354900B 20287127 9A8C49DC 3F220F64 4C57A7B1&quot;</span>)</span><br><span class="line">kgc = gmalg.SM9KGC(hid_e=hid_e, msk_e=msk_e, mpk_e=mpk_e)</span><br><span class="line"></span><br><span class="line">uid = <span class="string">b&quot;Bob&quot;</span></span><br><span class="line"></span><br><span class="line">sk_e = kgc.generate_sk_encrypt(uid)</span><br><span class="line"><span class="built_in">print</span>(sk_e.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line">sm9 = gmalg.SM9(hid_e=hid_e, mpk_e=mpk_e, sk_e=sk_e, uid=uid)</span><br><span class="line"></span><br><span class="line">plain = <span class="string">b&quot;Chinese IBE standard&quot;</span></span><br><span class="line">cipher = sm9.encrypt(plain, uid)  <span class="comment"># encrypt data to self</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(cipher.<span class="built_in">hex</span>())</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(sm9.decrypt(cipher))</span><br></pre></td></tr></table></figure>
-
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>其实大部分算法以前都接触过, 实现起来也比较简单, 但是 SM9 真的是第一次看, 里面的数学原理啥的一窍不通, 因此耗费了大量时间, 中途有很多地方都是卡在数学公式上, 对文档的描述理解有误, 导致调试了半天也不对, 之后总结一下在实现 SM9 中涉及的一些关键概念和坑点.</p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>国密</tag>
-        <tag>SM2</tag>
-        <tag>SM3</tag>
-        <tag>SM4</tag>
-        <tag>SM9</tag>
-        <tag>ZUC</tag>
-        <tag>gmalg</tag>
       </tags>
   </entry>
   <entry>
@@ -1733,6 +1733,7 @@
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
 <li><span class="exturl" data-url="aHR0cHM6Ly96aHVhbmxhbi56aGlodS5jb20vcC82NzQzMjYzMA==">Unity引擎类游戏MOD制作通用教程<i class="fa fa-external-link-alt"></i></span></li>
 <li><span class="exturl" data-url="aHR0cHM6Ly93d3cuYmlsaWJpbGkuY29tL3ZpZGVvL0JWMWs1NHkxejdvWS8=">[Unity3D-游戏汉化教程]第3期：MonoBehaviour<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vZ3VvYmFveHUvcC8xMjA2MDAyNy5odG1s">Unity手游汉化笔记②：使用UABE替换TTF字体<i class="fa fa-external-link-alt"></i></span></li>
 </ol>
 ]]></content>
       <categories>
@@ -1967,6 +1968,47 @@
       </tags>
   </entry>
   <entry>
+    <title>网页预览碧蓝航线动态立绘</title>
+    <url>//posts/2024/12/22/spinejs-azurlane/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用 transformers.Pipeline 迭代生成数据</title>
     <url>//posts/2024/05/07/py-transformers-genexpr/</url>
     <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
@@ -2020,47 +2062,6 @@
         <tag>transformers</tag>
         <tag>Pipeline</tag>
         <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网页预览碧蓝航线动态立绘</title>
-    <url>//posts/2024/12/22/spinejs-azurlane/</url>
-    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
-<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
-<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
-<span id="more"></span>
-
-<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
-<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
-<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
-<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
-<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
-<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
-<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
-<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
-<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
-<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
-<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
-<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
-<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
-<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>spine</tag>
-        <tag>spine-js</tag>
-        <tag>Azur Lane</tag>
-        <tag>动态立绘</tag>
-        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -3489,6 +3490,41 @@
       </tags>
   </entry>
   <entry>
+    <title>Transformer 的训练与推理</title>
+    <url>//posts/2023/08/29/transformer/</url>
+    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
+<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
+<span id="more"></span>
+
+<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
+<p>这张图是一个简略的 Transformer 整体框架图.</p>
+<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
+<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
+<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
+<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
+<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
+<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
+<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
+<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
+<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
+<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
+<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
+<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
+<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
+<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>Transformer</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 文档阅读笔记</title>
     <url>//posts/2023/12/15/sm9/</url>
     <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
@@ -3557,41 +3593,6 @@
         <tag>R-ate</tag>
         <tag>Frobenius</tag>
         <tag>FinalExp</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Transformer 的训练与推理</title>
-    <url>//posts/2023/08/29/transformer/</url>
-    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
-<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
-<span id="more"></span>
-
-<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
-<p>这张图是一个简略的 Transformer 整体框架图.</p>
-<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
-<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
-<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
-<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
-<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
-<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
-<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
-<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
-<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
-<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
-<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
-<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
-<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
-<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>NLP</tag>
-        <tag>Transformer</tag>
       </tags>
   </entry>
 </search>
