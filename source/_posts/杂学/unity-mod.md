@@ -658,7 +658,7 @@ IL 代码太长, 贴了一下核心代码片段的对照. 我们要做的就是�
 import json
 from pathlib import Path
 
-fontdata = Path("msyhbd.ttc").read_bytes()
+fontdata = Path("msyh.ttc").read_bytes()
 fontdata_int8 = [(byte - 256) if byte > 127 else byte for byte in fontdata]  # 要换成 int8 的范围, 默认情况 Python 的数字大小是无限制的
 
 old_data = json.loads(Path("YUMIN-sharedassets0.assets-1799.json").read_text())
