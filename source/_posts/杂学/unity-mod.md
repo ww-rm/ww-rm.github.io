@@ -590,6 +590,83 @@ IL 代码太长, 贴了一下核心代码片段的对照. 我们要做的就是�
 
 需要注意仔细甄别需要汉化的文本到底在哪, 因为开发者可能用非英语作为程序需要的内容 (非显示文本), 这些影响程序的文本是不能动的.
 
+### 修改字体
+
+如果追求完美, 完成汉化后, 还需要同步修改游戏内的字体, 否则极大概率出现口口文学, 或者文本参差不齐的现象.
+
+还是类似的, 可以用 UABEA 打开资源文件, 并且根据类型筛选出 Font 文件有哪些. 然后我们需要进行 Dump, 建议选择 json 格式, 然后可以用 python 去自动替换.
+
+因为导出时, 不是单纯导出一个字体文件, 而是这个字体资源文件, 所以还包含了一些在游戏内必需的资源信息, 但是我们只需要替换这个资源文件里的字体文件数据就行.
+
+```json
+{
+  "m_Name": "YUMIN",
+  "m_LineSpacing": 25.632812,
+  "m_DefaultMaterial": {
+    "m_FileID": 0,
+    "m_PathID": 11
+  },
+  "m_FontSize": 16.0,
+  "m_Texture": {
+    "m_FileID": 0,
+    "m_PathID": 162
+  },
+  "m_AsciiStartOffset": 0,
+  "m_Tracking": 1.0,
+  "m_CharacterSpacing": 0,
+  "m_CharacterPadding": 1,
+  "m_ConvertCase": -2,
+  "m_CharacterRects": {
+    "Array": []
+  },
+  "m_KerningValues": {
+    "Array": []
+  },
+  "m_PixelScale": 0.1,
+  "m_FontData": {
+    "Array": [...]
+  },
+  "m_Ascent": 14.078125,
+  "m_Descent": -3.5546875,
+  "m_DefaultStyle": 0,
+  "m_FontNames": {
+    "Array": [
+      "Yu Mincho"
+    ]
+  },
+  "m_FallbackFonts": {
+    "Array": [
+      {
+        "m_FileID": 0,
+        "m_PathID": 1798
+      }
+    ]
+  },
+  "m_FontRenderingMode": 0,
+  "m_UseLegacyBoundsCalculation": false,
+  "m_ShouldRoundAdvanceValue": true
+}
+```
+
+导出后的内容大概是这样的, 而字体文件以纯二进制数据的方式进行记录, 在 `m_FontData.Array` 里, 以 `int8` 类型数组被导出.
+
+所以我们需要把新的字体文件转换成相同类型的数组替换掉这部分, 然后保存用 UABEA 重新导入.
+
+可以用一个简短的 Python 脚本完成.
+
+```python
+import json
+from pathlib import Path
+
+fontdata = Path("msyhbd.ttc").read_bytes()
+fontdata_int8 = [(byte - 256) if byte > 127 else byte for byte in fontdata]  # 要换成 int8 的范围, 默认情况 Python 的数字大小是无限制的
+
+old_data = json.loads(Path("YUMIN-sharedassets0.assets-1799.json").read_text())
+old_data["m_FontData"]["Array"] = fontdata_int8
+
+Path("./out-1799.json").write_text(json.dumps(old_data, indent=2))
+```
+
 ## 参考
 
 1. [Unity引擎类游戏MOD制作通用教程](https://zhuanlan.zhihu.com/p/67432630)
