@@ -48,7 +48,7 @@ ildasm Assembly-CSharp.dll /output:Assembly-CSharp.il
 ilasm /dll /resource:Assembly-CSharp.res Assembly-CSharp.il /output:Assembly-CSharp.dll
 ```
 
-可能还有更好的工具, 例如 dnSpy, 但是作为小白, 我参考的帖子就是用的这几个, 所以成功之后也没花时间去研究更好的工具了, 有兴趣的可以试试.
+可能还有更好的工具, 例如 [dnSpy](https://github.com/dnSpyEx/dnSpy), 但是作为小白, 我参考的帖子就是用的这几个, 所以成功之后也没花时间去研究更好的工具了, 有兴趣的可以试试.
 
 ### 定位 C# 代码
 
@@ -247,6 +247,12 @@ public void CheckTimeLimit()
 ### 修改 IL 代码
 
 确认 C# 层面的代码修改逻辑之后, 就可以去修改 IL 代码了.
+
+{% note info %}
+经过后续测试, [dnSpy](https://github.com/dnSpyEx/dnSpy) 可以很轻松地以源代码形式进行修改方法并更新 dll 文件, 直接写 C#, 非常方便.
+
+猜测其内部原理与手动修改 IL 代码类似, 但是把这些繁琐的步骤简化了.
+{% endnote %}
 
 用 ildasm 导出 `Assembly-CSharp.il`, 然后用 VSCode 打开, 直接搜索这两个函数名, 找到 IL 代码的定义.
 
