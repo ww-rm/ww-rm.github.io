@@ -19,7 +19,9 @@ date: 2025-03-04 12:31:15
 
 前往 [Release](https://github.com/ww-rm/SpineViewer/releases) 界面下载压缩包.
 
-`SelfContained` 可独立运行, `FrameworkDependent` 需要安装依赖框架 [.NET 桌面运行时 8.0.x](https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0).
+软件需要安装依赖框架 [.NET 桌面运行时 8.0.x](https://dotnet.microsoft.com/zh-cn/download/dotnet/8.0).
+
+也可以下载带有 `SelfContained` 后缀的压缩包, 可以独立运行.
 
 ## 功能
 
