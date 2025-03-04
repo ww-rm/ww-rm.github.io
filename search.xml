@@ -16,6 +16,170 @@
       </tags>
   </entry>
   <entry>
+    <title>基于 Spine 的碧蓝航线桌宠</title>
+    <url>//posts/2023/08/30/desktopsprite/</url>
+    <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
+<span id="more"></span>
+
+<h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">https://github.com/ww-rm/DesktopSprite<i class="fa fa-external-link-alt"></i></span></p>
+<p>这是一个适用于 <code>Windows</code> 系统下的桌面精灵, 目前已在 <code>Win10</code>, <code>Win11</code> 下基本测试通过.</p>
+<ul>
+<li>轻量的性能监视器: 可以显示电脑占用和网速监视浮窗</li>
+</ul>
+<p><img data-src="/static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
+<ul>
+<li>可自定义桌宠: 支持基于 <code>spine v3.6.53</code> 导出的碧蓝航线全角色小人动画</li>
+</ul>
+<p><img data-src="/static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="/static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="/static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="/static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
+<h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 下载 <code>Latest</code> 版本的 <code>zip</code> 压缩包, 解压后双击运行里面的 <code>DesktopSprite.msi</code> 安装文件进行安装, 可以自定义安装位置.</p>
+<p>安装完成后, 开始菜单和桌面都会出现程序启动图标. 双击运行, 通知栏会有程序图标, 首次运行桌面默认会显示自带的碧蓝小人角色, 且有一个性能浮窗.</p>
+<h3 id="更换角色"><a href="#更换角色" class="headerlink" title="更换角色"></a>更换角色</h3><p>右键通知区域程序图标, 可以进入设置界面, 设置对应的 <code>atlas</code> 和 <code>skel/json</code> 文件, 然后应用/确定设置即可完成更换.</p>
+<p>需要注意 <code>*.atlas</code>, <code>*.png</code>, <code>*.skel/*.json</code> 三份文件需要互相匹配, 且 <code>*.atlas</code> 和 <code>*.png</code> 文件名必须相同 (选择 <code>atlas</code> 的时候会自动填入 <code>png</code> 文件).</p>
+<p><img data-src="/static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
+<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="/static/image/desktopsprite/config.png" alt="config.png"></p>
+<h5 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h5><ul>
+<li>开机启动: 程序是否开机启动</li>
+<li>整点报时: 一个小功能, 可以在整点时间弹出通知提醒</li>
+<li>提示声音: 整点报时是否有声音</li>
+<li>气泡图标路径: 整点报时气泡通知使用的图标</li>
+</ul>
+<h5 id="显示设置"><a href="#显示设置" class="headerlink" title="显示设置"></a>显示设置</h5><p>这部分的设置是针对性能浮窗的.</p>
+<ul>
+<li>显示浮窗: 是在桌面显示浮窗还是隐藏到通知区域图标使用鼠标悬停显示</li>
+<li>显示占用: 是否在浮窗上显示处理器和内存占用百分比</li>
+<li>显示网速: 是否在浮窗上显示上传和下载速度</li>
+<li>深色主题: 设置浮窗主题颜色</li>
+<li>透明度: 设置浮窗透明度百分比, 0 为完全透明, 100 为完全不透明</li>
+</ul>
+<h5 id="精灵设置"><a href="#精灵设置" class="headerlink" title="精灵设置"></a>精灵设置</h5><p>这部分的设置是针对桌宠的</p>
+<ul>
+<li>atlas, png, skel 路径: 选择要使用的 SD 小人模型, 三个文件要互相匹配</li>
+<li>显示精灵: 是否在桌面上显示桌宠, 不显示的情况下不会有桌宠的资源占用</li>
+<li>鼠标穿透: 是否让桌宠鼠标穿透, 穿透情况下桌宠无视鼠标和键盘输入</li>
+<li>最大帧率: 设置桌宠的渲染帧率, 对电脑性能有较高影响</li>
+<li>透明度: 设置桌宠透明度, 配合鼠标穿透可以设置挂件效果</li>
+<li>缩放: 设置桌宠的大小</li>
+</ul>
+<h5 id="Spine-设置"><a href="#Spine-设置" class="headerlink" title="Spine 设置"></a>Spine 设置</h5><p>该部分设置桌宠动画小人不同事件和动画的映射关系, 可选内容由加载的 spine 模型决定.</p>
+<ul>
+<li>待机: 无操作的普通情况</li>
+<li>拖动: 鼠标拖动桌宠时触发</li>
+<li>任务中: 没想好</li>
+<li>睡觉: 电脑无输入闲置一段时间后触发</li>
+<li>闲置: 电脑低负载时随机触发</li>
+<li>触摸: 单击桌宠触发</li>
+<li>摸头: 鼠标中键下滚</li>
+<li>任务完成: 任务结束后, 和任务中是连着的</li>
+<li>跳舞: 鼠标中键上滚</li>
+<li>过载: 电脑高负载时随机触发</li>
+</ul>
+<h5 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h5><ul>
+<li>打开数据文件夹: 打开程序数据文件所在的文件夹</li>
+</ul>
+<h4 id="快捷操作"><a href="#快捷操作" class="headerlink" title="快捷操作"></a>快捷操作</h4><ul>
+<li>右键菜单: 有两个, 一个是浮窗/通知区域图标的, 另一个是桌宠的, 大部分选项都是设置面板里有的, 是快捷操作</li>
+<li>精灵复位: 用来预防一些未知的特殊情况, 如一些不可知的显示器分辨率问题导致的精灵错位消失, 点击之后精灵会回到原点, 屏幕的正下方</li>
+<li>双击桌宠: 让角色转向</li>
+</ul>
+<h4 id="通知区域图标"><a href="#通知区域图标" class="headerlink" title="通知区域图标"></a>通知区域图标</h4><ul>
+<li>右键单击: 显示右键菜单</li>
+<li>左键双击: 显示桌宠</li>
+</ul>
+<h2 id="一些开发细节"><a href="#一些开发细节" class="headerlink" title="一些开发细节"></a>一些开发细节</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ul>
+<li><code>Win10+</code></li>
+<li><code>Visual Studio 2022</code></li>
+<li><code>C++14</code></li>
+<li><a href="https://github.com/EsotericSoftware/spine-runtimes/tree/3.6"><code>spine-runtime</code></a></li>
+<li><a href="https://github.com/open-source-parsers/jsoncpp"><code>jsoncpp</code></a></li>
+</ul>
+<p>其中 <code>spine-runtime</code> 和 <code>jsoncpp</code> 均是以源码方式引入并编译的, 内部有一些相应的适配性修改.</p>
+<p><code>spine-runtime</code> 版本固定了是 <code>v3.6.53</code>, 所以几乎只支持碧蓝航线导出的小人资源.</p>
+<h3 id="动画渲染"><a href="#动画渲染" class="headerlink" title="动画渲染"></a>动画渲染</h3><p>桌宠使用 2D 图形库绘制, 具体实现原理参考 <span class="exturl" data-url="aHR0cDovL3poLmVzb3Rlcmljc29mdHdhcmUuY29tL3NwaW5lLWM=">spine-c 运行时文档<i class="fa fa-external-link-alt"></i></span>, 标准实现需要使用纹理映射等计算机图形学操作<del>但是我不会</del>, 所以纹理映射是通过 2D 库的纹理笔刷来实现的.</p>
+<p>创建纹理笔刷之后, 在绘制顶点三角形时, 需要自己手动计算纹理到模型的仿射矩阵, 然后设置笔刷的变换矩阵, 就能完成纹理映射. 关键函数是这个 <code>GetAffineMatrix</code>:</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">GetAffineMatrix</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> x1, <span class="type">float</span> y1, <span class="type">float</span> x2, <span class="type">float</span> y2, <span class="type">float</span> x3, <span class="type">float</span> y3, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> u1, <span class="type">float</span> v1, <span class="type">float</span> u2, <span class="type">float</span> v2, <span class="type">float</span> u3, <span class="type">float</span> v3, </span></span></span><br><span class="line"><span class="params"><span class="function">    Matrix* m</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>能够计算两个平面三角形 <code>UV</code> 到 <code>XY</code> 的仿射矩阵. 与渲染有关的详细实现见 <a href="https://github.com/ww-rm/DesktopSprite/blob/main/DesktopSprite/src/ds/spinechar.cpp"><code>spinechar.cpp</code></a>.</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="关于配置文件"><a href="#关于配置文件" class="headerlink" title="关于配置文件"></a>关于配置文件</h3><p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>⚠️不建议直接操作配置文件! ⚠️</p>
+<p>点击 &quot;打开数据文件夹&quot; 后, 可以看到数据文件夹里有一份 <code>config.json</code>, 里面以 <code>json</code> 格式存储了所有的设置面板可见的配置信息.</p>
+<h3 id="使用上的问题"><a href="#使用上的问题" class="headerlink" title="使用上的问题"></a>使用上的问题</h3><ul>
+<li>不建议帧率调太高, 会使电脑耗电显著增加, 或者风扇抽风</li>
+<li>如果不慎出了一些和配置有关的问题, 比如设置了错误的内容导致程序崩了/打不开, 直接打开数据文件夹, 关闭程序并删除 <code>config.json</code> 后重启程序, 即可让程序使用默认配置运行</li>
+</ul>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>如果无法下载则可以试一下下面的链接:</p>
+<ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXRTYUJ6WlRXQ3l2Y3JnYkdoX21ncmc/cHdkPWJsaHg=">单角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXFwWm5KUkI0UGFDOUViM3RrWmRBQ3c/cHdkPWJsaHg=">全角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+</ul>
+<p>如果 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 界面进不去 (可能需要魔法才能访问), 这里贴一下程序的网盘链接.</p>
+<ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXZERnIwS1lSa25EakdESDFIYUVYNmc/cHdkPWJsaHg=">安装包 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMVR4c3ZIYmsyVFZqbHZ2OUx2LUM3eWc/cHdkPWJsaHg=">免安装 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9peUtXZTE3NGNycmU=">安装包 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pRlVNTDE3NGNybGk=">免安装 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
+</ul>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>桌宠</tag>
+        <tag>碧蓝航线</tag>
+        <tag>Spine</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对话情绪检测</title>
+    <url>//posts/2021/09/11/emodetection/</url>
+    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
+<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
+<span id="more"></span>
+
+<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
+<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
+<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
+<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
+<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
+<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>整个网络大致分为特征提取和情绪分类两部分.</p>
+<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
+<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
+<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
+<ul>
+<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
+<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
+<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
+</ul>
+<p>整个结构可以用下图表示:</p>
+<p><img data-src="/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
+<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
+<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
+<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
+<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>在测试集上的结果如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
+
+<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
+<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
+<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>情绪检测</tag>
+        <tag>nlp</tag>
+        <tag>自然语言处理</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>国密算法的纯 Python 实现</title>
     <url>//posts/2023/12/14/gmalg/</url>
     <content><![CDATA[<p>近期花了点时间学习国密算法, 并且按国标文档用纯 Python 实现了一个小的国密算法库, 这里贴一下项目的简介和用法.</p>
@@ -149,170 +313,6 @@
         <tag>hashtool</tag>
         <tag>C#</tag>
         <tag>winforms</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对话情绪检测</title>
-    <url>//posts/2021/09/11/emodetection/</url>
-    <content><![CDATA[<p>本篇是大三时自然语言处理课程的大作业, 题目选了 &quot;对话情绪检测&quot; (Emotion Detection in Conversations), 目标是对对话中的每个句子进行情绪的分类，以此来识别说话者当时的情绪.</p>
-<p>本文整理一下自己的课程报告内容, 并将代码整理至 Github 上, 文末附有项目地址.</p>
-<span id="more"></span>
-
-<h2 id="软硬件环境"><a href="#软硬件环境" class="headerlink" title="软硬件环境"></a>软硬件环境</h2><p>软件: <code>python 3.7</code>, <code>pytorch 1.6.0</code>, <code>pytorch-nlp</code></p>
-<p>硬件: <code>GeForce RTX 2080 Ti</code></p>
-<h2 id="数据集"><a href="#数据集" class="headerlink" title="数据集"></a>数据集</h2><p>使用的数据集为 <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span> 对话数据集, 在这里我们只用到对话文本数据和情绪标签文件.</p>
-<p>对话数据为多行文本, 每一行是一段对话, 每一句话用 <code>__eou__</code> 作为结束符. 每一段对话只有两个说话人, 且交替出现.</p>
-<p>在标签文件中, 每一行与对话数据一一对应, 但是每句话换成标签值, 取值范围 0-6, 共7种不同的情绪类别.</p>
-<h2 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h2><p>模型设计主要参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>整个网络大致分为特征提取和情绪分类两部分.</p>
-<h3 id="特征提取"><a href="#特征提取" class="headerlink" title="特征提取"></a>特征提取</h3><p>首先是文本的嵌入表示, 使用 <code>GloVe</code> 预训练词向量来转换原始文本, 词向量维度大小为 300.</p>
-<p>在使用预训练词向量之后, 对于每段对话中的每个发言, 采用 <code>BiLSTM</code> 进行语义提取, 取正向和反向的最后时刻输出拼接在一起, 最终将每句话转换为等长向量.</p>
-<h3 id="情绪检测"><a href="#情绪检测" class="headerlink" title="情绪检测"></a>情绪检测</h3><p>这一部分存在 4 个状态变量:</p>
-<ul>
-<li>全局上下文信息: 用于记录当前对话的进行位置以及对话的整个历史信息.</li>
-<li>两个说话人状态: 用于记录每个说话人在最新发言之前的状态.</li>
-<li>情绪状态: 用于记录最近一次发言的情绪状态, 用于输出每句话的情绪向量表达.</li>
-</ul>
-<p>整个结构可以用下图表示:</p>
-<p><img data-src="/static/image/emodetection/detection_model.jpg" alt="detection_model"></p>
-<p>其中 $U_t$ 就是每一句话, $t$ 代表时刻.</p>
-<p>注意力结构使用了简单的乘性注意力, 具体可以看代码, 就是求点积然后 softmax.</p>
-<p>最后将每个句子对应的 $E_t$ 放进线性层进行分类.</p>
-<h2 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h2><p>最终的训练参数如下:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">Namespace(</span><br><span class="line">   batch_size=<span class="number">16</span>, </span><br><span class="line">   embedding_size=<span class="number">300</span>, </span><br><span class="line">   lstm_size=<span class="number">256</span>, </span><br><span class="line">   hidden_size=<span class="number">256</span>, </span><br><span class="line">   learning_rate=<span class="number">0.001</span>, </span><br><span class="line">   epochs=<span class="number">50</span>, </span><br><span class="line">   seed=<span class="number">1</span>, </span><br><span class="line">   istrain=<span class="literal">True</span>, </span><br><span class="line">   dev_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_validation.txt&#x27;</span>, </span><br><span class="line">   dev_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/validation/dialogues_emotion_validation.txt&#x27;</span>, </span><br><span class="line">   model_save_path=<span class="string">&#x27;attn.pt&#x27;</span>, </span><br><span class="line">   test_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_test.txt&#x27;</span>, </span><br><span class="line">   test_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/test/dialogues_emotion_test.txt&#x27;</span>, </span><br><span class="line">   train_data_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_train.txt&#x27;</span>, </span><br><span class="line">   train_label_path=<span class="string">&#x27;./data/Emotion Detection in Conversations/train/dialogues_emotion_train.txt&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>在测试集上的结果如下:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">           0       0.91      0.91      0.91      6321</span><br><span class="line">           1       0.43      0.25      0.31       118</span><br><span class="line">           2       0.46      0.23      0.31        47</span><br><span class="line">           3       0.71      0.29      0.42        17</span><br><span class="line">           4       0.60      0.62      0.61      1019</span><br><span class="line">           5       0.28      0.27      0.28       102</span><br><span class="line">           6       0.48      0.43      0.45       116</span><br><span class="line"></span><br><span class="line">    accuracy                           0.84      7740</span><br><span class="line">   macro avg       0.55      0.43      0.47      7740</span><br><span class="line">weighted avg       0.84      0.84      0.84      7740</span><br></pre></td></tr></table></figure>
-
-<p>咋说呢, 调过很多参数了, 但是效果都不是很好, 个人感觉是数据集太小了, 样本数不够, 或者是炼丹手法不行, 有哪里不对, 看人家论文里也不是特别高就是了. <del>教辅说可能就是这个任务不适合深度学习, 但是我觉得数据量管够啥都能深度学习.</del></p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>作为一个结课作业项目, 没有太多创新之处, 只是复现了一下论文里的模型结构, 然后在不同的数据集上做了实验, 效果说不上多好.</p>
-<p>主要收获就是增强动手能力吧, 毕竟是纯手搓的网络代码, 让自己能更加熟悉一些基础网络结构和 <code>pytorch</code> 框架的使用方法.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Vtb3Rpb24tRGV0ZWN0aW9uLWluLUNvbnZlcnNhdGlvbnM=">Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>参考论文: <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjE2MDkvYWFhaS52MzNpMDEuMzMwMTY4MTg=">DialogueRNN: An Attentive RNN for Emotion Detection in Conversations<i class="fa fa-external-link-alt"></i></span></p>
-<p>数据集地址: <span class="exturl" data-url="aHR0cDovL3lhbnJhbi5saS9kYWlseWRpYWxvZw==">DailyDialog<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>情绪检测</tag>
-        <tag>nlp</tag>
-        <tag>自然语言处理</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于 Spine 的碧蓝航线桌宠</title>
-    <url>//posts/2023/08/30/desktopsprite/</url>
-    <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C++</code> 实现的原生桌宠程序, 基于 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvcmVsZWFzZXMvdGFnLzMuNi41Mw==">spine-runtimes v3.6.53<i class="fa fa-external-link-alt"></i></span> 运行库, 可以支持碧蓝航线导出的小人动画资源.</p>
-<span id="more"></span>
-
-<h2 id="项目简介"><a href="#项目简介" class="headerlink" title="项目简介"></a>项目简介</h2><p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">https://github.com/ww-rm/DesktopSprite<i class="fa fa-external-link-alt"></i></span></p>
-<p>这是一个适用于 <code>Windows</code> 系统下的桌面精灵, 目前已在 <code>Win10</code>, <code>Win11</code> 下基本测试通过.</p>
-<ul>
-<li>轻量的性能监视器: 可以显示电脑占用和网速监视浮窗</li>
-</ul>
-<p><img data-src="/static/image/desktopsprite/perfmonitor.gif" alt="性能浮窗动图"></p>
-<ul>
-<li>可自定义桌宠: 支持基于 <code>spine v3.6.53</code> 导出的碧蓝航线全角色小人动画</li>
-</ul>
-<p><img data-src="/static/image/desktopsprite/guanghui_2.gif" alt="guanghui_2 动图"><br><img data-src="/static/image/desktopsprite/biaoqiang_h.gif" alt="biaoqiang_h 动图"><br><img data-src="/static/image/desktopsprite/lafei_h.gif" alt="lafei_h 动图"><br><img data-src="/static/image/desktopsprite/z23_h.gif" alt="z23_h 动图"></p>
-<h2 id="安装与使用"><a href="#安装与使用" class="headerlink" title="安装与使用"></a>安装与使用</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 下载 <code>Latest</code> 版本的 <code>zip</code> 压缩包, 解压后双击运行里面的 <code>DesktopSprite.msi</code> 安装文件进行安装, 可以自定义安装位置.</p>
-<p>安装完成后, 开始菜单和桌面都会出现程序启动图标. 双击运行, 通知栏会有程序图标, 首次运行桌面默认会显示自带的碧蓝小人角色, 且有一个性能浮窗.</p>
-<h3 id="更换角色"><a href="#更换角色" class="headerlink" title="更换角色"></a>更换角色</h3><p>右键通知区域程序图标, 可以进入设置界面, 设置对应的 <code>atlas</code> 和 <code>skel/json</code> 文件, 然后应用/确定设置即可完成更换.</p>
-<p>需要注意 <code>*.atlas</code>, <code>*.png</code>, <code>*.skel/*.json</code> 三份文件需要互相匹配, 且 <code>*.atlas</code> 和 <code>*.png</code> 文件名必须相同 (选择 <code>atlas</code> 的时候会自动填入 <code>png</code> 文件).</p>
-<p><img data-src="/static/image/desktopsprite/atlasconfig.png" alt="atlasconfig"></p>
-<h3 id="详细使用说明"><a href="#详细使用说明" class="headerlink" title="详细使用说明"></a>详细使用说明</h3><h4 id="设置面板"><a href="#设置面板" class="headerlink" title="设置面板"></a>设置面板</h4><p><img data-src="/static/image/desktopsprite/config.png" alt="config.png"></p>
-<h5 id="系统设置"><a href="#系统设置" class="headerlink" title="系统设置"></a>系统设置</h5><ul>
-<li>开机启动: 程序是否开机启动</li>
-<li>整点报时: 一个小功能, 可以在整点时间弹出通知提醒</li>
-<li>提示声音: 整点报时是否有声音</li>
-<li>气泡图标路径: 整点报时气泡通知使用的图标</li>
-</ul>
-<h5 id="显示设置"><a href="#显示设置" class="headerlink" title="显示设置"></a>显示设置</h5><p>这部分的设置是针对性能浮窗的.</p>
-<ul>
-<li>显示浮窗: 是在桌面显示浮窗还是隐藏到通知区域图标使用鼠标悬停显示</li>
-<li>显示占用: 是否在浮窗上显示处理器和内存占用百分比</li>
-<li>显示网速: 是否在浮窗上显示上传和下载速度</li>
-<li>深色主题: 设置浮窗主题颜色</li>
-<li>透明度: 设置浮窗透明度百分比, 0 为完全透明, 100 为完全不透明</li>
-</ul>
-<h5 id="精灵设置"><a href="#精灵设置" class="headerlink" title="精灵设置"></a>精灵设置</h5><p>这部分的设置是针对桌宠的</p>
-<ul>
-<li>atlas, png, skel 路径: 选择要使用的 SD 小人模型, 三个文件要互相匹配</li>
-<li>显示精灵: 是否在桌面上显示桌宠, 不显示的情况下不会有桌宠的资源占用</li>
-<li>鼠标穿透: 是否让桌宠鼠标穿透, 穿透情况下桌宠无视鼠标和键盘输入</li>
-<li>最大帧率: 设置桌宠的渲染帧率, 对电脑性能有较高影响</li>
-<li>透明度: 设置桌宠透明度, 配合鼠标穿透可以设置挂件效果</li>
-<li>缩放: 设置桌宠的大小</li>
-</ul>
-<h5 id="Spine-设置"><a href="#Spine-设置" class="headerlink" title="Spine 设置"></a>Spine 设置</h5><p>该部分设置桌宠动画小人不同事件和动画的映射关系, 可选内容由加载的 spine 模型决定.</p>
-<ul>
-<li>待机: 无操作的普通情况</li>
-<li>拖动: 鼠标拖动桌宠时触发</li>
-<li>任务中: 没想好</li>
-<li>睡觉: 电脑无输入闲置一段时间后触发</li>
-<li>闲置: 电脑低负载时随机触发</li>
-<li>触摸: 单击桌宠触发</li>
-<li>摸头: 鼠标中键下滚</li>
-<li>任务完成: 任务结束后, 和任务中是连着的</li>
-<li>跳舞: 鼠标中键上滚</li>
-<li>过载: 电脑高负载时随机触发</li>
-</ul>
-<h5 id="按钮"><a href="#按钮" class="headerlink" title="按钮"></a>按钮</h5><ul>
-<li>打开数据文件夹: 打开程序数据文件所在的文件夹</li>
-</ul>
-<h4 id="快捷操作"><a href="#快捷操作" class="headerlink" title="快捷操作"></a>快捷操作</h4><ul>
-<li>右键菜单: 有两个, 一个是浮窗/通知区域图标的, 另一个是桌宠的, 大部分选项都是设置面板里有的, 是快捷操作</li>
-<li>精灵复位: 用来预防一些未知的特殊情况, 如一些不可知的显示器分辨率问题导致的精灵错位消失, 点击之后精灵会回到原点, 屏幕的正下方</li>
-<li>双击桌宠: 让角色转向</li>
-</ul>
-<h4 id="通知区域图标"><a href="#通知区域图标" class="headerlink" title="通知区域图标"></a>通知区域图标</h4><ul>
-<li>右键单击: 显示右键菜单</li>
-<li>左键双击: 显示桌宠</li>
-</ul>
-<h2 id="一些开发细节"><a href="#一些开发细节" class="headerlink" title="一些开发细节"></a>一些开发细节</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ul>
-<li><code>Win10+</code></li>
-<li><code>Visual Studio 2022</code></li>
-<li><code>C++14</code></li>
-<li><a href="https://github.com/EsotericSoftware/spine-runtimes/tree/3.6"><code>spine-runtime</code></a></li>
-<li><a href="https://github.com/open-source-parsers/jsoncpp"><code>jsoncpp</code></a></li>
-</ul>
-<p>其中 <code>spine-runtime</code> 和 <code>jsoncpp</code> 均是以源码方式引入并编译的, 内部有一些相应的适配性修改.</p>
-<p><code>spine-runtime</code> 版本固定了是 <code>v3.6.53</code>, 所以几乎只支持碧蓝航线导出的小人资源.</p>
-<h3 id="动画渲染"><a href="#动画渲染" class="headerlink" title="动画渲染"></a>动画渲染</h3><p>桌宠使用 2D 图形库绘制, 具体实现原理参考 <span class="exturl" data-url="aHR0cDovL3poLmVzb3Rlcmljc29mdHdhcmUuY29tL3NwaW5lLWM=">spine-c 运行时文档<i class="fa fa-external-link-alt"></i></span>, 标准实现需要使用纹理映射等计算机图形学操作<del>但是我不会</del>, 所以纹理映射是通过 2D 库的纹理笔刷来实现的.</p>
-<p>创建纹理笔刷之后, 在绘制顶点三角形时, 需要自己手动计算纹理到模型的仿射矩阵, 然后设置笔刷的变换矩阵, 就能完成纹理映射. 关键函数是这个 <code>GetAffineMatrix</code>:</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">GetAffineMatrix</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> x1, <span class="type">float</span> y1, <span class="type">float</span> x2, <span class="type">float</span> y2, <span class="type">float</span> x3, <span class="type">float</span> y3, </span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">float</span> u1, <span class="type">float</span> v1, <span class="type">float</span> u2, <span class="type">float</span> v2, <span class="type">float</span> u3, <span class="type">float</span> v3, </span></span></span><br><span class="line"><span class="params"><span class="function">    Matrix* m</span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>能够计算两个平面三角形 <code>UV</code> 到 <code>XY</code> 的仿射矩阵. 与渲染有关的详细实现见 <a href="https://github.com/ww-rm/DesktopSprite/blob/main/DesktopSprite/src/ds/spinechar.cpp"><code>spinechar.cpp</code></a>.</p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><h3 id="关于配置文件"><a href="#关于配置文件" class="headerlink" title="关于配置文件"></a>关于配置文件</h3><p>⚠️不建议直接操作配置文件! ⚠️</p>
-<p>⚠️不建议直接操作配置文件! ⚠️</p>
-<p>⚠️不建议直接操作配置文件! ⚠️</p>
-<p>点击 &quot;打开数据文件夹&quot; 后, 可以看到数据文件夹里有一份 <code>config.json</code>, 里面以 <code>json</code> 格式存储了所有的设置面板可见的配置信息.</p>
-<h3 id="使用上的问题"><a href="#使用上的问题" class="headerlink" title="使用上的问题"></a>使用上的问题</h3><ul>
-<li>不建议帧率调太高, 会使电脑耗电显著增加, 或者风扇抽风</li>
-<li>如果不慎出了一些和配置有关的问题, 比如设置了错误的内容导致程序崩了/打不开, 直接打开数据文件夹, 关闭程序并删除 <code>config.json</code> 后重启程序, 即可让程序使用默认配置运行</li>
-</ul>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>如果无法下载则可以试一下下面的链接:</p>
-<ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXRTYUJ6WlRXQ3l2Y3JnYkdoX21ncmc/cHdkPWJsaHg=">单角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXFwWm5KUkI0UGFDOUViM3RrWmRBQ3c/cHdkPWJsaHg=">全角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-</ul>
-<p>如果 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGUvcmVsZWFzZXM=">Release<i class="fa fa-external-link-alt"></i></span> 界面进不去 (可能需要魔法才能访问), 这里贴一下程序的网盘链接.</p>
-<ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXZERnIwS1lSa25EakdESDFIYUVYNmc/cHdkPWJsaHg=">安装包 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMVR4c3ZIYmsyVFZqbHZ2OUx2LUM3eWc/cHdkPWJsaHg=">免安装 - 百度网盘<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9peUtXZTE3NGNycmU=">安装包 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pRlVNTDE3NGNybGk=">免安装 - 蓝奏云<i class="fa fa-external-link-alt"></i></span>.</li>
-</ul>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>桌宠</tag>
-        <tag>碧蓝航线</tag>
-        <tag>Spine</tag>
       </tags>
   </entry>
   <entry>
@@ -472,6 +472,58 @@
         <tag>python 库</tag>
         <tag>PyPI</tag>
         <tag>网易云音乐</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SpineViewer 简单好用的 Spine 查看&amp;导出工具</title>
+    <url>//posts/2025/03/04/spineviewer/</url>
+    <content><![CDATA[<p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">SpineViewer<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C#</code> 实现的桌面工具, 支持多版本多骨骼的 Spine 动画查看和导出, 并且支持方便的面板参数调整.</p>
+<span id="more"></span>
+
+<p><img data-src="/static/image/spineviewer/preview.jpg" alt="preview.jpg"></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3JlbGVhc2Vz">Release<i class="fa fa-external-link-alt"></i></span> 界面下载压缩包.</p>
+<p><code>SelfContained</code> 可独立运行, <code>FrameworkDependent</code> 需要安装依赖框架 <span class="exturl" data-url="aHR0cHM6Ly9kb3RuZXQubWljcm9zb2Z0LmNvbS96aC1jbi9kb3dubG9hZC9kb3RuZXQvOC4w">.NET 桌面运行时 8.0.x<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
+<li>支持不同版本 Spine 查看<ul>
+<li><input checked="" disabled="" type="checkbox"> <code>v3.6.x</code></li>
+<li><input disabled="" type="checkbox"> <code>v3.7.x</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>v3.8.x</code></li>
+<li><input disabled="" type="checkbox"> <code>v3.9.x</code></li>
+<li><input disabled="" type="checkbox"> <code>v4.0.x</code></li>
+<li><input disabled="" type="checkbox"> <code>v4.1.x</code></li>
+<li><input disabled="" type="checkbox"> <code>v4.2.x</code></li>
+</ul>
+</li>
+<li>支持多骨骼文件动画预览</li>
+<li>支持每个骨骼独立参数设置</li>
+<li>支持动画PNG帧序列导出</li>
+<li>支持缩放旋转等导出画面设置</li>
+<li>Coming soon...</li>
+</ul>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p><strong>文件</strong>菜单可以选择<strong>打开</strong>或者<strong>批量打开</strong>进行骨骼文件导入.</p>
+<h3 id="骨骼调整"><a href="#骨骼调整" class="headerlink" title="骨骼调整"></a>骨骼调整</h3><p>在<strong>模型列表</strong>中选择一项或多项, 将会在<strong>模型参数</strong>面板显示可供调节的参数.</p>
+<p><strong>模型列表</strong>右键菜单可以对列表项进行增删调整, 也可以使用鼠标左键拖动调整顺序.</p>
+<h3 id="画面调整"><a href="#画面调整" class="headerlink" title="画面调整"></a>画面调整</h3><p><strong>预览画面</strong>支持的鼠标操作:</p>
+<ul>
+<li>左键可以对骨骼进行拖动</li>
+<li>右键对画面进行拖动</li>
+<li>滚轮进行画面缩放</li>
+</ul>
+<p>除此之外, 也可以通过<strong>画面参数</strong>面板调节导出和预览时的画面参数.</p>
+<p>在<strong>功能</strong>菜单中, 可以重置同步所有骨骼动画时间.</p>
+<h3 id="动画导出"><a href="#动画导出" class="headerlink" title="动画导出"></a>动画导出</h3><p><strong>文件</strong>菜单中选择<strong>导出</strong>可以将目前加载的所有骨骼动画按照预览时的画面进行PNG帧序列导出.</p>
+<p>可以在每个骨骼的<strong>模型参数</strong>中查看动画完整时长.</p>
+<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>算是第二次写 Winforms 应用了<del>于毕设的百忙之中抽空完成</del>, 不得不感概, GPT 真的大大改善代码体验, 以前找个文档可以要翻老半天, 而且不熟悉的话找到的还不规范, 极容易掉坑, 现在有 GPT 之类的加成, 拿着代码片段和需求一问, 几乎直接就能跑了, 只能说科技改变生活啊, 对一些简单的开源项目太有帮助了.</p>
+<p>这是在原有项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 上改出来的, 起因是有人留 Issue 说是否可以增加骨骼数量上限. 其实自己也一直很膈应这件事, 因为之前第一次写 Winforms 应用, 压根不怎么会写, 对控件库甚至语法都不是很熟悉, 所以很多地方写的很死, 都是手动摆出来了多少个控件然后支持操作.</p>
+<p>不过这次用上 <code>PropertyGrid</code> 和 <code>ListView</code> 之后, 不管是使用上还是代码上体验都好了很多, 而且也做了不同控件和对话框的封装, 项目结构确实远好于之前<del>果然代码还是得多写</del>, 希望能收获几个 star 吧.</p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>Spine</tag>
+        <tag>SpineViewer</tag>
+        <tag>Winforms</tag>
       </tags>
   </entry>
   <entry>
@@ -1066,6 +1118,60 @@
       </tags>
   </entry>
   <entry>
+    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
+    <url>//posts/2022/08/14/kxsw/</url>
+    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
+<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
+<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
+<span id="more"></span>
+
+<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
+<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
+<p><img data-src="/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>在这里只简单科普一下基本概念.</p>
+<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
+<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
+<p>不使用工具前:</p>
+<p><code>用户 --|--&gt; 目标网站</code></p>
+<p>使用工具后:</p>
+<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
+<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
+<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
+<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
+<ul>
+<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
+<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
+<li>不改变系统代理: 保持原有系统代理设置不变.</li>
+</ul>
+<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
+<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
+<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
+<p><img data-src="/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
+<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
+<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
+<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
+<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
+<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
+<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
+<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
+<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
+<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
+<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
+<p><img data-src="/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
+<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>科学上网</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>看雪 2023·KCTF 第十一题设计思路与题解</title>
     <url>//posts/2023/10/07/kctf-2023/</url>
     <content><![CDATA[<p>在我导安排下作为防守方出了个题到<span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXRlYW1fbGlzdC0xOS0zMy5odG0=">看雪 2023·KCTF<i class="fa fa-external-link-alt"></i></span> 上, <span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXNlYXNvbl9maWdodC0yMzYuaHRt">第十一题 步步逼近<i class="fa fa-external-link-alt"></i></span>, 有幸拿了精致奖, 第一次参加这类比赛, 属实是走大运了. 这里把出题思路和题解贴一下, 和看雪的是一样的, 原文链接 <span class="exturl" data-url="aHR0cHM6Ly9iYnMua2FueHVlLmNvbS90aHJlYWQtMjc4NDc4Lmh0bQ==">https://bbs.kanxue.com/thread-278478.htm<i class="fa fa-external-link-alt"></i></span>.</p>
@@ -1146,60 +1252,6 @@
         <tag>看雪</tag>
         <tag>KCTF</tag>
         <tag>逆向</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
-    <url>//posts/2022/08/14/kxsw/</url>
-    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
-<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
-<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
-<span id="more"></span>
-
-<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
-<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
-<p><img data-src="/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
-<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>在这里只简单科普一下基本概念.</p>
-<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
-<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
-<p>不使用工具前:</p>
-<p><code>用户 --|--&gt; 目标网站</code></p>
-<p>使用工具后:</p>
-<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
-<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
-<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
-<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
-<ul>
-<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
-<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
-<li>不改变系统代理: 保持原有系统代理设置不变.</li>
-</ul>
-<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
-<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
-<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
-<p><img data-src="/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
-<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
-<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
-<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
-<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
-<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
-<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
-<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
-<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
-<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
-<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
-<p><img data-src="/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
-<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>科学上网</tag>
       </tags>
   </entry>
   <entry>
@@ -2671,6 +2723,20 @@
       </tags>
   </entry>
   <entry>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>给新生的编程工具推荐与基本使用方法</title>
     <url>//posts/2022/08/11/wast-vscandvs/</url>
     <content><![CDATA[<p>此帖面向大一新生刚入门的编程小白, 作为编程工具的常规推荐, 大佬请直接无视orz.</p>
@@ -2814,20 +2880,6 @@
         <tag>Visual Studio Code</tag>
         <tag>Visual Studio</tag>
         <tag>VS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
       </tags>
   </entry>
   <entry>
@@ -3132,221 +3184,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Simpleperf 三部曲 (三)</title>
-    <url>//posts/2024/07/07/simpleperf3/</url>
-    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
-<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
-
-<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
-
-<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
-
-<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
-<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
-<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
-
-<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
-<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
-<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
-
-<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
-
-<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
-<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
-<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
-<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
-<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
-<ul>
-<li>显示该函数调用的函数的火焰图.</li>
-<li>显示调用该函数的函数的火焰图.</li>
-<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
-<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
-</ul>
-<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
-
-<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
-<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
-<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
-<ul>
-<li>每线程轨迹</li>
-<li>火焰图</li>
-<li>搜索, 聚焦于特定的堆栈</li>
-<li>时间序列视图, 以时间戳顺序查看样本</li>
-<li>按线程和持续时间过滤</li>
-</ul>
-<p>使用方法:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
-
-<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
-<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
-<p>这种格式可以导入到:</p>
-<ul>
-<li>FlameGraph</li>
-<li>Flamescope</li>
-<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
-<li>Speedscope</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
-<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
-
-<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
-<p>折叠堆栈格式可被以下工具读取:</p>
-<ul>
-<li>The FlameGraph toolkit</li>
-<li>Inferno (FlameGraph 的 Rust 移植版)</li>
-<li>Speedscope</li>
-</ul>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
-
-<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
-<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
-<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
-
-<p>结果如下所示:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
-
-<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
-<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Simpleperf</tag>
-        <tag>Android</tag>
-        <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SM9 文档阅读笔记</title>
-    <url>//posts/2023/12/15/sm9/</url>
-    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
-<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
-<span id="more"></span>
-
-<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
-<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
-<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
-<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
-<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
-<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
-<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
-<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
-<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
-<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
-<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
-<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
-<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
-<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
-<p>因此有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
-<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
-<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
-<p>幂次与系数转换关系如下:</p>
-<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
-<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
-<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
-<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
-<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
-<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
-<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
-<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
-<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
-<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
-<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
-<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
-<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
-<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
-<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
-<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
-<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
-<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
-<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
-<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
-<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
-<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
-<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
-<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
-<p>因此困难部分的指数可以表示为:</p>
-<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
-<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
-<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
-<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
-<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>双线性对</tag>
-        <tag>R-ate</tag>
-        <tag>Frobenius</tag>
-        <tag>FinalExp</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Transformer 的训练与推理</title>
-    <url>//posts/2023/08/29/transformer/</url>
-    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
-<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
-<span id="more"></span>
-
-<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
-<p>这张图是一个简略的 Transformer 整体框架图.</p>
-<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
-<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
-<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
-<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
-<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
-<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
-<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
-<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
-<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
-<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
-<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
-<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
-<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
-<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>NLP</tag>
-        <tag>Transformer</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Simpleperf 三部曲 (一)</title>
     <url>//posts/2024/07/07/simpleperf1/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3597,6 +3434,221 @@
         <tag>Simpleperf</tag>
         <tag>Android</tag>
         <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SM9 文档阅读笔记</title>
+    <url>//posts/2023/12/15/sm9/</url>
+    <content><![CDATA[<p>本文记录自己在学习实现 SM9 中遇到的问题和个人理解. 由于实现之前没有系统学习过 SM9 涉及的相关数学知识, 因此踩了许多坑, 特此记录.</p>
+<p>主要是一些关键性数学概念的理解, 以及一些简单的优化技巧.</p>
+<span id="more"></span>
+
+<h2 id="扩域运算"><a href="#扩域运算" class="headerlink" title="扩域运算"></a>扩域运算</h2><p>在 SM9 中, 按如下方式进行扩域运算:</p>
+<p>$F_{q^{12}}$ 的 $1\text{-}2\text{-}4\text{-}12$ 塔式扩张:</p>
+<p>$$<br>\begin{align*}<br>  &amp; F_{q^{2}}[u] = F_{q}[u]/(u^2 - \alpha), &amp;&amp; \alpha = -2 \\<br>  &amp; F_{q^{4}}[v] = F_{q^{2}}[v]/(v^2 - \xi), &amp;&amp; \xi = u \\<br>  &amp; F_{q^{12}}[w] = F_{q^{4}}[w]/(w^3 - v), &amp;&amp; v^2 = \xi<br>\end{align*}<br>$$</p>
+<p>其中, 第一次的 2 次扩张约化多项式为: $x^2 - \alpha, \alpha=-2$;</p>
+<p>第二次进行 2 次扩张的约化多项式为: $x^2 - u, u^2 = \alpha, u = \sqrt{-2}$;</p>
+<p>第三次进行 3 次扩张的约化多项式为: $x^3-v, v^2=u, v = \sqrt{\sqrt{-2}}$.</p>
+<p>$u$ 属于 $F_{q^{2}}$, 表示为 $(1, 0)$.</p>
+<p>$v$ 属于 $F_{q^{4}}$, 表示为 $(0, 1, 0, 0)$, 也可以用 $F_{q^{2}}$ 元素表示为 $((0, 1), (0, 0))$.</p>
+<p>扩域这个概念可以类比中学学过的 &quot;复数&quot;, $ai + b$, 将实数域扩展到了复数域, 这里面的 $i$ 是 $\sqrt{-1}$.</p>
+<p>扩展后的域元素可以用扩展前的域元素来进行表示, 这里面 $a$ 和 $b$ 都是实数域, 而 $ai + b$ 则是复数域.</p>
+<p>因此 SM9 中将 $F_{q}$ 的元素最高扩展到了 $F_{q^{12}}$ 上, 也就是从原本的 1 项变成了 12 项. 并且需要注意扩域元素的书写方式.</p>
+<p>例如 $F_{q^{4}}$ 上我们需要按 $F_{q^{2 \times 2}}$ 来理解, 也就是在 $F_{q^{2}}$ 上进行了 1 次 2 次扩张, 这样扩域后的元素用 $F_{q^{2}}$ 上的元素表示, <strong>而不是</strong>简单的用 $F_{q}$ 进行表示, 两者之间需要进行转换.</p>
+<p>具体来说可以根据扩域元素 $u$, $v$ 和 $w$ 来进行转换计算, 在 SM9 中扩域元素使用多项式进行表示, 三者之间存在如下关系.</p>
+<p>$$<br>\begin{align*}<br>  \alpha = u^2 = (v^2)^2 = ((w^3)^2)^2<br>\end{align*}<br>$$</p>
+<p>因此有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  w &amp;= \alpha^\frac{1}{12} \\<br>  v &amp;= \alpha^\frac{1}{6} = w^2 \\<br>  u &amp;= \alpha^\frac{1}{2} = w^6<br>\end{align*}<br>\right.<br>$$</p>
+<p>所以塔式扩张下一个 $F_{q^{12}}$ 上的域元素 $X_{F_{q^{12}}}$ 可以被表示为:</p>
+<p>$$<br>\begin{align*}<br>  X &amp;= Aw^2 + Bw + C \\<br>  ~ &amp;= (a_1v + a_0)w^2 + (b_1v + b_0)w + (c_1v + c_0) \\<br>  ~ &amp;= ((a_{11}u + a_{10})v + (a_{01}u + a_{00}))w^2 + ((b_{11}u + b_{10})v + (b_{01}u + b_{00}))w + ((c_{11}u + c_{10})v + (c_{01}u + c_{00})) \\<br>  ~ &amp;= a_{11}uvw^2 + a_{10}vw^2 + a_{01}uw^2 + a_{00}w^2 + b_{11}uvw + b_{10}vw + b_{01}uw + b_{00}w + c_{11}uv + c_{10}v + c_{01}u + c_{00} \\<br>  ~ &amp;= a_{11}w^{11} + a_{10}w^5 + a_{01}w^8 + a_{00}w^2 + b_{11}w^{10} + b_{10}w^4 + b_{01}w^7 + b_{00}w + c_{11}w^9 + c_{10}w^3 + c_{01}w^6 + c_{00} \\<br>  ~ &amp;= (((a_{11}, a_{10}), (a_{01}, a_{00})), ((b_{11}, b_{10}), (b_{01}, b_{00})), ((c_{11}, c_{10}), (c_{01}, c_{00}))) \\<br>  ~ &amp;= (a_{11}, b_{11}, c_{11}, a_{01}, b_{01}, c_{01}, a_{10}, b_{10}, c_{10}, a_{00}, b_{00}, c_{00})<br>\end{align*}<br>$$</p>
+<p>幂次与系数转换关系如下:</p>
+<p>$$<br>\begin{align*}<br>&amp;(  &amp;11&amp;, &amp;10&amp;,    &amp;9&amp;,  &amp;8&amp;,      &amp;7&amp;,  &amp;6&amp;,    &amp;5&amp;,  &amp;4&amp;,      &amp;3&amp;,  &amp;2&amp;,    &amp;1&amp;,  &amp;0&amp;  &amp;) \\<br>&amp;(((&amp;11&amp;,  &amp;5&amp;), ( &amp;8&amp;,  &amp;2&amp;)), ((&amp;10&amp;,  &amp;4&amp;), ( &amp;7&amp;,  &amp;1&amp;)), (( &amp;9&amp;,  &amp;3&amp;), ( &amp;6&amp;,  &amp;0&amp;))&amp;)<br>\end{align*}<br>$$</p>
+<p>在这种情况下, 如果采用第二种方式表示扩域元素, 在需要将低维元素直接扩展成高维元素时, 低维元素保留在右侧, 左侧部分置零.</p>
+<h2 id="BN-曲线上-R-ate-对的计算"><a href="#BN-曲线上-R-ate-对的计算" class="headerlink" title="BN 曲线上 R-ate 对的计算"></a>BN 曲线上 R-ate 对的计算</h2><h3 id="涉及的群"><a href="#涉及的群" class="headerlink" title="涉及的群"></a>涉及的群</h3><p>SM9 的双线性对涉及三个群的运算, $\mathbb{G}_1$, $\mathbb{G}_2$ 和 $\mathbb{G}_T$.</p>
+<p>其中 $\mathbb{G}_1$, $\mathbb{G}_2$ 分别是 $F_{q}$, $F_{q^2}$ <strong>椭圆曲线上的点群</strong>, 而 $\mathbb{G}_T$ 是 $F_{q^{12}}$ 上的<strong>域元素群</strong>.</p>
+<h3 id="扭曲线"><a href="#扭曲线" class="headerlink" title="扭曲线"></a>扭曲线</h3><p>R-ate 对的计算为 $f = R_a(P, Q)$, 其中 $P \in E(F_{q}), Q \in E&#39;(F_{q^2}), f \in F_{q^{12}}$.</p>
+<p>这里输入的 $Q$ 原本应该是 $E(F_{q^{12}})$ 上的元素, 但是 BN 曲线存在一条扭曲线 $E&#39;(F_{q^2})$, 能够将原本需要在 $F_{q^{12}}$ 上进行的椭圆曲线点运算转换到 $F_{q^2}$ 上的椭圆曲线进行, 从而降低计算量.</p>
+<p>转换函数与扭曲线参数 $\beta$ 有关, 记为 $\phi: E&#39; \rightarrow E: (x, y) \mapsto (\frac{x}{\beta^{\frac{1}{3}}}, \frac{y}{\beta^{\frac{1}{2}}})$.</p>
+<p>所以, 在 R-ate 对的计算过程中, 对于需要 $Q$ 的运算中, <strong>只有椭圆曲线上的点运算是直接使用 $Q$ 进行计算的</strong>, 其余计算都需要先将 $Q$ 使用 $\phi$ 函数转换到 $E(F_{q^{12}})$ 上再进行计算.</p>
+<h3 id="R-ate-计算"><a href="#R-ate-计算" class="headerlink" title="R-ate 计算"></a>R-ate 计算</h3><p>除了对 $Q$ 进行点运算时在 $F_{q^2}$ 上进行, 其余的计算都在 $F_{q^{12}}$ 上进行.</p>
+<p>例如计算 $g$ 函数时, 正确的做法是计算 $g_{\phi(T), \phi(T)}(P&#39;)$ 和 $g_{\phi(T), \phi(Q)}(P&#39;)$, 其中 $P&#39;$ 是将 $P$ 直接扩展到 $E(F_{q^{12}})$ 的点.</p>
+<p>以及后面计算 Frobenius 自同态的 $\pi_q$ 和 $\pi_{q^2}$ 时, 需要进行转换计算 $Q_1 = \phi^{-1}(\pi_q(\phi(Q)))$ 和 $Q_2 = \phi^{-1}(\pi_{q^2}(\phi(Q)))$.</p>
+<h2 id="Frobenius-优化"><a href="#Frobenius-优化" class="headerlink" title="Frobenius 优化"></a>Frobenius 优化</h2><p>Frobenius 运算定义为: $\pi_q(x, y) = (x^q, y^q)$, 其中 $x, y$ 可以是扩域上的元素.</p>
+<p>设 $x = a_nx^n + a_{n-1}x^{n-1} + \cdots + a_1$, 则:</p>
+<p>$$<br>\begin{align*}<br>  x^q &amp;= (a_nx_n + a_{n-1}x_{n-1} + \cdots + a_1)^q \\<br>  ~ &amp;= \sum{(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )(a_nx_n)^i(a_{n-1}x_{n-1})^j(a_{n-2}x_{n-2})^k \cdots}<br>\end{align*}<br>$$</p>
+<p>当 $q$ 为素数时, 由费马小定理可以知道 $a^{q} \equiv a \mod q$, 且当 $(C_{q}^{i}C_{q-i}^{j}C_{q-i-j}^{k} \cdots )$ 不为 1 时必为 $q$ 的倍数 (被 $q$ 整除).</p>
+<p>所以在进行模 $q$ 运算后, $x^q = a_nx_n^q + a_{n-1}x_{n-1}^q + \cdots + a_1$.</p>
+<p>可以看出来 Frobenius 运算就是在原有的系数上乘上了一个对应元素的 $q$ 次方, 在扩域元素确定的情况下, 这些值是可以被提前计算出来的, 因此将会被简化成 $n$ 次扩域乘法和 $n - 1$ 次扩域加法.</p>
+<p>进一步, 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjExMDkvSUNDU0QuMjAxOS44ODQyOTA4">Simplification and Hardware Parallel Design of Frobenius Mapping Algorithm Based on SM9<i class="fa fa-external-link-alt"></i></span> 可以得到针对 SM9 参数的特定优化策略, 即每一项前面仅仅是乘了一个常数, 所以可以将常数值全部进行预计算从而提高后续计算速度, 此时只需要 $n - 1$ 次 $F_{q}$ 上的乘法就能完成运算.</p>
+<h2 id="FinalExp-优化"><a href="#FinalExp-优化" class="headerlink" title="FinalExp 优化"></a>FinalExp 优化</h2><p>在 R-ate 对计算的最后, 有一步 $f = f^{\frac{q^{12} - 1}{r}}$.</p>
+<p>这是一步在 $F_{q^{12}}$ 上的指数运算, 并且指数非常大, 常规运算时间开销非常夸张. 由文献 <span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjEwMDcvOTc4LTMtNjQyLTAzMjk4LTFfNg==">On the Final Exponentiation for Calculating Pairings on Ordinary Elliptic Curves<i class="fa fa-external-link-alt"></i></span> 可以得到对 BN 曲线的特定优化:</p>
+<p>$$<br>\frac{q^{12} - 1}{r} = (q^6 - 1)(q^2 + 1)(\frac{q^4 - q^2 + 1}{r})<br>$$</p>
+<p>前半部分的 $(q^6 - 1)(q^2 + 1)$ 称为 &quot;简单部分&quot;, 因为可以通过 Frobenius 和模逆运算快速得到结果 (并且 $q^6$ 可以仅通过共轭和取负得到结果).</p>
+<p>后半部分的 $\frac{q^4 - q^2 + 1}{r}$ 称为 &quot;困难部分&quot;, 文献中根据 BN 曲线 $q$ 和 $r$ 关于 $t$ 的表达式继续分解得到:</p>
+<p>$$<br>\frac{q^4 - q^2 + 1}{r} = \lambda_3q^3 + \lambda_2q^2 + \lambda_1q + \lambda<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>  \lambda_3 &amp;= 1 \\<br>  \lambda_2 &amp;= 6t^2 + 1 \\<br>  \lambda_1 &amp;= -36t^3 - 18t^2 - 12t + 1 \\<br>  \lambda_0 &amp;= -36t^3 - 30t^2 - 18t - 2<br>\end{align*}<br>\right.<br>$$</p>
+<p>因此困难部分的指数可以表示为:</p>
+<p>$$<br>\begin{align*}<br>  \frac{q^4 - q^2 + 1}{r} = (6t^2q^2 + q^3 + q^2 + q) - (36(t^3 + t^3q) + 30t^2 + 18(t^2q + t) + 12tq + 2)<br>\end{align*}<br>$$</p>
+<p>括号内只需要依次算出和 $t, q$ 有关的 $f$ 指数运算结果即可, 并且 $q$ 可以用 Frobenius 运算得到, 最后负号的内容一起求一次逆就行.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>花了一点篇幅记录了一下自己在实现 SM9 算法中遇到的问题和解决过程, 给自己补充了很多基础的密码学知识, 很多内容对于领域内人来说是基础中的基础, 但是初见还是容易让人晕头转向.</p>
+<p>关于 SM9 的优化方法还有很多, 这里只简单提了一些, 自己实现的时候也是尽可能的加进去能看懂的优化方法了<del>毕竟没专门研究这方面, 不能一上来就挑战地狱难度副本</del>.</p>
+<p>实现过程中也参考了开源的国密库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2d1YW56aGkvR21TU0w=">GmSSL<i class="fa fa-external-link-alt"></i></span>, 毕竟调试的时候没有标准答案真的很痛苦.</p>
+<p>最后放上自己实现的国密算法库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2dtYWxn">gmalg<i class="fa fa-external-link-alt"></i></span>, 一个不依赖第三方库纯 Python 实现的国密算法库, 就不考虑性能了, 主要是学习国密算法原理<del>能用就行</del>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>双线性对</tag>
+        <tag>R-ate</tag>
+        <tag>Frobenius</tag>
+        <tag>FinalExp</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Simpleperf 三部曲 (三)</title>
+    <url>//posts/2024/07/07/simpleperf3/</url>
+    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Simpleperf</tag>
+        <tag>Android</tag>
+        <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Transformer 的训练与推理</title>
+    <url>//posts/2023/08/29/transformer/</url>
+    <content><![CDATA[<p>本文是对 Transformer 训练和预测过程的一些细节理解记录, 基于 <span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span>, 本文内符号也沿用此文.</p>
+<p>主要是对于 Decoder 部分训练和预测时的区别以及并行化原理的总结.</p>
+<span id="more"></span>
+
+<h2 id="数据流动回顾"><a href="#数据流动回顾" class="headerlink" title="数据流动回顾"></a>数据流动回顾</h2><p><img data-src="https://jalammar.github.io/images/t/transformer_resideual_layer_norm_3.png" alt="framework"></p>
+<p>这张图是一个简略的 Transformer 整体框架图.</p>
+<p>对于 Encoder 部分, 输入是 <code>(B, T, E)</code> 的形状, 其中 <code>B</code> 是批大小, <code>T</code> 是最大句长, <code>E</code> 是词向量长度; 输出形状和输入相同, 也是 <code>(B, T, E)</code>, 并且这同一份数据对应接下来 Decoder 其中一层注意力的 <code>Key</code> 和 <code>Value</code> 输入.</p>
+<p>而对于 Decoder 部分, 同样设输入形状是 <code>(B, T, E)</code>, 那么它的输出形状也是和输入形状一样为 <code>(B, T, E)</code>.</p>
+<p>最后的 Liner 和 Softmax 则是将 Decoder 的 <code>(B, T, E)</code> 映射到词典大小的概率矩阵 <code>(B, T, vocab_size)</code>.</p>
+<h2 id="训练过程"><a href="#训练过程" class="headerlink" title="训练过程"></a>训练过程</h2><p>Encoder 部分很简单, 在训练和预测上没有什么理解上的问题, 主要是 Decoder 部分是如何做到并行化的.</p>
+<p>前面说到, 对于 Decoder 而言, 输入和输出的形状都是一样的 <code>(B, T, E)</code>, 那么首先要知道的是, 此处的并行化, 是在训练时将不同时间步的输出并行化了.</p>
+<p>对于 <code>t</code> 个时间步的输入 $[x_0, x_1, \ldots, x_{t-1}]$, Decoder 的输出是 $[y_1, y_2, \ldots, y_t]$, 而它们的对应关系如下所示:</p>
+<p>$$<br>\begin{bmatrix}<br>  x_0 &amp; ~ &amp; ~ &amp; ~ \\<br>  x_0 &amp; x_1 &amp; ~ &amp; ~ \\<br>  \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\<br>  x_0 &amp; x_1 &amp; \ldots &amp; x_{t-1}<br>\end{bmatrix} \Rightarrow \begin{bmatrix}<br>  y_1 \\<br>  y_2 \\<br>  \vdots \\<br>  y_t<br>\end{bmatrix}<br>$$</p>
+<p>而实现这种并行的关键是 Masked-Attension, 这个网上有很多举例, 简单来说就是对于 $y_i$, 通过 Mask 让它只包含了 $[x_0, x_1, \ldots, x_{i-1}]$ 的信息.</p>
+<p>最后把这 <code>t</code> 个时刻的不同长度的输入序列 &quot;叠&quot; 在一起, 得到了等长的依次排在一起的不同时刻的输出.</p>
+<h2 id="预测过程"><a href="#预测过程" class="headerlink" title="预测过程"></a>预测过程</h2><p>通过前面的训练过程可以知道, 从原理上来说, 虽然 Decoder 的输入和输出形状相同, 但是每个时间步的输入序列只有一个输出符号, 也就是预测出来的下一个输入符号, 因此 Decoder 在预测时, 是串行的循环过程, 直到出现终止符.</p>
+<p><img data-src="https://jalammar.github.io/images/t/transformer_decoding_2.gif" alt="decoder"></p>
+<p>那么来看这张图, 预测时, Decoder 一开始的输入 <code>(B, T, E)</code> 里面, 只有第一个符号是有效的, 并且是开始符, 随后进行预测, 得到了输出数据 <code>(B, T, E)</code>, 但是只需要取输出的第一个符号, 并且也只有这个符号有效, 它将作为下一个要拼在输入序列后面的第二个符号.</p>
+<p>随后重复上述步骤, 对于 <code>t</code> 时刻的操作, 输入的 <code>(B, T, E)</code> 内只有前 <code>t</code> 个符号有效, 而得到输出序列 <code>(B, T, E)</code> 后也只有前 <code>t</code> 个符号有效, 并且第 <code>t</code> 个符号就是下一个要接在输入序列后的预测符号, 而前 <code>t - 1</code> 个符号可以忽略不要, 因为它就是之前已经使用过的已经放在输入序列里的符号 (因为第 <code>i</code> 个输出符号只受前 <code>i - 1</code> 个输入符号的影响, 因此输入序列变长也不影响曾经的输出符号结果, 只有最后的第 <code>t</code> 个输出符号是新内容).</p>
+<p>循环整个过程, 直到遇见终止符, 就可以解码出完整的预测结果.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>NLP</tag>
+        <tag>Transformer</tag>
       </tags>
   </entry>
 </search>
