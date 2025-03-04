@@ -16,9 +16,4 @@ type: about
 - 了解常见密码算法{% curtain %}的拼写{% endcurtain %}.
 - etc.
 
-网站目前包含以下几部分.
-
-- 主站: [暗香画楼](/)
-- Pixiv 资源站: [Pixiv 精选](https://ww-rm.github.io/pixivdaily/)
-
-没事多看看吧~
+欢迎留言交流, 没事多点点吧~
