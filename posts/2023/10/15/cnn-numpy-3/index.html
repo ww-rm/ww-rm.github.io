@@ -18,33 +18,33 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高(代码复用率也是相当之高). 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 numpy 实现一个简单的卷积神经网络进行手写数字识别,">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于 NumPy 的手写数字识别 (卷积神经网络) (三)">
-<meta property="og:url" content="https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/">
+<meta property="og:url" content="https://ww-rm.top/posts/2023/10/15/cnn-numpy-3/">
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高(代码复用率也是相当之高). 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 numpy 实现一个简单的卷积神经网络进行手写数字识别,">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-3/cnn.jpg">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/cnn-numpy-3/loss.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/cnn-numpy-3/cnn.jpg">
+<meta property="og:image" content="https://ww-rm.top/static/image/cnn-numpy-3/loss.png">
 <meta property="article:published_time" content="2023-10-15T07:59:21.000Z">
-<meta property="article:modified_time" content="2025-03-04T05:19:08.200Z">
+<meta property="article:modified_time" content="2025-03-04T09:03:57.135Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="手写数字识别">
 <meta property="article:tag" content="卷积神经网络">
 <meta property="article:tag" content="深度学习">
 <meta property="article:tag" content="pytorch">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://ww-rm.github.io/static/image/cnn-numpy-3/cnn.jpg">
+<meta name="twitter:image" content="https://ww-rm.top/static/image/cnn-numpy-3/cnn.jpg">
 
 
-<link rel="canonical" href="https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/">
+<link rel="canonical" href="https://ww-rm.top/posts/2023/10/15/cnn-numpy-3/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/","path":"/posts/2023/10/15/cnn-numpy-3/","title":"基于 NumPy 的手写数字识别 (卷积神经网络) (三)"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.top/posts/2023/10/15/cnn-numpy-3/","path":"/posts/2023/10/15/cnn-numpy-3/","title":"基于 NumPy 的手写数字识别 (卷积神经网络) (三)"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>基于 NumPy 的手写数字识别 (卷积神经网络) (三) | 暗香画楼</title>
@@ -224,7 +224,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/10/15/cnn-numpy-3/">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.top/posts/2023/10/15/cnn-numpy-3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">

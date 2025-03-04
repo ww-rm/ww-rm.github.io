@@ -18,17 +18,17 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="这是网安本科速通系列的最后一篇了, 主题还是 pytorch, 但是问题换成了 NLP, 并且还是以经典的文本分类作为示例, 数据集使用与前面经典问题之文本分类相同的一份小数据集, 方便进行比较. 阅读本篇前需要先看前两篇, 经典问题之文本分类与基于 PyTorch 的手写数字分类. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="再遇文本分类">
-<meta property="og:url" content="https://ww-rm.github.io/posts/2022/08/19/wast-nlp/">
+<meta property="og:url" content="https://ww-rm.top/posts/2022/08/19/wast-nlp/">
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="这是网安本科速通系列的最后一篇了, 主题还是 pytorch, 但是问题换成了 NLP, 并且还是以经典的文本分类作为示例, 数据集使用与前面经典问题之文本分类相同的一份小数据集, 方便进行比较. 阅读本篇前需要先看前两篇, 经典问题之文本分类与基于 PyTorch 的手写数字分类. 本篇的项目代码和数据集是以前两篇作为基础的, 并且也会精简正文内容.">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-08-19T06:29:33.000Z">
-<meta property="article:modified_time" content="2025-03-04T05:19:08.202Z">
+<meta property="article:modified_time" content="2025-03-04T09:03:57.137Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="nlp">
 <meta property="article:tag" content="深度学习">
@@ -37,11 +37,11 @@
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://ww-rm.github.io/posts/2022/08/19/wast-nlp/">
+<link rel="canonical" href="https://ww-rm.top/posts/2022/08/19/wast-nlp/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2022/08/19/wast-nlp/","path":"/posts/2022/08/19/wast-nlp/","title":"再遇文本分类"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.top/posts/2022/08/19/wast-nlp/","path":"/posts/2022/08/19/wast-nlp/","title":"再遇文本分类"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>再遇文本分类 | 暗香画楼</title>
@@ -221,7 +221,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2022/08/19/wast-nlp/">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.top/posts/2022/08/19/wast-nlp/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">

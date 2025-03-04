@@ -18,31 +18,31 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ECC 算法原理简介与实现">
-<meta property="og:url" content="https://ww-rm.github.io/posts/2022/12/07/simple-ecc/">
+<meta property="og:url" content="https://ww-rm.top/posts/2022/12/07/simple-ecc/">
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="本文记于某次密码作业课余, 提供对 ECC 算法的简要介绍与简单实现, 文末附有代码.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/simple-ecc/zcG6gI.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/simple-ecc/zcYiWj.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/simple-ecc/zcG6gI.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/simple-ecc/zcYiWj.png">
 <meta property="article:published_time" content="2022-12-07T03:04:56.000Z">
-<meta property="article:modified_time" content="2025-03-04T05:19:08.201Z">
+<meta property="article:modified_time" content="2025-03-04T09:03:57.136Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="公钥算法">
 <meta property="article:tag" content="椭圆曲线密码">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://ww-rm.github.io/static/image/simple-ecc/zcG6gI.png">
+<meta name="twitter:image" content="https://ww-rm.top/static/image/simple-ecc/zcG6gI.png">
 
 
-<link rel="canonical" href="https://ww-rm.github.io/posts/2022/12/07/simple-ecc/">
+<link rel="canonical" href="https://ww-rm.top/posts/2022/12/07/simple-ecc/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2022/12/07/simple-ecc/","path":"/posts/2022/12/07/simple-ecc/","title":"ECC 算法原理简介与实现"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.top/posts/2022/12/07/simple-ecc/","path":"/posts/2022/12/07/simple-ecc/","title":"ECC 算法原理简介与实现"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>ECC 算法原理简介与实现 | 暗香画楼</title>
@@ -222,7 +222,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2022/12/07/simple-ecc/">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.top/posts/2022/12/07/simple-ecc/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">

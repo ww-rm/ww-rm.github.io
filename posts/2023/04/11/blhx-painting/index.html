@@ -18,47 +18,47 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程. 本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 python 脚本.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="碧蓝航线立绘提取与批量还原">
-<meta property="og:url" content="https://ww-rm.github.io/posts/2023/04/11/blhx-painting/">
+<meta property="og:url" content="https://ww-rm.top/posts/2023/04/11/blhx-painting/">
 <meta property="og:site_name" content="暗香画楼">
 <meta property="og:description" content="因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程. 本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 python 脚本.">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLI7y8.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIDRx.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLITQf.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIBJ1.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIoSP.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLI0iR.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLI5Wt.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIdo9.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIhFA.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIadJ.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIHOS.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIrz6.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLHstH.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLI6sO.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIqeg.png">
-<meta property="og:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLIyQK.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLHg1I.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLI7y8.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIDRx.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLITQf.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIBJ1.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIoSP.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLI0iR.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLI5Wt.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIdo9.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIhFA.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIadJ.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIHOS.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIrz6.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLHstH.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLI6sO.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIqeg.png">
+<meta property="og:image" content="https://ww-rm.top/static/image/blhx-painting/ppLIyQK.png">
 <meta property="article:published_time" content="2023-04-11T01:53:19.000Z">
-<meta property="article:modified_time" content="2025-03-04T05:19:08.200Z">
+<meta property="article:modified_time" content="2025-03-04T09:03:57.135Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="碧蓝航线">
 <meta property="article:tag" content="工具">
 <meta property="article:tag" content="立绘还原">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://ww-rm.github.io/static/image/blhx-painting/ppLHg1I.png">
+<meta name="twitter:image" content="https://ww-rm.top/static/image/blhx-painting/ppLHg1I.png">
 
 
-<link rel="canonical" href="https://ww-rm.github.io/posts/2023/04/11/blhx-painting/">
+<link rel="canonical" href="https://ww-rm.top/posts/2023/04/11/blhx-painting/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.github.io/posts/2023/04/11/blhx-painting/","path":"/posts/2023/04/11/blhx-painting/","title":"碧蓝航线立绘提取与批量还原"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.top/posts/2023/04/11/blhx-painting/","path":"/posts/2023/04/11/blhx-painting/","title":"碧蓝航线立绘提取与批量还原"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>碧蓝航线立绘提取与批量还原 | 暗香画楼</title>
@@ -238,7 +238,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://ww-rm.github.io/posts/2023/04/11/blhx-painting/">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.top/posts/2023/04/11/blhx-painting/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
