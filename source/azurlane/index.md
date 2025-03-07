@@ -15,7 +15,8 @@ type: azurlane-spinepainting
 
 - 游戏内资源体积较大, 建议科学上网进行加载, 否则可能点击链接之后需要**非常长的加载时间**
 - 所有资源均可在仓库 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting) 内进行查看和下载
-- 网页功能性能有限, 推荐使用本地工具 [DeskSpine](https://github.com/ww-rm/DeskSpine), 可以设置动态桌面壁纸, 并支持画面导出
+- 网页功能性能有限, 推荐使用本地工具 [DeskSpine](https://github.com/ww-rm/DeskSpine), 可以设置动态桌面壁纸
+- 也可以使用 [SpineViewer](https://github.com/ww-rm/SpineViewer) 进行 PNG 帧序列导出
 
 {% endnote %}
 
@@ -70,4 +71,6 @@ type: azurlane-spinepainting
 
 所有资源均可在仓库 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting) 内进行查看和下载.
 
-开源项目 [DeskSpine](https://github.com/ww-rm/DeskSpine), 是一个 Windows 平台下的 Spine 桌宠软件, 可以设置动态桌面壁纸, 并支持逐帧画面导出, 详情可以阅读项目介绍, 欢迎下载体验.
+开源项目 [DeskSpine](https://github.com/ww-rm/DeskSpine), 是一个 Windows 平台下的 Spine 桌宠软件, 可以设置动态桌面壁纸, 详情可以阅读项目介绍, 欢迎下载体验.
+
+除此之外还有 [SpineViewer](https://github.com/ww-rm/SpineViewer), 是一个 Windows 平台下的简单易用的 Spine 动画预览和导出软件, 支持多版本多骨骼, 解压即用, 欢迎下载体验.
