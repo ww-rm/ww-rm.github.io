@@ -2025,47 +2025,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网页预览碧蓝航线动态立绘</title>
-    <url>//posts/2024/12/22/spinejs-azurlane/</url>
-    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
-<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
-<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
-<span id="more"></span>
-
-<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
-<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
-<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
-<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
-<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
-<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
-<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
-<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
-<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
-<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
-<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
-<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
-<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
-<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>spine</tag>
-        <tag>spine-js</tag>
-        <tag>Azur Lane</tag>
-        <tag>动态立绘</tag>
-        <tag>前端</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用 transformers.Pipeline 迭代生成数据</title>
     <url>//posts/2024/05/07/py-transformers-genexpr/</url>
     <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
@@ -2119,6 +2078,47 @@
         <tag>transformers</tag>
         <tag>Pipeline</tag>
         <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网页预览碧蓝航线动态立绘</title>
+    <url>//posts/2024/12/22/spinejs-azurlane/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -2238,103 +2238,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Git 与 Github 入门</title>
-    <url>//posts/2022/08/15/wast-gitandgithub/</url>
-    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
-<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
-<span id="more"></span>
-
-<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
-<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
-<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
-<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
-<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
-<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
-<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
-<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
-<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
-<p><img data-src="/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
-<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
-<p><img data-src="/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
-<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
-<p><img data-src="/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
-<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
-<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
-<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
-<p><code>git init</code>: 初始化一个本地仓库.</p>
-<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
-<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
-<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
-<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
-<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
-<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
-<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
-<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
-<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
-
-<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
-<p><img data-src="/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
-<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
-<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
-<p><img data-src="/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
-<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
-<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
-<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
-<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
-<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
-<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
-<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
-<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
-<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
-<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
-<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
-<p><img data-src="/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
-<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
-<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
-<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
-</div>
-
-<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
-<p><img data-src="/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
-<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
-<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
-<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
-<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
-<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
-<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
-<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
-<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
-<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
-<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
-<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
-<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
-<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
-<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
-<p><img data-src="/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
-<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
-<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
-<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
-<p><img data-src="/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
-<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
-<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
-<p><img data-src="/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
-<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
-<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
-<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
-        <tag>github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 PyTorch 的手写数字分类</title>
     <url>//posts/2022/08/18/wast-dl/</url>
     <content><![CDATA[<p>本篇算是对 <code>pytorch</code> 这一 <code>python</code> 深度学习库神器的入门教程, 以手写数字分类这一经典问题做示例, 来概括一下如何使用 <code>pytorch</code> 来搭建一个自定义的网络结构, 并加以训练.</p>
@@ -2434,6 +2337,103 @@
         <tag>深度学习</tag>
         <tag>pytorch</tag>
         <tag>手写数字分类</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Git 与 Github 入门</title>
+    <url>//posts/2022/08/15/wast-gitandgithub/</url>
+    <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
+<p>因此本篇将向萌新们介绍一下版本管理工具 <code>git</code> 与全世界最大的代码托管平台 <code>github</code> 的基本使用方法.</p>
+<span id="more"></span>
+
+<h2 id="Github"><a href="#Github" class="headerlink" title="Github"></a>Github</h2><p>先说 <code>github</code>, 简单粗暴的理解就是, <code>github</code> 是一个专属于代码的云盘, 全世界的人都可以在上面存储自己的代码, 并且可以让大家都来查看自己的代码.</p>
+<p>平常如果遇到一些不会的代码问题, 多半用搜索引擎搜出来的都是 CSDN 和博客园或者知乎的内容, 偶尔可以见到一些个人博客<del>比如我这个</del>. 个人博客可能质量稍好, 毕竟是自己经营的, 大概率会认真写点东西放上去, 但是前三者就不一定了, 可能同样的内容都被复制的有包浆了. 因此我们如果想要进一步提升自己的 Coding 水平, 就需要看更高质量的内容, 所以我们把目光投向了 <code>github</code>.</p>
+<p><code>github</code> 的最大宗旨就是开源, 任何人都可以发布自己的代码并且让他人一起协同合作. 得益于此, <code>github</code> 上面有很多经典的大型开源项目可供学习, 并且小项目的完整度和质量也比一众博客高出不少, 是我们<del>抄</del>借鉴代码的好去处.</p>
+<p><code>github</code> 的官网地址是 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLw==">https://github.com/<i class="fa fa-external-link-alt"></i></span>, 由于不可抗力, 访问不太稳定, 但是可以通过科学上网解决, 可以参考我前一篇文章<a href="/posts/2022/08/15/wast-gitandgithub/">解决学习道路上的 &quot;最后 1 KB&quot;</a>快速入门一下. 进去之后就可以像普通的搜索引擎那样使用, 但是是搜索 <code>github</code> 的所有项目仓库 (多用英语搜, 结果会更理想).</p>
+<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p><code>git</code> 和 <code>github</code> 长得很像但是完全是两回事, 后者是一个存放代码的地方, 但是前者是一个代码版本管理工具.</p>
+<p>罗马不是一天建成的, 代码也不是一天肝完的, 前一天写完的代码, 后一天就会出现 bug, 因此对一份代码不间断的进行修修补补是常事. 如果是毕业论文, 倒还是可以给文件名自己加上一个版本号, 比如 &quot;最终版&quot;, &quot;最终版 v2&quot;...... 但是对于代码文件, 这就不太适用了.</p>
+<p>一是代码文件将来会修改的次数可能太多, 一份文件动辄十几二十次, 取这么多版本号不太现实, 二是无法很好的对比每一个版本每次的修改变动, 无法让人一目了然每次修改都改了啥.</p>
+<p>因此 <code>git</code> 的出现很好解决了上述问题, 下面简要介绍几个常用的 <code>git</code> 命令和基本概念.</p>
+<h3 id="安装-Git"><a href="#安装-Git" class="headerlink" title="安装 Git"></a>安装 Git</h3><p>首先当然是安装 <code>git</code>, 官网地址 <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS8=">https://git-scm.com/<i class="fa fa-external-link-alt"></i></span>, 点进去直接 &quot;Downloads&quot; 最新版本进行安装, 安装时有一些选项值得注意一下.</p>
+<p><img data-src="/static/image/wast-gitandgithub/vaPitJ.png" alt="vaPitJ.png">]</p>
+<p>这两个可以勾上, 这样子右键菜单里会加入这两个快捷项, 方便我们随处快速打开 <code>git</code> 终端.</p>
+<p><img data-src="/static/image/wast-gitandgithub/vaPtnf.png" alt="vaPtnf.png"></p>
+<p>然后是这个, 使用 <code>VS Code</code> 作为 <code>git</code> 的默认文本编辑器. 要求我们安装了 <code>VS Code</code>, 然后勾选这个选项. 这个意思是一旦 <code>git</code> 出现需要我们手动敲一点文本内容的时候, 会弹出来 <code>VS Code</code> 界面作为输入界面. 强烈建议换掉, 一是好看二是省事<del>珍爱生命, 远离 Vim</del>.</p>
+<p><img data-src="/static/image/wast-gitandgithub/vaPTjx.png" alt="vaPTjx.png"></p>
+<p>然后是这个, 也是建议选下面的, 曾经 <code>git</code> 的主分支默认叫 <code>master</code>, 但是现在大部分新项目都叫 <code>main</code> 了. 不是什么大问题, 但是建议按新的约定来<del>紧随时代潮流</del>.</p>
+<p>后面的选项就可以不用太在意了, 直接一路 Next 就行了, 反正之后都还可以自己手动调整设置项.</p>
+<h3 id="使用-Git"><a href="#使用-Git" class="headerlink" title="使用 Git"></a>使用 Git</h3><p>这里只介绍待会要用到的命令和一些基本概念, 毕竟是入门<del>主要是太懒不想写</del>, 具体的细节可以自己看官方文档或者使用搜索引擎学习.</p>
+<p><code>git init</code>: 初始化一个本地仓库.</p>
+<p>想要使用 <code>git</code> 来管理一个项目, 首先需要使用该命令让 <code>git</code> 将一个项目文件夹标记为需要被 <code>git</code> 进行管理的仓库. 运行完成后, 项目文件夹下就会多出来一个 <code>.git</code> 文件夹, 代表这个项目文件夹已经是一个合法的 <code>git</code> 仓库了.</p>
+<p><code>git add &lt;文件&gt;</code>: 临时储存文件变动.</p>
+<p>当我们的代码文件发生改动时, 使用该命令进行临时存储, 所谓 &quot;临时&quot;, 是指我们还没有完成一次完整的修改, 但是需要临时保存一下已经做过的修改步骤, 让我们在进一步修改时好进行对比.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 提交一次改动.</p>
+<p>当我们已经完成了一次修改, 使用了 <code>add</code> 进行了存储, 并且想要把这次修改确定下来, 形成一次记录时, 需要使用该命令. 其中 &quot;信息&quot; 部分是一个很重要的内容, 是对这一次提交的一个简要说明, 日后我们可以很方便的根据当时提交时填的信息来确定提交的内容, 也可以从大量提交中快速检索与某些特定目的相关的提交.</p>
+<p><code>git log --graph --oneline --all</code>: 使用图形化方式查看所有分支的提交记录.</p>
+<p>使用该命令可以查看所有提交记录以及各提交记录的哈希值, 有助于我们迅速了解整个仓库的提交历史记录.</p>
+<p><code>git show &lt;提交 id&gt;</code>: 查看某一次提交的具体内容.</p>
+<p>&quot;提交 id&quot; 就是使用 <code>git log</code> 查到的提交记录哈希值, 显示之后会得到文件变动记录以及各文件具体的修改情况.</p>
+<h3 id="简单的实践一下"><a href="#简单的实践一下" class="headerlink" title="简单的实践一下"></a>简单的实践一下</h3><p>以我们之前曾经创建过的一个 <code>example</code> 项目举例, 来使用 <code>git</code> 对其进行本地版本管理, 项目文件结构如下所示.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    env/</span><br><span class="line">    main.py</span><br></pre></td></tr></table></figure>
+
+<p>总共两部分, 一个是 <code>env</code> 文件夹, <code>python</code> 的虚拟环境, 另一个是我们的源文件 <code>main.py</code>, 我们的目标是只提交 <code>main.py</code>, 而忽略虚拟环境 <code>env</code>, 因为环境严格来说并不需要记录到整个项目里, 每次使用时可以重新生成. 完整的命令执行记录如图所示.</p>
+<p><img data-src="/static/image/wast-gitandgithub/vaVnBt.png" alt="vaVnBt.png"></p>
+<p>首先进入 <code>example</code> 文件夹, 然后使用 <code>ls</code> 命令查看了一下文件夹内的内容. 之后便是 <code>init -&gt; add -&gt; commit</code> 的一连串操作.</p>
+<p>需要注意的地方是, 第一次使用 <code>commit</code> 时, 会给予我们图上的提示信息, 意思是提交时需要指定作者信息. 也就是对于每次提交, <code>git</code> 必须记录是 &quot;谁&quot; 提交了这次修改, 并且是通过 &quot;邮箱&quot; 和 &quot;用户名&quot; 两个信息来确定身份的. 这里我们直接按照提示信息里说的, 设置一下自己的邮箱和用户名, 然后重新使用 <code>commit</code> 命令进行提交即可.</p>
+<p><img data-src="/static/image/wast-gitandgithub/vaVI8e.png" alt="vaVI8e.png"></p>
+<p>然后我们使用 <code>log</code> 和 <code>show</code> 两个命令查看一下刚刚的提交记录, 其中 <code>+</code> 表示文件内新增的行, 而 <code>-</code> 表示删去的行, 一般来说如果是对某一行进行了修改则会是 <code>+</code> 和 <code>-</code> 交替出现, 这里只有 <code>+</code> 是因为提交了一份全新的文件.</p>
+<h2 id="使用-Git-管理-Github-上的项目"><a href="#使用-Git-管理-Github-上的项目" class="headerlink" title="使用 Git 管理 Github 上的项目"></a>使用 Git 管理 Github 上的项目</h2><h3 id="Git-分支简介"><a href="#Git-分支简介" class="headerlink" title="Git 分支简介"></a>Git 分支简介</h3><p>如果 <code>git</code> 的功能仅限于本地管理, 那也就止步于此了, 其最强大的功能还是与 <code>github</code> 结合, 从而实现本地与远程同步的版本管理.</p>
+<p>这里需要先介绍一下 <code>git</code> 进行版本管理的一个重要概念 &quot;分支&quot;.</p>
+<p>当我们使用 <code>git init</code> 命令创建本地仓库时, 其实就有了第一个分支, 也是我们的主分支 <code>main</code>, 名字就是在安装 <code>git</code> 时设定的默认名称.</p>
+<p>当我们对仓库进行操作并提交记录时, <code>git</code> 需要知道当前仓库正处于哪一个分支上, 并把提交记录在这个分支上, 形成分支上的一个个节点. 从而很多次提交之后, 这个分支会逐渐变长, 并且上面的节点数变多, 每一个节点就是每一次提交记录.</p>
+<p>当你某天想让你的代码形成另外一个版本时, 但是并不想影响主分支上的内容时, 就可以从主分支的某个节点开始, 延伸出另一条新分支, 从而让两个分支上的内容同时存在且互不干扰. 可想而知, 当分支数多了之后, 分支图将会是一个树形结构.</p>
+<p>本地仓库是如此, 对于远程仓库来说也是类似的. 当我们需要将本地的代码仓库同步放到 <code>Github</code> 上进行管理时, 则需要添加仓库内的 &quot;远程分支&quot; 信息.</p>
+<p>远程分支与本地的分支像并列的关系, 它们之间形成关联并进行追踪, 从而你可以指定本地的某个分支与远程的某个分支进行关联并同步. 最终远程仓库的远程分支就像是本地仓库分支的一份 &quot;备份&quot;, 无论是哪一边有改动, 都可以通过 <code>git</code> 指令来进行互相同步.</p>
+<p>这里放上一个经典的图形化 <code>git</code> 操作学习网站 <span class="exturl" data-url="aHR0cHM6Ly9sZWFybmdpdGJyYW5jaGluZy5qcy5vcmcv">Leanr Git Branching<i class="fa fa-external-link-alt"></i></span>, 有助于快速理解 <code>git</code> 的分支概念<del>几乎我所有认识的学长都推荐过</del>.</p>
+<h3 id="在-Github-上发布第一个项目"><a href="#在-Github-上发布第一个项目" class="headerlink" title="在 Github 上发布第一个项目"></a>在 Github 上发布第一个项目</h3><p>首先, 你得注册一个 <code>Github</code> 账号, 点 <code>Sign up</code> 之后自己琢磨吧.</p>
+<p>注册好之后, 你的个人界面网址应该就是 <code>https://github.com/&lt;用户名&gt;/</code>, 并且进去后界面大概长的像下面的样子.</p>
+<p><img data-src="/static/image/wast-gitandgithub/vaLItP.png" alt="vaLItP.png"></p>
+<p>但是在创建仓库发布项目之前, 还有一步重要的事情, 往自己的 <code>Github</code> 里添加 <code>ssh</code> 连接公钥, 可能现在你还不清楚是什么但是照着教程做即可, 既可以提高安全性也可以避免一些麻烦. (如果有喜欢尝试的同学可以试一下走 <code>http</code> 协议的方式, <code>Github</code> 已经不推荐并且由于不可抗力网络质量也很差.)</p>
+<p>贴上官方的<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24vYXV0aGVudGljYXRpb24vY29ubmVjdGluZy10by1naXRodWItd2l0aC1zc2g=">教程<i class="fa fa-external-link-alt"></i></span>, 同时下面也会简要描述一下步骤.</p>
+<div class="note info"><p>1.生成自己的 ssh 公钥<br>如果曾经已经生成过的同学可以酌情跳过这一步.<br>打开 <code>git bash</code> 或者 <code>cmd</code>, 输入以下指令.<br><code>ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;</code><br>其中 <code>-C</code> 后面跟的是注释内容, 一般填一个能够标识身份的邮箱地址. 之后一路回车即可.<br>成功生成之后, 可以使用 <code>ls</code> 和 <code>cat</code> 命令查看生成的文件与公钥内容.<br>所有操作和成功生成后的结果如下图所示.<br><img data-src="/static/image/wast-gitandgithub/vwila8.png" alt="vwila8.png"><br>2.将公钥添加到 Github<br>回到 <code>github</code> 的个人主页面, 进入 &quot;Settings&quot; 界面, 在左侧选择 &quot;SSH and GPG Keys&quot;, 然后选择 <code>New SSH Key</code>, 并将<strong>公钥文件 <code>id_rsa.pub</code></strong> 的内容复制进去, 注意是<strong>公钥文件 <code>id_rsa.pub</code></strong>.<br><img data-src="/static/image/wast-gitandgithub/vwi2s1.png" alt="vwi2s1.png"></p>
+</div>
+
+<p>继续回到我们的 <code>Github</code> 个人主页面, 点击页面右上角的加号, 选择 &quot;New repository&quot;, 创建我们的第一个项目仓库.</p>
+<p><img data-src="/static/image/wast-gitandgithub/v0E9gg.png" alt="v0E9gg.png"></p>
+<p>如图所示填好必要的信息, 其中选项 public 即代表这是一个公开仓库, 任何人都可以在 <code>github</code> 上访问并查看里面的文件内容.</p>
+<p>创建完成后, 会显示三种后续的操作, 在这里我们选择第二种, &quot;将已有的仓库从命令行推送&quot;.</p>
+<p>进入你的本地仓库, 打开 <code>git bash</code> 并依次执行下面三条命令.</p>
+<p><code>git remote add origin git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code>: 将远程主机与仓库地址添加到本地仓库配置中, 主机名 <code>origin</code>, 地址为 <code>ssh</code> 地址 <code>git@github.com:&lt;用户名&gt;/&lt;仓库名&gt;.git</code></p>
+<p><code>git branch -M main</code>: 可选步骤, 将当前分支重命名为 <code>main</code>, 此前我们的分支名已经是 <code>main</code> 了.</p>
+<p><code>git push -u origin main</code>: 将本地分支 <code>main</code> 推送到远程主机 <code>origin</code>, 并且远程分支名与本地相同也为 <code>main</code>.</p>
+<p>执行完成后稍等一会刷新一下页面, 就可以看到 <code>github</code> 上已经有本地仓库的内容了.</p>
+<h3 id="在本地管理远程项目"><a href="#在本地管理远程项目" class="headerlink" title="在本地管理远程项目"></a>在本地管理远程项目</h3><p>这部分主要介绍平常敲代码时常用的命令流.</p>
+<p><code>git pull</code>: 进行写代码时的第一步, 使用该命令可以将远程仓库里的最新记录同步至本地.</p>
+<p><code>git add &lt;文件&gt;</code>: 写代码中途或者写完代码后, 将修改后的文件进行储存.</p>
+<p><code>git commit -m &lt;信息&gt;</code>: 将所有通过 <code>add</code> 存储的内容进行提交, 产生一次记录.</p>
+<p><code>git push</code>: 将本地所有的提交记录同步推送到远程仓库.</p>
+<h2 id="在-VS-Code-中使用-Git"><a href="#在-VS-Code-中使用-Git" class="headerlink" title="在 VS Code 中使用 Git"></a>在 VS Code 中使用 Git</h2><p>前面花了很长的篇幅讲解 <code>git</code> 的各种使用, 并且有着非常多的命令, 很容易让人头晕. 但是好在大部分命令都是重复相似的, 因此, 为了省事, 绝大多数开发工具都支持图形化的 <code>git</code> 命令操作, 从而避免了命令行的痛苦. 但是在使用时仍然需要知道每一个按键选项与命令的基本对应关系, 清楚每一步具体做了什么.</p>
+<p><code>VS Code</code> 本身自带对 <code>git</code> 的支持, 且已经能够满足基本使用. 打开我们的 <code>example</code> 项目, 左边切换到 <code>源代码管理</code> 的面板.</p>
+<p><img data-src="/static/image/wast-gitandgithub/v0naB4.png" alt="v0naB4.png"></p>
+<p>在这里可以看到本地仓库的所有更改, 我们可以手动切换一下视图模式, 以树形式查看, 方便与资源管理器的视图对应.</p>
+<p>可以看到存在两部分变动, 且标记为 <code>U</code>, 意为 &quot;未跟踪&quot;, 也就是它是一份新文件, 如果是曾经有过记录则是 <code>M</code>. 点击左侧的文件名, 还可以在右方的窗口里预览文件的每一行更改情况.</p>
+<p>我们选择 <code>main.py</code> 一行右侧的 <code>+</code> 号, &quot;暂存更改&quot;, 其行为等价于 <code>add</code> 操作.</p>
+<p><img data-src="/static/image/wast-gitandgithub/v0uFrF.png" alt="v0uFrF.png"></p>
+<p>操作之后 <code>main.py</code> 被放入 &quot;暂存的更改&quot; 中, 此时可以在上方的输入框中键入信息, 然后点提交, 该步骤等价于 <code>git commit</code> 操作.</p>
+<p>如果没有暂存的更改, 则所有的更改都将会被提交. 如果提交信息为空, 则会弹出界面让你输入信息.</p>
+<p><img data-src="/static/image/wast-gitandgithub/v0KiWt.png" alt="v0KiWt.png"></p>
+<p>提交完成后, <code>VS Code</code> 左下角将会如图所示, 有一个双箭头圆圈且有数字标记, 意为本地比远程多一次提交记录, 点击圆圈, <code>VS Code</code> 会将本地仓库与远程仓库进行自动同步, 其操作等价于先进行 <code>pull</code> 再进行 <code>push</code>.</p>
+<p>一般来说, 推荐使用命令行创建仓库以及关联远程仓库等初始化操作, 之后再使用图形化界面进行每天的提交和同步操作. 此外, 如果觉得 <code>VS Code</code> 原生支持不够, 还有丰富的插件可以选择, 比如 <code>GitLens</code> 诸如此类.</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>尽可能的把平常高频使用的内容都写上去了, 虽然感觉写的很长但是仍然很难把每一件事都写的很清楚, 只能是把表面写一写, 内部的细节原理不是这个入门篇能一次性搞定, 还得靠自己平日善用搜索引擎和官方文档.</p>
+<p>这里贴一下 <code>git</code> 与 <code>github</code> 的文档地址, <span class="exturl" data-url="aHR0cHM6Ly9naXQtc2NtLmNvbS9kb2Nz">https://git-scm.com/docs<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vY24=">https://docs.github.com/cn<i class="fa fa-external-link-alt"></i></span>, 熟能生巧~</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+        <tag>github</tag>
       </tags>
   </entry>
   <entry>
@@ -2884,20 +2884,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Windows 10 激活工具</title>
-    <url>//posts/2023/02/27/win10activation/</url>
-    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>激活工具</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Typora 破解版</title>
     <url>//posts/2023/07/03/typora-cracked/</url>
     <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
@@ -2910,6 +2896,20 @@
       </categories>
       <tags>
         <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows 10 激活工具</title>
+    <url>//posts/2023/02/27/win10activation/</url>
+    <content><![CDATA[<p>Windows 10 激活工具存档, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZFJabjBvbTJqdWQ=">W10_Digital_Activation_Program_v1.4.6_Chs.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: A7A44635E59CC9C403EBA7873D1B6D0E</span><br><span class="line">SHA1: 13275066B9D3FBFF8F99AA7CDF89D5AC2E94F571</span><br><span class="line">SHA2-256: E44F2F49A0805F3B0B7CB4720B48CFCAEDB3755189ED12CC49F406B425A40296</span><br><span class="line">SHA3-256: 078D7D813914831F4D19757FE98E89F49177C8EC9DEBA4A7FDEEE1083233D890</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>激活工具</tag>
       </tags>
   </entry>
   <entry>
@@ -3291,6 +3291,115 @@
       </tags>
   </entry>
   <entry>
+    <title>Simpleperf 三部曲 (三)</title>
+    <url>//posts/2024/07/07/simpleperf3/</url>
+    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Simpleperf</tag>
+        <tag>Android</tag>
+        <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Simpleperf 三部曲 (二)</title>
     <url>//posts/2024/07/07/simpleperf2/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3427,115 +3536,6 @@
 <h3 id="报告调用图"><a href="#报告调用图" class="headerlink" title="报告调用图"></a>报告调用图</h3><p>要报告调用图, 请确保分析数据是带有调用图记录的, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjcmVjb3JkLWNhbGwtZ3JhcGhz">Record call graphs<i class="fa fa-external-link-alt"></i></span> 所示.</p>
 <hr>
 <p>更多详细内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXJlY29yZC1jb21tYW5k">The record command<i class="fa fa-external-link-alt"></i></span>.</p>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Simpleperf</tag>
-        <tag>Android</tag>
-        <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Simpleperf 三部曲 (三)</title>
-    <url>//posts/2024/07/07/simpleperf3/</url>
-    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
-<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
-
-<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
-
-<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
-
-<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
-<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
-<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
-
-<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
-<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
-<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
-
-<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
-
-<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
-<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
-<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
-<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
-<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
-<ul>
-<li>显示该函数调用的函数的火焰图.</li>
-<li>显示调用该函数的函数的火焰图.</li>
-<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
-<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
-</ul>
-<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
-
-<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
-<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
-<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
-<ul>
-<li>每线程轨迹</li>
-<li>火焰图</li>
-<li>搜索, 聚焦于特定的堆栈</li>
-<li>时间序列视图, 以时间戳顺序查看样本</li>
-<li>按线程和持续时间过滤</li>
-</ul>
-<p>使用方法:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
-
-<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
-<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
-<p>这种格式可以导入到:</p>
-<ul>
-<li>FlameGraph</li>
-<li>Flamescope</li>
-<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
-<li>Speedscope</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
-<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
-
-<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
-<p>折叠堆栈格式可被以下工具读取:</p>
-<ul>
-<li>The FlameGraph toolkit</li>
-<li>Inferno (FlameGraph 的 Rust 移植版)</li>
-<li>Speedscope</li>
-</ul>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
-
-<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
-<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
-<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
-
-<p>结果如下所示:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
-
-<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
-<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>阅读笔记</category>
