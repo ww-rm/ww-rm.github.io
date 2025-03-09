@@ -6,7 +6,7 @@ const BGCOLOR_LIGHT = [0.55, 0.77, 0.86, 1];
 
 /** @type {Object<string, {chName: string, skelNames: string[], pages: string[]}>} */
 let ASSET_MAPPING = null
-let ASSET_PREFIX = "/azurlane_spinepainting/preview.json";
+let ASSET_PREFIX = "/azurlane_spinepainting/";
 let DEFAULT_SKIN = "buli_super";
 
 /** @type {HTMLCanvasElement} */
@@ -405,7 +405,7 @@ function init() {
     }
 
     // 通过 XHR 获取 JSON 数据
-    let assetMappingUrl = ASSET_PREFIX + "index.json";
+    let assetMappingUrl = ASSET_PREFIX + "preview.json";
     let xhr = new XMLHttpRequest();
     xhr.open("GET", assetMappingUrl, true);
     xhr.responseType = "json";

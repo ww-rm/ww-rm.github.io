@@ -1804,6 +1804,62 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 transformers.Pipeline 迭代生成数据</title>
+    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
+    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后这样子进行推理.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
+<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
+<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
+<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
+<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>其中提到了:</p>
+<blockquote>
+<p>For ease of use, a generator is also possible:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
+<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
+<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
+<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
+<ul>
+<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
+<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
+</ul>
+<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
+<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
+<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
+<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
+<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>transformers</tag>
+        <tag>Pipeline</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>在 Windows 上编译安装 NUPACK</title>
     <url>//posts/2024/05/11/py-nupack/</url>
     <content><![CDATA[<p>之前项目里用到了 <span class="exturl" data-url="aHR0cHM6Ly9udXBhY2sub3JnLw==">NUPACK<i class="fa fa-external-link-alt"></i></span> 这个软件, 用来做引物二级结构预测, 但是就<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQv">官方文档<i class="fa fa-external-link-alt"></i></span>上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程.</p>
@@ -2025,62 +2081,6 @@
       </tags>
   </entry>
   <entry>
-    <title>使用 transformers.Pipeline 迭代生成数据</title>
-    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
-    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
-<span id="more"></span>
-
-<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>然后这样子进行推理.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
-
-<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
-<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
-<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
-<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
-<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>其中提到了:</p>
-<blockquote>
-<p>For ease of use, a generator is also possible:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
-<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
-<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
-<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
-<ul>
-<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
-<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
-</ul>
-<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
-<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
-<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
-<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
-<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>transformers</tag>
-        <tag>Pipeline</tag>
-        <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>网页预览碧蓝航线动态立绘</title>
     <url>//posts/2024/12/22/spinejs-azurlane/</url>
     <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
@@ -2119,6 +2119,24 @@
         <tag>Azur Lane</tag>
         <tag>动态立绘</tag>
         <tag>前端</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
@@ -2217,24 +2235,6 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
-      </categories>
-      <tags>
-        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
@@ -3291,115 +3291,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Simpleperf 三部曲 (三)</title>
-    <url>//posts/2024/07/07/simpleperf3/</url>
-    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
-<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
-
-<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
-
-<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
-
-<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
-<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
-<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
-
-<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
-<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
-<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
-
-<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
-
-<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
-<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
-<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
-<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
-<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
-<ul>
-<li>显示该函数调用的函数的火焰图.</li>
-<li>显示调用该函数的函数的火焰图.</li>
-<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
-<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
-</ul>
-<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
-
-<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
-<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
-<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
-<ul>
-<li>每线程轨迹</li>
-<li>火焰图</li>
-<li>搜索, 聚焦于特定的堆栈</li>
-<li>时间序列视图, 以时间戳顺序查看样本</li>
-<li>按线程和持续时间过滤</li>
-</ul>
-<p>使用方法:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
-
-<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
-<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
-<p>这种格式可以导入到:</p>
-<ul>
-<li>FlameGraph</li>
-<li>Flamescope</li>
-<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
-<li>Speedscope</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
-<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
-
-<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
-<p>折叠堆栈格式可被以下工具读取:</p>
-<ul>
-<li>The FlameGraph toolkit</li>
-<li>Inferno (FlameGraph 的 Rust 移植版)</li>
-<li>Speedscope</li>
-</ul>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
-
-<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
-<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
-<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
-
-<p>结果如下所示:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
-
-<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
-<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Simpleperf</tag>
-        <tag>Android</tag>
-        <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Simpleperf 三部曲 (二)</title>
     <url>//posts/2024/07/07/simpleperf2/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3536,6 +3427,115 @@
 <h3 id="报告调用图"><a href="#报告调用图" class="headerlink" title="报告调用图"></a>报告调用图</h3><p>要报告调用图, 请确保分析数据是带有调用图记录的, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjcmVjb3JkLWNhbGwtZ3JhcGhz">Record call graphs<i class="fa fa-external-link-alt"></i></span> 所示.</p>
 <hr>
 <p>更多详细内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXJlY29yZC1jb21tYW5k">The record command<i class="fa fa-external-link-alt"></i></span>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Simpleperf</tag>
+        <tag>Android</tag>
+        <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Simpleperf 三部曲 (三)</title>
+    <url>//posts/2024/07/07/simpleperf3/</url>
+    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>阅读笔记</category>
