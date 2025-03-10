@@ -51,9 +51,11 @@ function calculateBounds(skeleton) {
 }
 
 /** 创建 Spine 对象 */
-function createSpineObject(skelFileData, atlasFileData, textureLoader) {
+function createSpineObject(skelFileData, atlasFileData, textureLoader, scale = 1) {
     let atlas = new spine.TextureAtlas(atlasFileData, textureLoader);
     let skeletonBinary = new spine.SkeletonBinary(new spine.AtlasAttachmentLoader(atlas));
+    skeletonBinary.scale = scale; // 部分存在不同缩放
+
     let skeletonData = skeletonBinary.readSkeletonData(skelFileData);
     let animationNames = skeletonData.animations.map(e => e.name);
 
@@ -130,27 +132,6 @@ function render() {
     requestAnimationFrame(render);
 }
 
-/** 获得立绘所有资源 url */
-function getSkinUrls(skinName) {
-    if (!ASSET_MAPPING[skinName]) {
-        console.error(skinName, "not found");
-        return;
-    }
-
-    let prefix = ASSET_PREFIX + skinName + "/";
-    let skelUrls = [];
-    let atlasUrls = [];
-    let pageUrls = [];
-    ASSET_MAPPING[skinName].skelNames.forEach(name => {
-        skelUrls.push(prefix + name + ".skel");
-        atlasUrls.push(prefix + name + ".atlas");
-    });
-    ASSET_MAPPING[skinName].pages.forEach(filename => {
-        pageUrls.push(prefix + filename);
-    });
-    return { prefix: prefix, skelUrls: skelUrls, atlasUrls: atlasUrls, pageUrls: pageUrls };
-}
-
 /** 加载指定皮肤资源 */
 function loadSkin(skinName) {
     if (!context) return;
@@ -165,10 +146,12 @@ function loadSkin(skinName) {
     }
 
     // 开始下载资源 (如果浏览器有缓存就不会重复下载)
-    let urls = getSkinUrls(skinName);
-    urls.skelUrls.forEach(e => { manager.loadBinary(e); });
-    urls.atlasUrls.forEach(e => { manager.loadText(e); });
-    urls.pageUrls.forEach(e => { manager.loadTexture(e); })
+    const skinMeta = ASSET_MAPPING[skinName];
+    skinMeta.spines.forEach(e => {
+        manager.loadBinary(e.skelUrl);
+        manager.loadText(e.atlasUrl);
+        e.pageUrls.forEach(v => manager.loadTexture(v))
+    })
 
     // 移除上一个等待任务, 更改显示最新启动加载的皮肤, 但是曾经开始下载的资源依然会继续下载
     if (loadTask) {
@@ -179,15 +162,16 @@ function loadSkin(skinName) {
     }
 
     loadTask = setInterval(function () {
-        let chName = ASSET_MAPPING[skinName].chName;
+        let chName = skinMeta.chName;
         if (manager.isLoadingComplete()) {
             spineObjects = [];
-            for (let i = 0; i < urls.skelUrls.length; i++) {
-                let skelFileData = manager.get(urls.skelUrls[i]);
-                let atlasFileData = manager.get(urls.atlasUrls[i]);
-                let textureLoader = (path) => manager.get(urls.prefix + path);
+            const spines = skinMeta.spines
+            for (let i = 0; i < spines.length; i++) {
+                let skelFileData = manager.get(spines[i].skelUrl);
+                let atlasFileData = manager.get(spines[i].atlasUrl);
+                let textureLoader = (path) => manager.get(skinMeta.prefix + path);
                 try {
-                    let spObj = createSpineObject(skelFileData, atlasFileData, textureLoader);
+                    let spObj = createSpineObject(skelFileData, atlasFileData, textureLoader, spines[i].scale || 1);
                     spineObjects.push(spObj);
                 } catch (error) {
                     console.error(skinName, i, "load failed.");
@@ -405,7 +389,7 @@ function init() {
     }
 
     // 通过 XHR 获取 JSON 数据
-    let assetMappingUrl = ASSET_PREFIX + "index.json";
+    let assetMappingUrl = ASSET_PREFIX + "preview.json";
     let xhr = new XMLHttpRequest();
     xhr.open("GET", assetMappingUrl, true);
     xhr.responseType = "json";
@@ -446,6 +430,18 @@ function init() {
 }
 
 function main() {
+    // 生成皮肤 url
+    for (let key of Object.keys(ASSET_MAPPING)) {
+        let prefix = ASSET_PREFIX + key + "/";
+        ASSET_MAPPING[key]["prefix"] = prefix;
+        let spines = ASSET_MAPPING[key].spines;
+        for (let i = 0; i < spines.length; i++) {
+            spines[i]["skelUrl"] = prefix + spines[i].skelName;
+            spines[i]["atlasUrl"] = prefix + spines[i].atlasName;
+            spines[i]["pageUrls"] = spines[i].pages.map(e => prefix + e);
+        }
+    }
+
     // 生成皮肤列表
     let container = document.getElementById("shipnames-container");
     for (let key of Object.keys(ASSET_MAPPING).sort()) {
