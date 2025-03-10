@@ -566,94 +566,6 @@
       </tags>
   </entry>
   <entry>
-    <title>碧蓝航线立绘提取与批量还原</title>
-    <url>//posts/2023/04/11/blhx-painting/</url>
-    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
-<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
-<span id="more"></span>
-
-<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
-<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
-<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
-<ul>
-<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
-<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
-<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
-<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
-</ul>
-<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
-<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
-<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
-<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
-<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
-<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
-<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
-</ul>
-<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
-<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
-<p><img data-src="/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
-<details class="note danger"><summary><p>guanghui_h.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
-<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
-</details>
-
-<details class="note info"><summary><p>guanghui.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_2.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_3.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_4.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_5.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
-
-</details>
-
-<details class="note info"><summary><p>guanghui_idol_n.png</p>
-</summary>
-<p><img data-src="/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
-
-</details>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>工具</tag>
-        <tag>立绘还原</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>基于 NumPy 的手写数字识别 (卷积神经网络) (一)</title>
     <url>//posts/2023/10/13/cnn-numpy-1/</url>
     <content><![CDATA[<p>&quot;基于 numpy 的手写数字识别&quot;, 这一经典问题除了用作深度学习入门内容, 还被广泛作为各大课程的课程作业, 因此在各大搜索引擎上搜索率也是相当之高<del>(代码复用率也是相当之高)</del>. 网上确实有挺多现成的可使用代码, 但是大部分都是造的全连接网络, 并且很多时候内部原理不是特别清晰. 因此决定自己也来造一次轮子, 使用 <code>numpy</code> 实现一个简单的卷积神经网络进行手写数字识别, 正好也能借此机会梳理一下神经网络的基本原理.</p>
@@ -748,6 +660,94 @@
         <tag>手写数字识别</tag>
         <tag>卷积神经网络</tag>
         <tag>深度学习</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>碧蓝航线立绘提取与批量还原</title>
+    <url>//posts/2023/04/11/blhx-painting/</url>
+    <content><![CDATA[<p>因为网上没看到太好的核心步骤介绍和脚本, 所以自己造了一下轮子, 方便自己记录学习过程.</p>
+<p>本文介绍碧蓝航线立绘提取和还原基本思路, 文末附有完整的批量还原 <code>python</code> 脚本.</p>
+<span id="more"></span>
+
+<h2 id="资源提取"><a href="#资源提取" class="headerlink" title="资源提取"></a>资源提取</h2><p>提取的方法网上很多, 不再赘述, 用 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1BlcmZhcmUvQXNzZXRTdHVkaW8vcmVsZWFzZXM=">AssetStudio<i class="fa fa-external-link-alt"></i></span> 导出安装包和热更新里的 <code>painting</code> 内容, 得到 里面的 <code>Mesh</code> 和 <code>Texture2D</code> 资源即可进行下一步还原.</p>
+<h2 id="文件格式"><a href="#文件格式" class="headerlink" title="文件格式"></a>文件格式</h2><p><code>Texture2D</code> 下面的内容是所有打包后的立绘纹理图片, 目测都是 <code>名字</code> + <code>.png</code> 的文件名.</p>
+<p><code>Mesh</code> 下面是 3D 模型贴图格式, 大部分都是 <code>名字</code> + <code>-mesh.obj</code> 的文件名, 小部分要特殊处理, 名字和前面纹理图名字一一对应.</p>
+<ul>
+<li><code>g</code> 开头的行是标识行, 可以忽略;</li>
+<li><code>v</code> 开头的是模型顶点坐标, 对应还原后的图的坐标;</li>
+<li><code>vt</code> 是纹理图的顶点坐标, 对应打包后图片的坐标;</li>
+<li><code>f</code> 是 <code>v</code> 和 <code>vt</code> 的对应关系, 每一行代表一个三角面, 用三组点来记录, 分别是 <code>v/vt/vn</code> 的序号, 从 1 开始.</li>
+</ul>
+<p>更为详细的内容可以自行谷歌 <code>Mesh</code> 的文件格式.</p>
+<h2 id="还原思路"><a href="#还原思路" class="headerlink" title="还原思路"></a>还原思路</h2><h3 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h3><p><code>Mesh</code> 中每一个 <code>f</code> 行代表一个小三角形, 实测相邻的两行就是一整个矩形, 因此只需要读取 <code>Mesh</code> 文件记录之后, 两行两行去处理 <code>f</code> 记录, 就可以像拼图一样从纹理图把原图拼出来.</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>模型坐标的 <code>x</code> 取值需要取绝对值进行镜像 (原因不知).</li>
+<li>原始坐标系的原点都在图片的左下角, 需要调整成左上角 (翻转 <code>y</code> 轴).</li>
+<li>需要将坐标系里的点转换到图片里的像素行列值 (比较玄学, 坐标里的点对应图片像素一个 <code>2x2</code> 像素的中心点)</li>
+<li>打包的纹理图图块和原图图块可能存在某一些块大小不一致, 实测都是纹理图可能比原图多 1 行/列透明像素, 因此拼的时候需要对比大小, 剔除多余的透明行/列<del>想想也知道怎么可能拆分成这么多块后还刚好能重新拼成一个大块</del>. 而且由于绘图误差, 全透明点的 RGB 不一定是全 0, 并且 alpha 通道也可能有一些值, 所以凡是透明度小于某个阈值就可以认为是透明的了.</li>
+<li>瓜游的 0.125 个程序员导致很多立绘就是原图, 然后对应的 <code>Mesh</code> 文件没有; 也可能热更新很多次, 同一个纹理图有很多个 <code>Mesh</code> 文件, 需要都尝试一下.</li>
+</ul>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><p>安装一下必要的库, 运行的时候需要设定资源文件夹和导出文件夹.</p>
+<p>当遇到无法通过 <code>Mesh</code> 文件来还原的纹理图时, 会弹窗显示图片的缩略图, 可以手动选择是直接复制原图过去还是放弃这张图, 比如下面:</p>
+<p><img data-src="/static/image/blhx-painting/ppLHg1I.png" alt="ppLHg1I.png"></p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"><span class="keyword">import</span> tkinter <span class="keyword">as</span> tk</span><br><span class="line"><span class="keyword">import</span> traceback</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageTk</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">read_mesh_obj</span>(<span class="params">path</span>):</span><br><span class="line">    vertex = []  <span class="comment"># x, y, x</span></span><br><span class="line">    vertex_texture = []  <span class="comment"># u, v</span></span><br><span class="line">    vector_normal = []  <span class="comment"># x, y, z # 2D 没有法向量</span></span><br><span class="line">    face = []  <span class="comment"># v/vt/vn</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;r&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">            type_, *values = line.strip().split(<span class="string">&quot; &quot;</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> type_ == <span class="string">&quot;v&quot;</span>:</span><br><span class="line">                vertex.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, values[:<span class="number">2</span>])))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;vt&quot;</span>:</span><br><span class="line">                vertex_texture.append(<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">float</span>, values)))</span><br><span class="line">            <span class="keyword">elif</span> type_ == <span class="string">&quot;f&quot;</span>:</span><br><span class="line">                face.append([<span class="built_in">list</span>(<span class="built_in">map</span>(<span class="built_in">int</span>, value.split(<span class="string">&quot;/&quot;</span>))) <span class="keyword">for</span> value <span class="keyword">in</span> values])</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">    <span class="keyword">return</span> vertex, vertex_texture, face</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">restore_painting</span>(<span class="params">texture: np.ndarray, v, vt, f</span>) -&gt; np.ndarray:</span><br><span class="line">    v = np.array(v)[:, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除 z 轴</span></span><br><span class="line">    vt = np.array(vt)</span><br><span class="line">    f = np.array(f)[:, :, <span class="number">0</span>:<span class="number">2</span>]  <span class="comment"># 去除法向量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 v</span></span><br><span class="line">    v = np.<span class="built_in">abs</span>(v)  <span class="comment"># 水平镜像, 原因不明</span></span><br><span class="line">    v[:, <span class="number">1</span>] = np.<span class="built_in">max</span>(v[:, <span class="number">1</span>]) - v[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴, x 对应列数, y 对应行数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理 vt</span></span><br><span class="line">    vt = vt * np.array(texture.shape[<span class="number">1</span>::-<span class="number">1</span>]).reshape(<span class="number">1</span>, <span class="number">2</span>)  <span class="comment"># 转换到像素</span></span><br><span class="line">    vt[:, <span class="number">1</span>] = texture.shape[<span class="number">0</span>] - vt[:, <span class="number">1</span>]  <span class="comment"># 翻转 y 轴</span></span><br><span class="line">    vt = np.<span class="built_in">round</span>(vt, <span class="number">0</span>).astype(<span class="built_in">int</span>)  <span class="comment"># 转换整数坐标</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 新建空图</span></span><br><span class="line">    width, height = np.<span class="built_in">max</span>(v, axis=<span class="number">0</span>) + <span class="number">2</span>  <span class="comment"># 上下左右各扩展 1 个位置</span></span><br><span class="line">    png = np.zeros((height, width, <span class="number">4</span>), dtype=texture.dtype)</span><br><span class="line">    <span class="comment"># print(png.shape)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">len</span>(f), <span class="number">2</span>):</span><br><span class="line">        v_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line">        vt_rect_pts: <span class="type">List</span>[<span class="type">Tuple</span>[<span class="built_in">int</span>, <span class="built_in">int</span>]] = []</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])  <span class="comment"># 下标需要序号 -1</span></span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> v_idx, vt_idx <span class="keyword">in</span> f[i + <span class="number">1</span>]:</span><br><span class="line">            v_rect_pts.append(v[v_idx - <span class="number">1</span>])</span><br><span class="line">            vt_rect_pts.append(vt[vt_idx - <span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 排序得到左上和右下坐标</span></span><br><span class="line">        leftup_v, *_, rightdown_v = <span class="built_in">sorted</span>(v_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line">        leftup_vt, *_, rightdown_vt = <span class="built_in">sorted</span>(vt_rect_pts, key=<span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 转换像素行列坐标, 左闭右开</span></span><br><span class="line">        leftup_v = (leftup_v + <span class="number">1</span>) - <span class="number">1</span>  <span class="comment"># +1 是为了把图往两个正方向移动一格, 修正坐标</span></span><br><span class="line">        rightdown_v = (rightdown_v + <span class="number">1</span>) + <span class="number">1</span></span><br><span class="line">        leftup_vt = leftup_vt - <span class="number">1</span></span><br><span class="line">        rightdown_vt = rightdown_vt + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 判断区域是否大小相等</span></span><br><span class="line">        size1 = rightdown_v - leftup_v</span><br><span class="line">        size2 = rightdown_vt - leftup_vt</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="built_in">all</span>(size1 == size2):</span><br><span class="line">            <span class="comment"># 处理不相等情况, 目前只发现纹理区域会可能多一行/列, 想办法去掉空白</span></span><br><span class="line">            <span class="comment"># 空白的条件是某一行/列透明度均小于一个阈值</span></span><br><span class="line">            texture_region = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line">            alpha_value = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">            row_delta = size2[<span class="number">1</span>] - size1[<span class="number">1</span>]</span><br><span class="line">            <span class="keyword">if</span> row_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[-<span class="number">1</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">1</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[<span class="number">0</span>, :, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">1</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty row not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> row_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;row_delta&#125;</span> extra rows found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">            col_delta = size2[<span class="number">0</span>] - size1[<span class="number">0</span>]</span><br><span class="line">            <span class="keyword">if</span> col_delta == <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> np.<span class="built_in">all</span>(texture_region[:, -<span class="number">1</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    rightdown_vt[<span class="number">0</span>] -= <span class="number">1</span></span><br><span class="line">                <span class="keyword">elif</span> np.<span class="built_in">all</span>(texture_region[:, <span class="number">0</span>, -<span class="number">1</span>] &lt; alpha_value):</span><br><span class="line">                    leftup_vt[<span class="number">0</span>] += <span class="number">1</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">raise</span> ValueError(<span class="string">&quot;Empty col not found!&quot;</span>)</span><br><span class="line">            <span class="keyword">elif</span> col_delta &gt; <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">f&quot;<span class="subst">&#123;col_delta&#125;</span> extra cols found.&quot;</span>)</span><br><span class="line"></span><br><span class="line">        png[leftup_v[<span class="number">1</span>]:rightdown_v[<span class="number">1</span>], leftup_v[<span class="number">0</span>]:rightdown_v[<span class="number">0</span>]] = texture[leftup_vt[<span class="number">1</span>]:rightdown_vt[<span class="number">1</span>], leftup_vt[<span class="number">0</span>]:rightdown_vt[<span class="number">0</span>]]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> png</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">choose_image</span>(<span class="params">image_path</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_confirm</span>():</span><br><span class="line">        root.result = <span class="literal">True</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">on_cancel</span>():</span><br><span class="line">        root.result = <span class="literal">False</span></span><br><span class="line">        root.destroy()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化 tkinter 窗口</span></span><br><span class="line">    root = tk.Tk()</span><br><span class="line">    root.title(<span class="string">&quot;选择保留&quot;</span>)</span><br><span class="line">    root.result = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载图片并调整大小</span></span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    max_size = (<span class="number">300</span>, <span class="number">300</span>)</span><br><span class="line">    image.thumbnail(max_size)</span><br><span class="line">    photo = ImageTk.PhotoImage(image)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建图片标签并放置在窗口上</span></span><br><span class="line">    label = tk.Label(root, image=photo)</span><br><span class="line">    label.pack(padx=<span class="number">5</span>, pady=<span class="number">5</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 创建确认和取消按钮并放置在窗口上</span></span><br><span class="line">    confirm_button = tk.Button(root, text=<span class="string">&quot;复制&quot;</span>, command=on_confirm)</span><br><span class="line">    confirm_button.pack(side=tk.LEFT, padx=(<span class="number">20</span>, <span class="number">10</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    cancel_button = tk.Button(root, text=<span class="string">&quot;放弃&quot;</span>, command=on_cancel)</span><br><span class="line">    cancel_button.pack(side=tk.RIGHT, padx=(<span class="number">10</span>, <span class="number">20</span>), pady=<span class="number">10</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 运行窗口并等待用户操作</span></span><br><span class="line">    root.mainloop()</span><br><span class="line">    <span class="keyword">return</span> root.result</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">PNG_DIR = Path(<span class="string">&quot;./Texture2D&quot;</span>)</span><br><span class="line">OBJ_DIR = Path(<span class="string">&quot;./Mesh&quot;</span>)</span><br><span class="line"></span><br><span class="line">EXPORT_DIR = Path(<span class="string">&quot;./paintings&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> png <span class="keyword">in</span> PNG_DIR.iterdir():</span><br><span class="line">        char_name = png.stem</span><br><span class="line"></span><br><span class="line">        <span class="built_in">print</span>(char_name)</span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">        painting_path = EXPORT_DIR.joinpath(png.name)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> mesh <span class="keyword">in</span> OBJ_DIR.glob(<span class="string">f&quot;<span class="subst">&#123;char_name&#125;</span>-mesh*.obj&quot;</span>):</span><br><span class="line">            v, vt, f = read_mesh_obj(mesh)</span><br><span class="line">            texture: np.ndarray = cv2.imread(png.as_posix(), cv2.IMREAD_UNCHANGED)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                painting = restore_painting(texture, v, vt, f)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                traceback.print_exc()</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Restore Error: <span class="subst">&#123;char_name&#125;</span>&quot;</span>)</span><br><span class="line">                <span class="keyword">continue</span>  <span class="comment"># 还原失败继续试下一个可能的 mesh 文件</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 还原成功跳出循环</span></span><br><span class="line">            cv2.imwrite(painting_path.as_posix(), painting)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;No valid mesh file found for <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">            <span class="keyword">if</span> choose_image(png):</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Copy: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line">                shutil.copy(png, painting_path)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">f&quot;Discard: <span class="subst">&#123;png&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Total: <span class="subst">&#123;count&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">input</span>(<span class="string">&quot;Press &lt;Enter&gt; to exit...&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="还原效果"><a href="#还原效果" class="headerlink" title="还原效果"></a>还原效果</h2><p>放一些还原前和还原后的图作对比<del>夹带私货</del>.</p>
+<details class="note danger"><summary><p>guanghui_h.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLI7y8.png" alt="ppLI7y8.png"><br><img data-src="/static/image/blhx-painting/ppLIDRx.png" alt="ppLIDRx.png"><br>🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹🌹</p>
+<div style="text-align:center;">🌹<span class="black-curtain">为光辉老婆献上 99 朵玫瑰!</span>🌹</div>
+</details>
+
+<details class="note info"><summary><p>guanghui.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLITQf.png" alt="ppLITQf.png"><br><img data-src="/static/image/blhx-painting/ppLIBJ1.png" alt="ppLIBJ1.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_2.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLIoSP.png" alt="ppLIoSP.png"><br><img data-src="/static/image/blhx-painting/ppLI0iR.png" alt="ppLI0iR.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_3.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLI5Wt.png" alt="ppLI5Wt.png"><br><img data-src="/static/image/blhx-painting/ppLIdo9.png" alt="ppLIdo9.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_4.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLIhFA.png" alt="ppLIhFA.png"><br><img data-src="/static/image/blhx-painting/ppLIadJ.png" alt="ppLIadJ.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_5.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLIHOS.png" alt="ppLIHOS.png"><br><img data-src="/static/image/blhx-painting/ppLIrz6.png" alt="ppLIrz6.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLHstH.png" alt="ppLHstH.png"><br><img data-src="/static/image/blhx-painting/ppLI6sO.png" alt="ppLI6sO.png"></p>
+
+</details>
+
+<details class="note info"><summary><p>guanghui_idol_n.png</p>
+</summary>
+<p><img data-src="/static/image/blhx-painting/ppLIqeg.png" alt="ppLIqeg.png"><br><img data-src="/static/image/blhx-painting/ppLIyQK.png" alt="ppLIyQK.png"></p>
+
+</details>
+]]></content>
+      <categories>
+        <category>代码块</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>工具</tag>
+        <tag>立绘还原</tag>
       </tags>
   </entry>
   <entry>
@@ -1082,43 +1082,6 @@
       </tags>
   </entry>
   <entry>
-    <title>解决 Github SSH 连接超时</title>
-    <url>//posts/2024/01/17/githubssh-timeout/</url>
-    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
-<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
-<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
-
-<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
-<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
-<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
-<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
-<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
-
-<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
-<p>因此, 解决方案就是添加下面的配置:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
-
-<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
-<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
-<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SSH</tag>
-        <tag>Github</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>看雪 2023·KCTF 第十一题设计思路与题解</title>
     <url>//posts/2023/10/07/kctf-2023/</url>
     <content><![CDATA[<p>在我导安排下作为防守方出了个题到<span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXRlYW1fbGlzdC0xOS0zMy5odG0=">看雪 2023·KCTF<i class="fa fa-external-link-alt"></i></span> 上, <span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXNlYXNvbl9maWdodC0yMzYuaHRt">第十一题 步步逼近<i class="fa fa-external-link-alt"></i></span>, 有幸拿了精致奖, 第一次参加这类比赛, 属实是走大运了. 这里把出题思路和题解贴一下, 和看雪的是一样的, 原文链接 <span class="exturl" data-url="aHR0cHM6Ly9iYnMua2FueHVlLmNvbS90aHJlYWQtMjc4NDc4Lmh0bQ==">https://bbs.kanxue.com/thread-278478.htm<i class="fa fa-external-link-alt"></i></span>.</p>
@@ -1199,6 +1162,43 @@
         <tag>看雪</tag>
         <tag>KCTF</tag>
         <tag>逆向</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决 Github SSH 连接超时</title>
+    <url>//posts/2024/01/17/githubssh-timeout/</url>
+    <content><![CDATA[<p>解决 Github SSH 连接超时.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ssh -T git@github.com</span><br><span class="line">ssh: connect to host github.com port 22: Connection timed out</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>众所周知 Github 的网页端访问极其不稳定, 用 http 协议 clone 仓库的时候非常难受, 但是用公钥走 ssh 协议进行连接体感稳定很多.</p>
+<p>但是最近 ssh 也不行了, 稳定连接超时, 本地一堆仓库都没办法进行推送.</p>
+<p>网上搜了一大圈, 发现都是加 ssh 配置, 增加下面的内容:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname ssh.github.com</span><br><span class="line">  Port 443</span><br></pre></td></tr></table></figure>
+
+<p>意思是原先的 22 端口被墙了, 换个 443 的端口就好了.</p>
+<p>这么试了之后确实好了, 但是总感觉哪里不对劲, 因为我的印象里, 在指定 <code>Hostname</code> 的情况下, <code>Host</code> 的作用是别名.</p>
+<p>也就是说这个配置项的作用其实是将所有连接到 <code>github.com</code> 的换到了 <code>ssh.github.com</code>.</p>
+<p>然后我把 <code>Port 443</code> 给注释了, 结果发现也能跑通, 这说明和端口压根没啥关系, 纯粹是域名的问题.</p>
+<p>分别 ping 一下两个域名, 可以发现 <code>github.com</code> 完全不通, 但是 <code>ssh.github.com</code> 是通的.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ping github.com</span><br><span class="line"></span><br><span class="line">正在 Ping github.com [20.205.243.166] 具有 32 字节的数据:</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line">请求超时。</span><br><span class="line"></span><br><span class="line">20.205.243.166 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 0，丢失 = 4 (100% 丢失)，</span><br><span class="line"></span><br><span class="line">$ ping ssh.github.com</span><br><span class="line"></span><br><span class="line">正在 Ping ssh.github.com [20.205.243.160] 具有 32 字节的数据:</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=95ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=111ms TTL=98</span><br><span class="line">来自 20.205.243.160 的回复: 字节=32 时间=98ms TTL=98</span><br><span class="line"></span><br><span class="line">20.205.243.160 的 Ping 统计信息:</span><br><span class="line">    数据包: 已发送 = 4，已接收 = 4，丢失 = 0 (0% 丢失)，</span><br><span class="line">往返行程的估计时间(以毫秒为单位):</span><br><span class="line">    最短 = 95ms，最长 = 111ms，平均 = 100ms</span><br></pre></td></tr></table></figure>
+
+<p>至此, 可以确定就是最近解析的主域名 <code>github.com</code> 的 IP 被彻底墙了, 但是供 ssh 连接的子域名 <code>ssh.github.com</code> IP 还活着.</p>
+<p>因此, 解决方案就是添加下面的配置:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Host github.com</span><br><span class="line">  Hostname 20.205.243.160</span><br></pre></td></tr></table></figure>
+
+<p>将现有的 <code>github.com</code> 主机名换一个可以用的 IP.</p>
+<p>另外, 找到了 Github 官方的文档 <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24vdHJvdWJsZXNob290aW5nLXNzaC91c2luZy1zc2gtb3Zlci10aGUtaHR0cHMtcG9ydA==">Using SSH over the HTTPS port<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>这里面教你如何在 22 端口不可用时, 转用 443 端口, 但是 443 端口必须使用 <code>ssh.github.com</code>. 这也是网上大部分教程的出处. 但是由于这个问题不是端口导致的, 因此方法有效只是巧合罢了.</p>
+<p>最后, Github 官方提供了它们的服务 IP 范围, <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmdpdGh1Yi5jb20vZW4vYXV0aGVudGljYXRpb24va2VlcGluZy15b3VyLWFjY291bnQtYW5kLWRhdGEtc2VjdXJlL2Fib3V0LWdpdGh1YnMtaXAtYWRkcmVzc2Vz">About GitHub&#39;s IP addresses<i class="fa fa-external-link-alt"></i></span>, 从里面可以找一个 ssh 连接成功, 然后写到配置里.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+        <tag>Github</tag>
       </tags>
   </entry>
   <entry>
@@ -1556,6 +1556,41 @@
       </tags>
   </entry>
   <entry>
+    <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
+    <url>//posts/2024/06/16/sm9gfn/</url>
+    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
+<span id="more"></span>
+
+<h2 id="十二次扩域上的稀疏乘法"><a href="#十二次扩域上的稀疏乘法" class="headerlink" title="十二次扩域上的稀疏乘法"></a>十二次扩域上的稀疏乘法</h2><p>$$<br>\begin{align*}<br>     U &amp;= (x_U, y_U, z_U) \rightarrow (x_1, y_1) \\<br>     V &amp;= (x_V, y_V, z_V) \rightarrow (x_2, y_2) \\<br>     Q &amp;= (x_Q, y_Q, z_Q) \rightarrow (x_3, y_3) \\<br>     U&#39; &amp;= (x&#39;_U, y&#39;_U, z&#39;_U) \rightarrow (x&#39;_1, y&#39;_1) \\<br>     V&#39; &amp;= (x&#39;_V, y&#39;_V, z&#39;_V) \rightarrow (x&#39;_2, y&#39;_2)<br>\end{align*}<br>$$</p>
+<p>$U, V, Q$ 是 $E(F_{q^{12}})$ 上的点, $U&#39;, V&#39;$ 是扭曲线上的点, 也是函数的直接输入值.</p>
+<p>$Q$ 输入时在 $E(F_{q})$ 上, 但是可以直接通过塔式扩张转换到 $E(F_{q^{12}})$ 上.</p>
+<p>根据雅各比加重坐标系转换公式和扭曲线转换公式可得:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_1 &amp;= \frac{x_U}{z_U^2} = \frac{x_U&#39;}{\omega^2} = \frac{x_U&#39;}{\omega^2 z_U&#39;^2} \\<br>    y_1 &amp;= \frac{y_U}{z_U^3} = \frac{y_U&#39;}{\omega^3} = \frac{y_U&#39;}{\omega^3 z_U&#39;^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>可以看到根据 $z$ 的次数, 分母会乘上同次数的 $\omega$, 这在 $F_{q^{12}}$ 上相当于是把这个 $F_{q^{2}}$ 元素次数加一, 也就是改变这个元素的位置.</p>
+<p>同理有:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_2 &amp;= \frac{x_V}{z_V^2} \\<br>    y_2 &amp;= \frac{y_V}{z_V^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    x_3 &amp;= \frac{x_Q}{z_Q^2} \\<br>    y_3 &amp;= \frac{y_Q}{z_Q^3}<br>\end{align*}<br>\right.<br>$$</p>
+<p>根据公式有:</p>
+<p>$$<br>\begin{align*}<br>     \lambda_1 &amp;= \frac{3x_2^2}{2y_2} \\<br>     \lambda_2 &amp;= \frac{y_1 - y_2}{x_1 - x_2}<br>\end{align*}<br>$$</p>
+<p>则:</p>
+<p>$$<br>\begin{align*}<br>g_{V, V}(Q) &amp;= \lambda_1(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{3x_2^2(x_3-x_2)}{2y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{3x_3}{2}\frac{x_2^2}{y_2} - \frac{3}{2}\frac{x_2^3}{y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_3 x_V^2}{y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_Q x_V^2}{z_Q^2 y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V} {z_V^3} - \frac{y_Q} {z_Q^3} \\<br>~ &amp;= \frac{\frac{3}{2} x_Q z_Q x_V^2 z_V^2 + z_Q^3(y_V^2 - \frac{3}{2}x_V^3) - y_Q y_V z_V^3}{z_Q^3 y_V z_V^3}<br>\end{align*}<br>$$</p>
+<p>$$<br>\begin{align*}<br>g_{U, V}(Q) &amp;= \lambda_2(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{y_1 - y_2}{x_1 - x_2}(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{y_U}{z_U^3} - \frac{y_V}{z_V^3}}{\frac{x_U}{z_U^2} - \frac{x_V}{z_V^2}}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3}{z_Uz_V(x_U z_V^2 - x_V z_U^2)}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3} {z_Uz_V(x_U z_V^2 - x_V z_U^2)}\frac{x_3 z_V^2 - x_V}{z_V^2} + \frac{y_V - y_3 z_V^3}{z_V^3} \\<br>~ &amp;= \frac{z_V(y_U z_V^3 - y_V z_U^3)(x_3 z_V^2 - x_V) + z_Uz_V(x_U z_V^2 - x_V z_U^2)(y_V - y_3 z_V^3)}{z_Uz_V(x_U z_V^2 - x_V z_U^2)z_V^3} \\<br>~ &amp;= \frac{t_2 x_3 z_V^2 + t_1 y_V - t_2 x_V - t_1 y_3 z_V^3}{t_1 z_V^3} \\<br>~ &amp;= \frac{t_2 \frac{x_Q}{z_Q^2} z_V^2 + t_1 y_V - t_2 x_V - t_1 \frac{y_Q}{z_Q^3} z_V^3} {t_1 z_V^3} \\<br>~ &amp;= \frac{x_Q z_Q t_2 z_V^2 + z_Q^3(t_1 y_V - t_2 x_V) - y_Q t_1 z_V^3} {z_Q^3 t_1 z_V^3}<br>\end{align*}<br>$$</p>
+<p>其中:</p>
+<p>$$<br>\left\{<br>\begin{align*}<br>    t_1 &amp;= z_Uz_V(x_U z_V^2 - x_V z_U^2) \\<br>    t_2 &amp;= z_V(y_U z_V^3 - y_V z_U^3)<br>\end{align*}<br>\right.<br>$$</p>
+<p>当 $U, V$ 为相反点, 即 $x_1 = x_2, y_1 + y_2 = 0$ 时:</p>
+<p>$$<br>\begin{align*}<br>g_{V, -V}(Q) &amp;= x_3 - x_2 \\<br>~ &amp;= \frac{x_Q}{z_Q^2} - \frac{x_V}{z_V^2} \\<br>~ &amp;= \frac{x_Q z_V^2 - z_Q^2 x_V}{z_Q^2 z_V^2}<br>\end{align*}<br>$$</p>
+<p>在代码实现时, 通过展开, 可以将计算控制在 $F_{q^{2}}$ 上, 且分开算分子分母, 可以有效避免求逆, 延迟到在最后计算 $FinalExp$ 时对总的分母计算一次逆.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>SM9</tag>
+        <tag>SM9优化</tag>
+        <tag>稀疏乘法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>SM9 算法中的塔式扩张公式推导</title>
     <url>//posts/2023/12/04/sm9fpex/</url>
     <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时塔式扩张部分的公式推导与代码实现. 由于没有系统学习过相关数学理论, 因此只是根据有限的认识完成了推导, 可能存在不严谨之处.</p>
@@ -1620,41 +1655,6 @@
         <tag>SM9</tag>
         <tag>塔式扩张</tag>
         <tag>扩域运算</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SM9 算法中 $g_{U, V}(Q)$ 的展开优化</title>
-    <url>//posts/2024/06/16/sm9gfn/</url>
-    <content><![CDATA[<p>本篇记录一下在实现 SM9 算法时对函数 $g_{U, V}(Q)$ 稀疏乘法的公式推导与优化实现.</p>
-<span id="more"></span>
-
-<h2 id="十二次扩域上的稀疏乘法"><a href="#十二次扩域上的稀疏乘法" class="headerlink" title="十二次扩域上的稀疏乘法"></a>十二次扩域上的稀疏乘法</h2><p>$$<br>\begin{align*}<br>     U &amp;= (x_U, y_U, z_U) \rightarrow (x_1, y_1) \\<br>     V &amp;= (x_V, y_V, z_V) \rightarrow (x_2, y_2) \\<br>     Q &amp;= (x_Q, y_Q, z_Q) \rightarrow (x_3, y_3) \\<br>     U&#39; &amp;= (x&#39;_U, y&#39;_U, z&#39;_U) \rightarrow (x&#39;_1, y&#39;_1) \\<br>     V&#39; &amp;= (x&#39;_V, y&#39;_V, z&#39;_V) \rightarrow (x&#39;_2, y&#39;_2)<br>\end{align*}<br>$$</p>
-<p>$U, V, Q$ 是 $E(F_{q^{12}})$ 上的点, $U&#39;, V&#39;$ 是扭曲线上的点, 也是函数的直接输入值.</p>
-<p>$Q$ 输入时在 $E(F_{q})$ 上, 但是可以直接通过塔式扩张转换到 $E(F_{q^{12}})$ 上.</p>
-<p>根据雅各比加重坐标系转换公式和扭曲线转换公式可得:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_1 &amp;= \frac{x_U}{z_U^2} = \frac{x_U&#39;}{\omega^2} = \frac{x_U&#39;}{\omega^2 z_U&#39;^2} \\<br>    y_1 &amp;= \frac{y_U}{z_U^3} = \frac{y_U&#39;}{\omega^3} = \frac{y_U&#39;}{\omega^3 z_U&#39;^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>可以看到根据 $z$ 的次数, 分母会乘上同次数的 $\omega$, 这在 $F_{q^{12}}$ 上相当于是把这个 $F_{q^{2}}$ 元素次数加一, 也就是改变这个元素的位置.</p>
-<p>同理有:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_2 &amp;= \frac{x_V}{z_V^2} \\<br>    y_2 &amp;= \frac{y_V}{z_V^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    x_3 &amp;= \frac{x_Q}{z_Q^2} \\<br>    y_3 &amp;= \frac{y_Q}{z_Q^3}<br>\end{align*}<br>\right.<br>$$</p>
-<p>根据公式有:</p>
-<p>$$<br>\begin{align*}<br>     \lambda_1 &amp;= \frac{3x_2^2}{2y_2} \\<br>     \lambda_2 &amp;= \frac{y_1 - y_2}{x_1 - x_2}<br>\end{align*}<br>$$</p>
-<p>则:</p>
-<p>$$<br>\begin{align*}<br>g_{V, V}(Q) &amp;= \lambda_1(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{3x_2^2(x_3-x_2)}{2y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{3x_3}{2}\frac{x_2^2}{y_2} - \frac{3}{2}\frac{x_2^3}{y_2} + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_3 x_V^2}{y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{\frac{3}{2} x_Q x_V^2}{z_Q^2 y_V z_V} - \frac{\frac{3}{2}x_V^3}{y_V z_V^3} + \frac{y_V} {z_V^3} - \frac{y_Q} {z_Q^3} \\<br>~ &amp;= \frac{\frac{3}{2} x_Q z_Q x_V^2 z_V^2 + z_Q^3(y_V^2 - \frac{3}{2}x_V^3) - y_Q y_V z_V^3}{z_Q^3 y_V z_V^3}<br>\end{align*}<br>$$</p>
-<p>$$<br>\begin{align*}<br>g_{U, V}(Q) &amp;= \lambda_2(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{y_1 - y_2}{x_1 - x_2}(x_3 - x_2) + y_2 - y_3 \\<br>~ &amp;= \frac{\frac{y_U}{z_U^3} - \frac{y_V}{z_V^3}}{\frac{x_U}{z_U^2} - \frac{x_V}{z_V^2}}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3}{z_Uz_V(x_U z_V^2 - x_V z_U^2)}(x_3 - \frac{x_V}{z_V^2}) + \frac{y_V}{z_V^3} - y_3 \\<br>~ &amp;= \frac{y_U z_V^3 - y_V z_U^3} {z_Uz_V(x_U z_V^2 - x_V z_U^2)}\frac{x_3 z_V^2 - x_V}{z_V^2} + \frac{y_V - y_3 z_V^3}{z_V^3} \\<br>~ &amp;= \frac{z_V(y_U z_V^3 - y_V z_U^3)(x_3 z_V^2 - x_V) + z_Uz_V(x_U z_V^2 - x_V z_U^2)(y_V - y_3 z_V^3)}{z_Uz_V(x_U z_V^2 - x_V z_U^2)z_V^3} \\<br>~ &amp;= \frac{t_2 x_3 z_V^2 + t_1 y_V - t_2 x_V - t_1 y_3 z_V^3}{t_1 z_V^3} \\<br>~ &amp;= \frac{t_2 \frac{x_Q}{z_Q^2} z_V^2 + t_1 y_V - t_2 x_V - t_1 \frac{y_Q}{z_Q^3} z_V^3} {t_1 z_V^3} \\<br>~ &amp;= \frac{x_Q z_Q t_2 z_V^2 + z_Q^3(t_1 y_V - t_2 x_V) - y_Q t_1 z_V^3} {z_Q^3 t_1 z_V^3}<br>\end{align*}<br>$$</p>
-<p>其中:</p>
-<p>$$<br>\left\{<br>\begin{align*}<br>    t_1 &amp;= z_Uz_V(x_U z_V^2 - x_V z_U^2) \\<br>    t_2 &amp;= z_V(y_U z_V^3 - y_V z_U^3)<br>\end{align*}<br>\right.<br>$$</p>
-<p>当 $U, V$ 为相反点, 即 $x_1 = x_2, y_1 + y_2 = 0$ 时:</p>
-<p>$$<br>\begin{align*}<br>g_{V, -V}(Q) &amp;= x_3 - x_2 \\<br>~ &amp;= \frac{x_Q}{z_Q^2} - \frac{x_V}{z_V^2} \\<br>~ &amp;= \frac{x_Q z_V^2 - z_Q^2 x_V}{z_Q^2 z_V^2}<br>\end{align*}<br>$$</p>
-<p>在代码实现时, 通过展开, 可以将计算控制在 $F_{q^{2}}$ 上, 且分开算分子分母, 可以有效避免求逆, 延迟到在最后计算 $FinalExp$ 时对总的分母计算一次逆.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>SM9</tag>
-        <tag>SM9优化</tag>
-        <tag>稀疏乘法</tag>
       </tags>
   </entry>
   <entry>
@@ -1801,62 +1801,6 @@
         <tag>汉化</tag>
         <tag>UABEA</tag>
         <tag>Unity</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用 transformers.Pipeline 迭代生成数据</title>
-    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
-    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
-<span id="more"></span>
-
-<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>然后这样子进行推理.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
-
-<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
-<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
-<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
-<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
-<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>其中提到了:</p>
-<blockquote>
-<p>For ease of use, a generator is also possible:</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
-<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
-<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
-<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
-<blockquote>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
-<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
-<ul>
-<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
-<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
-</ul>
-<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
-<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
-<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
-<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
-<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
-<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>transformers</tag>
-        <tag>Pipeline</tag>
-        <tag>Python</tag>
       </tags>
   </entry>
   <entry>
@@ -2081,6 +2025,62 @@
       </tags>
   </entry>
   <entry>
+    <title>使用 transformers.Pipeline 迭代生成数据</title>
+    <url>//posts/2024/05/07/py-transformers-genexpr/</url>
+    <content><![CDATA[<p>最近需要用 <a href="https://huggingface.co/docs/transformers/index"><code>transformers</code></a> 这个库载入大模型进行特征提取, 但是受限于硬件条件, 不能将所有输入推理后的结果放在内存里, 只能退而求其次分批推理然后写入本地. 于是顺势探索了一下 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVz">Pipelines<i class="fa fa-external-link-alt"></i></span> 的用法.</p>
+<span id="more"></span>
+
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>基本用法参考官方文档 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9waXBlbGluZV90dXRvcmlhbA==">Pipelines for inference<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>比如通过下面的方式加载一个 <a href="https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.FeatureExtractionPipeline"><code>FeatureExtractionPipeline</code></a>.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">fe_pipline = pipeline(</span><br><span class="line">    <span class="string">&quot;feature-extraction&quot;</span>,</span><br><span class="line">    model=AutoModelForTextEncoding.from_pretrained(self.encoder_dir),  <span class="comment"># BERT 模型</span></span><br><span class="line">    tokenizer=AutoTokenizer.from_pretrained(self.encoder_dir),</span><br><span class="line">    device=self.device</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后这样子进行推理.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">inputs = [ <span class="string">&quot;A B C D E&quot;</span>, <span class="string">&quot;F G H J K&quot;</span> ]  <span class="comment"># 两条输入</span></span><br><span class="line">outputs = fe_pipline(inputs, batch_size=self.batch_size, return_tensors=<span class="literal">False</span>)  <span class="comment"># (2, L, E)</span></span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以一次性得到 <code>inputs</code> 的所有推理结果.</p>
+<h2 id="分批输入"><a href="#分批输入" class="headerlink" title="分批输入"></a>分批输入</h2><p>官方提供了一个分批输入的示例, <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3BpcGVsaW5lLWJhdGNoaW5n">Pipeline batching<i class="fa fa-external-link-alt"></i></span>.</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"><span class="keyword">from</span> transformers.pipelines.pt_utils <span class="keyword">import</span> KeyDataset</span><br><span class="line"><span class="keyword">import</span> datasets</span><br><span class="line"></span><br><span class="line">dataset = datasets.load_dataset(<span class="string">&quot;imdb&quot;</span>, name=<span class="string">&quot;plain_text&quot;</span>, split=<span class="string">&quot;unsupervised&quot;</span>)</span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>, device=<span class="number">0</span>)</span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(KeyDataset(dataset, <span class="string">&quot;text&quot;</span>), batch_size=<span class="number">8</span>, truncation=<span class="string">&quot;only_first&quot;</span>):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># [&#123;&#x27;label&#x27;: &#x27;POSITIVE&#x27;, &#x27;score&#x27;: 0.9998743534088135&#125;]</span></span><br><span class="line">    <span class="comment"># Exactly the same output as before, but the content are passed</span></span><br><span class="line">    <span class="comment"># as batches to the model</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>这个示例里指定了每次处理的批大小为 <code>8</code>, 同时返回了可迭代结果, 可以按照每次一条的方式获得输出结果.</p>
+<p>不过在实际测试的时候发现, 当我给定 <code>list</code> 类型的 <code>inputs</code> 时, 推理的时候确实是分批推理的, 但是最后返回结果的时候, 其实是把所有结果合在一起返回了一个大的 <code>list</code>.</p>
+<p>这和我的需求还是有一丢丢差距的, 我希望的是每次推理一个批次之后, 只返回一个批次的结果, 然后继续迭代下一个批次, 这样占用的内存大小最多不超过一个批次.</p>
+<h2 id="迭代输出"><a href="#迭代输出" class="headerlink" title="迭代输出"></a>迭代输出</h2><p>继续找一下文档, 还能发现一些示例 <span class="exturl" data-url="aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kb2NzL3RyYW5zZm9ybWVycy9tYWluX2NsYXNzZXMvcGlwZWxpbmVzI3RyYW5zZm9ybWVycy5waXBlbGluZQ==">The pipeline abstraction<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>其中提到了:</p>
+<blockquote>
+<p>For ease of use, a generator is also possible:</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> pipeline</span><br><span class="line"></span><br><span class="line">pipe = pipeline(<span class="string">&quot;text-classification&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data</span>():</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># This could come from a dataset, a database, a queue or HTTP request</span></span><br><span class="line">        <span class="comment"># in a server</span></span><br><span class="line">        <span class="comment"># Caveat: because this is iterative, you cannot use `num_workers &gt; 1` variable</span></span><br><span class="line">        <span class="comment"># to use multiple threads to preprocess data. You can still have 1 thread that</span></span><br><span class="line">        <span class="comment"># does the preprocessing while the main runs the big inference</span></span><br><span class="line">        <span class="keyword">yield</span> <span class="string">&quot;This is a test&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> out <span class="keyword">in</span> pipe(data()):</span><br><span class="line">    <span class="built_in">print</span>(out)</span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: &quot;NUMBER TEN FRESH NELLY IS WAITING ON YOU GOOD NIGHT HUSBAND&quot;&#125;</span></span><br><span class="line">    <span class="comment"># &#123;&quot;text&quot;: ....&#125;</span></span><br><span class="line">    <span class="comment"># ....</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>也就是说 <code>Pipeline</code> 还支持未知长度的生成器输入, 在这种情况下, 对 <code>pipeline</code> 的调用没有返回全部结果, 而是一个迭代器, 每次能获取其中一条结果.</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>不过还是不太放心, 官方文档只有一些示例, 对接口参数和返回值的描述并不是很清晰, 所以干脆 F12 看看内部源码.</p>
+<p><code>transformers</code> 版本为 <code>4.31.0</code>.</p>
+<p>关键函数为 <code>transformers.pipelines.base.Pipeline.__call__</code>. 这里摘出来相关的代码片段</p>
+<blockquote>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">@add_end_docstrings(<span class="params">PIPELINE_INIT_ARGS</span>)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Pipeline</span>(<span class="title class_ inherited__">_ScikitCompat</span>):</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, inputs, *args, num_workers=<span class="literal">None</span>, batch_size=<span class="literal">None</span>, **kwargs</span>):</span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        is_dataset = Dataset <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(inputs, Dataset)</span><br><span class="line">        is_generator = <span class="built_in">isinstance</span>(inputs, types.GeneratorType)</span><br><span class="line">        is_list = <span class="built_in">isinstance</span>(inputs, <span class="built_in">list</span>)</span><br><span class="line"></span><br><span class="line">        is_iterable = is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list</span><br><span class="line"></span><br><span class="line">        <span class="comment"># TODO make the get_iterator work also for `tf` (and `flax`).</span></span><br><span class="line">        can_use_iterator = self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> (is_dataset <span class="keyword">or</span> is_generator <span class="keyword">or</span> is_list)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> is_list:</span><br><span class="line">            <span class="keyword">if</span> can_use_iterator:</span><br><span class="line">                final_iterator = self.get_iterator(</span><br><span class="line">                    inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                )</span><br><span class="line">                outputs = <span class="built_in">list</span>(final_iterator)</span><br><span class="line">                <span class="keyword">return</span> outputs</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> self.run_multi(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> can_use_iterator:</span><br><span class="line">            <span class="keyword">return</span> self.get_iterator(</span><br><span class="line">                inputs, num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">elif</span> is_iterable:</span><br><span class="line">            <span class="keyword">return</span> self.iterate(inputs, preprocess_params, forward_params, postprocess_params)</span><br><span class="line">        <span class="keyword">elif</span> self.framework == <span class="string">&quot;pt&quot;</span> <span class="keyword">and</span> <span class="built_in">isinstance</span>(self, ChunkPipeline):</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">next</span>(</span><br><span class="line">                <span class="built_in">iter</span>(</span><br><span class="line">                    self.get_iterator(</span><br><span class="line">                        [inputs], num_workers, batch_size, preprocess_params, forward_params, postprocess_params</span><br><span class="line">                    )</span><br><span class="line">                )</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> self.run_single(inputs, preprocess_params, forward_params, postprocess_params)</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>可以看到对输入 <code>inputs</code> 的进行了类型判断, 然后返回值的类型则根据 <code>inputs</code> 的类型由最后的 <code>if ... else ...</code> 决定.</p>
+<p>在使用框架是 <code>pytorch</code> 的情况下, 这里大致分成两大类情况:</p>
+<ul>
+<li>输入是 <code>list</code> 类型, 那么返回值一定被处理成和输入数据长度一样的 <code>list</code> 进行返回.</li>
+<li>输入是可迭代的 (<code>is_iterable</code>), 那么返回一个迭代器.</li>
+</ul>
+<p><code>get_iterator</code> 会返回一个 <code>PipelineIterator</code> 对象, 在指定了 <code>batch_size</code> 的情况下, 内部会保存一个结果缓冲区, 当缓冲区非空则迭代输出下一个结果, 直到缓冲区空, 则进行下一批的推理, 并更新缓冲区.</p>
+<p>这个设计倒是完美符合了我的需求, 但是实际使用的时候还是踩了坑.</p>
+<p>原本以为把输入换成 <code>iter(inputs)</code> 就可以按迭代方式输出了, 但是却报错了, 仔细看看源码才发现, 这里其中一个判断是 <code>isinstance(inputs, types.GeneratorType)</code>, 也就是判断输入是否是生成器. 而在 Python 里, <code>Generator</code> 是 <code>Iterator</code> 的子类, 因此二者都是可迭代的 (<code>Iterable</code>), 但是输入是 <code>Iterator</code> 的时候, 此处的逻辑却无法将它判断成可迭代的对象.</p>
+<p>又翻了一下源码, 看上去只需要判断是迭代器就行了, 并没有用到生成器的特性, 因此严重怀疑这里是不是写代码的人没注意这个问题搞错了......</p>
+<p>不过问题不大, Python 提供了很优雅的生成器表达式语法糖, 不用写繁琐的生成器函数, 只需要 <code>(v for v in inputs)</code> 就能把可迭代对象包装成生成器, 之后就能愉快的使用它的缓冲区输出功能了~</p>
+<h2 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h2><p>当然也有别的曲线救国方案, 从它的逻辑上看, 只要不是 <code>list</code> 并且 <code>can_use_iterator</code> 就可以得到输出迭代器, 那么还可以把输出包装成 <code>torch.utils.data.Dataset</code>, 不过这个显然没有使用生成器表达式方便.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>transformers</tag>
+        <tag>Pipeline</tag>
+        <tag>Python</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>网页预览碧蓝航线动态立绘</title>
     <url>//posts/2024/12/22/spinejs-azurlane/</url>
     <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
@@ -2119,24 +2119,6 @@
         <tag>Azur Lane</tag>
         <tag>动态立绘</tag>
         <tag>前端</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>&quot;网安本科速通&quot; 系列后记</title>
-    <url>//posts/2022/08/19/wast-afterword/</url>
-    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
-<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
-<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
-<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
-<p>就这样了, 网安本科速通, 完成!</p>
-<p><img data-src="/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>后记</category>
-      </categories>
-      <tags>
-        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
@@ -2235,6 +2217,24 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>&quot;网安本科速通&quot; 系列后记</title>
+    <url>//posts/2022/08/19/wast-afterword/</url>
+    <content><![CDATA[<p>终于写完了最后一篇! (撒花~), <a href="/categories/%E7%BD%91%E5%AE%89%E6%9C%AC%E7%A7%91%E9%80%9F%E9%80%9A/">点我查看全系列内容</a>.</p>
+<p>虽然这个系列就此完结, 但是只是因为我觉得再写下去已经不算速通的内容了, 我只写了最基本的必需内容.</p>
+<p>我相信如果真的好好看完了的话, 应付一下平常的作业应该绰绰有余了. 但是如果真的想要学有所获, 这个系列里的东西真的太浅了, 每一篇都只是入个门而已, 你得花上看这个系列的十倍以上的时间去学习, 去尝试.</p>
+<p>这个系列也算是对本科四年一些知识点的总结吧, 都是蜻蜓点水般的带过, 希望日后自己再看到时, 还能够想起来都学了些啥.</p>
+<p>就这样了, 网安本科速通, 完成!</p>
+<p><img data-src="/static/image/wast-afterword/zzz.gif" alt="zzz.gif"></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>后记</category>
+      </categories>
+      <tags>
+        <tag>杂谈</tag>
       </tags>
   </entry>
   <entry>
