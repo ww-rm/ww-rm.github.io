@@ -444,8 +444,8 @@ function main() {
 
     // 生成皮肤列表
     let container = document.getElementById("shipnames-container");
-    for (let key of Object.keys(ASSET_MAPPING).sort()) {
-        value = ASSET_MAPPING[key];
+    for (let key of Object.keys(ASSET_MAPPING).reverse()) {
+        let value = ASSET_MAPPING[key];
         let link = document.createElement("a");
         link.href = "javascript:void(0);";
         link.textContent = value.chName;
