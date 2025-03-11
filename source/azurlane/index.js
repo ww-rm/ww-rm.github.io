@@ -393,14 +393,41 @@ function init() {
 
     xhr.onload = function () {
         if (xhr.status === 200) {
-            let skinData = xhr.response;
-            if (!skinData || typeof skinData !== "object") {
+            let indexData = xhr.response;
+            if (!indexData || typeof indexData !== "object") {
                 alert("皮肤信息解析失败！");
                 return;
             }
 
-            // 将获取的皮肤数据赋值到 ASSET_MAPPING
-            ASSET_MAPPING = skinData;
+            // 将获取的皮肤数据赋值转换成 ASSET_MAPPING
+            ASSET_MAPPING = {};
+            for (const [shipName, v1] of Object.entries(indexData)) {
+                const shipChName = v1.chName;
+                for (const [skinName, v2] of Object.entries(v1.skins)) {
+                    let skinChName = v2.chName;
+                    if (skinChName === shipChName) {
+                        skinChName = "";
+                    } else if (skinChName.endsWith('.改')) {
+                        skinChName = "改";
+                    }
+
+                    const chName = shipChName + (skinChName ? `_${skinChName}` : "");
+
+                    // 过滤 spines 数组：排除 skelName 去掉后缀后以 "_hx" 结尾的项
+                    const spines = v2.spines.filter(sp => {
+                        const firstPart = sp.skelName.split('.')[0];
+                        return !firstPart.endsWith('_hx');
+                    });
+
+                    const skinData = {
+                        shipName: shipName,
+                        chName: chName,
+                        spines: spines
+                    };
+
+                    ASSET_MAPPING[skinName] = skinData;
+                }
+            }
 
             // 处理参数 s
             if (params.get("s")) {
@@ -428,10 +455,10 @@ function init() {
 
 function main() {
     // 生成皮肤 url
-    for (let key of Object.keys(ASSET_MAPPING)) {
-        let prefix = ASSET_PREFIX + key + "/";
-        ASSET_MAPPING[key]["prefix"] = prefix;
-        let spines = ASSET_MAPPING[key].spines;
+    for (const [skinName, skin] of Object.entries(ASSET_MAPPING)) {
+        const prefix = `${ASSET_PREFIX}/${skin.shipName}/${skinName}/`;
+        ASSET_MAPPING[skinName]["prefix"] = prefix;
+        let spines = ASSET_MAPPING[skinName].spines;
         for (let i = 0; i < spines.length; i++) {
             spines[i]["skelUrl"] = prefix + spines[i].skelName;
             spines[i]["atlasUrl"] = prefix + spines[i].atlasName;
