@@ -354,7 +354,6 @@ function backgroundColorChange(event) {
 /** 皮肤列表筛选事件 */
 function filterSkinInputChange(event) {
     let text = event.target.value;
-    console.log(text);
     let links = document.getElementById("shipnames-container").querySelectorAll("a");
     if (!text) {
         links.forEach(link => {
@@ -363,9 +362,7 @@ function filterSkinInputChange(event) {
         });
     } else {
         text = text.trim();
-        console.log(text);
         links.forEach(link => {
-            console.log(link.textContent);
             if (link.textContent.includes(text)) {
                 link.style.backgroundColor = "lightyellow";
                 link.style.display = "";
