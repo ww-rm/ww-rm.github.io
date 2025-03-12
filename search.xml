@@ -107,7 +107,8 @@
 <li>不建议帧率调太高, 会使电脑耗电显著增加, 或者风扇抽风</li>
 <li>如果不慎出了一些和配置有关的问题, 比如设置了错误的内容导致程序崩了/打不开, 直接打开数据文件夹, 关闭程序并删除 <code>config.json</code> 后重启程序, 即可让程序使用默认配置运行</li>
 </ul>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>更新：访问 <a href="/azurlane_char/">azurlane_char</a> 获取整理好的小人角色.</p>
+<p>此处附一下自己导出的角色小人资源, 不一定包含最新角色, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0F6dXJMYW5lU0Q=">AzurLaneSD<i class="fa fa-external-link-alt"></i></span>.</p>
 <p>如果无法下载则可以试一下下面的链接:</p>
 <ul>
 <li><span class="exturl" data-url="aHR0cHM6Ly9wYW4uYmFpZHUuY29tL3MvMXRTYUJ6WlRXQ3l2Y3JnYkdoX21ncmc/cHdkPWJsaHg=">单角色下载<i class="fa fa-external-link-alt"></i></span>, 提取码: <code>blhx</code>.</li>
@@ -1119,6 +1120,60 @@
       </tags>
   </entry>
   <entry>
+    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
+    <url>//posts/2022/08/14/kxsw/</url>
+    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
+<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
+<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
+<span id="more"></span>
+
+<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
+<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
+<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
+<p><img data-src="/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
+<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>在这里只简单科普一下基本概念.</p>
+<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
+<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
+<p>不使用工具前:</p>
+<p><code>用户 --|--&gt; 目标网站</code></p>
+<p>使用工具后:</p>
+<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
+<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
+<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
+<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
+<ul>
+<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
+<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
+<li>不改变系统代理: 保持原有系统代理设置不变.</li>
+</ul>
+<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
+<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
+<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
+<p><img data-src="/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
+<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
+<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
+<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
+<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
+<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
+<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
+<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
+<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
+<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
+<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
+<p><img data-src="/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
+<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
+]]></content>
+      <categories>
+        <category>杂学</category>
+      </categories>
+      <tags>
+        <tag>科学上网</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>看雪 2023·KCTF 第十一题设计思路与题解</title>
     <url>//posts/2023/10/07/kctf-2023/</url>
     <content><![CDATA[<p>在我导安排下作为防守方出了个题到<span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXRlYW1fbGlzdC0xOS0zMy5odG0=">看雪 2023·KCTF<i class="fa fa-external-link-alt"></i></span> 上, <span class="exturl" data-url="aHR0cHM6Ly9jdGYua2FueHVlLmNvbS9nYW1lLXNlYXNvbl9maWdodC0yMzYuaHRt">第十一题 步步逼近<i class="fa fa-external-link-alt"></i></span>, 有幸拿了精致奖, 第一次参加这类比赛, 属实是走大运了. 这里把出题思路和题解贴一下, 和看雪的是一样的, 原文链接 <span class="exturl" data-url="aHR0cHM6Ly9iYnMua2FueHVlLmNvbS90aHJlYWQtMjc4NDc4Lmh0bQ==">https://bbs.kanxue.com/thread-278478.htm<i class="fa fa-external-link-alt"></i></span>.</p>
@@ -1199,60 +1254,6 @@
         <tag>看雪</tag>
         <tag>KCTF</tag>
         <tag>逆向</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>解决学习道路上的 &quot;最后 1 KB&quot;</title>
-    <url>//posts/2022/08/14/kxsw/</url>
-    <content><![CDATA[<p><code>Github</code> 时断时连? <code>git clone</code> 老是失败? 谷歌学术无法使用? ......</p>
-<p>没有关系! 看了本篇以后, 从此不在担忧, 让你在互联网的世界里畅通无阻.</p>
-<p>本篇为一篇小白入门, 旨在简单介绍解决上述问题的基本方案, 让你扫清上网时的 &quot;最后 1 KB&quot;.</p>
-<span id="more"></span>
-
-<h2 id="工具下载"><a href="#工具下载" class="headerlink" title="工具下载"></a>工具下载</h2><p>这里只说基于 <code>V2Ray</code> 的两个工具, 分别用于 PC 端和安卓端. 先附上两个工具的 Github 官方地址.</p>
-<p>PC 端 <code>V2RayN</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti8=">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Ti9yZWxlYXNlcy8=">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>安卓端 <code>V2RayNG</code>: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5Tkcv">Github 项目地址<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tLzJkdXN0L3YycmF5TkcvcmVsZWFzZXMv">下载页面<i class="fa fa-external-link-alt"></i></span></p>
-<p>考虑到很多人一开始是没有这些工具的, 而这些工具的下载又可能需要工具本身支持, 所以额外放一个 <code>V2RayN-Core v5.32</code> 的网盘<span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pUG0wUzA5ajZ2cWgv">下载地址<i class="fa fa-external-link-alt"></i></span> (压缩包哈希校验会与官网下载不同, 因为重新打包过再上传的).</p>
-<p><img data-src="/static/image/kxsw/vUBwJU.jpg" alt="vUBwJU.jpg"></p>
-<h2 id="工具使用"><a href="#工具使用" class="headerlink" title="工具使用"></a>工具使用</h2><p>网上教程很多, 这里直接放一下看起来是官方的<span class="exturl" data-url="aHR0cHM6Ly92MnJheW4ub3JnLw==">教程网站<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>在这里只简单科普一下基本概念.</p>
-<p>既然由于不可抗力导致直接连接网站的效果很差, 甚至无法连接, 那么我们可以找人帮忙, 找那些访问速度较好的 &quot;中间人&quot; 帮我们访问, 我们再从中间人那里间接获得需要的信息, 这种 &quot;中间人&quot; 就称为 &quot;节点&quot;.</p>
-<p>但是我们自己是无法直接和节点进行交互的, 所以需要工具来帮助我们传递需求, 而对于 <code>V2Ray</code> 这一类工具客户端, 其工作方式是在你自己的机器上搭建一个本地的 &quot;代理服务器&quot;, 从而我们可以访问本地的代理服务器, 进而访问到节点, 下面放一个对比.</p>
-<p>不使用工具前:</p>
-<p><code>用户 --|--&gt; 目标网站</code></p>
-<p>使用工具后:</p>
-<p><code>用户 --&gt; 本地代理 --&gt; 节点 --&gt; 目标网站</code></p>
-<p>所以对使用工具来说, 比较重要的信息是, 代理服务器设置是什么, 以及使用的节点是什么.</p>
-<h3 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h3><p>PC 端上, <code>V2RayN</code> 的本地代理默认监听地址是 <code>127.0.0.1</code>, 其中 <code>http</code> 协议的端口是 <code>10809</code>, <code>socks</code> 协议的端口是 <code>10808</code>.</p>
-<p>启动 <code>V2RayN</code> 客户端之后, 右键点击通知栏的图标, 在系统代理内有三个选项.</p>
-<ul>
-<li>清除系统代理: 清除掉在系统设置内的代理设置.</li>
-<li>自动配置系统代理: 将系统设置内的代理设置为 <code>V2RayN</code> 的代理服务器.</li>
-<li>不改变系统代理: 保持原有系统代理设置不变.</li>
-</ul>
-<p>这是个让我们快速更改系统代理设置的选项, 除此之外, 我们也可以手动去系统设置里的 <code>网络和 Internet -&gt; 代理 -&gt; 手动设置代理</code> 调整系统要使用的代理服务器.</p>
-<p>当系统代理被设置之后, 凡是只能通过系统代理的软件 <code>http</code> 协议流量, 比如 <code>Edge</code> 和 <code>Chrome</code> 浏览器等, 都会经过 <code>V2RayN</code> 来转发给节点, 从而访问到目标网站.</p>
-<p>但是某些程序是可以单独设置使用代理服务器的, 比如 <code>Firefox</code> 浏览器, 这种就需要自己去浏览器设置里手动设置代理.</p>
-<p><img data-src="/static/image/kxsw/vUyCmd.png" alt="vUyCmd.png"></p>
-<p>个人推荐备一个 <code>Firefox</code> 浏览器, 这样子可以单独把代理挂给浏览器而不是影响全局, 既可以访问国外网站也不影响使用 <code>Edge</code> 等浏览器访问国内网站.</p>
-<h3 id="使用节点与订阅"><a href="#使用节点与订阅" class="headerlink" title="使用节点与订阅"></a>使用节点与订阅</h3><p>一个节点通常长这样.</p>
-<p><code>&lt;协议&gt;://&lt;内容&gt;</code></p>
-<p><code>vmess://55yL5ZWl5ZGi77yf5rKh5pyJ6IqC54K55L+h5oGv77yB</code></p>
-<p>直接 <code>Ctrl + C</code> 复制内容然后进入客户端 <code>Ctrl + V</code> 就可以导入节点信息了.</p>
-<p>这种时候就会有人说了, 一个个节点导入太麻烦, 而且节点说不定什么时候就会失效, 还得重新一个个找. 所以, 订阅地址它出现了.</p>
-<p>比如有个白嫖订阅地址 <span class="exturl" data-url="aHR0cHM6Ly9qaWFuZy5uZXRsaWZ5LmNvbS8=">https://jiang.netlify.com/<i class="fa fa-external-link-alt"></i></span>, 你点开了直接看就会发现是一大堆的字符, 其实是一个个的节点信息, 并且每隔一段时间内容还不一样, 也就是节点信息被更新了.</p>
-<p>那么, 只要往 <code>V2RayN</code> 客户端内添加这个订阅地址, 以后再使用 &quot;更新订阅&quot; 的功能, 客户端就会自动从这个地址获取节点信息并且更新该订阅下的所有节点为新节点, 为我们懒人带来福音.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>So, 为了解决上网的最后 &quot;1 KB&quot;, 我们需要首先获得工具, 然后获得节点 (或者获得订阅地址), 再然后开启软件设置节点与代理, 之后就可以在学习的道路上畅通无阻了<del>天翼 3G 太快了</del>.</p>
-<p>这里贴一个可以白嫖的机场地址 <span class="exturl" data-url="aHR0cHM6Ly9wZXBzaWNvbGEubWUv">https://pepsicola.me<i class="fa fa-external-link-alt"></i></span> , 有免费订阅可以满足日常基本使用需求<del>不知道看到这篇文章的时候是否还进得去</del>.</p>
-<p>尝试使用谷歌学术搜索一篇论文, 很 nice, 顷刻之间, 已尽数列出.</p>
-<p><img data-src="/static/image/kxsw/vUc2TA.png" alt="vUc2TA.png"></p>
-<p>PS: 就这么多了(。_。), 有兴趣的同学还请善用搜索引擎, 发挥互联网自主探索精神.</p>
-]]></content>
-      <categories>
-        <category>杂学</category>
-      </categories>
-      <tags>
-        <tag>科学上网</tag>
       </tags>
   </entry>
   <entry>
@@ -2081,47 +2082,6 @@
       </tags>
   </entry>
   <entry>
-    <title>网页预览碧蓝航线动态立绘</title>
-    <url>//posts/2024/12/22/spinejs-azurlane/</url>
-    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
-<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
-<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
-<span id="more"></span>
-
-<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
-<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
-<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
-<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
-<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
-<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
-<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
-<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
-<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
-<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
-<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
-<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
-<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
-<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>spine</tag>
-        <tag>spine-js</tag>
-        <tag>Azur Lane</tag>
-        <tag>动态立绘</tag>
-        <tag>前端</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>腾讯测试开发实习面试经验分享</title>
     <url>//posts/2024/03/19/tencent-intership-interview/</url>
     <content><![CDATA[<p>腾讯 IEG 25 届测试开发实习生面试经验分享.</p>
@@ -2217,6 +2177,47 @@
         <tag>实习</tag>
         <tag>测试开发</tag>
         <tag>IEG</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>网页预览碧蓝航线动态立绘</title>
+    <url>//posts/2024/12/22/spinejs-azurlane/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览 (持续更新)</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2tTcGluZQ==">DeskSpine<i class="fa fa-external-link-alt"></i></span>, 目前还没彻底完工<del>咕咕咕</del>, 但是基本功能已经差不多了<del>能用</del>, 是我基于过去项目 <a href="/posts/2023/08/30/desktopsprite/">DesktopSprite</a> 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多<del>bug也少很多</del>, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    </p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -2340,6 +2341,61 @@
       </tags>
   </entry>
   <entry>
+    <title>经典问题之文本分类</title>
+    <url>//posts/2022/08/17/wast-ml/</url>
+    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
+<span id="more"></span>
+
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
+<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
+<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
+<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
+
+<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
+<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
+<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
+<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
+
+<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
+<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
+<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
+
+<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
+<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
+<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
+<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
+<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
+<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
+
+<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
+<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
+<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
+
+<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
+
+<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
+<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>机器学习</tag>
+        <tag>scikit-learn</tag>
+        <tag>文本分类</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Git 与 Github 入门</title>
     <url>//posts/2022/08/15/wast-gitandgithub/</url>
     <content><![CDATA[<p><code>git</code> 你可能用不到但是 <code>github</code> 肯定用得到, 因为面对一大堆代码任务, 谁都想去<del>抄</del>借鉴一下他人优秀的代码.</p>
@@ -2434,61 +2490,6 @@
       <tags>
         <tag>git</tag>
         <tag>github</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>经典问题之文本分类</title>
-    <url>//posts/2022/08/17/wast-ml/</url>
-    <content><![CDATA[<p>成为一个熟练的调包侠是速通的关键要素之一, 在无数的课程大作业和小任务中, 使用机器学习来解决一些问题算是经典中的经典<del>典中典</del>, 比如通过文本分类来实现垃圾邮件过滤. 因此本篇将基于 <code>python</code> 中最常用的机器学习库 <code>scikit-learn</code>, 用朴素贝叶斯模型来完成一次文本分类任务.</p>
-<span id="more"></span>
-
-<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>需要的第三方库.</p>
-<p><code>jieba</code>: 一个中文分词库, 可以将一个句子分成一个个的单词.</p>
-<p><code>scikit-learn</code>: <code>python</code> 中最常用的机器学习库, 内置多种模型与算法, 开箱即用.</p>
-<h2 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">example/</span><br><span class="line">    data/</span><br><span class="line">        财经/</span><br><span class="line">            1.txt</span><br><span class="line">            2.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        房产/</span><br><span class="line">            1.txt</span><br><span class="line">            ...</span><br><span class="line">            200.txt</span><br><span class="line">        XXX/</span><br><span class="line">            XXX.txt</span><br><span class="line">        ...</span><br><span class="line">    main.py</span><br><span class="line">    main.ipynb</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="/static/image/wast-ml/vBh4sA.png" alt="vBh4sA.png"></p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><h3 id="导入所有需要用到的库"><a href="#导入所有需要用到的库" class="headerlink" title="导入所有需要用到的库"></a>导入所有需要用到的库</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> jieba</span><br><span class="line"><span class="keyword">from</span> sklearn.datasets <span class="keyword">import</span> load_files</span><br><span class="line"><span class="keyword">from</span> sklearn.feature_extraction.text <span class="keyword">import</span> CountVectorizer</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> classification_report</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.naive_bayes <span class="keyword">import</span> MultinomialNB</span><br></pre></td></tr></table></figure>
-
-<h3 id="读取数据集"><a href="#读取数据集" class="headerlink" title="读取数据集"></a>读取数据集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">raw_data = load_files(<span class="string">&quot;./data/&quot;</span>, encoding=<span class="string">&quot;utf8&quot;</span>, shuffle=<span class="literal">True</span>, decode_error=<span class="string">&quot;ignore&quot;</span>, random_state=<span class="number">1</span>)</span><br><span class="line">data_x = raw_data[<span class="string">&quot;data&quot;</span>]</span><br><span class="line">data_y = raw_data[<span class="string">&quot;target&quot;</span>]</span><br><span class="line">index2label = raw_data[<span class="string">&quot;target_names&quot;</span>]</span><br><span class="line">label2index = &#123;l: i <span class="keyword">for</span> i, l <span class="keyword">in</span> <span class="built_in">enumerate</span>(index2label)&#125;</span><br><span class="line"><span class="comment"># print(len(data_x), data_x[1])</span></span><br><span class="line"><span class="comment"># print(len(data_y), data_y[1])</span></span><br><span class="line"><span class="comment"># print(index2label)</span></span><br><span class="line"><span class="comment"># print(label2index)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## 1400 她们深陷美妆圈分享好货停不下来...更多的是时间与心思。</span></span><br><span class="line"><span class="comment">## 1400 3</span></span><br><span class="line"><span class="comment">## [&#x27;家居&#x27;, &#x27;房产&#x27;, &#x27;教育&#x27;, &#x27;时尚&#x27;, &#x27;时政&#x27;, &#x27;科技&#x27;, &#x27;财经&#x27;]</span></span><br><span class="line"><span class="comment">## &#123;&#x27;家居&#x27;: 0, &#x27;房产&#x27;: 1, &#x27;教育&#x27;: 2, &#x27;时尚&#x27;: 3, &#x27;时政&#x27;: 4, &#x27;科技&#x27;: 5, &#x27;财经&#x27;: 6&#125;</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>数据的读取直接使用现成的库函数 <code>load_files</code>, 需要满足一定的目录结构才能直接使用, 即数据集文件夹下面是类别文件夹, 类别文件夹下面是每一份数据文件.</p>
-<p>读取之后返回的对象包含所有的原始数据与自动生成的标签, 从 <code>index2label</code> 和 <code>label2index</code> 可以看到数字标签与类别文字的对应关系.</p>
-<p>如果是其他形式的数据集, 需要自己写加载函数. 加载后的获取的内容与上面的应当类似, 有数字标签及其与文字类别的对应关系, 以及样本与标签相互对应的两个有序列表.</p>
-<h3 id="划分训练集与测试集"><a href="#划分训练集与测试集" class="headerlink" title="划分训练集与测试集"></a>划分训练集与测试集</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">train_x, test_x, train_y, test_y = train_test_split(</span><br><span class="line">    data_x, data_y, train_size=<span class="number">0.7</span>,</span><br><span class="line">    shuffle=<span class="literal">True</span>, stratify=data_y, random_state=<span class="number">1</span></span><br><span class="line">)</span><br><span class="line"><span class="comment"># print(f&quot;train_x: &#123;len(train_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment"># print(f&quot;test_x: &#123;len(test_x)&#125;&quot;)</span></span><br><span class="line"><span class="comment">## ========== Output ==========</span></span><br><span class="line"><span class="comment">## train_x: 979</span></span><br><span class="line"><span class="comment">## test_x: 421</span></span><br><span class="line"><span class="comment">## ============================</span></span><br></pre></td></tr></table></figure>
-
-<p>继续调包来划分数据集, 并且填入参数, 按 7:3 划分训练集与测试集.</p>
-<p>其中 <code>stratify</code> 参数含义为按比例划分, 即训练集与测试集的各类别之间的比例与提供的 <code>data_y</code> 比例一致, 即划分前的总比例.</p>
-<h3 id="对数据集进行特征提取"><a href="#对数据集进行特征提取" class="headerlink" title="对数据集进行特征提取"></a>对数据集进行特征提取</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">cv = CountVectorizer(tokenizer=jieba.lcut)</span><br><span class="line">train_x = cv.fit_transform(train_x)</span><br><span class="line">test_x = cv.transform(test_x)</span><br></pre></td></tr></table></figure>
-
-<p>因为我们最终是使用朴素贝叶斯模型进行文本分类, 因此需要得到一些离散特征.</p>
-<p>这部分使用了 <code>CountVectorizer</code> 来进行特征提取, 它可以使用 <code>tokenizer</code> 对数据集进行分词并统计, 在内部构建一个词典, 将每个单词映射到一个序号, 进而把每个样本变成一个向量.</p>
-<p><code>CountVectorizer.fit</code>: 接受数据集进行拟合, 更新内部的词典.<br><code>CountVectorizer.transform</code>: 接受数据集, 按照内部的词典将每个样本转换成向量形式.</p>
-<p>在这里我们使用 <code>fit_transform</code> 来处理训练集, 这是两步合并操作, 意思是使用训练集来构建词典并将训练集向量化.</p>
-<p>但是只使用 <code>transform</code> 来处理测试集, 也就是使用训练集上的词典来向量化测试集. 这个比较好理解, 因为对于模型来说, 通过训练集训练, 理论上来说是不知道测试集的内容的, 因此不需要让词典更新测试集的词汇.</p>
-<h3 id="构建模型并拟合"><a href="#构建模型并拟合" class="headerlink" title="构建模型并拟合"></a>构建模型并拟合</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">model = MultinomialNB()</span><br><span class="line">model.fit(train_x, train_y)</span><br></pre></td></tr></table></figure>
-
-<p>我们选择 <code>MultinomialNB</code> 模型, 因为它是 <code>sklearn</code> 中适合处理离散特征的贝叶斯模型, 有很多可调节的参数, 这里从简, 直接全部默认参数.</p>
-<p>把训练集喂进模型的 <code>fit</code> 函数, 然后等待一会训练过程.</p>
-<h3 id="在测试集上测试准确性"><a href="#在测试集上测试准确性" class="headerlink" title="在测试集上测试准确性"></a>在测试集上测试准确性</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line">pred_y = model.predict(test_x)</span><br><span class="line"><span class="built_in">print</span>(classification_report(test_y, pred_y, target_names=index2label))</span><br></pre></td></tr></table></figure>
-
-<p>将测试集的样本喂进训练之后的模型 <code>predict</code> 函数中得到 <code>pred_y</code>. 我们直接调包来计算各项指标 (当然包里还有其他分别计算各项指标的函数), 得到如下输出.</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">              precision    recall  f1-score   support</span><br><span class="line"></span><br><span class="line">          家居       0.88      0.97      0.92        60</span><br><span class="line">          房产       1.00      0.80      0.89        60</span><br><span class="line">          教育       0.82      1.00      0.90        60</span><br><span class="line">          时尚       1.00      0.98      0.99        60</span><br><span class="line">          时政       0.91      0.85      0.88        60</span><br><span class="line">          科技       1.00      0.97      0.98        61</span><br><span class="line">          财经       0.98      0.98      0.98        60</span><br><span class="line"></span><br><span class="line">    accuracy                           0.94       421</span><br><span class="line">   macro avg       0.94      0.94      0.94       421</span><br><span class="line">weighted avg       0.94      0.94      0.94       421</span><br></pre></td></tr></table></figure>
-
-<p>可以看到效果不错, 稍低一点的是 &quot;房产&quot; 与 &quot;时政&quot;, 召回率较低, 猜测可能被误分类到 &quot;家居&quot; 和 &quot;教育&quot; 里面去了.</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实做一个调包侠还是挺简单的, 不到 50 行代码就实现了一个看起来似乎挺麻烦的事, 但是能够正确调包的前提是知道各个模型的基本原理, 能够构建合适的特征并选择合适的模型, 同时也需要对常用的机器学习库的 api 有一定了解和使用经验, 不然连调包侠也当不了 X﹏X.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p><code>scikit-learn</code> 官方文档: <span class="exturl" data-url="aHR0cHM6Ly9zY2lraXQtbGVhcm4ub3JnL3N0YWJsZS9pbmRleC5odG1s">https://scikit-learn.org/stable/index.html<i class="fa fa-external-link-alt"></i></span> (其实这文档很少看, 不如搜索引擎现搜).</p>
-<p>另外贴一下文章里面用的数据集网盘地址, <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pVHZLejA5cGNxOGI=">点击下载<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>没啥其他相关资源了, 课上好好学<del>课下慢慢搜</del>就完事了.</p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>机器学习</tag>
-        <tag>scikit-learn</tag>
-        <tag>文本分类</tag>
       </tags>
   </entry>
   <entry>
@@ -3291,115 +3292,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Simpleperf 三部曲 (三)</title>
-    <url>//posts/2024/07/07/simpleperf3/</url>
-    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
-<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
-
-<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
-
-<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
-
-<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
-<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
-<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
-
-<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
-<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
-<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
-
-<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
-
-<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
-<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
-<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
-<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
-<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
-<ul>
-<li>显示该函数调用的函数的火焰图.</li>
-<li>显示调用该函数的函数的火焰图.</li>
-<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
-<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
-</ul>
-<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
-
-<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
-<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
-<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
-<ul>
-<li>每线程轨迹</li>
-<li>火焰图</li>
-<li>搜索, 聚焦于特定的堆栈</li>
-<li>时间序列视图, 以时间戳顺序查看样本</li>
-<li>按线程和持续时间过滤</li>
-</ul>
-<p>使用方法:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
-
-<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
-<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
-<p>这种格式可以导入到:</p>
-<ul>
-<li>FlameGraph</li>
-<li>Flamescope</li>
-<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
-<li>Speedscope</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
-<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
-
-<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
-<p>折叠堆栈格式可被以下工具读取:</p>
-<ul>
-<li>The FlameGraph toolkit</li>
-<li>Inferno (FlameGraph 的 Rust 移植版)</li>
-<li>Speedscope</li>
-</ul>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
-
-<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
-<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
-<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
-
-<p>结果如下所示:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
-
-<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
-<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Simpleperf</tag>
-        <tag>Android</tag>
-        <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Simpleperf 三部曲 (二)</title>
     <url>//posts/2024/07/07/simpleperf2/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3536,6 +3428,115 @@
 <h3 id="报告调用图"><a href="#报告调用图" class="headerlink" title="报告调用图"></a>报告调用图</h3><p>要报告调用图, 请确保分析数据是带有调用图记录的, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjcmVjb3JkLWNhbGwtZ3JhcGhz">Record call graphs<i class="fa fa-external-link-alt"></i></span> 所示.</p>
 <hr>
 <p>更多详细内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXJlY29yZC1jb21tYW5k">The record command<i class="fa fa-external-link-alt"></i></span>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Simpleperf</tag>
+        <tag>Android</tag>
+        <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Simpleperf 三部曲 (三)</title>
+    <url>//posts/2024/07/07/simpleperf3/</url>
+    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>阅读笔记</category>
