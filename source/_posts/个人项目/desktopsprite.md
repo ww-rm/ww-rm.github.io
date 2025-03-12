@@ -160,6 +160,8 @@ void GetAffineMatrix(
 
 ## 相关资源
 
+更新：访问 [azurlane_char](/azurlane_char/) 获取整理好的小人角色.
+
 此处附一下自己导出的角色小人资源, 不一定包含最新角色, [AzurLaneSD](https://github.com/ww-rm/AzurLaneSD).
 
 如果无法下载则可以试一下下面的链接:
