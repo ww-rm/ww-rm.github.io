@@ -20,16 +20,17 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="本文是对个人项目 SpineViewer 的介绍, 一个使用 C# 实现的桌面工具, 支持多版本多骨骼的 Spine 动画查看和导出, 并且支持方便的面板参数调整.">
+    <meta name="description" content="所见即所得 的 Spine 文件查看&amp;导出程序. 项目地址: https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;SpineViewer">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SpineViewer 简单好用的 Spine 查看&amp;导出工具">
 <meta property="og:url" content="https://ww-rm.top/posts/2025/03/04/spineviewer/">
 <meta property="og:site_name" content="暗香画楼">
-<meta property="og:description" content="本文是对个人项目 SpineViewer 的介绍, 一个使用 C# 实现的桌面工具, 支持多版本多骨骼的 Spine 动画查看和导出, 并且支持方便的面板参数调整.">
+<meta property="og:description" content="所见即所得 的 Spine 文件查看&amp;导出程序. 项目地址: https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;SpineViewer">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://ww-rm.top/static/image/spineviewer/preview.jpg">
+<meta property="og:image" content="https://starchart.cc/ww-rm/SpineViewer.svg?variant=adaptive">
 <meta property="article:published_time" content="2025-03-04T04:31:15.000Z">
-<meta property="article:modified_time" content="2025-03-12T07:36:29.338Z">
+<meta property="article:modified_time" content="2025-03-26T05:42:48.309Z">
 <meta property="article:author" content="ww-rm">
 <meta property="article:tag" content="Spine">
 <meta property="article:tag" content="SpineViewer">
@@ -148,7 +149,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%A8%E9%AA%BC%E5%AF%BC%E5%85%A5"><span class="nav-number">3.1.</span> <span class="nav-text">骨骼导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%A8%E9%AA%BC%E8%B0%83%E6%95%B4"><span class="nav-number">3.2.</span> <span class="nav-text">骨骼调整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%BB%E9%9D%A2%E8%B0%83%E6%95%B4"><span class="nav-number">3.3.</span> <span class="nav-text">画面调整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E7%94%BB%E5%AF%BC%E5%87%BA"><span class="nav-number">3.4.</span> <span class="nav-text">动画导出</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8E%E8%AF%9D"><span class="nav-number">4.</span> <span class="nav-text">后话</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA%E6%A0%BC%E5%BC%8F%E6%94%AF%E6%8C%81"><span class="nav-number">2.</span> <span class="nav-text">导出格式支持</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%A8%E9%AA%BC%E5%AF%BC%E5%85%A5"><span class="nav-number">3.1.</span> <span class="nav-text">骨骼导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%A7%88%E5%86%85%E5%AE%B9%E8%B0%83%E6%95%B4"><span class="nav-number">3.2.</span> <span class="nav-text">预览内容调整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E8%A7%88%E5%86%85%E5%AE%B9%E5%AF%BC%E5%87%BA"><span class="nav-number">3.3.</span> <span class="nav-text">预览内容导出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E5%A4%9A"><span class="nav-number">3.4.</span> <span class="nav-text">更多</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -277,14 +278,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>925</span>
+      <span>814</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
+      <span>1 分钟</span>
     </span>
 </div>
 
@@ -295,46 +296,51 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>本文是对个人项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">SpineViewer<i class="fa fa-external-link-alt"></i></span> 的介绍, 一个使用 <code>C#</code> 实现的桌面工具, 支持多版本多骨骼的 Spine 动画查看和导出, 并且支持方便的面板参数调整.</p>
+        <p><em>所见即所得</em> 的 Spine 文件查看&amp;导出程序.</p>
+<p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">https://github.com/ww-rm/SpineViewer<i class="fa fa-external-link-alt"></i></span></p>
+<p><img data-src="/static/image/spineviewer/preview.jpg" alt="previewer"></p>
 <span id="more"></span>
 
-<p><img data-src="/static/image/spineviewer/preview.jpg" alt="preview.jpg"></p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3JlbGVhc2Vz">Release<i class="fa fa-external-link-alt"></i></span> 界面下载压缩包.</p>
 <p>软件需要安装依赖框架 <span class="exturl" data-url="aHR0cHM6Ly9kb3RuZXQubWljcm9zb2Z0LmNvbS96aC1jbi9kb3dubG9hZC9kb3RuZXQvOC4w">.NET 桌面运行时 8.0.x<i class="fa fa-external-link-alt"></i></span>.</p>
 <p>也可以下载带有 <code>SelfContained</code> 后缀的压缩包, 可以独立运行.</p>
-<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
-<li>支持不同版本 Spine 查看<ul>
-<li><input checked="" disabled="" type="checkbox"> <code>v3.6.x</code></li>
-<li><input checked="" disabled="" type="checkbox"> <code>v3.7.x</code></li>
-<li><input checked="" disabled="" type="checkbox"> <code>v3.8.x</code></li>
-<li><input checked="" disabled="" type="checkbox"> <code>v4.0.x</code></li>
-<li><input checked="" disabled="" type="checkbox"> <code>v4.1.x</code></li>
-<li><input checked="" disabled="" type="checkbox"> <code>v4.2.x</code></li>
-<li><input disabled="" type="checkbox"> <code>v4.3.x</code></li>
+<h2 id="导出格式支持"><a href="#导出格式支持" class="headerlink" title="导出格式支持"></a>导出格式支持</h2><ul>
+<li>单帧画面</li>
+<li>帧序列</li>
+<li>GIF 动图</li>
+<li>MKV</li>
+<li>MP4</li>
+<li>MOV</li>
+<li>WebM</li>
+<li>...</li>
 </ul>
-</li>
-<li>支持多骨骼文件动画预览</li>
-<li>支持每个骨骼独立参数设置</li>
-<li>支持动画PNG帧序列导出</li>
-<li>支持缩放旋转等导出画面设置</li>
-<li>Coming soon...</li>
-</ul>
-<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p><strong>文件</strong>菜单可以选择<strong>打开</strong>或者<strong>批量打开</strong>进行骨骼文件导入.</p>
-<h3 id="骨骼调整"><a href="#骨骼调整" class="headerlink" title="骨骼调整"></a>骨骼调整</h3><p>在<strong>模型列表</strong>中选择一项或多项, 将会在<strong>模型参数</strong>面板显示可供调节的参数.</p>
-<p><strong>模型列表</strong>右键菜单可以对列表项进行增删调整, 也可以使用鼠标左键拖动调整顺序.</p>
-<h3 id="画面调整"><a href="#画面调整" class="headerlink" title="画面调整"></a>画面调整</h3><p><strong>预览画面</strong>支持的鼠标操作:</p>
+<p>更多格式正在施工 :rocket::rocket::rocket:</p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p>有 3 种模式导入骨骼文件:</p>
 <ul>
-<li>左键可以对骨骼进行拖动</li>
-<li>右键对画面进行拖动</li>
-<li>滚轮进行画面缩放</li>
+<li>拖放/粘贴需要导入的骨骼文件/目录到模型列表</li>
+<li>从文件菜单里批量打开骨骼文件</li>
+<li>从文件菜单选择单个模型打开</li>
 </ul>
-<p>除此之外, 也可以通过<strong>画面参数</strong>面板调节导出和预览时的画面参数.</p>
-<p>在<strong>功能</strong>菜单中, 可以重置同步所有骨骼动画时间.</p>
-<h3 id="动画导出"><a href="#动画导出" class="headerlink" title="动画导出"></a>动画导出</h3><p><strong>文件</strong>菜单中选择<strong>导出</strong>可以将目前加载的所有骨骼动画按照预览时的画面进行PNG帧序列导出.</p>
-<p>可以在每个骨骼的<strong>模型参数</strong>中查看动画完整时长.</p>
-<h2 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h2><p>算是第二次写 Winforms 应用了<del>于毕设的百忙之中抽空完成</del>, 不得不感概, GPT 真的大大改善代码体验, 以前找个文档可以要翻老半天, 而且不熟悉的话找到的还不规范, 极容易掉坑, 现在有 GPT 之类的加成, 拿着代码片段和需求一问, 几乎直接就能跑了, 只能说科技改变生活啊, 对一些简单的开源项目太有帮助了.</p>
-<p>这是在原有项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL0Rlc2t0b3BTcHJpdGU=">DesktopSprite<i class="fa fa-external-link-alt"></i></span> 上改出来的, 起因是有人留 Issue 说是否可以增加骨骼数量上限. 其实自己也一直很膈应这件事, 因为之前第一次写 Winforms 应用, 压根不怎么会写, 对控件库甚至语法都不是很熟悉, 所以很多地方写的很死, 都是手动摆出来了多少个控件然后支持操作.</p>
-<p>不过这次用上 <code>PropertyGrid</code> 和 <code>ListView</code> 之后, 不管是使用上还是代码上体验都好了很多, 而且也做了不同控件和对话框的封装, 项目结构确实远好于之前<del>果然代码还是得多写</del>, 希望能收获几个 star 吧.</p>
+<h3 id="预览内容调整"><a href="#预览内容调整" class="headerlink" title="预览内容调整"></a>预览内容调整</h3><p>模型列表支持右键菜单以及部分快捷键, 并且可以多选进行模型参数的批量调整.</p>
+<p>预览画面除了使用面板进行参数设置外, 支持部分鼠标动作:</p>
+<ul>
+<li>左键可以选择和拖拽模型, 按下 <code>Ctrl</code> 键可以实现多选, 与左侧列表选择是联动的.</li>
+<li>右键对整体画面进行拖动.</li>
+<li>滚轮进行画面缩放.</li>
+<li>仅渲染选中模式, 在该模式下, 预览画面仅包含被选中的模型, 并且只能通过左侧列表改变选中状态.</li>
+</ul>
+<p>预览画面下方按钮支持对画面时间进行调整, 可以当作一个简易的播放器.</p>
+<h3 id="预览内容导出"><a href="#预览内容导出" class="headerlink" title="预览内容导出"></a>预览内容导出</h3><p>导出遵循 &quot;所见即所得&quot; 原则, 即实时预览的画面就是你导出的画面.</p>
+<p>导出有以下几个关键参数:</p>
+<ul>
+<li>仅渲染选中. 这个参数不仅影响预览模式, 也影响导出, 如果仅渲染选中, 那么在导出时只有被选中的模型会被考虑, 忽略其他模型.</li>
+<li>输出文件夹. 这个参数某些时候可选, 当不提供时, 则将输出产物输出到每个模型各自的模型文件夹, 否则输出产物全部输出到提供的输出文件夹.</li>
+<li>导出单个. 默认是每个模型独立导出, 即对模型列表进行批量操作, 如果选择仅导出单个, 那么被导出的所有模型将在同一个画面上被渲染, 输出产物只有一份.</li>
+</ul>
+<h3 id="更多"><a href="#更多" class="headerlink" title="更多"></a>更多</h3><p>更为详细的使用方法和说明见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3dpa2k=">Wiki<i class="fa fa-external-link-alt"></i></span>, 有使用上的问题或者 BUG 可以提个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcw==">Issue<i class="fa fa-external-link-alt"></i></span>.</p>
+<hr>
+<p><em>如果你觉得这个项目不错请给个 :star:, 并分享给更多人知道! :)</em></p>
+<p><a target="_blank" rel="noopener" href="https://starchart.cc/ww-rm/SpineViewer"><img data-src="https://starchart.cc/ww-rm/SpineViewer.svg?variant=adaptive" alt="Stargazers over time"></a></p>
 
     </div>
 
@@ -396,7 +402,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">8:09</span>
+    <span title="站点阅读时长">8:08</span>
   </span>
 </div>
 <div class="busuanzi-count">
