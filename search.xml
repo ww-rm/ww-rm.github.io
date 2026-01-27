@@ -317,95 +317,6 @@
       </tags>
   </entry>
   <entry>
-    <title>SpineViewer 简单好用的 Spine 查看&amp;导出工具</title>
-    <url>//posts/2025/03/04/spineviewer/</url>
-    <content><![CDATA[<p><em>所见即所得</em> 的 Spine 文件查看&amp;导出程序.</p>
-<p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">https://github.com/ww-rm/SpineViewer<i class="fa fa-external-link-alt"></i></span></p>
-<p><img data-src="/static/image/spineviewer/preview.webp" alt="previewer"></p>
-<span id="more"></span>
-
-<p>Spine 文件查看&amp;导出程序, 同时也是支持 Spine 的动态壁纸程序.</p>
-<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
-<li>支持多版本 spine 文件 (<code>2.1.x; 3.4.x - 4.2.x</code>)</li>
-<li>支持列表式多骨骼查看和渲染层级管理</li>
-<li>支持多轨道动画</li>
-<li>支持皮肤/插槽/附件设置</li>
-<li>支持调试渲染</li>
-<li>支持画面/模型/轨道时间倍速设置</li>
-<li>支持设置轨道 Alpha 混合参数</li>
-<li>支持单帧/动图/视频文件导出</li>
-<li>支持 FFmpeg 自定义导出</li>
-<li>支持非 PNG 格式的纹理图片格式</li>
-<li>支持开机自启常驻动态壁纸</li>
-<li>......</li>
-</ul>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3JlbGVhc2Vz">Release<i class="fa fa-external-link-alt"></i></span> 界面下载压缩包.</p>
-<p>软件需要安装依赖框架 <span class="exturl" data-url="aHR0cHM6Ly9kb3RuZXQubWljcm9zb2Z0LmNvbS96aC1jbi9kb3dubG9hZC9kb3RuZXQvOC4w">.NET 桌面运行时 8.0.x<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>也可以下载带有 <code>SelfContained</code> 后缀的压缩包, 可以独立运行.</p>
-<p>导出 GIF/MP4 等动图/视频格式需要在本地安装 ffmpeg 命令行, 并且添加至环境变量, <span class="exturl" data-url="aHR0cHM6Ly9mZm1wZWcub3JnL2Rvd25sb2FkLmh0bWwjYnVpbGQtd2luZG93cw==">点击前往 FFmpeg-Windows 下载页面<i class="fa fa-external-link-alt"></i></span>, 也可以点这个下载最新版本 <span class="exturl" data-url="aHR0cHM6Ly93d3cuZ3lhbi5kZXYvZmZtcGVnL2J1aWxkcy9mZm1wZWctcmVsZWFzZS1mdWxsLjd6">ffmpeg-release-full.7z<i class="fa fa-external-link-alt"></i></span>.</p>
-<h2 id="修改显示语言"><a href="#修改显示语言" class="headerlink" title="修改显示语言"></a>修改显示语言</h2><p>本项目目前支持以下界面显示语言:</p>
-<ul>
-<li><code>ZH</code> (中文)</li>
-<li><code>EN</code> (English)</li>
-<li><code>JA</code> (日本語)</li>
-</ul>
-<p>可以通过窗口菜单的 &quot;文件&quot; -&gt; &quot;首选项...&quot; -&gt; &quot;语言&quot;, 选择你需要的语言并确认修改.</p>
-<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h3><p>程序大致是左右布局, 左侧是功能面板, 右侧是画面.</p>
-<p>左侧有三个子面板, 分别是:</p>
-<ul>
-<li><strong>模型</strong>. 该面板记录导入并进行渲染的模型列表, 可以在这个面板设置与模型渲染相关的参数和渲染顺序, 以及一些与模型有关的功能.</li>
-<li><strong>浏览</strong>. 该面板用于预览指定文件夹的内容, 并没有真正导入文件到程序. 在该面板可以为模型生成 webp 格式的预览图, 或者导入选中的模型.</li>
-<li><strong>画面</strong>. 该面板用于设置右侧预览画面的参数.</li>
-</ul>
-<p>绝大部分按钮或者标签或者输入框都可以通过鼠标指针悬停来获取帮助文本.</p>
-<h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p>可以直接拖放/粘贴需要导入的骨骼文件/目录到模型面板.</p>
-<p>或者在浏览面板内右键菜单导入选中项.</p>
-<h3 id="内容调整"><a href="#内容调整" class="headerlink" title="内容调整"></a>内容调整</h3><p>模型面板支持右键菜单以及部分快捷键, 并且可以多选进行模型参数的批量调整.</p>
-<p>预览画面除了使用面板进行参数设置外, 支持部分鼠标动作:</p>
-<ul>
-<li>左键可以选择和拖拽模型, 按下 <code>Ctrl</code> 键可以实现多选, 与左侧列表选择是联动的.</li>
-<li>右键对整体画面进行拖动.</li>
-<li>滚轮进行画面缩放, 按住 <code>Ctrl</code> 可以对选中的模型进行批量缩放, <code>Shift</code> 可以切换缩放倍数.</li>
-<li>仅渲染选中模式, 在该模式下, 预览画面仅包含被选中的模型, 并且只能通过左侧列表改变选中状态.</li>
-</ul>
-<p>预览画面下方按钮支持对画面时间进行调整, 可以当作一个简易的播放器.</p>
-<h3 id="内容导出"><a href="#内容导出" class="headerlink" title="内容导出"></a>内容导出</h3><p>在模型列表里, 右键单击选中的模型, 弹出菜单里可以对选中项执行导出操作.</p>
-<p>导出有以下几个关键参数:</p>
-<ul>
-<li>输出文件夹. 这个参数某些时候可选, 当不提供时, 则将输出产物输出到每个模型各自的模型文件夹, 否则输出产物全部输出到提供的输出文件夹.</li>
-<li>导出单个. 默认是每个模型独立导出, 即对模型列表进行批量操作, 如果选择仅导出单个, 那么被导出的所有模型将在同一个画面上被渲染, 输出产物只有一份.</li>
-<li>自动分辨率. 该模式会忽略预览画面的分辨率和视区参数, 导出产物的分辨率与被导出内容的实际大小一致, 如果是动图或者视频则会与完整显示动画的必需大小一致.</li>
-</ul>
-<h3 id="动态壁纸"><a href="#动态壁纸" class="headerlink" title="动态壁纸"></a>动态壁纸</h3><p>动态壁纸通过桌面投影实现, 可以将当前预览画面上的内容实时投影至桌面.</p>
-<p>在程序首选项或者托盘图标右键菜单中可以进行桌面投影的启用与否, 模型和画面参数调整完成后, 可以将当前参数保存为工作区文件, 方便之后恢复该配置.</p>
-<p>如果希望开机自启常驻壁纸, 也可以在首选项中启用开机自启, 并且设置启动后需要加载的工作区文件.</p>
-<h3 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h3><p>项目附带一个纯命令行工具 <code>SpineViewerCLI</code>, 目前支持对单个模型执行一些简单操作, 例如参数值查询以及导出等, 并且 Release 界面提供 Windows 和 Linux 多平台二进制文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ SpineViewerCLI -h</span><br><span class="line">Description:</span><br><span class="line">  Root Command</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  SpineViewerCLI [<span class="built_in">command</span>] [options]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -q, --quiet     Suppress console logging (quiet mode).</span><br><span class="line">  -?, -h, --<span class="built_in">help</span>  Show <span class="built_in">help</span> and usage information</span><br><span class="line">  --version       Show version information</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  query &lt;skel&gt;    Query information of single model</span><br><span class="line">  preview &lt;skel&gt;  Preview a model</span><br><span class="line">  <span class="built_in">export</span> &lt;skel&gt;   Export single model</span><br></pre></td></tr></table></figure>
-
-<h3 id="更多"><a href="#更多" class="headerlink" title="更多"></a>更多</h3><p>更为详细的使用方法和说明见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3dpa2k=">Wiki<i class="fa fa-external-link-alt"></i></span>, 有使用上的问题或者 BUG 可以提个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcw==">Issue<i class="fa fa-external-link-alt"></i></span>.</p>
-<h2 id="Acknowledgements"><a href="#Acknowledgements" class="headerlink" title="Acknowledgements"></a>Acknowledgements</h2><ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXM=">spine-runtimes<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1NGTUwvU0ZNTC5OZXQ=">SFML.Net<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3Jvc2VuYmplcmcvRkZNcGVnQ29yZQ==">FFMpegCore<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0hhbmR5T3JnL0hhbmR5Q29udHJvbA==">HandyControl<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL05Mb2cvTkxvZw==">NLog<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21vbm8vU2tpYVNoYXJw">SkiaSharp<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3NwZWN0cmVjb25zb2xlL3NwZWN0cmUuY29uc29sZQ==">Spectre.Console<i class="fa fa-external-link-alt"></i></span></li>
-</ul>
-<hr>
-<p><em>如果你觉得这个项目不错请给个 :star:, 并分享给更多人知道! :)</em></p>
-<p><a href="https://starchart.cc/ww-rm/SpineViewer"><img data-src="https://starchart.cc/ww-rm/SpineViewer.svg?variant=adaptive" alt="Stargazers over time"></a></p>
-]]></content>
-      <categories>
-        <category>个人项目</category>
-      </categories>
-      <tags>
-        <tag>Spine</tag>
-        <tag>SpineViewer</tag>
-        <tag>Winforms</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
     <url>//posts/2023/11/04/ncmdump/</url>
     <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
@@ -562,6 +473,95 @@
         <tag>python 库</tag>
         <tag>PyPI</tag>
         <tag>网易云音乐</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SpineViewer 简单好用的 Spine 查看&amp;导出工具</title>
+    <url>//posts/2025/03/04/spineviewer/</url>
+    <content><![CDATA[<p><em>所见即所得</em> 的 Spine 文件查看&amp;导出程序.</p>
+<p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">https://github.com/ww-rm/SpineViewer<i class="fa fa-external-link-alt"></i></span></p>
+<p><img data-src="/static/image/spineviewer/preview.webp" alt="previewer"></p>
+<span id="more"></span>
+
+<p>Spine 文件查看&amp;导出程序, 同时也是支持 Spine 的动态壁纸程序.</p>
+<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
+<li>支持多版本 spine 文件 (<code>2.1.x; 3.4.x - 4.2.x</code>)</li>
+<li>支持列表式多骨骼查看和渲染层级管理</li>
+<li>支持多轨道动画</li>
+<li>支持皮肤/插槽/附件设置</li>
+<li>支持调试渲染</li>
+<li>支持画面/模型/轨道时间倍速设置</li>
+<li>支持设置轨道 Alpha 混合参数</li>
+<li>支持单帧/动图/视频文件导出</li>
+<li>支持 FFmpeg 自定义导出</li>
+<li>支持非 PNG 格式的纹理图片格式</li>
+<li>支持开机自启常驻动态壁纸</li>
+<li>......</li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3JlbGVhc2Vz">Release<i class="fa fa-external-link-alt"></i></span> 界面下载压缩包.</p>
+<p>软件需要安装依赖框架 <span class="exturl" data-url="aHR0cHM6Ly9kb3RuZXQubWljcm9zb2Z0LmNvbS96aC1jbi9kb3dubG9hZC9kb3RuZXQvOC4w">.NET 桌面运行时 8.0.x<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>也可以下载带有 <code>SelfContained</code> 后缀的压缩包, 可以独立运行.</p>
+<p>导出 GIF/MP4 等动图/视频格式需要在本地安装 ffmpeg 命令行, 并且添加至环境变量, <span class="exturl" data-url="aHR0cHM6Ly9mZm1wZWcub3JnL2Rvd25sb2FkLmh0bWwjYnVpbGQtd2luZG93cw==">点击前往 FFmpeg-Windows 下载页面<i class="fa fa-external-link-alt"></i></span>, 也可以点这个下载最新版本 <span class="exturl" data-url="aHR0cHM6Ly93d3cuZ3lhbi5kZXYvZmZtcGVnL2J1aWxkcy9mZm1wZWctcmVsZWFzZS1mdWxsLjd6">ffmpeg-release-full.7z<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="修改显示语言"><a href="#修改显示语言" class="headerlink" title="修改显示语言"></a>修改显示语言</h2><p>本项目目前支持以下界面显示语言:</p>
+<ul>
+<li><code>ZH</code> (中文)</li>
+<li><code>EN</code> (English)</li>
+<li><code>JA</code> (日本語)</li>
+</ul>
+<p>可以通过窗口菜单的 &quot;文件&quot; -&gt; &quot;首选项...&quot; -&gt; &quot;语言&quot;, 选择你需要的语言并确认修改.</p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h3><p>程序大致是左右布局, 左侧是功能面板, 右侧是画面.</p>
+<p>左侧有三个子面板, 分别是:</p>
+<ul>
+<li><strong>模型</strong>. 该面板记录导入并进行渲染的模型列表, 可以在这个面板设置与模型渲染相关的参数和渲染顺序, 以及一些与模型有关的功能.</li>
+<li><strong>浏览</strong>. 该面板用于预览指定文件夹的内容, 并没有真正导入文件到程序. 在该面板可以为模型生成 webp 格式的预览图, 或者导入选中的模型.</li>
+<li><strong>画面</strong>. 该面板用于设置右侧预览画面的参数.</li>
+</ul>
+<p>绝大部分按钮或者标签或者输入框都可以通过鼠标指针悬停来获取帮助文本.</p>
+<h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p>可以直接拖放/粘贴需要导入的骨骼文件/目录到模型面板.</p>
+<p>或者在浏览面板内右键菜单导入选中项.</p>
+<h3 id="内容调整"><a href="#内容调整" class="headerlink" title="内容调整"></a>内容调整</h3><p>模型面板支持右键菜单以及部分快捷键, 并且可以多选进行模型参数的批量调整.</p>
+<p>预览画面除了使用面板进行参数设置外, 支持部分鼠标动作:</p>
+<ul>
+<li>左键可以选择和拖拽模型, 按下 <code>Ctrl</code> 键可以实现多选, 与左侧列表选择是联动的.</li>
+<li>右键对整体画面进行拖动.</li>
+<li>滚轮进行画面缩放, 按住 <code>Ctrl</code> 可以对选中的模型进行批量缩放, <code>Shift</code> 可以切换缩放倍数.</li>
+<li>仅渲染选中模式, 在该模式下, 预览画面仅包含被选中的模型, 并且只能通过左侧列表改变选中状态.</li>
+</ul>
+<p>预览画面下方按钮支持对画面时间进行调整, 可以当作一个简易的播放器.</p>
+<h3 id="内容导出"><a href="#内容导出" class="headerlink" title="内容导出"></a>内容导出</h3><p>在模型列表里, 右键单击选中的模型, 弹出菜单里可以对选中项执行导出操作.</p>
+<p>导出有以下几个关键参数:</p>
+<ul>
+<li>输出文件夹. 这个参数某些时候可选, 当不提供时, 则将输出产物输出到每个模型各自的模型文件夹, 否则输出产物全部输出到提供的输出文件夹.</li>
+<li>导出单个. 默认是每个模型独立导出, 即对模型列表进行批量操作, 如果选择仅导出单个, 那么被导出的所有模型将在同一个画面上被渲染, 输出产物只有一份.</li>
+<li>自动分辨率. 该模式会忽略预览画面的分辨率和视区参数, 导出产物的分辨率与被导出内容的实际大小一致, 如果是动图或者视频则会与完整显示动画的必需大小一致.</li>
+</ul>
+<h3 id="动态壁纸"><a href="#动态壁纸" class="headerlink" title="动态壁纸"></a>动态壁纸</h3><p>动态壁纸通过桌面投影实现, 可以将当前预览画面上的内容实时投影至桌面.</p>
+<p>在程序首选项或者托盘图标右键菜单中可以进行桌面投影的启用与否, 模型和画面参数调整完成后, 可以将当前参数保存为工作区文件, 方便之后恢复该配置.</p>
+<p>如果希望开机自启常驻壁纸, 也可以在首选项中启用开机自启, 并且设置启动后需要加载的工作区文件.</p>
+<h3 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h3><p>项目附带一个纯命令行工具 <code>SpineViewerCLI</code>, 目前支持对单个模型执行一些简单操作, 例如参数值查询以及导出等, 并且 Release 界面提供 Windows 和 Linux 多平台二进制文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ SpineViewerCLI -h</span><br><span class="line">Description:</span><br><span class="line">  Root Command</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  SpineViewerCLI [<span class="built_in">command</span>] [options]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -q, --quiet     Suppress console logging (quiet mode).</span><br><span class="line">  -?, -h, --<span class="built_in">help</span>  Show <span class="built_in">help</span> and usage information</span><br><span class="line">  --version       Show version information</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  query &lt;skel&gt;    Query information of single model</span><br><span class="line">  preview &lt;skel&gt;  Preview a model</span><br><span class="line">  <span class="built_in">export</span> &lt;skel&gt;   Export single model</span><br></pre></td></tr></table></figure>
+
+<h3 id="更多"><a href="#更多" class="headerlink" title="更多"></a>更多</h3><p>更为详细的使用方法和说明见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3dpa2k=">Wiki<i class="fa fa-external-link-alt"></i></span>, 有使用上的问题或者 BUG 可以提个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcw==">Issue<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="Acknowledgements"><a href="#Acknowledgements" class="headerlink" title="Acknowledgements"></a>Acknowledgements</h2><ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXM=">spine-runtimes<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1NGTUwvU0ZNTC5OZXQ=">SFML.Net<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3Jvc2VuYmplcmcvRkZNcGVnQ29yZQ==">FFMpegCore<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0hhbmR5T3JnL0hhbmR5Q29udHJvbA==">HandyControl<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL05Mb2cvTkxvZw==">NLog<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21vbm8vU2tpYVNoYXJw">SkiaSharp<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3NwZWN0cmVjb25zb2xlL3NwZWN0cmUuY29uc29sZQ==">Spectre.Console<i class="fa fa-external-link-alt"></i></span></li>
+</ul>
+<hr>
+<p><em>如果你觉得这个项目不错请给个 :star:, 并分享给更多人知道! :)</em></p>
+<p><a href="https://starchart.cc/ww-rm/SpineViewer"><img data-src="https://starchart.cc/ww-rm/SpineViewer.svg?variant=adaptive" alt="Stargazers over time"></a></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>Spine</tag>
+        <tag>SpineViewer</tag>
+        <tag>Winforms</tag>
       </tags>
   </entry>
   <entry>
@@ -1863,6 +1863,375 @@
         <tag>汉化</tag>
         <tag>UABEA</tag>
         <tag>Unity</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C# 生成多图层 psd 文件</title>
+    <url>//posts/2026/01/28/csharp-psdwriter/</url>
+    <content><![CDATA[<p>为了解决自己项目里一个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcy8xNjU=">Issue (#165)<i class="fa fa-external-link-alt"></i></span>, 决定想办法在项目里实现 psd 文件的写入操作, 但是搜索了一圈没有发现比较合适的开源项目, 加上自己的需求比较简单, 就是把多张透明背景的图按顺序堆叠到一个 psd 文件里即可, 所以干脆自己研究了一下 psd 的文件格式, 造了个小轮子, 实现了最基本的多图层 psd 格式写入.</p>
+<span id="more"></span>
+
+<h2 id="基本格式分析"><a href="#基本格式分析" class="headerlink" title="基本格式分析"></a>基本格式分析</h2><p>根据官方的文档, 一个完整的 psd 文件分为 5 个部分, 分别是:</p>
+<ol>
+<li>File Header</li>
+<li>Color Mode Data</li>
+<li>Image Resources</li>
+<li>Layer And Mask Information</li>
+<li>Image Data</li>
+</ol>
+<p>其中 <code>File Header</code> 是固定大小 26 字节, 并且对于我的需求来说, 大部分取值也是固定的, 所以这部分比较简单.</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Signature</code></td>
+<td align="center">4 字节</td>
+<td align="center">psd 文件的文件头标识, 内容为 <code>b&quot;8BIM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>Version</code></td>
+<td align="center">2 字节</td>
+<td align="center">固定为 1</td>
+</tr>
+<tr>
+<td align="center"><code>Reserved</code></td>
+<td align="center">6 字节</td>
+<td align="center">全 0 字节</td>
+</tr>
+<tr>
+<td align="center"><code>Number of channels</code></td>
+<td align="center">2 字节</td>
+<td align="center">图像通道数, 可以从简固定成 4</td>
+</tr>
+<tr>
+<td align="center"><code>Height in pixels</code></td>
+<td align="center">4 字节</td>
+<td align="center">图像像素高度</td>
+</tr>
+<tr>
+<td align="center"><code>Width in pixels</code></td>
+<td align="center">4 字节</td>
+<td align="center">图像像素宽度</td>
+</tr>
+<tr>
+<td align="center"><code>Number of bits per channel</code></td>
+<td align="center">2 字节</td>
+<td align="center">位深, 可以从简固定成 8</td>
+</tr>
+<tr>
+<td align="center"><code>Color mode</code></td>
+<td align="center">2 字节</td>
+<td align="center">可以从简固定成 3, 也就是 RGB 模式</td>
+</tr>
+</tbody></table>
+<p>只有图像的宽高是需要根据实际进行调整的.</p>
+<p>另外在 psd 文件里, 都是按照<strong>大端字节序</strong>进行数据存储, 因此数值类型以及 Unicode 等的编码也都需要按大端序进行处理.</p>
+<p>剩下的 4 个部分基本都是由不定长字节数组组成, 大致格式都是 &quot;数据长度 + 数据内容&quot; 构成, 并且可能嵌套定义.</p>
+<p>但是如果只是需要写入简单的多图层 psd, <code>Color Mode Data</code> 和 <code>Image Resources</code> 部分是可以完全不需要的, 因此它俩的写入内容为空, 具体来说是各自写 4 个 0 字节 (表示该部分数据长度为 0).</p>
+<p>除此之外, <code>Image Data</code> 部分内容也可以不需要实际内容, 但是需要有数据占位, 因此可以写固定内容, 所以只需要着重研究一下第 4 部分 <code>Layer And Mask Information</code>.</p>
+<h3 id="Layer-And-Mask-Information"><a href="#Layer-And-Mask-Information" class="headerlink" title="Layer And Mask Information"></a>Layer And Mask Information</h3><p>该部分组成如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Length</code></td>
+<td align="center">4 字节</td>
+<td align="center">该部分的字节长度</td>
+</tr>
+<tr>
+<td align="center"><code>Layer info</code></td>
+<td align="center">不定长度</td>
+<td align="center">详细的层信息</td>
+</tr>
+<tr>
+<td align="center"><code>Global layer mask info</code></td>
+<td align="center">不定长度</td>
+<td align="center">全局蒙版信息, 可以从简不要, 写入 4 字节全 0 表示无内容即可</td>
+</tr>
+<tr>
+<td align="center"><code>Series of tagged blocks</code></td>
+<td align="center">不定长度</td>
+<td align="center">一些额外的标记信息, 可以从简不要, 无需写入任何内容</td>
+</tr>
+</tbody></table>
+<p>由上可知, 我们需要的信息都存放在 <code>Layer info</code> 中, 它的定义如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Length</code></td>
+<td align="center">4 字节</td>
+<td align="center">该部分的字节长度</td>
+</tr>
+<tr>
+<td align="center"><code>Layer count</code></td>
+<td align="center">2 字节</td>
+<td align="center">层的数量, 该值类型是有符号 16 位整数, 但是从简可以仅记录正数情况</td>
+</tr>
+<tr>
+<td align="center"><code>Information about each layer</code></td>
+<td align="center">不定长度</td>
+<td align="center">层信息, 按顺序记录每个层的基本信息, 从前往后对应堆叠顺序的从下往上</td>
+</tr>
+<tr>
+<td align="center"><code>Channel image data</code></td>
+<td align="center">不定长度</td>
+<td align="center">每个层的通道像素数据, 与层信息顺序保持一致</td>
+</tr>
+</tbody></table>
+<p>下面依次看看层信息和层通道数据部分的内容.</p>
+<h4 id="Layer-records"><a href="#Layer-records" class="headerlink" title="Layer records"></a>Layer records</h4><p>层信息里面, 每个层都有自己的 <code>Layer records</code>, 多个层则直接按顺序连续写入各自的 <code>Layer records</code> 即可, 其基本定义如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Retangle of contents</code></td>
+<td align="center">4 * 4 字节</td>
+<td align="center">4 个有符号 32 位整数, 按顺序依次是 Top, Left, Bottom, Right. 从简可以将 Top 和 Left 固定成 0, Right 和 Bottom 分别取图像的宽和高. 其中 Top 和 Left 含端点, Right 和 Bottom 不含端点.</td>
+</tr>
+<tr>
+<td align="center"><code>Number of channels</code></td>
+<td align="center">2 字节</td>
+<td align="center">从简可以固定成 4</td>
+</tr>
+<tr>
+<td align="center"><code>Channel information</code></td>
+<td align="center">6 * <code>Number of channels</code> 字节</td>
+<td align="center">通道的信息, 每个通道都有 2 + 4 个字节. 前 2 字节为有符号 16 位整数, 记录通道类型, 例如 0, 1, 2 分别表示 R, G, B 通道, -1 表示 A; 后 4 字节表示该通道像素数据的长度</td>
+</tr>
+<tr>
+<td align="center"><code>Blend mode signature</code></td>
+<td align="center">4 字节</td>
+<td align="center">混合模式标记, 固定为 <code>b&quot;8BIM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>Blend mode key</code></td>
+<td align="center">4 字节</td>
+<td align="center">混合模式, 常见的有 <code>norm</code>, <code>pass</code> 等, 从简可以固定为 <code>norm</code></td>
+</tr>
+<tr>
+<td align="center"><code>Opacity</code></td>
+<td align="center">1 字节</td>
+<td align="center">不透明度, 从简可以固定为 255</td>
+</tr>
+<tr>
+<td align="center"><code>Clipping</code></td>
+<td align="center">1 字节</td>
+<td align="center">从简可以固定为 0</td>
+</tr>
+<tr>
+<td align="center"><code>Flags</code></td>
+<td align="center">1 字节</td>
+<td align="center">从简可以固定为 8 (根据新建的简单 psd 文件观察可得)</td>
+</tr>
+<tr>
+<td align="center"><code>Filler</code></td>
+<td align="center">1 字节</td>
+<td align="center">0 填充字节</td>
+</tr>
+<tr>
+<td align="center"><code>Length of the extra data</code></td>
+<td align="center">4 字节</td>
+<td align="center">额外数据的长度, 指的是 <code>Layer records</code> 下这个字段结束往后的所有数据长度</td>
+</tr>
+<tr>
+<td align="center"><code>Layer mask data</code></td>
+<td align="center">不定长度</td>
+<td align="center">可以从简不要, 写入 4 字节全 0 表示无数据</td>
+</tr>
+<tr>
+<td align="center"><code>Layer blending ranges</code></td>
+<td align="center">4 + (2 + 2 * <code>Number of channels</code>) * 4 字节</td>
+<td align="center">可以从简为固定模式数据</td>
+</tr>
+<tr>
+<td align="center"><code>Layer name</code></td>
+<td align="center">4n 字节</td>
+<td align="center">层的名字, 用 0 填充至 4 字节倍数 (实际观察似乎可能是历史遗留字段)</td>
+</tr>
+<tr>
+<td align="center"><code>Additional layer information</code></td>
+<td align="center">4n 字节</td>
+<td align="center">额外的层信息</td>
+</tr>
+</tbody></table>
+<p>对于 <code>Layer blending ranges</code>, 它的定义如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">4 字节</td>
+<td align="center">Length of layer blending ranges data</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Composite gray blend source range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Composite gray blend destination range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">First channel source range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">First channel destination range</td>
+</tr>
+<tr>
+<td align="center">...</td>
+<td align="center">...</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Nth channel source range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Nth channel destination range</td>
+</tr>
+</tbody></table>
+<p>其中每个 range 都由 2 个黑色阈值和白色阈值组成, 而根据对简单的 psd 文件分析后, 可以固定每个 range 都为 <code>0x0000FFFF</code>, 加上通道数可以从简固定为 4, 所以 <code>Layer blending ranges</code> 的内容可以是 44 字节固定值.</p>
+<p>对于 <code>Layer name</code>, 它有以下几部分:</p>
+<p><code>1 字节长度 || 字符串字节数组 || 0 填充</code></p>
+<p>整体需填充至 4 字节倍数, 并且分析实际文件得到长度最大值为 0x1F (31 字节), 也就是整个 <code>Layer name</code> 最长为 32 字节. 字符串所使用的编码似乎是本机活动代码页, 但实际观察下来似乎这个字段并没有被使用, 可以自行处理满足格式和长度要求即可.</p>
+<p>最后是 <code>Additional layer information</code>, 该部分的格式大多如下:</p>
+<p><code>8BIM || 4 字节标签 || 4 字节数据长度 || 字节数据</code></p>
+<p>虽然文档上说数据需要 0 填充至偶数长度, 但是实际观察其实大部分都是需要填充至 4 字节倍数.</p>
+<p>这里比较有用的两个标签是 <code>luni</code> 和 <code>lsct</code>, 分别用来记录层名称和定义分隔层.</p>
+<details class="note info"><summary><p><code>luni</code> 标签数据格式</p>
+</summary>
+<p><code>luni</code> 用来记录图层名称, 也就是 Photoshop 在图层面板上显示的可修改名称, 据实际测试在软件中该名称字符串不能超过 255 字符.<br>该标签的数据内容为使用大端模式 Unicode 编码的层名称, 整体结构为 <code>4 字节长度 || 编码后的字符数组 || 0 填充</code>.<br>每个字符会被编码为 2 字节, 并且使用 0 字节填充成 4 字节倍数, 已经是 4 字节整数时可以没有填充.</p>
+
+</details>
+
+<details class="note info"><summary><p><code>lsct</code> 标签数据格式</p>
+</summary>
+<p><code>lsct</code> 用来标记该层是特殊的分隔层, 不包含实际像素内容, 可以用来建立图层分组.<br>简单情况下的数据格式为 <code>4 字节类型取值</code>, 该情况数据长度固定为 4, 有以下类型取值:</p>
+<ul>
+<li><code>0</code>: 其他类型</li>
+<li><code>1</code>: 打开状态的组</li>
+<li><code>2</code>: 关闭状态的组</li>
+<li><code>3</code>: 组分隔符, UI 上不显示</li>
+</ul>
+<p>如果需要实现图层分组, 则需要用到后 3 种类型, 并且该图层 <code>Retangle of contents</code> 字段取值全 0, <code>Channel image data</code> 也是直接记录空数据.<br>根据实际的 psd 文件分析, 可以得到分隔层按线性方式来嵌套记录分组信息, 例如有以下图层和分组 (从上往下):</p>
+<figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line"><span class="bullet">-</span> 层 1</span><br><span class="line"><span class="bullet">-</span> 组 2</span><br><span class="line"><span class="bullet">  -</span> 层 2.1</span><br><span class="line"><span class="bullet">  -</span> 组 2.2</span><br><span class="line"><span class="bullet">    -</span> 层 2.2.1</span><br><span class="line"><span class="bullet">  -</span> 层 2.3</span><br><span class="line"><span class="bullet">-</span> 层 3</span><br></pre></td></tr></table></figure>
+
+<p>则对应文件里的层顺序为:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">- 层 1</span><br><span class="line">- 组 2 (lsct=2)</span><br><span class="line">- 层 2.1</span><br><span class="line">- 组 2.2  (lsct=2)</span><br><span class="line">- 层 2.2.1</span><br><span class="line">- 分隔符 2.2 (lsct=3)</span><br><span class="line">- 层 2.3</span><br><span class="line">- 分隔符 2 (lsct=3)</span><br><span class="line">- 层 3</span><br></pre></td></tr></table></figure>
+
+<p>也就是每个组都由一个组层 (lsct=2) 和一个组分隔符层 (lsct=3) 配合而成 (类似一个左括号和右括号), 并且分隔层处于组层的下面, 标识该组的结束位置. (在文件二进制数据的顺序里分隔层处于组层的前面, 因为堆叠顺序和文件内的排列顺序是反过来的, 即从前往后的层顺序对应从下往上的堆叠顺序)</p>
+
+</details>
+
+<h4 id="Channel-image-data"><a href="#Channel-image-data" class="headerlink" title="Channel image data"></a>Channel image data</h4><p>这部分由多个连续的通道像素数据构成, 每个通道按以下格式组成:</p>
+<p><code>2 字节压缩模式 || 通道数据</code></p>
+<p>其中压缩模式有以下取值:</p>
+<ul>
+<li>0: 原始数据</li>
+<li>1: RLE 编码</li>
+<li>2: 无预测的 ZIP 编码</li>
+<li>3: 有预测的 ZIP 编码</li>
+</ul>
+<p>常用的也就 0 和 1 两种编码方式, 实现起来也比较简单.</p>
+<p>如果是 0, 则通道数据的大小为 <code>(Bottom - Top) * (Right - Left)</code> (也就是 <code>Layer records</code> 里的 <code>Retangle of contents</code> 字段代表的大小), 然后先行后列的顺序记录.</p>
+<p>对于分组层, 或者空数据层, 则每个通道数据可以直接表示为 2 个 0 字节, 即原始数据模式且无数据.</p>
+<p>如果是 1, 则将通道数据按行进行 RLE 编码, 也就是以下格式:</p>
+<table>
+<thead>
+<tr>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">2 字节</td>
+<td align="center">压缩模式</td>
+</tr>
+<tr>
+<td align="center">2 * (Bottom - Top) 字节</td>
+<td align="center">每一行 RLE 编码数据字节长度</td>
+</tr>
+<tr>
+<td align="center">不定长度 * (Bottom - Top) 字节</td>
+<td align="center">每一行 RLE 编码数据</td>
+</tr>
+</tbody></table>
+<details class="note info"><summary><p>RLE 编码</p>
+</summary>
+<p>PSD 使用的 RLE 编码也称 PackBits 算法 (TIFF standard 内使用的算法), 一段编码最多对不超过 128 字节数据进行编码, 超出部分则需要重新开始一段新的编码, 一段编码由两部分构成:</p>
+<p><code>1 字节长度标识 || 数据</code></p>
+<table>
+<thead>
+<tr>
+<th align="center">长度标识 <code>n</code> 取值范围</th>
+<th align="center">数据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>[0, 127]</code></td>
+<td align="center"><code>n + 1</code> 个原始字节数据</td>
+</tr>
+<tr>
+<td align="center"><code>[-127, -1]</code></td>
+<td align="center"><code>1</code> 字节, 但是重复 <code>-n + 1</code> 次</td>
+</tr>
+<tr>
+<td align="center"><code>-128</code></td>
+<td align="center">无, 忽略并跳过</td>
+</tr>
+</tbody></table>
+<p>以下解码伪代码摘自原文:</p>
+<blockquote>
+<p>Loop until you get the number of unpacked bytes you are expecting:<br>Read the next source byte into n.<br>If n is between 0 and 127 inclusive, copy the next n+1 bytes literally.<br>Else if n is between -127 and -1 inclusive, copy the next byte -n+1 times.<br>Else if n is -128, noop.<br>Endloop</p>
+</blockquote>
+
+</details>
+
+<p>最后将每个通道的像素数据编码后的数据按照 <code>Layer records</code> 的 <code>Channel information</code> 一致的层通道顺序进行写入, 如果有多个层则也按多个层的顺序写即可.</p>
+<h3 id="Image-Data"><a href="#Image-Data" class="headerlink" title="Image Data"></a>Image Data</h3><p>PSD 文件的最后一部分是 <code>Image Data</code>, 似乎是用来存储图像数据 (合并后), 据实测如果层数据没问题则该部分内容可以任意设置, 但是不能留空, 需要满足格式要求.</p>
+<p>该部分数据格式与 <code>Channel image data</code> 类似, 也是需要对通道数据进行编码存放, 起始的 2 字节代表压缩模式, 取值也与之前的相同, 对数据的压缩方式也相同. 如果图像的通道数是 4, 则在此部分需要连续写入 4 个编码后的通道数据.</p>
+<p>从简可以直接设置通道数据全 0, 并且使用 RLE 编码, 则直接根据图像的宽度对一行全 0 字节进行 RLE 编码后, 将编码结果重复写入多次即可.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>具体代码见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">SpineViewer<i class="fa fa-external-link-alt"></i></span> 仓库的子项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3RyZWUvbWFpbi9Qc2RXcml0ZXI=">PsdWriter<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>核心类和方法可以见 <code>PsdWriter.Sections.Layers.Layer</code> 及 <code>PsdWriter.Sections.Layers.RgbaLayer.SetRgbaImageData</code>.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuYWRvYmUuY29tL2Rldm5ldC1hcHBzL3Bob3Rvc2hvcC9maWxlZm9ybWF0YXNodG1sLw==">Adobe Photoshop File Formats Specification<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vcWlhbndlbjM2L3AvMzk2NTExNi5odG1s">TIFF6 Packbit algorithm<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuaXNvLm9yZy9zdGFuZGFyZC8zNDM0Mi5odG1s">ISO 12639:2004@Section 9: PackBits Compression<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>C#</tag>
+        <tag>psd</tag>
+        <tag>CSharp</tag>
       </tags>
   </entry>
   <entry>
@@ -3353,115 +3722,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Simpleperf 三部曲 (三)</title>
-    <url>//posts/2024/07/07/simpleperf3/</url>
-    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
-<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
-
-<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
-
-<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
-
-<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
-<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
-<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
-
-<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
-<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
-<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
-
-<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
-
-<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
-<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
-<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
-<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
-<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
-<ul>
-<li>显示该函数调用的函数的火焰图.</li>
-<li>显示调用该函数的函数的火焰图.</li>
-<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
-<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
-</ul>
-<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
-
-<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
-<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
-
-<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
-<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
-<ul>
-<li>每线程轨迹</li>
-<li>火焰图</li>
-<li>搜索, 聚焦于特定的堆栈</li>
-<li>时间序列视图, 以时间戳顺序查看样本</li>
-<li>按线程和持续时间过滤</li>
-</ul>
-<p>使用方法:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
-
-<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
-<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
-<p>这种格式可以导入到:</p>
-<ul>
-<li>FlameGraph</li>
-<li>Flamescope</li>
-<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
-<li>Speedscope</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
-
-<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
-<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
-
-<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
-<p>折叠堆栈格式可被以下工具读取:</p>
-<ul>
-<li>The FlameGraph toolkit</li>
-<li>Inferno (FlameGraph 的 Rust 移植版)</li>
-<li>Speedscope</li>
-</ul>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
-
-<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
-<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
-<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
-<p>示例:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
-
-<p>结果如下所示:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
-
-<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
-<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>Simpleperf</tag>
-        <tag>Android</tag>
-        <tag>安卓性能分析</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Simpleperf 三部曲 (二)</title>
     <url>//posts/2024/07/07/simpleperf2/</url>
     <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
@@ -3598,6 +3858,115 @@
 <h3 id="报告调用图"><a href="#报告调用图" class="headerlink" title="报告调用图"></a>报告调用图</h3><p>要报告调用图, 请确保分析数据是带有调用图记录的, 如 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjcmVjb3JkLWNhbGwtZ3JhcGhz">Record call graphs<i class="fa fa-external-link-alt"></i></span> 所示.</p>
 <hr>
 <p>更多详细内容见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvZXhlY3V0YWJsZV9jb21tYW5kc19yZWZlcmVuY2UubWQjdGhlLXJlY29yZC1jb21tYW5k">The record command<i class="fa fa-external-link-alt"></i></span>.</p>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>Simpleperf</tag>
+        <tag>Android</tag>
+        <tag>安卓性能分析</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Simpleperf 三部曲 (三)</title>
+    <url>//posts/2024/07/07/simpleperf3/</url>
+    <content><![CDATA[<p>本文是对性能分析工具 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2MvUkVBRE1FLm1k">Simpleperf<i class="fa fa-external-link-alt"></i></span> 使用文档总结, 也可以看作是文档翻译.</p>
+<p>本篇原文见 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL21haW4vc2ltcGxlcGVyZi9kb2Mvc2NyaXB0c19yZWZlcmVuY2UubWQ=">Scripts reference<i class="fa fa-external-link-alt"></i></span>.</p>
+<span id="more"></span>
+
+<h2 id="记录分析数据"><a href="#记录分析数据" class="headerlink" title="记录分析数据"></a>记录分析数据</h2><h3 id="app-profiler-py"><a href="#app-profiler-py" class="headerlink" title="app_profiler.py"></a>app_profiler.py</h3><p><code>app_profiler.py</code> 用于记录 Android 应用程序和本地可执行文件的分析数据.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录一个 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录包含编译成本地指令的 Java 代码的 Android 应用程序. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp --compile_java_code</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序的 Activity 启动. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -a .SleepActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py -np surfaceflinger</span><br><span class="line"></span><br><span class="line"><span class="comment"># 根据 pid 记录一个本地进程. </span></span><br><span class="line">$ ./app_profiler.py --pid 11324</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个命令. </span></span><br><span class="line">$ ./app_profiler.py -cmd \</span><br><span class="line">    <span class="string">&quot;dex2oat --dex-file=/data/local/tmp/app-debug.apk --oat-file=/data/local/tmp/a.oat&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个 Android 应用程序, 并使用 -r 向 record 命令发送自定义选项. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e cpu-clock -g --duration 30&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录 CPU 时间和非 CPU 时间. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp \</span><br><span class="line">    -r <span class="string">&quot;-e task-clock -g -f 1000 --duration 10 --trace-offcpu&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 将分析数据保存到自定义文件 (如 perf_custom.data) 而不是 perf.data. </span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp -o perf_custom.data</span><br></pre></td></tr></table></figure>
+
+<h3 id="从应用程序启动时进行分析"><a href="#从应用程序启动时进行分析" class="headerlink" title="从应用程序启动时进行分析"></a>从应用程序启动时进行分析</h3><p>有时我们想分析应用程序的启动时间. 为支持这一点, 我们在 record 命令中添加了 --app 选项. --app 选项设置要分析的 Android 应用程序的包名. 如果应用程序尚未运行, record 命令将以 1 毫秒的间隔轮询应用程序进程. 因此, 要从应用程序启动时开始分析, 我们可以先使用 --app 启动 record 命令, 然后再启动应用程序. 下面是一个示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./run_simpleperf_on_device.py record --app simpleperf.example.cpp \</span><br><span class="line">    -g --duration 1 -o /data/local/tmp/perf.data</span><br><span class="line"><span class="comment"># Start the app manually or using the `am` command.</span></span><br></pre></td></tr></table></figure>
+
+<p>为了方便使用, app_profiler.py 支持使用 <code>-a</code> 选项在记录开始后启动一个 Activity.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp -a .MainActivity</span><br></pre></td></tr></table></figure>
+
+<h3 id="binary-cache-builder-py"><a href="#binary-cache-builder-py" class="headerlink" title="binary_cache_builder.py"></a>binary_cache_builder.py</h3><p><code>binary_cache</code> 目录是一个保存分析数据文件所需二进制文件的目录. 这些二进制文件应为未剥离版本, 包含调试信息和符号表. report 脚本使用 <code>binary_cache</code> 目录读取二进制文件的符号, <code>report_html.py</code> 也使用该目录生成带注释的源代码和反汇编代码.</p>
+<p>默认情况下, <code>app_profiler.py</code> 在记录后构建 <code>binary_cache</code> 目录. 但我们也可以使用 <code>binary_cache_builder.py</code> 为现有的分析数据文件构建 <code>binary_cache</code>. 这在您直接使用 <code>simpleperf record</code> 进行系统范围的分析或在未连接 USB 线缆的情况下记录数据时非常有用.</p>
+<p><code>binary_cache_builder.py</code> 可以从 Android 设备中拉取二进制文件, 或在主机上的目录中查找二进制文件 (通过 -lib 选项) .</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># Generate binary_cache for perf.data, by pulling binaries from the device.</span></span><br><span class="line">$ ./binary_cache_builder.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># Generate binary_cache, by pulling binaries from the device and finding binaries in</span></span><br><span class="line"><span class="comment"># SimpleperfExampleCpp.</span></span><br><span class="line">$ ./binary_cache_builder.py -lib path_of_SimpleperfExampleCpp</span><br></pre></td></tr></table></figure>
+
+<h3 id="run-simpleperf-on-device-py"><a href="#run-simpleperf-on-device-py" class="headerlink" title="run_simpleperf_on_device.py"></a>run_simpleperf_on_device.py</h3><p>这个脚本将 simpleperf 可执行文件推送到设备上, 并在设备上运行 simpleperf 命令. 它比手动运行 adb 命令更方便.</p>
+<h2 id="查看分析数据"><a href="#查看分析数据" class="headerlink" title="查看分析数据"></a>查看分析数据</h2><p>本节中的脚本用于查看分析结果或将分析数据转换为外部 UI 使用的格式. 有关推荐的 UI, 请参见 view_the_profile.md.</p>
+<h3 id="report-py"><a href="#report-py" class="headerlink" title="report.py"></a>report.py</h3><p><code>report.py</code> 是主机上 report 命令的包装器. 它接受 report 命令的所有选项.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 报告调用图</span></span><br><span class="line">$ ./report.py -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在由 Python Tk 实现的 GUI 窗口中报告调用图</span></span><br><span class="line">$ ./report.py -g --gui</span><br></pre></td></tr></table></figure>
+
+<h3 id="report-html-py"><a href="#report-html-py" class="headerlink" title="report_html.py"></a>report_html.py</h3><p><code>report_html.py</code> 根据分析数据生成 <code>report.html</code>. 然后 <code>report.html</code> 可以在不依赖其他文件的情况下显示分析结果. 因此, 它可以在本地浏览器中显示或传输到其他机器上. 根据使用的命令行选项, <code>report.html</code> 的内容可以包括: 图表统计, 样本表, 火焰图, 每个函数的注释源代码, 每个函数的注释反汇编.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成图表统计, 样本表和火焰图. </span></span><br><span class="line">$ ./report_html.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为所有二进制文件添加反汇编可能会花费很多时间. 因此, 我们可以选择仅为选定的二进制文件添加反汇编. </span></span><br><span class="line">$ ./report_html.py --add_disassembly --binary_filter libgame.so</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为属于包名为 com.example.myapp 的应用程序的二进制文件添加反汇编和源代码. </span></span><br><span class="line">$ ./report_html.py --add_source_code --add_disassembly --binary_filter com.example.myapp</span><br><span class="line"></span><br><span class="line"><span class="comment"># report_html.py 接受多个记录数据文件. </span></span><br><span class="line">$ ./report_html.py -i perf1.data perf2.data</span><br></pre></td></tr></table></figure>
+
+<p>下面是为 SimpleperfExampleCpp 生成 html 分析结果的示例.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line">./report_html.py --add_source_code --source_dirs path_of_SimpleperfExampleCpp --add_disassembly</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中打开生成的 report.html 后, 有几个标签页:</p>
+<p>第一个标签页是 &quot;Chart Statistics&quot;. 您可以点击饼图以显示每个进程, 线程, 库和函数所消耗的时间.</p>
+<p>第二个标签页是 &quot;Sample Table&quot;. 它显示每个函数所花费的时间. 通过点击表格中的一行, 我们可以跳转到一个名为&quot;Function&quot;的新标签页.</p>
+<p>第三个标签页是 &quot;Flamegraph&quot;. 它显示了由 inferno 生成的图表.</p>
+<p>第四个标签页是 &quot;Function&quot;. 只有当用户点击 &quot;Sample Table&quot; 标签页中的一行时才会出现. 它显示一个函数的信息, 包括:</p>
+<ul>
+<li>显示该函数调用的函数的火焰图.</li>
+<li>显示调用该函数的函数的火焰图.</li>
+<li>该函数的注释源代码. 只有在该函数有源代码文件时才会出现.</li>
+<li>该函数的注释反汇编. 只有在包含该函数的二进制文件存在时才会出现.</li>
+</ul>
+<h3 id="inferno"><a href="#inferno" class="headerlink" title="inferno"></a>inferno</h3><p>inferno 是一个用于在 HTML 文件中生成火焰图的工具.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 基于 perf.data 生成火焰图. </span></span><br><span class="line"><span class="comment"># 在 Windows 上, 使用 inferno.bat 代替 ./inferno.sh. </span></span><br><span class="line">$ ./inferno.sh -sc --record_file perf.data</span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一个本地程序并生成火焰图. </span></span><br><span class="line">$ ./inferno.sh -np surfaceflinger</span><br></pre></td></tr></table></figure>
+
+<h3 id="purgatorio"><a href="#purgatorio" class="headerlink" title="purgatorio"></a>purgatorio</h3><p>purgatorio 是一个可视化工具, 用于按时间顺序显示样本.</p>
+<h3 id="pprof-proto-generator-py"><a href="#pprof-proto-generator-py" class="headerlink" title="pprof_proto_generator.py"></a>pprof_proto_generator.py</h3><p>它将分析数据文件转换为 pprof.proto 格式, 该格式由 pprof 使用.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 pprof.proto 格式. </span></span><br><span class="line">$ ./pprof_proto_generator.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 PDF 格式显示报告. </span></span><br><span class="line">$ pprof -pdf pprof.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 以 HTML 格式显示报告. 要显示反汇编, 添加 --tools 选项, 如: </span></span><br><span class="line"><span class="comment"># --tools=objdump:&lt;ndk_path&gt;/toolchains/llvm/prebuilt/linux-x86_64/aarch64-linux-android/bin</span></span><br><span class="line"><span class="comment"># 要显示注释源代码或反汇编, 在视图菜单中选择 `top`, 点击一个函数并选择 `source` 或 `disassemble`. </span></span><br><span class="line">$ pprof -http=:8080 pprof.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="gecko-profile-generator-py"><a href="#gecko-profile-generator-py" class="headerlink" title="gecko_profile_generator.py"></a>gecko_profile_generator.py</h3><p>将 perf.data 转换为 Gecko Profile 格式, 该格式可被 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 读取.</p>
+<p>Firefox Profiler 是一个功能强大的通用分析器 UI, 可以在任何浏览器 (不仅仅是 Firefox) 本地运行, 具有:</p>
+<ul>
+<li>每线程轨迹</li>
+<li>火焰图</li>
+<li>搜索, 聚焦于特定的堆栈</li>
+<li>时间序列视图, 以时间戳顺序查看样本</li>
+<li>按线程和持续时间过滤</li>
+</ul>
+<p>使用方法:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 记录应用程序的分析数据</span></span><br><span class="line">$ ./app_profiler.py -p simpleperf.example.cpp</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换并压缩. </span></span><br><span class="line">$ ./gecko_profile_generator.py -i perf.data | gzip &gt; gecko-profile.json.gz</span><br></pre></td></tr></table></figure>
+
+<p>然后在 <span class="exturl" data-url="aHR0cHM6Ly9wcm9maWxlci5maXJlZm94LmNvbS8=">https://profiler.firefox.com/<i class="fa fa-external-link-alt"></i></span> 中打开 gecko-profile.json.gz.</p>
+<h3 id="report-sample-py"><a href="#report-sample-py" class="headerlink" title="report_sample.py"></a>report_sample.py</h3><p>report_sample.py 将分析数据文件转换为 linux-perf-tool 输出的 perf 脚本文本格式.</p>
+<p>这种格式可以导入到:</p>
+<ul>
+<li>FlameGraph</li>
+<li>Flamescope</li>
+<li>Firefox Profiler, 但更推荐使用 gecko_profile_generator.py.</li>
+<li>Speedscope</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将当前目录中的 perf.data 转换为 FlameGraph 使用的格式. </span></span><br><span class="line">$ ./report_sample.py --symfs binary_cache &gt;out.perf</span><br><span class="line"></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ FlameGraph/stackcollapse-perf.pl out.perf &gt;out.folded</span><br><span class="line">$ FlameGraph/flamegraph.pl out.folded &gt;a.svg</span><br></pre></td></tr></table></figure>
+
+<h3 id="stackcollapse-py"><a href="#stackcollapse-py" class="headerlink" title="stackcollapse.py"></a>stackcollapse.py</h3><p>stackcollapse.py 将分析数据文件 (perf.data) 转换为 Brendan Gregg 的  &quot;折叠堆栈&quot;  格式.</p>
+<p>折叠堆栈是以分号分隔的堆栈帧 (从根到叶) , 后跟在该堆栈中采样的事件计数的行, 例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">BusyThread;__start_thread;__pthread_start(void*);java.lang.Thread.run 17889729</span><br></pre></td></tr></table></figure>
+
+<p>所有相似的堆栈都被聚合, 样本时间戳不被使用.</p>
+<p>折叠堆栈格式可被以下工具读取:</p>
+<ul>
+<li>The FlameGraph toolkit</li>
+<li>Inferno (FlameGraph 的 Rust 移植版)</li>
+<li>Speedscope</li>
+</ul>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 将分析数据记录到 perf.data</span></span><br><span class="line">$ ./app_profiler.py &lt;args&gt;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为折叠堆栈格式</span></span><br><span class="line">$ ./stackcollapse.py --kernel --jit | gzip &gt; profile.folded.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 FlameGraph 可视化 Java 堆栈和纳秒时间</span></span><br><span class="line">$ git <span class="built_in">clone</span> https://github.com/brendangregg/FlameGraph.git</span><br><span class="line">$ gunzip -c profile.folded.gz \</span><br><span class="line">    | FlameGraph/flamegraph.pl --color=java --countname=ns \</span><br><span class="line">    &gt; profile.svg</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些工具库"><a href="#一些工具库" class="headerlink" title="一些工具库"></a>一些工具库</h2><h3 id="simpleperf-report-lib-py"><a href="#simpleperf-report-lib-py" class="headerlink" title="simpleperf_report_lib.py"></a>simpleperf_report_lib.py</h3><p>simpleperf_report_lib.py 是一个用于解析由 record 命令生成的分析数据文件的 Python 库. 内部它使用 libsimpleperf_report.so 来完成工作. 通常, 对于每个分析数据文件, 我们创建一个 ReportLib 实例, 传递文件路径 (通过 SetRecordFile) . 然后我们可以通过 GetNextSample() 读取所有样本. 对于每个样本, 我们可以读取其事件信息 (通过 GetEventOfCurrentSample) , 符号信息 (通过 GetSymbolOfCurrentSample) 和调用链信息 (通过 GetCallChainOfCurrentSample) . 我们还可以获取一些全局信息, 如记录选项 (通过 GetRecordCmd) , 设备架构 (通过 GetArch) 和元信息字符串 (通过 MetaInfo) .</p>
+<p>使用 simpleperf_report_lib.py 的示例可以在 report_sample.py, report_html.py, pprof_proto_generator.py 和 inferno/inferno.py 中找到.</p>
+<h3 id="ipc-py"><a href="#ipc-py" class="headerlink" title="ipc.py"></a>ipc.py</h3><p>ipc.py 捕获系统在指定持续时间内的每周期指令数 (IPC) .</p>
+<p>示例:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./ipc.py</span><br><span class="line">./ipc.py 2 20          <span class="comment"># 设置间隔为2秒, 总持续时间为20秒</span></span><br><span class="line">./ipc.py -p 284 -C 4   <span class="comment"># 仅在核4上分析PID 284</span></span><br><span class="line">./ipc.py -c <span class="string">&#x27;sleep 5&#x27;</span>  <span class="comment"># 仅分析运行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p>结果如下所示:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">K_CYCLES   K_INSTR      IPC</span><br><span class="line">36840      14138       0.38</span><br><span class="line">70701      27743       0.39</span><br><span class="line">104562     41350       0.40</span><br><span class="line">138264     54916       0.40</span><br></pre></td></tr></table></figure>
+
+<h3 id="sample-filter-py"><a href="#sample-filter-py" class="headerlink" title="sample_filter.py"></a>sample_filter.py</h3><p>sample_filter.py 根据 <span class="exturl" data-url="aHR0cHM6Ly9hbmRyb2lkLmdvb2dsZXNvdXJjZS5jb20vcGxhdGZvcm0vc3lzdGVtL2V4dHJhcy8rL3JlZnMvaGVhZHMvbWFpbi9zaW1wbGVwZXJmL2RvYy9zYW1wbGVfZmlsdGVyLm1k">sample_filter.md<i class="fa fa-external-link-alt"></i></span> 中的文档生成样本过滤器文件. 运行报告脚本时, 可以通过 <code>--filter-file</code> 选项传递过滤器文件.</p>
+<p>例如, 它可以用于将一个大型记录文件拆分为多个报告文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sample_filter.py -i perf.data --split-time-range 2 -o sample_filter</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part1 \</span><br><span class="line">    | gzip &gt;profile-part1.json.gz</span><br><span class="line">$ gecko_profile_generator.py -i perf.data --filter-file sample_filter_part2 \</span><br><span class="line">    | gzip &gt;profile-part2.json.gz</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>阅读笔记</category>

@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.4.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"ww-rm.top","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.12.3","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"flat"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="为了解决自己项目里一个 Issue (#165), 决定想办法在项目里实现 psd 文件的写入操作, 但是搜索了一圈没有发现比较合适的开源项目, 加上自己的需求比较简单, 就是把多张透明背景的图按顺序堆叠到一个 psd 文件里即可, 所以干脆自己研究了一下 psd 的文件格式, 造了个小轮子, 实现了最基本的多图层 psd 格式写入.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C# 生成多图层 psd 文件">
+<meta property="og:url" content="https://ww-rm.top/posts/2026/01/28/csharp-psdwriter/">
+<meta property="og:site_name" content="暗香画楼">
+<meta property="og:description" content="为了解决自己项目里一个 Issue (#165), 决定想办法在项目里实现 psd 文件的写入操作, 但是搜索了一圈没有发现比较合适的开源项目, 加上自己的需求比较简单, 就是把多张透明背景的图按顺序堆叠到一个 psd 文件里即可, 所以干脆自己研究了一下 psd 的文件格式, 造了个小轮子, 实现了最基本的多图层 psd 格式写入.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-01-28T15:17:05.000Z">
+<meta property="article:modified_time" content="2026-01-27T16:39:30.102Z">
+<meta property="article:author" content="ww-rm">
+<meta property="article:tag" content="C#">
+<meta property="article:tag" content="psd">
+<meta property="article:tag" content="CSharp">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://ww-rm.top/posts/2026/01/28/csharp-psdwriter/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://ww-rm.top/posts/2026/01/28/csharp-psdwriter/","path":"/posts/2026/01/28/csharp-psdwriter/","title":"C# 生成多图层 psd 文件"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>C# 生成多图层 psd 文件 | 暗香画楼</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+  <div class="background-image" style="background-image: url(/images/background/dark.webp); "></div>
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">暗香画楼</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">ww-rm 的藏身之处</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-azur-lane"><a href="/azurlane/" rel="section"><i class="fa fa-b fa-fw"></i>Azur Lane</a></li><li class="menu-item menu-item-pixiv-daily"><a href="/pixivdaily/" rel="section"><i class="fa fa-p fa-fw"></i>Pixiv Daily</a></li><li class="menu-item menu-item-pixiv-puzzle"><a href="/pixivpuzzle/" rel="section"><i class="fa fa-puzzle-piece fa-fw"></i>Pixiv Puzzle</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%A0%BC%E5%BC%8F%E5%88%86%E6%9E%90"><span class="nav-number">1.</span> <span class="nav-text">基本格式分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Layer-And-Mask-Information"><span class="nav-number">1.1.</span> <span class="nav-text">Layer And Mask Information</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Layer-records"><span class="nav-number">1.1.1.</span> <span class="nav-text">Layer records</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Channel-image-data"><span class="nav-number">1.1.2.</span> <span class="nav-text">Channel image data</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Image-Data"><span class="nav-number">1.2.</span> <span class="nav-text">Image Data</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.</span> <span class="nav-text">代码实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ww-rm"
+      src="/images/avatar/ww-rm.jpg">
+  <p class="site-author-name" itemprop="name">ww-rm</p>
+  <div class="site-description" itemprop="description">Code saves the world.</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">115</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtLw==" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ww-rm&#x2F;"><i class="fab fa-github fa-fw"></i>GitHub</span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOnd3LXJtQHFxLmNvbQ==" title="E-Mail → mailto:ww-rm@qq.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</span>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ww-rm.top/posts/2026/01/28/csharp-psdwriter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar/ww-rm.jpg">
+      <meta itemprop="name" content="ww-rm">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="暗香画楼">
+      <meta itemprop="description" content="Code saves the world.">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="C# 生成多图层 psd 文件 | 暗香画楼">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C# 生成多图层 psd 文件
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-01-28 23:17:05" itemprop="dateCreated datePublished" datetime="2026-01-28T23:17:05+08:00">2026-01-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%A0%81%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">码记</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>为了解决自己项目里一个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcy8xNjU=">Issue (#165)<i class="fa fa-external-link-alt"></i></span>, 决定想办法在项目里实现 psd 文件的写入操作, 但是搜索了一圈没有发现比较合适的开源项目, 加上自己的需求比较简单, 就是把多张透明背景的图按顺序堆叠到一个 psd 文件里即可, 所以干脆自己研究了一下 psd 的文件格式, 造了个小轮子, 实现了最基本的多图层 psd 格式写入.</p>
+<span id="more"></span>
+
+<h2 id="基本格式分析"><a href="#基本格式分析" class="headerlink" title="基本格式分析"></a>基本格式分析</h2><p>根据官方的文档, 一个完整的 psd 文件分为 5 个部分, 分别是:</p>
+<ol>
+<li>File Header</li>
+<li>Color Mode Data</li>
+<li>Image Resources</li>
+<li>Layer And Mask Information</li>
+<li>Image Data</li>
+</ol>
+<p>其中 <code>File Header</code> 是固定大小 26 字节, 并且对于我的需求来说, 大部分取值也是固定的, 所以这部分比较简单.</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Signature</code></td>
+<td align="center">4 字节</td>
+<td align="center">psd 文件的文件头标识, 内容为 <code>b&quot;8BIM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>Version</code></td>
+<td align="center">2 字节</td>
+<td align="center">固定为 1</td>
+</tr>
+<tr>
+<td align="center"><code>Reserved</code></td>
+<td align="center">6 字节</td>
+<td align="center">全 0 字节</td>
+</tr>
+<tr>
+<td align="center"><code>Number of channels</code></td>
+<td align="center">2 字节</td>
+<td align="center">图像通道数, 可以从简固定成 4</td>
+</tr>
+<tr>
+<td align="center"><code>Height in pixels</code></td>
+<td align="center">4 字节</td>
+<td align="center">图像像素高度</td>
+</tr>
+<tr>
+<td align="center"><code>Width in pixels</code></td>
+<td align="center">4 字节</td>
+<td align="center">图像像素宽度</td>
+</tr>
+<tr>
+<td align="center"><code>Number of bits per channel</code></td>
+<td align="center">2 字节</td>
+<td align="center">位深, 可以从简固定成 8</td>
+</tr>
+<tr>
+<td align="center"><code>Color mode</code></td>
+<td align="center">2 字节</td>
+<td align="center">可以从简固定成 3, 也就是 RGB 模式</td>
+</tr>
+</tbody></table>
+<p>只有图像的宽高是需要根据实际进行调整的.</p>
+<p>另外在 psd 文件里, 都是按照<strong>大端字节序</strong>进行数据存储, 因此数值类型以及 Unicode 等的编码也都需要按大端序进行处理.</p>
+<p>剩下的 4 个部分基本都是由不定长字节数组组成, 大致格式都是 &quot;数据长度 + 数据内容&quot; 构成, 并且可能嵌套定义.</p>
+<p>但是如果只是需要写入简单的多图层 psd, <code>Color Mode Data</code> 和 <code>Image Resources</code> 部分是可以完全不需要的, 因此它俩的写入内容为空, 具体来说是各自写 4 个 0 字节 (表示该部分数据长度为 0).</p>
+<p>除此之外, <code>Image Data</code> 部分内容也可以不需要实际内容, 但是需要有数据占位, 因此可以写固定内容, 所以只需要着重研究一下第 4 部分 <code>Layer And Mask Information</code>.</p>
+<h3 id="Layer-And-Mask-Information"><a href="#Layer-And-Mask-Information" class="headerlink" title="Layer And Mask Information"></a>Layer And Mask Information</h3><p>该部分组成如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Length</code></td>
+<td align="center">4 字节</td>
+<td align="center">该部分的字节长度</td>
+</tr>
+<tr>
+<td align="center"><code>Layer info</code></td>
+<td align="center">不定长度</td>
+<td align="center">详细的层信息</td>
+</tr>
+<tr>
+<td align="center"><code>Global layer mask info</code></td>
+<td align="center">不定长度</td>
+<td align="center">全局蒙版信息, 可以从简不要, 写入 4 字节全 0 表示无内容即可</td>
+</tr>
+<tr>
+<td align="center"><code>Series of tagged blocks</code></td>
+<td align="center">不定长度</td>
+<td align="center">一些额外的标记信息, 可以从简不要, 无需写入任何内容</td>
+</tr>
+</tbody></table>
+<p>由上可知, 我们需要的信息都存放在 <code>Layer info</code> 中, 它的定义如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Length</code></td>
+<td align="center">4 字节</td>
+<td align="center">该部分的字节长度</td>
+</tr>
+<tr>
+<td align="center"><code>Layer count</code></td>
+<td align="center">2 字节</td>
+<td align="center">层的数量, 该值类型是有符号 16 位整数, 但是从简可以仅记录正数情况</td>
+</tr>
+<tr>
+<td align="center"><code>Information about each layer</code></td>
+<td align="center">不定长度</td>
+<td align="center">层信息, 按顺序记录每个层的基本信息, 从前往后对应堆叠顺序的从下往上</td>
+</tr>
+<tr>
+<td align="center"><code>Channel image data</code></td>
+<td align="center">不定长度</td>
+<td align="center">每个层的通道像素数据, 与层信息顺序保持一致</td>
+</tr>
+</tbody></table>
+<p>下面依次看看层信息和层通道数据部分的内容.</p>
+<h4 id="Layer-records"><a href="#Layer-records" class="headerlink" title="Layer records"></a>Layer records</h4><p>层信息里面, 每个层都有自己的 <code>Layer records</code>, 多个层则直接按顺序连续写入各自的 <code>Layer records</code> 即可, 其基本定义如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">字段</th>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Retangle of contents</code></td>
+<td align="center">4 * 4 字节</td>
+<td align="center">4 个有符号 32 位整数, 按顺序依次是 Top, Left, Bottom, Right. 从简可以将 Top 和 Left 固定成 0, Right 和 Bottom 分别取图像的宽和高. 其中 Top 和 Left 含端点, Right 和 Bottom 不含端点.</td>
+</tr>
+<tr>
+<td align="center"><code>Number of channels</code></td>
+<td align="center">2 字节</td>
+<td align="center">从简可以固定成 4</td>
+</tr>
+<tr>
+<td align="center"><code>Channel information</code></td>
+<td align="center">6 * <code>Number of channels</code> 字节</td>
+<td align="center">通道的信息, 每个通道都有 2 + 4 个字节. 前 2 字节为有符号 16 位整数, 记录通道类型, 例如 0, 1, 2 分别表示 R, G, B 通道, -1 表示 A; 后 4 字节表示该通道像素数据的长度</td>
+</tr>
+<tr>
+<td align="center"><code>Blend mode signature</code></td>
+<td align="center">4 字节</td>
+<td align="center">混合模式标记, 固定为 <code>b&quot;8BIM&quot;</code></td>
+</tr>
+<tr>
+<td align="center"><code>Blend mode key</code></td>
+<td align="center">4 字节</td>
+<td align="center">混合模式, 常见的有 <code>norm</code>, <code>pass</code> 等, 从简可以固定为 <code>norm</code></td>
+</tr>
+<tr>
+<td align="center"><code>Opacity</code></td>
+<td align="center">1 字节</td>
+<td align="center">不透明度, 从简可以固定为 255</td>
+</tr>
+<tr>
+<td align="center"><code>Clipping</code></td>
+<td align="center">1 字节</td>
+<td align="center">从简可以固定为 0</td>
+</tr>
+<tr>
+<td align="center"><code>Flags</code></td>
+<td align="center">1 字节</td>
+<td align="center">从简可以固定为 8 (根据新建的简单 psd 文件观察可得)</td>
+</tr>
+<tr>
+<td align="center"><code>Filler</code></td>
+<td align="center">1 字节</td>
+<td align="center">0 填充字节</td>
+</tr>
+<tr>
+<td align="center"><code>Length of the extra data</code></td>
+<td align="center">4 字节</td>
+<td align="center">额外数据的长度, 指的是 <code>Layer records</code> 下这个字段结束往后的所有数据长度</td>
+</tr>
+<tr>
+<td align="center"><code>Layer mask data</code></td>
+<td align="center">不定长度</td>
+<td align="center">可以从简不要, 写入 4 字节全 0 表示无数据</td>
+</tr>
+<tr>
+<td align="center"><code>Layer blending ranges</code></td>
+<td align="center">4 + (2 + 2 * <code>Number of channels</code>) * 4 字节</td>
+<td align="center">可以从简为固定模式数据</td>
+</tr>
+<tr>
+<td align="center"><code>Layer name</code></td>
+<td align="center">4n 字节</td>
+<td align="center">层的名字, 用 0 填充至 4 字节倍数 (实际观察似乎可能是历史遗留字段)</td>
+</tr>
+<tr>
+<td align="center"><code>Additional layer information</code></td>
+<td align="center">4n 字节</td>
+<td align="center">额外的层信息</td>
+</tr>
+</tbody></table>
+<p>对于 <code>Layer blending ranges</code>, 它的定义如下:</p>
+<table>
+<thead>
+<tr>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">4 字节</td>
+<td align="center">Length of layer blending ranges data</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Composite gray blend source range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Composite gray blend destination range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">First channel source range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">First channel destination range</td>
+</tr>
+<tr>
+<td align="center">...</td>
+<td align="center">...</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Nth channel source range</td>
+</tr>
+<tr>
+<td align="center">4 字节</td>
+<td align="center">Nth channel destination range</td>
+</tr>
+</tbody></table>
+<p>其中每个 range 都由 2 个黑色阈值和白色阈值组成, 而根据对简单的 psd 文件分析后, 可以固定每个 range 都为 <code>0x0000FFFF</code>, 加上通道数可以从简固定为 4, 所以 <code>Layer blending ranges</code> 的内容可以是 44 字节固定值.</p>
+<p>对于 <code>Layer name</code>, 它有以下几部分:</p>
+<p><code>1 字节长度 || 字符串字节数组 || 0 填充</code></p>
+<p>整体需填充至 4 字节倍数, 并且分析实际文件得到长度最大值为 0x1F (31 字节), 也就是整个 <code>Layer name</code> 最长为 32 字节. 字符串所使用的编码似乎是本机活动代码页, 但实际观察下来似乎这个字段并没有被使用, 可以自行处理满足格式和长度要求即可.</p>
+<p>最后是 <code>Additional layer information</code>, 该部分的格式大多如下:</p>
+<p><code>8BIM || 4 字节标签 || 4 字节数据长度 || 字节数据</code></p>
+<p>虽然文档上说数据需要 0 填充至偶数长度, 但是实际观察其实大部分都是需要填充至 4 字节倍数.</p>
+<p>这里比较有用的两个标签是 <code>luni</code> 和 <code>lsct</code>, 分别用来记录层名称和定义分隔层.</p>
+<details class="note info"><summary><p><code>luni</code> 标签数据格式</p>
+</summary>
+<p><code>luni</code> 用来记录图层名称, 也就是 Photoshop 在图层面板上显示的可修改名称, 据实际测试在软件中该名称字符串不能超过 255 字符.<br>该标签的数据内容为使用大端模式 Unicode 编码的层名称, 整体结构为 <code>4 字节长度 || 编码后的字符数组 || 0 填充</code>.<br>每个字符会被编码为 2 字节, 并且使用 0 字节填充成 4 字节倍数, 已经是 4 字节整数时可以没有填充.</p>
+
+</details>
+
+<details class="note info"><summary><p><code>lsct</code> 标签数据格式</p>
+</summary>
+<p><code>lsct</code> 用来标记该层是特殊的分隔层, 不包含实际像素内容, 可以用来建立图层分组.<br>简单情况下的数据格式为 <code>4 字节类型取值</code>, 该情况数据长度固定为 4, 有以下类型取值:</p>
+<ul>
+<li><code>0</code>: 其他类型</li>
+<li><code>1</code>: 打开状态的组</li>
+<li><code>2</code>: 关闭状态的组</li>
+<li><code>3</code>: 组分隔符, UI 上不显示</li>
+</ul>
+<p>如果需要实现图层分组, 则需要用到后 3 种类型, 并且该图层 <code>Retangle of contents</code> 字段取值全 0, <code>Channel image data</code> 也是直接记录空数据.<br>根据实际的 psd 文件分析, 可以得到分隔层按线性方式来嵌套记录分组信息, 例如有以下图层和分组 (从上往下):</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> 层 1</span><br><span class="line"><span class="bullet">-</span> 组 2</span><br><span class="line"><span class="bullet">  -</span> 层 2.1</span><br><span class="line"><span class="bullet">  -</span> 组 2.2</span><br><span class="line"><span class="bullet">    -</span> 层 2.2.1</span><br><span class="line"><span class="bullet">  -</span> 层 2.3</span><br><span class="line"><span class="bullet">-</span> 层 3</span><br></pre></td></tr></table></figure>
+
+<p>则对应文件里的层顺序为:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- 层 1</span><br><span class="line">- 组 2 (lsct=2)</span><br><span class="line">- 层 2.1</span><br><span class="line">- 组 2.2  (lsct=2)</span><br><span class="line">- 层 2.2.1</span><br><span class="line">- 分隔符 2.2 (lsct=3)</span><br><span class="line">- 层 2.3</span><br><span class="line">- 分隔符 2 (lsct=3)</span><br><span class="line">- 层 3</span><br></pre></td></tr></table></figure>
+
+<p>也就是每个组都由一个组层 (lsct=2) 和一个组分隔符层 (lsct=3) 配合而成 (类似一个左括号和右括号), 并且分隔层处于组层的下面, 标识该组的结束位置. (在文件二进制数据的顺序里分隔层处于组层的前面, 因为堆叠顺序和文件内的排列顺序是反过来的, 即从前往后的层顺序对应从下往上的堆叠顺序)</p>
+
+</details>
+
+<h4 id="Channel-image-data"><a href="#Channel-image-data" class="headerlink" title="Channel image data"></a>Channel image data</h4><p>这部分由多个连续的通道像素数据构成, 每个通道按以下格式组成:</p>
+<p><code>2 字节压缩模式 || 通道数据</code></p>
+<p>其中压缩模式有以下取值:</p>
+<ul>
+<li>0: 原始数据</li>
+<li>1: RLE 编码</li>
+<li>2: 无预测的 ZIP 编码</li>
+<li>3: 有预测的 ZIP 编码</li>
+</ul>
+<p>常用的也就 0 和 1 两种编码方式, 实现起来也比较简单.</p>
+<p>如果是 0, 则通道数据的大小为 <code>(Bottom - Top) * (Right - Left)</code> (也就是 <code>Layer records</code> 里的 <code>Retangle of contents</code> 字段代表的大小), 然后先行后列的顺序记录.</p>
+<p>对于分组层, 或者空数据层, 则每个通道数据可以直接表示为 2 个 0 字节, 即原始数据模式且无数据.</p>
+<p>如果是 1, 则将通道数据按行进行 RLE 编码, 也就是以下格式:</p>
+<table>
+<thead>
+<tr>
+<th align="center">长度</th>
+<th align="center">详细说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">2 字节</td>
+<td align="center">压缩模式</td>
+</tr>
+<tr>
+<td align="center">2 * (Bottom - Top) 字节</td>
+<td align="center">每一行 RLE 编码数据字节长度</td>
+</tr>
+<tr>
+<td align="center">不定长度 * (Bottom - Top) 字节</td>
+<td align="center">每一行 RLE 编码数据</td>
+</tr>
+</tbody></table>
+<details class="note info"><summary><p>RLE 编码</p>
+</summary>
+<p>PSD 使用的 RLE 编码也称 PackBits 算法 (TIFF standard 内使用的算法), 一段编码最多对不超过 128 字节数据进行编码, 超出部分则需要重新开始一段新的编码, 一段编码由两部分构成:</p>
+<p><code>1 字节长度标识 || 数据</code></p>
+<table>
+<thead>
+<tr>
+<th align="center">长度标识 <code>n</code> 取值范围</th>
+<th align="center">数据</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>[0, 127]</code></td>
+<td align="center"><code>n + 1</code> 个原始字节数据</td>
+</tr>
+<tr>
+<td align="center"><code>[-127, -1]</code></td>
+<td align="center"><code>1</code> 字节, 但是重复 <code>-n + 1</code> 次</td>
+</tr>
+<tr>
+<td align="center"><code>-128</code></td>
+<td align="center">无, 忽略并跳过</td>
+</tr>
+</tbody></table>
+<p>以下解码伪代码摘自原文:</p>
+<blockquote>
+<p>Loop until you get the number of unpacked bytes you are expecting:<br>Read the next source byte into n.<br>If n is between 0 and 127 inclusive, copy the next n+1 bytes literally.<br>Else if n is between -127 and -1 inclusive, copy the next byte -n+1 times.<br>Else if n is -128, noop.<br>Endloop</p>
+</blockquote>
+
+</details>
+
+<p>最后将每个通道的像素数据编码后的数据按照 <code>Layer records</code> 的 <code>Channel information</code> 一致的层通道顺序进行写入, 如果有多个层则也按多个层的顺序写即可.</p>
+<h3 id="Image-Data"><a href="#Image-Data" class="headerlink" title="Image Data"></a>Image Data</h3><p>PSD 文件的最后一部分是 <code>Image Data</code>, 似乎是用来存储图像数据 (合并后), 据实测如果层数据没问题则该部分内容可以任意设置, 但是不能留空, 需要满足格式要求.</p>
+<p>该部分数据格式与 <code>Channel image data</code> 类似, 也是需要对通道数据进行编码存放, 起始的 2 字节代表压缩模式, 取值也与之前的相同, 对数据的压缩方式也相同. 如果图像的通道数是 4, 则在此部分需要连续写入 4 个编码后的通道数据.</p>
+<p>从简可以直接设置通道数据全 0, 并且使用 RLE 编码, 则直接根据图像的宽度对一行全 0 字节进行 RLE 编码后, 将编码结果重复写入多次即可.</p>
+<h2 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h2><p>具体代码见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">SpineViewer<i class="fa fa-external-link-alt"></i></span> 仓库的子项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3RyZWUvbWFpbi9Qc2RXcml0ZXI=">PsdWriter<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>核心类和方法可以见 <code>PsdWriter.Sections.Layers.Layer</code> 及 <code>PsdWriter.Sections.Layers.RgbaLayer.SetRgbaImageData</code>.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuYWRvYmUuY29tL2Rldm5ldC1hcHBzL3Bob3Rvc2hvcC9maWxlZm9ybWF0YXNodG1sLw==">Adobe Photoshop File Formats Specification<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuY25ibG9ncy5jb20vcWlhbndlbjM2L3AvMzk2NTExNi5odG1s">TIFF6 Packbit algorithm<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cuaXNvLm9yZy9zdGFuZGFyZC8zNDM0Mi5odG1s">ISO 12639:2004@Section 9: PackBits Compression<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"><i class="fa fa-tag"></i> C#</a>
+              <a href="/tags/psd/" rel="tag"><i class="fa fa-tag"></i> psd</a>
+              <a href="/tags/CSharp/" rel="tag"><i class="fa fa-tag"></i> CSharp</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/2025/11/01/githubssh-proxy/" rel="prev" title="Github SSH 连接设置代理">
+                  <i class="fa fa-chevron-left"></i> Github SSH 连接设置代理
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2021 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-user-secret"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ww-rm</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">275k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">8:21</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl" data-url="aHR0cHM6Ly90aGVtZS1uZXh0LmpzLm9yZw==">NexT.Gemini</span> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script color="192, 192, 192" opacity="1" zIndex="-1" count="150" pointColor="255, 255, 255" src="https://cdnjs.cloudflare.com/ajax/libs/canvas-nest.js/2.0.4/canvas-nest.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.0/search.js" integrity="sha256-vXZMYLEqsROAXkEw93GGIvaB2ab+QW6w3+1ahD9nXXA=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"ww-rm/gp-comments","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+</body>
+</html>
