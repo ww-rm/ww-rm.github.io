@@ -14,7 +14,7 @@ function generateIllustHtml(illustInfo) {
             <span><span class="description-label">作者: </span>${illustInfo.userName}</span>
         </div>
         <div class="description-item">
-            <a href="https://pixiv.net/artworks/${illustInfo.illustId}" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.pixiv.net/artworks/${illustInfo.illustId}" target="_blank" rel="noopener noreferrer">
                 <span class="description-label">PID: </span><span>${illustInfo.illustId}</span>
             </a>
             <a href="https://www.pixiv.net/users/${illustInfo.userId}" target="_blank" rel="noopener noreferrer">
