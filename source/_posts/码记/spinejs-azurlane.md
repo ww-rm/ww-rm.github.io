@@ -72,4 +72,4 @@ date: 2024-12-22 16:25:16
 
 立绘资源在仓库 [azurlane_spinepainting](https://github.com/ww-rm/azurlane_spinepainting).
 
-不过网页端功能和性能都有限, 这里趁机推销一下自己的小项目 [DeskSpine](https://github.com/ww-rm/DeskSpine), 目前还没彻底完工~~咕咕咕~~, 但是基本功能已经差不多了~~能用~~, 是我基于过去项目 [DesktopSprite](/posts/2023/08/30/desktopsprite/) 用 C# 重写的, 使用方法上也差不多, 但是比之前性能好上很多~~bug也少很多~~, 也增加了一些更好用的功能, 欢迎有兴趣的指挥官前来体验.    
+不过网页端功能和性能都有限, 这里趁机推销一下自己的项目 [SpineViewer](https://github.com/ww-rm/SpineViewer), 是一个 Windows 平台下的简单易用的 Spine 动画预览和导出软件, 支持多版本多骨骼, 解压即用, 欢迎下载体验.
