@@ -317,6 +317,95 @@
       </tags>
   </entry>
   <entry>
+    <title>SpineViewer 简单好用的 Spine 查看&amp;导出工具</title>
+    <url>//posts/2025/03/04/spineviewer/</url>
+    <content><![CDATA[<p><em>所见即所得</em> 的 Spine 文件查看&amp;导出程序.</p>
+<p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">https://github.com/ww-rm/SpineViewer<i class="fa fa-external-link-alt"></i></span></p>
+<p><img data-src="/static/image/spineviewer/preview.webp" alt="previewer"></p>
+<span id="more"></span>
+
+<p>Spine 文件查看&amp;导出程序, 同时也是支持 Spine 的动态壁纸程序.</p>
+<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
+<li>支持多版本 spine 文件 (<code>2.1.x; 3.4.x - 4.2.x</code>)</li>
+<li>支持列表式多骨骼查看和渲染层级管理</li>
+<li>支持多轨道动画</li>
+<li>支持皮肤/插槽/附件设置</li>
+<li>支持调试渲染</li>
+<li>支持画面/模型/轨道时间倍速设置</li>
+<li>支持设置轨道 Alpha 混合参数</li>
+<li>支持单帧/动图/视频文件导出</li>
+<li>支持 FFmpeg 自定义导出</li>
+<li>支持非 PNG 格式的纹理图片格式</li>
+<li>支持开机自启常驻动态壁纸</li>
+<li>......</li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3JlbGVhc2Vz">Release<i class="fa fa-external-link-alt"></i></span> 界面下载压缩包.</p>
+<p>软件需要安装依赖框架 <span class="exturl" data-url="aHR0cHM6Ly9kb3RuZXQubWljcm9zb2Z0LmNvbS96aC1jbi9kb3dubG9hZC9kb3RuZXQvOC4w">.NET 桌面运行时 8.0.x<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>也可以下载带有 <code>SelfContained</code> 后缀的压缩包, 可以独立运行.</p>
+<p>导出 GIF/MP4 等动图/视频格式需要在本地安装 ffmpeg 命令行, 并且添加至环境变量, <span class="exturl" data-url="aHR0cHM6Ly9mZm1wZWcub3JnL2Rvd25sb2FkLmh0bWwjYnVpbGQtd2luZG93cw==">点击前往 FFmpeg-Windows 下载页面<i class="fa fa-external-link-alt"></i></span>, 也可以点这个下载最新版本 <span class="exturl" data-url="aHR0cHM6Ly93d3cuZ3lhbi5kZXYvZmZtcGVnL2J1aWxkcy9mZm1wZWctcmVsZWFzZS1mdWxsLjd6">ffmpeg-release-full.7z<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="修改显示语言"><a href="#修改显示语言" class="headerlink" title="修改显示语言"></a>修改显示语言</h2><p>本项目目前支持以下界面显示语言:</p>
+<ul>
+<li><code>ZH</code> (中文)</li>
+<li><code>EN</code> (English)</li>
+<li><code>JA</code> (日本語)</li>
+</ul>
+<p>可以通过窗口菜单的 &quot;文件&quot; -&gt; &quot;首选项...&quot; -&gt; &quot;语言&quot;, 选择你需要的语言并确认修改.</p>
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h3><p>程序大致是左右布局, 左侧是功能面板, 右侧是画面.</p>
+<p>左侧有三个子面板, 分别是:</p>
+<ul>
+<li><strong>模型</strong>. 该面板记录导入并进行渲染的模型列表, 可以在这个面板设置与模型渲染相关的参数和渲染顺序, 以及一些与模型有关的功能.</li>
+<li><strong>浏览</strong>. 该面板用于预览指定文件夹的内容, 并没有真正导入文件到程序. 在该面板可以为模型生成 webp 格式的预览图, 或者导入选中的模型.</li>
+<li><strong>画面</strong>. 该面板用于设置右侧预览画面的参数.</li>
+</ul>
+<p>绝大部分按钮或者标签或者输入框都可以通过鼠标指针悬停来获取帮助文本.</p>
+<h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p>可以直接拖放/粘贴需要导入的骨骼文件/目录到模型面板.</p>
+<p>或者在浏览面板内右键菜单导入选中项.</p>
+<h3 id="内容调整"><a href="#内容调整" class="headerlink" title="内容调整"></a>内容调整</h3><p>模型面板支持右键菜单以及部分快捷键, 并且可以多选进行模型参数的批量调整.</p>
+<p>预览画面除了使用面板进行参数设置外, 支持部分鼠标动作:</p>
+<ul>
+<li>左键可以选择和拖拽模型, 按下 <code>Ctrl</code> 键可以实现多选, 与左侧列表选择是联动的.</li>
+<li>右键对整体画面进行拖动.</li>
+<li>滚轮进行画面缩放, 按住 <code>Ctrl</code> 可以对选中的模型进行批量缩放, <code>Shift</code> 可以切换缩放倍数.</li>
+<li>仅渲染选中模式, 在该模式下, 预览画面仅包含被选中的模型, 并且只能通过左侧列表改变选中状态.</li>
+</ul>
+<p>预览画面下方按钮支持对画面时间进行调整, 可以当作一个简易的播放器.</p>
+<h3 id="内容导出"><a href="#内容导出" class="headerlink" title="内容导出"></a>内容导出</h3><p>在模型列表里, 右键单击选中的模型, 弹出菜单里可以对选中项执行导出操作.</p>
+<p>导出有以下几个关键参数:</p>
+<ul>
+<li>输出文件夹. 这个参数某些时候可选, 当不提供时, 则将输出产物输出到每个模型各自的模型文件夹, 否则输出产物全部输出到提供的输出文件夹.</li>
+<li>导出单个. 默认是每个模型独立导出, 即对模型列表进行批量操作, 如果选择仅导出单个, 那么被导出的所有模型将在同一个画面上被渲染, 输出产物只有一份.</li>
+<li>自动分辨率. 该模式会忽略预览画面的分辨率和视区参数, 导出产物的分辨率与被导出内容的实际大小一致, 如果是动图或者视频则会与完整显示动画的必需大小一致.</li>
+</ul>
+<h3 id="动态壁纸"><a href="#动态壁纸" class="headerlink" title="动态壁纸"></a>动态壁纸</h3><p>动态壁纸通过桌面投影实现, 可以将当前预览画面上的内容实时投影至桌面.</p>
+<p>在程序首选项或者托盘图标右键菜单中可以进行桌面投影的启用与否, 模型和画面参数调整完成后, 可以将当前参数保存为工作区文件, 方便之后恢复该配置.</p>
+<p>如果希望开机自启常驻壁纸, 也可以在首选项中启用开机自启, 并且设置启动后需要加载的工作区文件.</p>
+<h3 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h3><p>项目附带一个纯命令行工具 <code>SpineViewerCLI</code>, 目前支持对单个模型执行一些简单操作, 例如参数值查询以及导出等, 并且 Release 界面提供 Windows 和 Linux 多平台二进制文件.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ SpineViewerCLI -h</span><br><span class="line">Description:</span><br><span class="line">  Root Command</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  SpineViewerCLI [<span class="built_in">command</span>] [options]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -q, --quiet     Suppress console logging (quiet mode).</span><br><span class="line">  -?, -h, --<span class="built_in">help</span>  Show <span class="built_in">help</span> and usage information</span><br><span class="line">  --version       Show version information</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  query &lt;skel&gt;    Query information of single model</span><br><span class="line">  preview &lt;skel&gt;  Preview a model</span><br><span class="line">  <span class="built_in">export</span> &lt;skel&gt;   Export single model</span><br></pre></td></tr></table></figure>
+
+<h3 id="更多"><a href="#更多" class="headerlink" title="更多"></a>更多</h3><p>更为详细的使用方法和说明见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3dpa2k=">Wiki<i class="fa fa-external-link-alt"></i></span>, 有使用上的问题或者 BUG 可以提个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcw==">Issue<i class="fa fa-external-link-alt"></i></span>.</p>
+<h2 id="Acknowledgements"><a href="#Acknowledgements" class="headerlink" title="Acknowledgements"></a>Acknowledgements</h2><ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXM=">spine-runtimes<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1NGTUwvU0ZNTC5OZXQ=">SFML.Net<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3Jvc2VuYmplcmcvRkZNcGVnQ29yZQ==">FFMpegCore<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0hhbmR5T3JnL0hhbmR5Q29udHJvbA==">HandyControl<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL05Mb2cvTkxvZw==">NLog<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21vbm8vU2tpYVNoYXJw">SkiaSharp<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3NwZWN0cmVjb25zb2xlL3NwZWN0cmUuY29uc29sZQ==">Spectre.Console<i class="fa fa-external-link-alt"></i></span></li>
+</ul>
+<hr>
+<p><em>如果你觉得这个项目不错请给个 :star:, 并分享给更多人知道! :)</em></p>
+<p><a href="https://starchart.cc/ww-rm/SpineViewer"><img data-src="https://starchart.cc/ww-rm/SpineViewer.svg?variant=adaptive" alt="Stargazers over time"></a></p>
+]]></content>
+      <categories>
+        <category>个人项目</category>
+      </categories>
+      <tags>
+        <tag>Spine</tag>
+        <tag>SpineViewer</tag>
+        <tag>Winforms</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>NCM 文件批量转换 (保留专辑和封面信息)</title>
     <url>//posts/2023/11/04/ncmdump/</url>
     <content><![CDATA[<p>这段时间打算用网易云音乐囤点资源, 但是下载之后才发现内容已经全部加密, 变成了 <code>ncm</code> 后缀的文件. 搜索一番, 找到了一些现成的转换工具和源码. 但是功能都十分有限, 而且转换出来之后的文件都没有专辑和封面信息<del>强迫症大怒</del>. 看了看有关的分析和源码之后, 决定自己重新整理一下转换功能, 并且把专辑和封面信息也加进去, 做个完善的命令行工具自用, 顺便打包成 Python 库, 上传到 PyPI 上.</p>
@@ -476,92 +565,41 @@
       </tags>
   </entry>
   <entry>
-    <title>SpineViewer 简单好用的 Spine 查看&amp;导出工具</title>
-    <url>//posts/2025/03/04/spineviewer/</url>
-    <content><![CDATA[<p><em>所见即所得</em> 的 Spine 文件查看&amp;导出程序.</p>
-<p>项目地址: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">https://github.com/ww-rm/SpineViewer<i class="fa fa-external-link-alt"></i></span></p>
-<p><img data-src="/static/image/spineviewer/preview.webp" alt="previewer"></p>
+    <title>安卓 APK 重打包</title>
+    <url>//posts/2024/07/09/apkrepack/</url>
+    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
+<p>本文参考<span class="exturl" data-url="aHR0cHM6Ly9jcmlmYW4uZ2l0aHViLmlvL2FuZHJvaWRfcmVfcmVwYWNrX2Fway93ZWJzaXRlL3JlcGFja19wcm9jZXNzLw==">重新打包apk流程<i class="fa fa-external-link-alt"></i></span>.</p>
 <span id="more"></span>
 
-<p>Spine 文件查看&amp;导出程序, 同时也是支持 Spine 的动态壁纸程序.</p>
-<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><ul>
-<li>支持多版本 spine 文件 (<code>2.1.x; 3.4.x - 4.2.x</code>)</li>
-<li>支持列表式多骨骼查看和渲染层级管理</li>
-<li>支持多轨道动画</li>
-<li>支持皮肤/插槽/附件设置</li>
-<li>支持调试渲染</li>
-<li>支持画面/模型/轨道时间倍速设置</li>
-<li>支持设置轨道 Alpha 混合参数</li>
-<li>支持单帧/动图/视频文件导出</li>
-<li>支持 FFmpeg 自定义导出</li>
-<li>支持非 PNG 格式的纹理图片格式</li>
-<li>支持开机自启常驻动态壁纸</li>
-<li>......</li>
-</ul>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>前往 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3JlbGVhc2Vz">Release<i class="fa fa-external-link-alt"></i></span> 界面下载压缩包.</p>
-<p>软件需要安装依赖框架 <span class="exturl" data-url="aHR0cHM6Ly9kb3RuZXQubWljcm9zb2Z0LmNvbS96aC1jbi9kb3dubG9hZC9kb3RuZXQvOC4w">.NET 桌面运行时 8.0.x<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>也可以下载带有 <code>SelfContained</code> 后缀的压缩包, 可以独立运行.</p>
-<p>导出 GIF/MP4 等动图/视频格式需要在本地安装 ffmpeg 命令行, 并且添加至环境变量, <span class="exturl" data-url="aHR0cHM6Ly9mZm1wZWcub3JnL2Rvd25sb2FkLmh0bWwjYnVpbGQtd2luZG93cw==">点击前往 FFmpeg-Windows 下载页面<i class="fa fa-external-link-alt"></i></span>, 也可以点这个下载最新版本 <span class="exturl" data-url="aHR0cHM6Ly93d3cuZ3lhbi5kZXYvZmZtcGVnL2J1aWxkcy9mZm1wZWctcmVsZWFzZS1mdWxsLjd6">ffmpeg-release-full.7z<i class="fa fa-external-link-alt"></i></span>.</p>
-<h2 id="修改显示语言"><a href="#修改显示语言" class="headerlink" title="修改显示语言"></a>修改显示语言</h2><p>本项目目前支持以下界面显示语言:</p>
-<ul>
-<li><code>ZH</code> (中文)</li>
-<li><code>EN</code> (English)</li>
-<li><code>JA</code> (日本語)</li>
-</ul>
-<p>可以通过窗口菜单的 &quot;文件&quot; -&gt; &quot;首选项...&quot; -&gt; &quot;语言&quot;, 选择你需要的语言并确认修改.</p>
-<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><h3 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h3><p>程序大致是左右布局, 左侧是功能面板, 右侧是画面.</p>
-<p>左侧有三个子面板, 分别是:</p>
-<ul>
-<li><strong>模型</strong>. 该面板记录导入并进行渲染的模型列表, 可以在这个面板设置与模型渲染相关的参数和渲染顺序, 以及一些与模型有关的功能.</li>
-<li><strong>浏览</strong>. 该面板用于预览指定文件夹的内容, 并没有真正导入文件到程序. 在该面板可以为模型生成 webp 格式的预览图, 或者导入选中的模型.</li>
-<li><strong>画面</strong>. 该面板用于设置右侧预览画面的参数.</li>
-</ul>
-<p>绝大部分按钮或者标签或者输入框都可以通过鼠标指针悬停来获取帮助文本.</p>
-<h3 id="骨骼导入"><a href="#骨骼导入" class="headerlink" title="骨骼导入"></a>骨骼导入</h3><p>可以直接拖放/粘贴需要导入的骨骼文件/目录到模型面板.</p>
-<p>或者在浏览面板内右键菜单导入选中项.</p>
-<h3 id="内容调整"><a href="#内容调整" class="headerlink" title="内容调整"></a>内容调整</h3><p>模型面板支持右键菜单以及部分快捷键, 并且可以多选进行模型参数的批量调整.</p>
-<p>预览画面除了使用面板进行参数设置外, 支持部分鼠标动作:</p>
-<ul>
-<li>左键可以选择和拖拽模型, 按下 <code>Ctrl</code> 键可以实现多选, 与左侧列表选择是联动的.</li>
-<li>右键对整体画面进行拖动.</li>
-<li>滚轮进行画面缩放, 按住 <code>Ctrl</code> 可以对选中的模型进行批量缩放, <code>Shift</code> 可以切换缩放倍数.</li>
-<li>仅渲染选中模式, 在该模式下, 预览画面仅包含被选中的模型, 并且只能通过左侧列表改变选中状态.</li>
-</ul>
-<p>预览画面下方按钮支持对画面时间进行调整, 可以当作一个简易的播放器.</p>
-<h3 id="内容导出"><a href="#内容导出" class="headerlink" title="内容导出"></a>内容导出</h3><p>在模型列表里, 右键单击选中的模型, 弹出菜单里可以对选中项执行导出操作.</p>
-<p>导出有以下几个关键参数:</p>
-<ul>
-<li>输出文件夹. 这个参数某些时候可选, 当不提供时, 则将输出产物输出到每个模型各自的模型文件夹, 否则输出产物全部输出到提供的输出文件夹.</li>
-<li>导出单个. 默认是每个模型独立导出, 即对模型列表进行批量操作, 如果选择仅导出单个, 那么被导出的所有模型将在同一个画面上被渲染, 输出产物只有一份.</li>
-<li>自动分辨率. 该模式会忽略预览画面的分辨率和视区参数, 导出产物的分辨率与被导出内容的实际大小一致, 如果是动图或者视频则会与完整显示动画的必需大小一致.</li>
-</ul>
-<h3 id="动态壁纸"><a href="#动态壁纸" class="headerlink" title="动态壁纸"></a>动态壁纸</h3><p>动态壁纸通过桌面投影实现, 可以将当前预览画面上的内容实时投影至桌面.</p>
-<p>在程序首选项或者托盘图标右键菜单中可以进行桌面投影的启用与否, 模型和画面参数调整完成后, 可以将当前参数保存为工作区文件, 方便之后恢复该配置.</p>
-<p>如果希望开机自启常驻壁纸, 也可以在首选项中启用开机自启, 并且设置启动后需要加载的工作区文件.</p>
-<h3 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h3><p>项目附带一个纯命令行工具 <code>SpineViewerCLI</code>, 目前支持对单个模型执行一些简单操作, 例如参数值查询以及导出等, 并且 Release 界面提供 Windows 和 Linux 多平台二进制文件.</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ SpineViewerCLI -h</span><br><span class="line">Description:</span><br><span class="line">  Root Command</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line">  SpineViewerCLI [<span class="built_in">command</span>] [options]</span><br><span class="line"></span><br><span class="line">Options:</span><br><span class="line">  -q, --quiet     Suppress console logging (quiet mode).</span><br><span class="line">  -?, -h, --<span class="built_in">help</span>  Show <span class="built_in">help</span> and usage information</span><br><span class="line">  --version       Show version information</span><br><span class="line"></span><br><span class="line">Commands:</span><br><span class="line">  query &lt;skel&gt;    Query information of single model</span><br><span class="line">  preview &lt;skel&gt;  Preview a model</span><br><span class="line">  <span class="built_in">export</span> &lt;skel&gt;   Export single model</span><br></pre></td></tr></table></figure>
+<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
+<ol>
+<li>解包</li>
+<li>修改包体</li>
+<li>重打包</li>
+<li>对齐</li>
+<li>重签名</li>
+</ol>
+<p>顺序很重要, 签名的步骤一定是最后完成.</p>
+<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
+<p>修改包体可以自己按需手动或者脚本修改.</p>
+<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
+<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
+<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
 
-<h3 id="更多"><a href="#更多" class="headerlink" title="更多"></a>更多</h3><p>更为详细的使用方法和说明见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL3dpa2k=">Wiki<i class="fa fa-external-link-alt"></i></span>, 有使用上的问题或者 BUG 可以提个 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2VyL2lzc3Vlcw==">Issue<i class="fa fa-external-link-alt"></i></span>.</p>
-<h2 id="Acknowledgements"><a href="#Acknowledgements" class="headerlink" title="Acknowledgements"></a>Acknowledgements</h2><ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXM=">spine-runtimes<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL1NGTUwvU0ZNTC5OZXQ=">SFML.Net<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3Jvc2VuYmplcmcvRkZNcGVnQ29yZQ==">FFMpegCore<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0hhbmR5T3JnL0hhbmR5Q29udHJvbA==">HandyControl<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL05Mb2cvTkxvZw==">NLog<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21vbm8vU2tpYVNoYXJw">SkiaSharp<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3NwZWN0cmVjb25zb2xlL3NwZWN0cmUuY29uc29sZQ==">Spectre.Console<i class="fa fa-external-link-alt"></i></span></li>
-</ul>
-<hr>
-<p><em>如果你觉得这个项目不错请给个 :star:, 并分享给更多人知道! :)</em></p>
-<p><a href="https://starchart.cc/ww-rm/SpineViewer"><img data-src="https://starchart.cc/ww-rm/SpineViewer.svg?variant=adaptive" alt="Stargazers over time"></a></p>
+<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
+<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+
+<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
 ]]></content>
       <categories>
-        <category>个人项目</category>
+        <category>代码块</category>
       </categories>
       <tags>
-        <tag>Spine</tag>
-        <tag>SpineViewer</tag>
-        <tag>Winforms</tag>
+        <tag>安卓</tag>
+        <tag>APK</tag>
+        <tag>重打包</tag>
       </tags>
   </entry>
   <entry>
@@ -650,44 +688,6 @@
         <tag>碧蓝航线</tag>
         <tag>工具</tag>
         <tag>立绘还原</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>安卓 APK 重打包</title>
-    <url>//posts/2024/07/09/apkrepack/</url>
-    <content><![CDATA[<p>为了用 Simpleperf 在非 root 机上进行性能分析, 需要在 apk 的清单文件中设置 <code>android:debuggable=&quot;true&quot;</code> 的标记, 因此研究了一下怎么对 apk 进行重打包, 对修改后的包进行性能分析.</p>
-<p>本文参考<span class="exturl" data-url="aHR0cHM6Ly9jcmlmYW4uZ2l0aHViLmlvL2FuZHJvaWRfcmVfcmVwYWNrX2Fway93ZWJzaXRlL3JlcGFja19wcm9jZXNzLw==">重新打包apk流程<i class="fa fa-external-link-alt"></i></span>.</p>
-<span id="more"></span>
-
-<h2 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h2><p>重打包大概分成几个步骤:</p>
-<ol>
-<li>解包</li>
-<li>修改包体</li>
-<li>重打包</li>
-<li>对齐</li>
-<li>重签名</li>
-</ol>
-<p>顺序很重要, 签名的步骤一定是最后完成.</p>
-<p>其中解包和重打包用 <span class="exturl" data-url="aHR0cHM6Ly9hcGt0b29sLm9yZy8=">apktool<i class="fa fa-external-link-alt"></i></span> 解决.</p>
-<p>修改包体可以自己按需手动或者脚本修改.</p>
-<p>对齐和重签名分别用 Android Sdk 的 build-tools 里的 <code>zipalign.exe</code> 和 <code>apksigner.jar</code> 完成.</p>
-<p>上述提到的工具都可以通过 <code>--help</code> 查看用法, 比较简单.</p>
-<p>值得一提的是重签名的时候需要用 java 自带的工具 <code>keytool</code> 生成一份自签名的证书文件, 可以用类似下面的命令生成:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">keytool -genkeypair -v -keystore repacker.keystore -keyalg RSA -keysize 4096 -validity 10000</span><br></pre></td></tr></table></figure>
-
-<p>要填很多信息, 可以随便填, 比如都填 <code>repacker</code>, 最后输入 <code>y</code> 确认, 但是开头的口令可以怎么简单怎么来, 比如 <code>123456</code>.</p>
-<h2 id="一键脚本"><a href="#一键脚本" class="headerlink" title="一键脚本"></a>一键脚本</h2><p>写了个一键重打包脚本, 并且可以选择增加调试标志.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> subprocess <span class="keyword">as</span> sp</span><br><span class="line"><span class="keyword">from</span> argparse <span class="keyword">import</span> ArgumentParser</span><br><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Optional</span>, <span class="type">Union</span></span><br><span class="line"><span class="keyword">from</span> xml.dom <span class="keyword">import</span> minidom</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DEFAULT_ANDROID_SDK_DIR = Path(os.getenv(<span class="string">&quot;LOCALAPPDATA&quot;</span>), <span class="string">&quot;Android&quot;</span>, <span class="string">&quot;Sdk&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_bin_path</span>(<span class="params">filename: <span class="built_in">str</span>, *extra_search_dirs: <span class="built_in">list</span>[os.PathLike]</span>) -&gt; <span class="type">Optional</span>[Path]:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Try to find bin file in system path and return full file path.&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">    search_dirs = os.get_exec_path()</span><br><span class="line">    search_dirs.extend(extra_search_dirs)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> <span class="built_in">map</span>(Path, search_dirs):</span><br><span class="line">        exec_path = p.joinpath(filename)</span><br><span class="line">        <span class="keyword">if</span> exec_path.is_file():</span><br><span class="line">            <span class="keyword">return</span> exec_path.resolve()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdkBuildTool</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, tool_dir</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(tool_dir).resolve()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">version</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.name</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">apksigner</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;lib&quot;</span>, <span class="string">&quot;apksigner.jar&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">zipalign</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;zipalign.exe&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidSdk</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, sdk_dir: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._<span class="built_in">dir</span> = Path(sdk_dir).resolve()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_build_tools</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> [AndroidSdkBuildTool(p) <span class="keyword">for</span> p <span class="keyword">in</span> self._<span class="built_in">dir</span>.joinpath(<span class="string">&quot;build-tools&quot;</span>).iterdir()]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AndroidManifest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, path: os.PathLike</span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        self._tree = minidom.parse(<span class="built_in">str</span>(path))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">enable_debuggable</span>(<span class="params">self, flag: <span class="built_in">bool</span> = <span class="literal">True</span></span>):</span><br><span class="line">        application_node = self._tree.getElementsByTagName(<span class="string">&quot;application&quot;</span>)[<span class="number">0</span>]</span><br><span class="line">        application_node.setAttribute(<span class="string">&quot;android:debuggable&quot;</span>, (<span class="string">&quot;true&quot;</span> <span class="keyword">if</span> flag <span class="keyword">else</span> <span class="string">&quot;false&quot;</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">save</span>(<span class="params">self, path: os.PathLike</span>):</span><br><span class="line">        path = Path(path)</span><br><span class="line">        path.write_bytes(self._tree.toxml(encoding=<span class="string">&quot;utf-8&quot;</span>, standalone=<span class="literal">False</span>))</span><br><span class="line">        <span class="keyword">return</span> path</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">APKRepacker</span>:</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params"></span></span><br><span class="line"><span class="params">        self,</span></span><br><span class="line"><span class="params">        *extra_bin_dirs,</span></span><br><span class="line"><span class="params">        android_sdk_dir: <span class="type">Optional</span>[Path] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_file: <span class="type">Optional</span>[os.PathLike] = <span class="literal">None</span>,</span></span><br><span class="line"><span class="params">        ks_pwd: <span class="type">Optional</span>[<span class="built_in">str</span>] = <span class="literal">None</span></span></span><br><span class="line"><span class="params">    </span>) -&gt; <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">if</span> android_sdk_dir <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            android_sdk_dir = DEFAULT_ANDROID_SDK_DIR</span><br><span class="line">        self._java_path = find_bin_path(<span class="string">&quot;java.exe&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._apktool_path = find_bin_path(<span class="string">&quot;apktool.jar&quot;</span>, *extra_bin_dirs)</span><br><span class="line">        self._android_sdk = AndroidSdk(android_sdk_dir)</span><br><span class="line">        self._android_build_tool = self._android_sdk.get_build_tools()[-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">        self._ks_file = <span class="literal">None</span> <span class="keyword">if</span> ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">else</span> Path(ks_file)</span><br><span class="line">        self._ks_pwd = ks_pwd</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec</span>(<span class="params">self, bin_path: os.PathLike, *args</span>):</span><br><span class="line">        args = [<span class="built_in">str</span>(Path(bin_path).resolve()), *<span class="built_in">map</span>(<span class="built_in">str</span>, args)]</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Exec: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> sp.run(args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">_exec_jar</span>(<span class="params">self, jar_path: os.PathLike, *args</span>):</span><br><span class="line">        <span class="keyword">return</span> self._<span class="built_in">exec</span>(self._java_path, <span class="string">&quot;-jar&quot;</span>, jar_path, args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">print_executables</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;java: <span class="subst">&#123;self._java_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apktool: <span class="subst">&#123;self._apktool_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;zipalign: <span class="subst">&#123;self._android_build_tool.zipalign&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;apksigner: <span class="subst">&#123;self._android_build_tool.apksigner&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">unpack</span>(<span class="params">self, apk_path: os.PathLike, output_dir: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_dir))</span><br><span class="line">        <span class="keyword">return</span> Path(output_dir)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">pack</span>(<span class="params">self, apk_dir: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        self._exec_jar(self._apktool_path, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="built_in">str</span>(apk_dir), <span class="string">&quot;-o&quot;</span>, <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">align</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="comment"># MUST use absolute path</span></span><br><span class="line">        apk_path = Path(apk_path).resolve()</span><br><span class="line">        output_path = Path(output_path).resolve()</span><br><span class="line">        self._<span class="built_in">exec</span>(self._android_build_tool.zipalign, <span class="string">&quot;-f&quot;</span>, <span class="string">&quot;-p&quot;</span>, <span class="string">&quot;4&quot;</span>, <span class="built_in">str</span>(apk_path), <span class="built_in">str</span>(output_path))</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sign</span>(<span class="params">self, apk_path: os.PathLike, output_path: os.PathLike</span>):</span><br><span class="line">        <span class="keyword">if</span> self._ks_file <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> self._ks_pwd <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;apksigner needs ks file and ks password&quot;</span>)</span><br><span class="line"></span><br><span class="line">        p = sp.Popen(</span><br><span class="line">            [<span class="built_in">str</span>(self._java_path), <span class="string">&quot;-jar&quot;</span>,</span><br><span class="line">             <span class="built_in">str</span>(self._android_build_tool.apksigner), <span class="string">&quot;sign&quot;</span>,</span><br><span class="line">             <span class="string">&quot;--ks&quot;</span>, <span class="built_in">str</span>(self._ks_file), <span class="string">&quot;--out&quot;</span>, <span class="built_in">str</span>(output_path), <span class="built_in">str</span>(apk_path)],</span><br><span class="line">            stdin=sp.PIPE</span><br><span class="line">        )</span><br><span class="line">        sleep(<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(self._ks_pwd, file=p.stdin, end=<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> Path(output_path)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_debuggable_flag</span>(<span class="params">self, apk_dir: os.PathLike</span>):</span><br><span class="line">        manifest_path = Path(apk_dir).joinpath(<span class="string">&quot;AndroidManifest.xml&quot;</span>)</span><br><span class="line">        manifest = AndroidManifest(manifest_path)</span><br><span class="line">        manifest.enable_debuggable(<span class="literal">True</span>)</span><br><span class="line">        manifest.save(manifest_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    parser = ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-p&quot;</span>, <span class="string">&quot;--apk&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;要修改的 APK 文件路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;-o&quot;</span>, <span class="string">&quot;--output&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;重新打包后 APK 的输出路径&quot;</span>, required=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--sdk-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;Android Sdk 目录&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--extra-search-dir&quot;</span>, nargs=<span class="string">&quot;+&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;可执行文件或者 jar 包的额外搜索路径&quot;</span>, default=())</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-file&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;keytool 生成的自签名证书文件&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--ks-pwd&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, <span class="built_in">help</span>=<span class="string">&quot;ks 文件的口令&quot;</span>)</span><br><span class="line"></span><br><span class="line">    parser.add_argument(<span class="string">&quot;--enable-debuggable&quot;</span>, action=<span class="string">&quot;store_true&quot;</span>, <span class="built_in">help</span>=<span class="string">&quot;在 AndroidManifest.xml 增加可调试标记&quot;</span>)</span><br><span class="line"></span><br><span class="line">    args = parser.parse_args()</span><br><span class="line"></span><br><span class="line">    tmp = Path(<span class="string">&quot;./tmp&quot;</span>).resolve()</span><br><span class="line">    tmp.mkdir(parents=<span class="literal">True</span>, exist_ok=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    repacker = APKRepacker(</span><br><span class="line">        *args.extra_search_dir,</span><br><span class="line">        android_sdk_dir=args.sdk_dir,</span><br><span class="line">        ks_file=args.ks_file,</span><br><span class="line">        ks_pwd=args.ks_pwd</span><br><span class="line">    )</span><br><span class="line">    repacker.print_executables()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># apk paths and dirs</span></span><br><span class="line">    apk_path = Path(args.apk)</span><br><span class="line">    apk_name = apk_path.stem</span><br><span class="line">    apk_dir = tmp.joinpath(apk_name)</span><br><span class="line">    apk_repack_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_repack.apk&quot;</span>)</span><br><span class="line">    apk_align_path = tmp.joinpath(<span class="string">f&quot;<span class="subst">&#123;apk_name&#125;</span>_align.apk&quot;</span>)</span><br><span class="line">    apk_output_path = Path(args.output)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># unpack apk to dir</span></span><br><span class="line">    repacker.unpack(apk_path, apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># do some modifications</span></span><br><span class="line">    <span class="keyword">if</span> args.enable_debuggable:</span><br><span class="line">        repacker.add_debuggable_flag(apk_dir)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># pack and resign</span></span><br><span class="line">    repacker.pack(apk_dir, apk_repack_path)</span><br><span class="line">    repacker.align(apk_repack_path, apk_align_path)</span><br><span class="line">    repacker.sign(apk_align_path, apk_output_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
-
-<p>会自动搜索本机上存在的可执行文件, 也可以提供额外的文件搜索路径.</p>
-]]></content>
-      <categories>
-        <category>代码块</category>
-      </categories>
-      <tags>
-        <tag>安卓</tag>
-        <tag>APK</tag>
-        <tag>重打包</tag>
       </tags>
   </entry>
   <entry>
@@ -2259,6 +2259,47 @@
       </tags>
   </entry>
   <entry>
+    <title>网页预览碧蓝航线动态立绘</title>
+    <url>//posts/2024/12/22/js-azurlanespine/</url>
+    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
+<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
+<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
+<span id="more"></span>
+
+<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
+<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
+<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
+<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
+<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
+<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
+<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
+<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
+<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
+<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
+<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
+<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
+<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
+<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
+<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">SpineViewer<i class="fa fa-external-link-alt"></i></span>, 是一个 Windows 平台下的简单易用的 Spine 动画预览和导出软件, 支持多版本多骨骼, 解压即用, 欢迎下载体验.</p>
+]]></content>
+      <categories>
+        <category>码记</category>
+      </categories>
+      <tags>
+        <tag>碧蓝航线</tag>
+        <tag>spine</tag>
+        <tag>spine-js</tag>
+        <tag>Azur Lane</tag>
+        <tag>动态立绘</tag>
+        <tag>前端</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>在 Windows 上编译安装 NUPACK</title>
     <url>//posts/2024/05/11/py-nupack/</url>
     <content><![CDATA[<p>之前项目里用到了 <span class="exturl" data-url="aHR0cHM6Ly9udXBhY2sub3JnLw==">NUPACK<i class="fa fa-external-link-alt"></i></span> 这个软件, 用来做引物二级结构预测, 但是就<span class="exturl" data-url="aHR0cHM6Ly9kb2NzLm51cGFjay5vcmcvc3RhcnQv">官方文档<i class="fa fa-external-link-alt"></i></span>上来看, 只提供了 Linux 下的 Python 库以及源码, 并且就算是 Windows 也是直接推荐的 WSL2 子系统. 虽然项目部署到服务器上运行直接就是 Linux 环境, 但是富有折腾精神的咱还是决定在 Windows 上尝试编译安装一下, 因此有了本文记录全部的编译踩坑过程.</p>
@@ -2533,47 +2574,6 @@
         <tag>transformers</tag>
         <tag>Pipeline</tag>
         <tag>Python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>网页预览碧蓝航线动态立绘</title>
-    <url>//posts/2024/12/22/spinejs-azurlane/</url>
-    <content><![CDATA[<p>恰逢最近<span class="exturl" data-url="aHR0cHM6Ly93aWtpLmJpbGlnYW1lLmNvbS9ibGh4LzIwMjQlRTUlQjklQjQxMiVFNiU5QyU4ODE5JUU2JTk3JUE1MTA6MDAlRTYlQjglQUYlRTUlOEMlQkElRTYlOTQlQjklRTUlQkIlQkE=">碧蓝航线新版本更新<i class="fa fa-external-link-alt"></i></span>, 又双叒叕增加了一批新船立绘和角色皮肤, 本人作为前指挥官<del>兼LSP</del>, 最近也没啥事, 于是又下回来用以前的资源爽抽了一波.</p>
-<p>虽然氪金是不可能再氪了, 但是包还是能拆的, 刚好最近闲着, 再加上之前有使用 Spine 运行时的经验, 决定写个在线预览动绘的网页挂在博客上.</p>
-<p>成品见<a href="/azurlane/">碧蓝航线动态立绘在线预览</a>, 页面上有使用说明, 可以在线预览动态皮肤 (不是 Live2D), 皮肤资源也会不定期更新.</p>
-<span id="more"></span>
-
-<h2 id="基本思路"><a href="#基本思路" class="headerlink" title="基本思路"></a>基本思路</h2><h3 id="Spine-运行时"><a href="#Spine-运行时" class="headerlink" title="Spine 运行时"></a>Spine 运行时</h3><p>主要还是用官方的运行时库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvdHJlZS8zLjgvc3BpbmUtdHM=">spine-ts<i class="fa fa-external-link-alt"></i></span>, 剩下的就是写一个大概的前端页面, 提供交互功能.</p>
-<p>官方例子挺详细的, 而且源码也都有, 不过这里提一嘴建议直接用 <code>webgl</code> 版本, 最开始写的时候图简单用的 <code>canvas</code> 版本, 但是 <code>canvas</code> 版本既不支持 premultiplyAlpha, 也不支持 clipping, 而且性能也堪忧.</p>
-<p>官方库主要是封装了利用 <code>webgl</code> 渲染的过程, 所以我们只需要处理资源加载以及画面显示位置等等.</p>
-<h3 id="资源接口"><a href="#资源接口" class="headerlink" title="资源接口"></a>资源接口</h3><p>拆包拆出来的动态立绘资源将近 1 GB, 不过还是可以老办法, 开个新仓库并且部署 pages 功能, 这样子就能在网站域名子路径下访问资源了, 也不会污染其他仓库.</p>
-<p>仓库见 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>, 里面的资源应该是可以通过以 <code>/azurlane_spinepainting/</code> 为前缀的链接访问到的, 就是速度有点慢, 加上资源本身也大, 加载一个皮肤很可能要个一两分钟, 同时由于不可抗力还可能访问失败, 强烈建议科学上网访问.</p>
-<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p>说实话几乎没怎么写过前端, 因此 gpt 简直救我狗命, 不然不知道要写到猴年马月去了.</p>
-<p>一番思索决定在现有的 Markdown 文件里写 html, 不单独写页面, 这样能有效利用博客现成的主题.</p>
-<p>页面大概分上下两部分, 第一部分是 <code>船名_皮肤名</code> 这样的链接列表, 第二部分是一个 <code>canvas</code> 元素的预览画面, 用户可以通过点击皮肤链接来加载并切换下面的预览画面.</p>
-<p>皮肤列表用 js 动态生成, 不过也还是需要自己在代码里固定一个映射表, 提供名称以及资源位置啥的.</p>
-<p>预览界面几乎是原封不动照着 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0Vzb3RlcmljU29mdHdhcmUvc3BpbmUtcnVudGltZXMvYmxvYi8zLjgvc3BpbmUtdHMvd2ViZ2wvZXhhbXBsZS9pbmRleC5odG1s">spine-webgl<i class="fa fa-external-link-alt"></i></span> 的样例实现的, 但是重新封装了部分功能, 例如支持多个骨骼按序渲染, 并且调整了画面参数.</p>
-<p>预览画面也实现了一些交互功能, 例如 PC 上可以用鼠标拖动缩放, 移动设备也可以用手势动作进行拖动缩放, 也支持选择查看模型下不同的动画.<del>毕竟部分动绘皮肤也有特触.</del></p>
-<h2 id="页面效果"><a href="#页面效果" class="headerlink" title="页面效果"></a>页面效果</h2><p>最后的效果大概长这样:</p>
-<p><img data-src="/static/image/spinejs-azurlane/page-preview.jpg" alt="page-preview.jpg"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview1.gif" alt="page-preview1.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview2.gif" alt="page-preview2.gif"></p>
-<p><img data-src="/static/image/spinejs-azurlane/canvas-preview3.gif" alt="page-preview3.gif"></p>
-<h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><p>也算是个小的前端项目? 源码都在博客仓库的 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL3d3LXJtLmdpdGh1Yi5pby90cmVlL21haW4vc291cmNlL2F6dXJsYW5l">source/azurlane<i class="fa fa-external-link-alt"></i></span> 路径下 (未来可能会挪位置, 但是反正都在这个仓库).</p>
-<p>基本上都是和 gpt 交互然后改出来的代码, 不得不说 gpt 真是写前端利器.</p>
-<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><p>立绘资源在仓库 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL2F6dXJsYW5lX3NwaW5lcGFpbnRpbmc=">azurlane_spinepainting<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>不过网页端功能和性能都有限, 这里趁机推销一下自己的项目 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3d3LXJtL1NwaW5lVmlld2Vy">SpineViewer<i class="fa fa-external-link-alt"></i></span>, 是一个 Windows 平台下的简单易用的 Spine 动画预览和导出软件, 支持多版本多骨骼, 解压即用, 欢迎下载体验.</p>
-]]></content>
-      <categories>
-        <category>码记</category>
-      </categories>
-      <tags>
-        <tag>碧蓝航线</tag>
-        <tag>spine</tag>
-        <tag>spine-js</tag>
-        <tag>Azur Lane</tag>
-        <tag>动态立绘</tag>
-        <tag>前端</tag>
       </tags>
   </entry>
   <entry>
@@ -3011,6 +3011,77 @@
       </tags>
   </entry>
   <entry>
+    <title>基于 Requests 的爬虫入门</title>
+    <url>//posts/2022/08/16/wast-spider/</url>
+    <content><![CDATA[<p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
+<span id="more"></span>
+
+<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
+<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
+<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
+<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
+<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
+<p><img data-src="/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
+<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
+<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
+<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
+<p><img data-src="/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
+<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
+<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
+<p><img data-src="/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
+<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
+<p><img data-src="/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
+<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
+<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
+<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
+<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
+<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
+<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
+<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
+<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
+<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
+<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
+<p><img data-src="/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
+<p>定位完成后, 我们分析数据附近的结构.</p>
+<p><img data-src="/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
+<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
+<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
+<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
+<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
+<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
+<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
+<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
+<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
+<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
+<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
+<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
+<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
+<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
+<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
+<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
+<p>一些库的官方文档地址.</p>
+<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
+<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
+]]></content>
+      <categories>
+        <category>网安本科速通</category>
+        <category>必备技能</category>
+      </categories>
+      <tags>
+        <tag>爬虫</tag>
+        <tag>requests</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>打造一个舒适的 Python 编程环境</title>
     <url>//posts/2022/08/13/wast-pythonandvsc/</url>
     <content><![CDATA[<p>网安专业几乎 99% 的作业都可以用 <code>python</code> 来解决, 除了大一大二一些特别的专业课, 需要折腾一下 <code>c</code> 语言, 之后其余的所有网安专业必修与选修的大作业, 都多多少少和 &quot;大数据&quot;, &quot;人工智能&quot; 挂钩, 里面涉及了很多数据处理与分析, 这类任务用 <code>python</code> 写将会非常方便, 因为已经有了许多的第三方包让我们直接使用.</p>
@@ -3105,91 +3176,6 @@
       <tags>
         <tag>python</tag>
         <tag>VS Code</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>IDM 破解版</title>
-    <url>//posts/2023/05/17/idm-cracked/</url>
-    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
-]]></content>
-      <categories>
-        <category>资源分享</category>
-      </categories>
-      <tags>
-        <tag>下载工具</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于 Requests 的爬虫入门</title>
-    <url>//posts/2022/08/16/wast-spider/</url>
-    <content><![CDATA[<p>本篇是基于 <code>python</code> 语言及其第三方库 <code>requests</code> 的爬虫入门, 实现一个最简单的爬虫, 从网页上自动化获取我们能想要的信息.</p>
-<span id="more"></span>
-
-<p>教程要开始加速了! 从本篇开始, 默认你已经有了一些编程基础, 并且对 <code>python</code> 已经有过不少的使用经验, 将以速通为根本目的, 进行示范性操作, 而不会过深的涉及代码原理. <del>努力成为一个调包侠吧!</del></p>
-<h2 id="工具与环境准备"><a href="#工具与环境准备" class="headerlink" title="工具与环境准备"></a>工具与环境准备</h2><p>浏览器: <code>Edge</code>, <code>Chrome</code>, <code>Firefox</code> 均可, 推荐使用 <code>Firefox</code>, 抓包更方便.</p>
-<p><code>python</code> 的第三方库: <code>beautifulsoup4</code>, <code>lxml</code>, <code>requests</code>.</p>
-<h2 id="爬虫基本原理"><a href="#爬虫基本原理" class="headerlink" title="爬虫基本原理"></a>爬虫基本原理</h2><p>爬虫的本质是在模仿用户操作浏览器的过程.</p>
-<p>我们平常看到的网页内容, 都是通过操作浏览器, 浏览器再向服务器请求内容从而呈现给用户, 省去复杂的网络通信过程之后, 可以简要概括成下面的流程图.</p>
-<p><img data-src="/static/image/wast-spider/v0cQQx.png" alt="v0cQQx.png"></p>
-<p>我们的目标就是使用代码来完成其中的发出请求和接收响应的过程.</p>
-<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>下面以百度热搜的游戏榜为例, 梳理一下每一步, 最后写一个爬虫出来.</p>
-<h3 id="分析网站"><a href="#分析网站" class="headerlink" title="分析网站"></a>分析网站</h3><p>这是第一步也是最重要的一步, 通常使用浏览器的开发人员工具, 对你想要抓取的页面进行网络请求分析, 观察请求是如何发起, 想要的内容响应返回后出现在什么地方.</p>
-<p>目标网页网址为 <code>https://top.baidu.com/board?tab=game</code>, 浏览器查看一下长这样.</p>
-<p><img data-src="/static/image/wast-spider/v0hSFU.png" alt="v0hSFU.png"></p>
-<p>我们的目标是获得整个榜按顺序所有游戏的<strong>名字</strong>, <strong>热搜指数</strong>, <strong>类型</strong>以及<strong>详情页链接</strong>.</p>
-<p>打开我们的 <code>Firefox</code> 浏览器 (其他浏览器也是类似的), 首先快捷键 <code>F12</code> 或者更多工具里打开 &quot;开发者工具&quot;, 并切换到 &quot;网络&quot; 选项卡.</p>
-<p><img data-src="/static/image/wast-spider/v0hhc9.png" alt="v0hhc9.png"></p>
-<p>此时我们的页面停留在目标页面, 并且没有任何的记录信息, 因此我们选择 &quot;重新载入&quot; 或者刷新一次页面, 让浏览器重新发起一次请求.</p>
-<p><img data-src="/static/image/wast-spider/v04mBq.png" alt="v04mBq.png"></p>
-<p>查看网络请求的第一项, 也就是向目标网址发起的请求, 并选择右侧的响应选项卡, 可以看到我们要的内容已经预览出来了.</p>
-<p>所以我们确定爬取内容的方案, 就是直接请求目标网址, 然后获得文本内容响应即可.</p>
-<h3 id="请求网页"><a href="#请求网页" class="headerlink" title="请求网页"></a>请求网页</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">res = requests.get(<span class="string">&quot;https://top.baidu.com/board?tab=game&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(res.status_code)</span><br><span class="line"></span><br><span class="line">Path(<span class="string">&quot;a.html&quot;</span>).write_text(res.text, encoding=<span class="string">&quot;utf8&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>代码如上所示, 我们在这里解释一下关键代码 <code>requests.get</code>.</p>
-<p>在之前的网络请求面板中, 除了看到了响应, 我们还能够看到左侧的信息栏里, 有 &quot;状态&quot; 与 &quot;方法&quot; 两个取值, 分别为 <code>200</code> 和 <code>GET</code>.</p>
-<p>方法: 当浏览器向服务器发出请求时, 请求是有不同类型的, 其基本的区分标志就是该请求的方法 (Method), 常见的有 <code>GET</code> 与 <code>POST</code>, 此处则为 <code>GET</code> 请求方法.</p>
-<p>状态: 当服务器送回响应时, 除了相应的内容, 还会有一个基本要素 &quot;响应状态码&quot; (Status Code), 用来标识此次请求操作的结果 (而非请求需要的内容), 可以通过状态码来判断返回内容的类别. 通常为 <code>2XX</code>, <code>4XX</code> 等三位数字, 此处的 <code>200</code> 则是表示请求成功, 并正确的返回了响应内容.</p>
-<p>所以代码里的 <code>requests.get</code> 就是对参数里的 url 使用 <code>GET</code> 方法发起了请求, 并将响应存储到了 <code>res</code> 变量中, 随后将响应的状态码打印出来.</p>
-<p>将响应的文本内容保存至本地文件 <code>a.html</code> 中, 等待后续进一步分析.</p>
-<h3 id="分析网页结构与内容"><a href="#分析网页结构与内容" class="headerlink" title="分析网页结构与内容"></a>分析网页结构与内容</h3><p>与网站的交互就到此暂告一段落了, 接下来是对网页内容的分析, 从中提取出我们想要的内容.</p>
-<p>在 <code>VS Code</code> 中打开刚刚保存的 <code>a.html</code>, 并且使用自带格式化程序整理一下, 再使用 <code>Ctrl + F</code> 搜索内容中的关键词进行快速定位.</p>
-<p><img data-src="/static/image/wast-spider/v0oHrd.png" alt="v0oHrd.png"></p>
-<p>定位完成后, 我们分析数据附近的结构.</p>
-<p><img data-src="/static/image/wast-spider/v0TFZn.png" alt="v0TFZn.png"></p>
-<p>贴一个缩小后的图, 由 <code>html</code> 的树形结构可以知道, 红框里的每一个 <code>&lt;div&gt;</code> 块内就是榜上排名的其中一项游戏数据, 而它们的嵌套结构也很容易分析, 所有红框所示的数据都位于 <code>&lt;main&gt;</code> 的第二个 <code>&lt;div&gt;</code> 的第一个 <code>&lt;div&gt;</code> 的第二个 <code>&lt;div&gt;</code> 内, 不过这个嵌套有点稍长, 我们尝试看看最近的一个 <code>div</code> 是否有独特性.</p>
-<p>使用 <code>Ctrl + F</code> 搜索最里层的 <code>&lt;div&gt;</code> 块的属性 <code>style</code> 的内容 <code>margin-bottom:20px</code>, 惊喜的发现只查找到了一个, 所以我们待会可以直接定位到这一层, 然后依次获取它下面的子级 <code>&lt;div&gt;</code> 内容, 也就是我们要的数据.</p>
-<p>我们继续分析红框所示的 <code>&lt;div&gt;</code> 块内容, 它的内容由 3 部分组成, 分别是 <code>&lt;a&gt;</code>, <code>&lt;div&gt;</code> 和 <code>&lt;div&gt;</code>, 而我们需要的内容就位于后两个 <code>&lt;div&gt;</code> 中.</p>
-<p>按同样的方式可以继续分析最终的文本数据位于何处, 此处不再赘述.</p>
-<h3 id="从网页内容提取数据"><a href="#从网页内容提取数据" class="headerlink" title="从网页内容提取数据"></a>从网页内容提取数据</h3><p>面对这种有良好嵌套结构层次的网页, 我们使用 <code>beautifulsoup4</code> 对其进行内容解析, 下面直接贴代码.</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">soup = BeautifulSoup(res.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">items_div = soup.find(<span class="string">&quot;div&quot;</span>, &#123;<span class="string">&quot;style&quot;</span>: <span class="string">&quot;margin-bottom:20px&quot;</span>&#125;).find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)</span><br><span class="line"><span class="keyword">for</span> div <span class="keyword">in</span> items_div:</span><br><span class="line">    index = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    name = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).find(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>).get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    link = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find(<span class="string">&quot;a&quot;</span>, recursive=<span class="literal">False</span>).attrs[<span class="string">&quot;href&quot;</span>]</span><br><span class="line">    type_ = div.find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">1</span>].find_all(<span class="string">&quot;div&quot;</span>, recursive=<span class="literal">False</span>)[<span class="number">0</span>].get_text(strip=<span class="literal">True</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;<span class="subst">&#123;name&#125;</span>\t<span class="subst">&#123;index&#125;</span>\t<span class="subst">&#123;type_&#125;</span>\t<span class="subst">&#123;link&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<p>代码中变量 <code>items_div</code> 其中一个 <code>div</code> 的 <code>html</code> 内容也附上.</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;category-wrap_iQLoo square_1ULM9&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;img-wrapper_29V76&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;index_1Ew5p c-index-bg1&quot;</span>&gt;</span> 1 <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">            <span class="attr">src</span>=<span class="string">&quot;https://fyb-1.cdn.bcebos.com/fyb-1/20220811/4d0a80d59a3675130cf61eff31e3ae41?x-bce-process=image/resize,m_fill,w_214,h_214&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">alt</span>=<span class="string">&quot;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;border_3WfEn&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;trend_2RttY&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;img-wrap_JPOmE trend-icon_1Z3Cd&quot;</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span></span></span><br><span class="line"><span class="tag">                <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/icon-same_886375f242bd1538af21a9721f16b170.png&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;hot-index_1Bl1a&quot;</span>&gt;</span> 228934 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;text_1lUwZ&quot;</span>&gt;</span> 热搜指数 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">class</span>=<span class="string">&quot;line_3-bzA&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">src</span>=<span class="string">&quot;//fyb-pc-static.cdn.bcebos.com/static/asset/line-bg@2x_95cb5a089159c6d5a959a596d460d60a.png&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content_1YWBm&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;title_dIF3B &quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis&quot;</span>&gt;</span> 原神 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--s-frag--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;intro_1l0wp&quot;</span>&gt;</span> 类型：单机游戏 <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;c-single-text-ellipsis desc_3CTjT&quot;</span>&gt;</span></span><br><span class="line">            陌生的天空下，少年少女立于尘沙。你们是一对旅行中的双子，从世界之外漂流而来。你的血亲被陌生的神灵带走，而你也被神封印，陷入沉眠。再度醒来，天地间风景已变……《原神》是由米哈游自研的一款全新开放世界冒险RPG。你将在游戏中探索一个被称作「提瓦特」的幻想世界。在这广阔的世界中，你可以踏遍七国，邂逅性格各异、能力独特的同伴，与他们一同对抗强敌，踏上寻回血亲之路；也可以不带目的地漫游，沉浸在充满生机的世界</span><br><span class="line">            <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;https://www.baidu.com/s?wd=%E5%8E%9F%E7%A5%9E+%E6%B8%B8%E6%88%8F<span class="symbol">&amp;amp;</span>sa=fyb_game_all<span class="symbol">&amp;amp;</span>rsv_dl=fyb_game_all&quot;</span></span></span><br><span class="line"><span class="tag">                <span class="attr">class</span>=<span class="string">&quot;look-more_3oNWC&quot;</span> <span class="attr">target</span>=<span class="string">&quot;_blank&quot;</span>&gt;</span> 查看更多<span class="symbol">&amp;gt;</span> <span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--/s-frag--&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>代码稍显冗长, 首先是获得 <code>soup</code>, 也就是解析好的文档内容, 然后是反复的调用核心函数 <code>find</code> 和 <code>find_all</code>.</p>
-<p><code>bs4</code> 的理念是, 整个文档 <code>soup</code> 会被视作一个文档树, 且其中的子节点也是相同的小文档树, 形成一个递归结构. 而使用这两个函数则可以很方便的在树中进行遍历与查找.</p>
-<p>两个函数参数相同, 详情可以查阅使用文档, 唯一不同的地方是 <code>find</code> 只获取找到的第一个节点而 <code>find_all</code> 则会获取所有节点返回一个列表. 我们给所有的调用都加上了 <code>recursive=False</code>, 这样可以确保让我们一层一层依次往下而不是递归获取内部所有节点, 每一层节点的序号和文档内部的实际情况相对应, 可以自行对比看看每一行是怎么来的.</p>
-<p><code>get_text</code> 用来获取当前节点内部所有的文本内容, 加上参数后可以去除首尾的空白.</p>
-<h3 id="接下来干什么"><a href="#接下来干什么" class="headerlink" title="接下来干什么"></a>接下来干什么</h3><p>获得数据之后, 我们可以选择保存到文件进行存储.</p>
-<p>但是我们获取的东西非常有限, 仅仅只是一个排行榜, 不过在这些数据里, 有一项是详情链接, 后续可以进一步对详情链接的页面进行分析, 从而实现对详情页面内容的抓取, 让爬虫爬的更远一点.</p>
-<h2 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h2><p>这次文章内容很简短, 仅仅是实践了一下最基本过程, 并且随着网站数据更新, 页面结构随时会发生变化, 因此还需多多练习.</p>
-<p>有很多与爬虫相关的内容, 可以搜索相关的关键词进行进一步学习, 一并贴在下面了.</p>
-<p><code>http 协议</code>: 进一步了解请求中的方法和响应中的状态码的含义, 掌握更多浏览器与服务器交互的细节过程.</p>
-<p><code>html 文档结构</code>: 了解网页的树形结构, 学习 <code>html</code> 语法.</p>
-<p><code>正则表达式</code>: 除了使用 <code>beautifulsoup4</code> 这样的工具结构化处理网页, 也可以按规则直接搜索你想要的所有结果.</p>
-<p>一些库的官方文档地址.</p>
-<p><code>requests</code>: <span class="exturl" data-url="aHR0cHM6Ly9yZXF1ZXN0cy5yZWFkdGhlZG9jcy5pby8=">https://requests.readthedocs.io/<i class="fa fa-external-link-alt"></i></span></p>
-<p><code>beautifulsoup4</code>: <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3J1bW15LmNvbS9zb2Z0d2FyZS9CZWF1dGlmdWxTb3VwL2JzNC9kb2Mv">https://www.crummy.com/software/BeautifulSoup/bs4/doc/<i class="fa fa-external-link-alt"></i></span></p>
-]]></content>
-      <categories>
-        <category>网安本科速通</category>
-        <category>必备技能</category>
-      </categories>
-      <tags>
-        <tag>爬虫</tag>
-        <tag>requests</tag>
       </tags>
   </entry>
   <entry>
@@ -3339,12 +3325,11 @@
       </tags>
   </entry>
   <entry>
-    <title>Typora 破解版</title>
-    <url>//posts/2023/07/03/typora-cracked/</url>
-    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
-<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
+    <title>IDM 破解版</title>
+    <url>//posts/2023/05/17/idm-cracked/</url>
+    <content><![CDATA[<p>IDM 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pZkNUaDB3Zjdxa2I=">IDM-v6.41.11-Repack.zip<i class="fa fa-external-link-alt"></i></span>.</p>
 <p>校验码:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: EC358D55F0B1657A3095568747CC5B27</span><br><span class="line">SHA1: 8F544AA6CA37BA181A6D942441CC65C0B448FE42</span><br><span class="line">SHA2-256: 8A6DE19A91AE4644762D89C507946AB8E7D096B39D14A32B42C2FAACF9C442DD</span><br><span class="line">SHA3-256: 0679F2F0EB14C58149380429E1229AED27012A5ABC46347AE4742E3975C59079</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>资源分享</category>
@@ -3365,6 +3350,83 @@
       </categories>
       <tags>
         <tag>激活工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Typora 破解版</title>
+    <url>//posts/2023/07/03/typora-cracked/</url>
+    <content><![CDATA[<p>Typora v1.3.8 破解版, 下载地址: <span class="exturl" data-url="aHR0cHM6Ly93dy1ybS5sYW56b3V0LmNvbS9pWmFuNTBuNGF3cGE=">typora-setup-x64.zip<i class="fa fa-external-link-alt"></i></span>.</p>
+<p>安装包安装之后, 将压缩包里的 <code>winmm.dll</code> 文件放到程序安装目录下. 可能会报毒, 需要手动添加信任.</p>
+<p>校验码:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MD5: 8AA8CCF545DA329B44E56700C9D2F468</span><br><span class="line">SHA1: A10C3549E148C7C8124AF9A46D4D3882AC86214B</span><br><span class="line">SHA2-256: B997A59F563AD71282CFA99E3B1AD0900E7DE870D27576C5A53D1EC98567900E</span><br><span class="line">SHA3-256: 590592CE225A2D5261B4D2EC892E869E61301ABDCC49D6D78A3AA268A38E1C4D</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>资源分享</category>
+      </categories>
+      <tags>
+        <tag>下载工具</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MultiheadAttention 使用方法</title>
+    <url>//posts/2024/01/22/multiheadattention/</url>
+    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
+<span id="more"></span>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
+<blockquote>
+<ul>
+<li><code>embed_dim</code> – Total dimension of the model.</li>
+<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
+<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
+<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
+</ul>
+</blockquote>
+<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
+<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
+</div>
+
+<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
+<ul>
+<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
+<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
+</ul>
+<p>下一步则是计算注意力, 也就是经典公式:</p>
+<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
+<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
+<p><img data-src="/static/image/multiheadattention/attention.jpg" alt="attention"></p>
+<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
+<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
+<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
+<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
+<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
+<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
+<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
+<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
+<ul>
+<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
+<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
+<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
+<li>参数 <code>num_heads</code> 对应 $h$.</li>
+<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
+<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
+<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
+<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
+</ul>
+<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
+</ol>
+]]></content>
+      <categories>
+        <category>阅读笔记</category>
+      </categories>
+      <tags>
+        <tag>PyTorch</tag>
+        <tag>MultiheadAttention</tag>
+        <tag>NLP</tag>
       </tags>
   </entry>
   <entry>
@@ -3428,68 +3490,6 @@
         <tag>图像生成</tag>
         <tag>扩散模型</tag>
         <tag>Diffusion Model</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MultiheadAttention 使用方法</title>
-    <url>//posts/2024/01/22/multiheadattention/</url>
-    <content><![CDATA[<p>记录一下 PyTorch 中多头注意力 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 的使用方法, 主要是对维度变换的过程梳理.</p>
-<span id="more"></span>
-
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 PyTorch 的文档中, 对于 <span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">MultiheadAttention<i class="fa fa-external-link-alt"></i></span> 类有着这么几个与维度有关的构造参数, 影响 <code>forward</code> 传入的 <code>query</code>, <code>key</code>, <code>value</code> 的形状:</p>
-<blockquote>
-<ul>
-<li><code>embed_dim</code> – Total dimension of the model.</li>
-<li><code>num_heads</code> – Number of parallel attention heads. Note that <code>embed_dim</code> will be split across <code>num_heads</code> (i.e. each head will have dimension <code>embed_dim // num_heads</code>).</li>
-<li><code>kdim</code> – Total number of features for keys. Default: <code>None</code> (uses <code>kdim</code>=<code>embed_dim</code>).</li>
-<li><code>vdim</code> – Total number of features for values. Default: <code>None</code> (uses <code>vdim</code>=<code>embed_dim</code>).</li>
-</ul>
-</blockquote>
-<p>在使用自注意力的时候, 前向传播只需要填入相同的参数作为 <code>query</code>, <code>key</code>, <code>value</code>, 不用考虑太多, 但是需要使用填入具有不同维度的 <code>query</code>, <code>key</code>, <code>value</code> 时, 则会令一些不熟悉的新手晕头转向.</p>
-<h2 id="注意力机制"><a href="#注意力机制" class="headerlink" title="注意力机制"></a>注意力机制</h2><div class="note info"><p>以下输入并不是 <code>MultiheadAttention</code> 的输入, 只是注意力部分的输入.</p>
-</div>
-
-<p>设有三个独立的张量 $Q_{B \times L \times d_k}$, $K_{B \times S \times d_k}$, $V_{B \times S \times d_v}$ 为注意力的输入, 其中 $B$ 指批大小, $L$ 指 $Q$ 的序列长, $S$ 指 $K$ 和 $V$ 的序列长, 那么可以知道输入:</p>
-<ul>
-<li>$Q$, $K$ 的每个元素长度 (特征数) 相同, 而 $V$ 可以具有独立的元素长度.</li>
-<li>$Q$ 的序列长度是独立的, 而 $K$ 和 $V$ 的序列长度必须相等, 因为它们的元素成对出现.</li>
-</ul>
-<p>下一步则是计算注意力, 也就是经典公式:</p>
-<p>$$<br>Attention(Q, K, V) = softmax(\frac{QK^\top}{\sqrt{d_k}})V<br>$$</p>
-<p>中间的 $QK^\top$ 将会得到一个 $B \times L \times S$ 的张量, 也就是为每个样本生成了一个 $L \times S$ 的矩阵, 而这个矩阵中间的每个元素就是 $Q$ 和 $K$ 中每个元素的内积.</p>
-<p><img data-src="/static/image/multiheadattention/attention.jpg" alt="attention"></p>
-<p>如上图所示是一个样本的计算过程, 在获取内积结果之后, 对每一行进行 softmax 操作, 目的是得到 $K$ 中每个元素对于 $Q$ 的每个元素的权重, 然后将与 $K$ 匹配的 $V$ 中的值进行加权平均.</p>
-<p>对 $Q$ 中的每个元素来说, 相当于是从一个 KV 表中通过对关键字 (<strong>Key</strong>) 的查询 (<strong>Query</strong>), 来获得了对应每一个值 (<strong>Value</strong>) 的权重, 最后对整个表进行加权平均, 得到了查询结果.</p>
-<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><p>上一节中我们回顾了注意力部分的内容, 而在完整的注意力模型里, 还有多头处理.</p>
-<p>现在, 设我们的原始输入 <code>query</code>, <code>key</code>, <code>value</code> 形状分别为 $(B, L, E_q)$, $(B, S, E_k)$, $(B, S, E_v)$, 然后还有一个 $d_{model}$, 模型使用的隐藏层大小, 以及 $h$, 模型使用的注意力头数.</p>
-<p>此时, 我们将会有 $h$ 个线性投影矩阵, 记为 $W^Q_i, W^K_i, W^V_i, i = 0, \ldots, h - 1$, 它们的形状分别为 $(E_q, d_k)$, $(E_k, d_k)$, $(E_v, d_v)$.</p>
-<p>每一组 $W^*_i$ 都形成一组注意力头, 对输入的 <code>query</code>, <code>key</code>, <code>value</code> 投影出一组 $Q_i, K_i, V_i$, 并计算出不同方面的 $Attention(Q_i, K_i, V_i)$ 注意力结果.</p>
-<p>最后将 $h$ 个长度为 $d_v$ 的注意力结果拼接起来, 将拼接后的结果与一个 $W^O_{hd_v \times d_{model}}$ 进行运算, 得到最后的多头注意力输出, 形状为 $(B, L, d_{model})$.</p>
-<h2 id="PyTorch-中的参数设置"><a href="#PyTorch-中的参数设置" class="headerlink" title="PyTorch 中的参数设置"></a>PyTorch 中的参数设置</h2><p>在 PyTorch 的实现中:</p>
-<ul>
-<li>参数 <code>embed_size</code> 对应 $E_q$.</li>
-<li>参数 <code>k_dim</code> 对应 $E_k$.</li>
-<li>参数 <code>v_dim</code> 对应 $E_v$.</li>
-<li>参数 <code>num_heads</code> 对应 $h$.</li>
-<li>$d_{model} = E_q$, 也就是限制了输入 <code>query</code> 的维度和模型的输出维度相同.</li>
-<li>$d_k = d_{model} / h$, 要求 <code>embed_size</code> 能够整除 <code>num_heads</code>.</li>
-<li>$d_v = d_k$, 即输入注意力的 $V_i$ 与 $Q_i, K_i$ 特征数相同, 输出的注意力结果特征数与输入相同.</li>
-<li>$hd_v = d_{model}$. 当 $h = 1$ 时, 有 $d_v = d_k = d_{model} = E_q$.</li>
-</ul>
-<p>可以看出 PyTorch 内部实现隐含了很多处的维度相等, 并不支持所有的细节调整, 但是完成原始论文中的要求还是绰绰有余.</p>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
-<li><span class="exturl" data-url="aHR0cHM6Ly9kb2kub3JnLzEwLjQ4NTUwL2FyWGl2LjE3MDYuMDM3NjI=">Attention is All you Need<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9qYWxhbW1hci5naXRodWIuaW8vaWxsdXN0cmF0ZWQtdHJhbnNmb3JtZXIv">The Illustrated Transformer<i class="fa fa-external-link-alt"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9weXRvcmNoLm9yZy9kb2NzL3N0YWJsZS9nZW5lcmF0ZWQvdG9yY2gubm4uTXVsdGloZWFkQXR0ZW50aW9uLmh0bWw=">torch.nn.MultiheadAttention<i class="fa fa-external-link-alt"></i></span></li>
-</ol>
-]]></content>
-      <categories>
-        <category>阅读笔记</category>
-      </categories>
-      <tags>
-        <tag>PyTorch</tag>
-        <tag>MultiheadAttention</tag>
-        <tag>NLP</tag>
       </tags>
   </entry>
   <entry>
